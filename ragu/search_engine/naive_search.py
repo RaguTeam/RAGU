@@ -82,7 +82,7 @@ class NaiveSearchEngine(BaseEngine):
                              If None, keeps all reranked chunks. Used only when reranker is set.
         :return: NaiveSearchResult with retrieved chunks, scores, and document ids.
         """
-        vectorized_query = await self.embedder(query)
+        vectorized_query = await self.embedder.embed_single(query)
         results = await self.graph.index.chunk_vector_db.query(
             Embedding(vector=vectorized_query[0]),
         )

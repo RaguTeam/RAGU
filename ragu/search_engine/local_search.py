@@ -78,9 +78,9 @@ class LocalSearchEngine(BaseEngine):
         :param top_k: Number of top entities to retrieve from the entity vector DB.
         :return: LocalSearchResult containing entities, relations, summaries, chunks, and document ids.
         """
-        vectorized_query = await self.embedder(query)
+        embedding = await self.embedder.embed_single(query)
         embedding_hits = await self.knowledge_graph.index.entity_vector_db.query(
-            Embedding(vectorized_query[0]),
+            Embedding(embedding),
             top_k=top_k,
         )
         entities = await self.knowledge_graph.index.get_entities([hit.id for hit in embedding_hits])

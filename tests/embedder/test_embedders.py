@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import numpy as np
+from openai import AsyncOpenAI
 import pytest
 
 import ragu.embedder.openai_embedder as openai_module
@@ -42,8 +43,10 @@ def _build_embedder(monkeypatch, **kwargs) -> OpenAIEmbedder:
     monkeypatch.setattr(openai_module, "AsyncOpenAI", _FakeAsyncOpenAI)
     return OpenAIEmbedder(
         model_name="text-embedding-3-small",
-        base_url="http://localhost:8000/v1",
-        api_token="test-token",
+        client=AsyncOpenAI(
+            base_url="http://localhost:8000/v1",
+            api_key="test-token",
+        ),
         dim=5,
         **kwargs,
     )
@@ -73,7 +76,7 @@ async def test_openai_one_call_returns_embedding(monkeypatch):
         data=[SimpleNamespace(embedding=[0.1, 0.2, 0.3, 0.4, 0.5])]
     )
 
-    result = await embedder._one_call("hello")
+    result = await embedder._embed_via_api("hello")
 
     assert result == [0.1, 0.2, 0.3, 0.4, 0.5]
     embedder.client.embeddings.create.assert_awaited_once()
@@ -83,12 +86,12 @@ async def test_openai_one_call_returns_embedding(monkeypatch):
 async def test_openai_embed_returns_cached_values_without_generation(monkeypatch):
     embedder = _build_embedder(monkeypatch)
     embedder._cache.get = AsyncMock(side_effect=[[1.0] * 5, [2.0] * 5])
-    embedder._one_call = AsyncMock()
+    embedder._embed_via_api = AsyncMock()
 
     result = await embedder.embed(["a", "b"])
 
     assert result == [[1.0] * 5, [2.0] * 5]
-    embedder._one_call.assert_not_awaited()
+    embedder._embed_via_api.assert_not_awaited()
 
 
 @pytest.mark.asyncio
@@ -96,12 +99,12 @@ async def test_openai_embed_generates_missing_embeddings_preserving_order(monkey
     monkeypatch.setattr(openai_module, "AsyncRunner", _FakeRunner)
     embedder = _build_embedder(monkeypatch)
     embedder._cache.get = AsyncMock(return_value=None)
-    embedder._one_call = AsyncMock(side_effect=[[0.1] * 5, [0.2] * 5])
+    embedder._embed_via_api = AsyncMock(side_effect=[[0.1] * 5, [0.2] * 5])
 
     result = await embedder.embed(["first", "second"])
 
     assert result == [[0.1] * 5, [0.2] * 5]
-    assert embedder._one_call.await_count == 2
+    assert embedder._embed_via_api.await_count == 2
 
 
 @pytest.mark.asyncio
@@ -109,7 +112,7 @@ async def test_openai_embed_sets_none_for_failed_requests(monkeypatch):
     monkeypatch.setattr(openai_module, "AsyncRunner", _FakeRunner)
     embedder = _build_embedder(monkeypatch)
     embedder._cache.get = AsyncMock(return_value=None)
-    embedder._one_call = AsyncMock(side_effect=[RuntimeError("api failure"), [0.7] * 5])
+    embedder._embed_via_api = AsyncMock(side_effect=[RuntimeError("api failure"), [0.7] * 5])
 
     result = await embedder.embed(["bad", "good"])
 
@@ -123,7 +126,7 @@ async def test_openai_embed_writes_cache_when_enabled(monkeypatch):
     embedder._cache.get = AsyncMock(return_value=None)
     embedder._cache.set = AsyncMock()
     embedder._cache.flush_cache = AsyncMock()
-    embedder._one_call = AsyncMock(side_effect=[[0.3] * 5, [0.4] * 5])
+    embedder._embed_via_api = AsyncMock(side_effect=[[0.3] * 5, [0.4] * 5])
 
     result = await embedder.embed(["x", "y"])
 
@@ -137,9 +140,9 @@ async def test_openai_embed_accepts_single_string(monkeypatch):
     monkeypatch.setattr(openai_module, "AsyncRunner", _FakeRunner)
     embedder = _build_embedder(monkeypatch)
     embedder._cache.get = AsyncMock(return_value=None)
-    embedder._one_call = AsyncMock(return_value=[0.9] * 5)
+    embedder._embed_via_api = AsyncMock(return_value=[0.9] * 5)
 
-    result = await embedder.embed("single")
+    result = await embedder.embed_single("single")
 
     assert result == [[0.9] * 5]
 

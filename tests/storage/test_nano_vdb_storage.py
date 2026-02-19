@@ -6,6 +6,7 @@ import pytest
 
 from ragu.embedder.base_embedder import BaseEmbedder
 from ragu.storage.vdb_storage_adapters.nano_vdb import NanoVectorDBStorage
+from ragu.utils.ragu_utils import FLOATS
 
 
 class DummyEmbedder(BaseEmbedder):
@@ -13,10 +14,10 @@ class DummyEmbedder(BaseEmbedder):
         super().__init__(dim=dim)
         self.vector_by_text = vector_by_text
 
-    async def embed(self, texts):
+    async def embed(self, texts: list[str]) -> list[list[float]] | FLOATS:
         if isinstance(texts, str):
             texts = [texts]
-        return [self.vector_by_text.get(text) for text in texts]
+        return [self.vector_by_text[text] for text in texts]
 
 
 @pytest.mark.asyncio

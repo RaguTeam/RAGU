@@ -2,6 +2,7 @@ from dataclasses import asdict
 from itertools import chain
 from typing import List, Any, Optional
 
+import numpy as np
 import pandas as pd
 from sklearn.cluster import DBSCAN
 
@@ -186,7 +187,10 @@ class EntitySummarizer(RaguGenerativeModule):
         :return: A single merged (and optionally cluster-summarized) description string.
         """
         if len(descriptions) > self.cluster_only_if_more_than and self.use_clustering:
-            cluster = DBSCAN(eps=0.5, min_samples=2).fit(await self.embedder.embed(descriptions))
+            assert self.embedder
+            cluster = DBSCAN(eps=0.5, min_samples=2).fit(
+                np.array(await self.embedder.embed(descriptions))
+            )
             labels = cluster.labels_
 
             clusters: dict[int, list[str]] = {}

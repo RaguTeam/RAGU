@@ -3,6 +3,8 @@ from ragu.common.batch_generator import BatchGenerator
 
 import numpy as np
 
+from ragu.utils.ragu_utils import FLOATS
+
 
 class STEmbedder(BaseEmbedder):
     """
@@ -33,16 +35,14 @@ class STEmbedder(BaseEmbedder):
         self.model = SentenceTransformer(model_name_or_path, **kwargs)
         self.dim = dim or self.model.get_sentence_embedding_dimension()
 
-    async def embed(self, texts: str | list[str], batch_size: int=16) -> np.ndarray:
+    async def embed(self, texts: list[str], batch_size: int=16) -> list[list[float]] | FLOATS:
         """
-        Computes embeddings for a string or a list of strings.
+        Computes embeddings for a list of strings.
 
         :param texts: Input text(s) to embed.
         :param batch_size: Batch size.
         :return: Embeddings for the input text(s).
         """
-        if isinstance(texts, str):
-            texts = [texts]
 
         batch_generator = BatchGenerator(texts, batch_size=batch_size)
         embeddings_list = [

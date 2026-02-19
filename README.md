@@ -58,6 +58,7 @@ pip install graph_ragu[local]
 ```python
 import asyncio
 
+from openai import AsyncOpenAI
 from ragu import (
     SimpleChunker,
     KnowledgeGraph,
@@ -76,6 +77,7 @@ LLM_BASE_URL = "https://api.openai.com/v1"
 LLM_API_KEY = "your-api-key-here"
 
 EMBEDDER_MODEL_NAME = "text-embedding-3-large"
+EMBEDDER_DIM = 3072
 
 
 async def main():
@@ -108,12 +110,14 @@ async def main():
     # Initialize embedder
     embedder = OpenAIEmbedder(
         model_name=EMBEDDER_MODEL_NAME,
-        base_url=LLM_BASE_URL,
-        api_token=LLM_API_KEY,
-        dim=3072,
+        client=AsyncOpenAI(
+            base_url=LLM_BASE_URL,
+            api_key=LLM_API_KEY,
+        ),
+        dim=EMBEDDER_DIM,
         max_requests_per_second=1,
         max_requests_per_minute=60,
-        use_cache=True,
+        cache_dir='cache/',
     )
 
     # Configure builder settings

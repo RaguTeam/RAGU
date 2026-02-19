@@ -7,6 +7,7 @@ from disk storage without rebuilding.
 
 from pathlib import Path
 
+from openai import AsyncOpenAI
 import pytest
 
 from ragu.common.global_parameters import Settings
@@ -53,8 +54,10 @@ class TestGraphLoading:
         """
         return OpenAIEmbedder(
             model_name="text-embedding-3-large",
-            base_url="https://api.openai.com/v1",
-            api_token="dummy-key",
+            client=AsyncOpenAI(
+                base_url="https://api.openai.com/v1",
+                api_key="dummy-key",
+            ),
             dim=3072,  # Match the dimension used in example graph
         )
 

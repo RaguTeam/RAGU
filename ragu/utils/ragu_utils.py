@@ -5,7 +5,17 @@ from pathlib import Path
 from typing import Callable, Any
 from typing import List
 
+import numpy as np
+import numpy.typing as npt
+
 from aiolimiter import AsyncLimiter
+
+
+FLOATS = npt.NDArray[np.floating[Any]]
+"""A typization for numpy array of floats"""
+
+INTS = npt.NDArray[np.integer[Any]]
+"""A typization for numpy array of integers"""
 
 
 class AsyncRunner:
