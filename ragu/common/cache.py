@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import MutableMapping
 import json
 import pickle
 from dataclasses import dataclass
@@ -7,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel
+from diskcache import Index # pyright: ignore[reportMissingTypeStubs]
 
 from ragu.common.global_parameters import DEFAULT_FILENAMES, Settings
 from ragu.common.logger import logger
@@ -46,6 +48,7 @@ def make_llm_cache_key(
 
     if schema is not None:
         if not (schema_str := _schema_cache.get(schema, None)):
+            print(f'Cache miss for schema {schema}')
             schema_str = json.dumps(schema.model_json_schema(), sort_keys=True)
             _schema_cache[schema] = schema_str
         key_parts.append(schema_str)
@@ -337,3 +340,13 @@ class EmbeddingCache:
         """
         if self._pending_disk_writes > 0:
             await self.flush_cache()
+
+
+_CACHES: dict[str, Index] = {}
+
+def get_cache(dir: str | Path) -> MutableMapping[str, Any]:
+    """Get or create a key-value cache which uses the specified directory."""
+    dir = str(dir)
+    if (cache := _CACHES.get(dir, None)) is None:
+        cache = _CACHES[dir] = Index(dir)
+    return cache

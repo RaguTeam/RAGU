@@ -864,6 +864,7 @@ version = "1.0.4"
 source = { editable = "." }
 dependencies = [
     { name = "aiolimiter" },
+    { name = "diskcache" },
     { name = "graspologic" },
     { name = "instructor" },
     { name = "loguru" },
@@ -897,6 +898,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "aiolimiter", specifier = ">=1.2.1" },
+    { name = "diskcache" },
     { name = "graspologic", specifier = ">=3.4.4" },
     { name = "instructor", specifier = ">=1.11.3" },
     { name = "loguru", specifier = ">=0.7.3" },
