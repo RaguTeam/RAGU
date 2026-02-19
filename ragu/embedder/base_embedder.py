@@ -16,7 +16,7 @@ class BaseEmbedder(ABC):
         self.dim = dim
 
     @abstractmethod
-    async def embed(self, texts: List[str]):
+    async def embed(self, texts: List[str]) -> List[List[float]]:
         """
         Computes embeddings for a list of text inputs.
 
@@ -25,7 +25,7 @@ class BaseEmbedder(ABC):
         """
         ...
 
-    async def __call__(self, *args, **kwargs):
+    async def __call__(self, *args, **kwargs) -> List[List[float]]:
         """
         Call alias for ``embed``.
         """

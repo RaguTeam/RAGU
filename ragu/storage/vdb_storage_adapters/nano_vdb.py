@@ -1,15 +1,15 @@
 # Based on https://github.com/gusye1234/nano-graphrag/blob/main/nano_graphrag/_storage/vdb_nanovectordb.py
 
 import os
-from typing import Any, Dict, List
+from typing import Any, List
 
 import numpy as np
 from nano_vectordb import NanoVectorDB
 
 from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
-from ragu.embedder.base_embedder import BaseEmbedder
 from ragu.storage.base_storage import BaseVectorStorage
+from ragu.storage.types import Embedding, EmbeddingHit
 
 
 class NanoVectorDBStorage(BaseVectorStorage):
@@ -17,14 +17,13 @@ class NanoVectorDBStorage(BaseVectorStorage):
     Vector storage implementation using NanoVectorDB as the backend.
 
     This class provides a simple vector database for storing and retrieving
-    text embeddings, enabling similarity search operations such as nearest
-    neighbor queries. Embeddings are generated using a provided embedder model.
+    embeddings, enabling similarity search operations such as nearest
+    neighbor queries.
     """
 
     def __init__(
         self,
-        embedder: BaseEmbedder,
-        batch_size: int = 16,
+        embedding_dim: int,
         cosine_threshold: float = 0.2,
         storage_folder: str = Settings.storage_folder,
         filename: str = "data.json",
@@ -33,8 +32,7 @@ class NanoVectorDBStorage(BaseVectorStorage):
         """
         Initialize the NanoVectorDB-based vector storage.
 
-        :param embedder: The embedding model used to compute vector representations.
-        :param batch_size: Number of documents to embed per batch.
+        :param embedding_dim: Embedding dimensionality.
         :param cosine_threshold: Minimum cosine similarity threshold for query filtering.
         :param storage_folder: Folder where the vector storage file is located.
         :param filename: Name of the JSON file containing the stored vectors.
@@ -43,72 +41,78 @@ class NanoVectorDBStorage(BaseVectorStorage):
         super().__init__(**kwargs)
 
         self.filename = os.path.join(storage_folder, filename)
-        self.batch_size = batch_size
-        self.embedder = embedder
+        self.embedding_dim = embedding_dim
         self.cosine_threshold = cosine_threshold
         self._client = NanoVectorDB(
-            embedder.dim,
+            embedding_dim,
             storage_file=self.filename
         )
 
-    async def upsert(self, data: Dict[str, Dict[str, Any]]) -> List[Any]:
+    async def upsert(self, data: List[Embedding]) -> List[Any]:
         """
-        Insert or update a batch of vectorized documents in the database.
+        Insert or update a batch of embeddings in the database.
 
-        This method computes embeddings for the provided data using the
-        configured embedder, attaches them to the documents, and upserts
-        them into the underlying NanoVectorDB instance.
-
-        :param data: Dictionary mapping document IDs to their content and metadata.
+        :param data: Embedding records with vectors and metadata.
         :return: List of records successfully inserted or updated.
         """
         if not data:
             logger.warning("Attempted to insert empty data into vector DB.")
             return []
 
-        list_data = [
-            {"__id__": key, **{k: v for k, v in value.items()}}
-            for key, value in data.items()
-        ]
-
-        contents = [value["content"] for value in data.values()]
-        embeddings = await self.embedder(contents)
-
-        valid_data = []
+        valid_data: List[dict[str, Any]] = []
         skipped = 0
 
-        for item, embedding in zip(list_data, embeddings):
-            if embedding is None or isinstance(embedding, Exception):
+        for embedding in data:
+            if embedding.vector is None:
                 skipped += 1
                 continue
 
-            item["__vector__"] = np.array(embedding) # type: ignore
+            item = {
+                "__id__": embedding.id,
+                "__vector__": np.array(embedding.vector),
+                **embedding.metadata,
+            }
             valid_data.append(item)
 
         if skipped:
-            logger.warning(f"Skipped {skipped} items with missing or failed embeddings.")
+            logger.warning(f"Skipped {skipped} items with missing embeddings.")
 
-        return self._client.upsert(datas=valid_data) # type: ignore
+        if not valid_data:
+            return []
 
-    async def query(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+        return self._client.upsert(datas=valid_data)  # type: ignore
+
+    async def query(self, vector: Embedding, top_k: int = 5) -> List[EmbeddingHit]:
         """
         Search for the most similar documents in the vector database.
 
-        Generates an embedding for the given query and performs a cosine
-        similarity search against all stored vectors, returning the top
-        ``k`` results exceeding the similarity threshold.
+        Performs a cosine similarity search against all stored vectors,
+        returning the top ``k`` results exceeding the similarity threshold.
 
-        :param query: Input text query for similarity search.
+        :param vector: Query embedding payload.
         :param top_k: Number of nearest neighbors to return.
-        :return: List of dictionaries containing matched records and their distances.
+        :return: List of matched records and their distances.
         """
-        embedding = await self.embedder(query)
         results = self._client.query(
-            query=embedding[0],
+            query=np.array(vector.vector),
             top_k=top_k,
             better_than_threshold=self.cosine_threshold
         )
-        return [{**res, "id": res["__id__"], "distance": res["__metrics__"]} for res in results]
+        hits: List[EmbeddingHit] = []
+        for result in results:
+            metadata = {
+                key: value
+                for key, value in result.items()
+                if key not in {"__id__", "__metrics__", "__vector__"}
+            }
+            hits.append(
+                EmbeddingHit(
+                    id=result["__id__"],
+                    distance=float(result["__metrics__"]),
+                    metadata=metadata,
+                )
+            )
+        return hits
 
     async def index_start_callback(self):
         """

@@ -1,5 +1,7 @@
 from typing import Optional, List
 
+from openai import embeddings
+
 from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import Settings
 from ragu.embedder.base_embedder import BaseEmbedder
@@ -8,6 +10,7 @@ from ragu.llm.base_llm import BaseLLM
 from ragu.rerank.base_reranker import BaseReranker
 from ragu.search_engine.base_engine import BaseEngine
 from ragu.search_engine.types import NaiveSearchResult
+from ragu.storage import Embedding
 from ragu.utils.token_truncation import TokenTruncation
 
 from ragu.common.prompts.prompt_storage import RAGUInstruction
@@ -79,13 +82,16 @@ class NaiveSearchEngine(BaseEngine):
                              If None, keeps all reranked chunks. Used only when reranker is set.
         :return: NaiveSearchResult with retrieved chunks, scores, and document ids.
         """
-        results = await self.graph.index.chunk_vector_db.query(query, top_k=top_k)
+        vectorized_query = await self.embedder(query)
+        results = await self.graph.index.chunk_vector_db.query(
+            Embedding(vector=vectorized_query[0]),
+        )
 
         if not results:
             return NaiveSearchResult(chunks=[], scores=[], documents_id=[])
 
-        chunk_ids = [r["__id__"] for r in results]
-        distances = [r.get("distance", 0.0) for r in results]
+        chunk_ids = [r.id for r in results]
+        distances = [r.distance for r in results]
 
         chunk_data_list = await self.graph.index.chunks_kv_storage.get_by_ids(chunk_ids)
 

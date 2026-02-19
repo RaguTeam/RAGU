@@ -1,6 +1,4 @@
 # Partially based on https://github.com/gusye1234/nano-graphrag/blob/main/nano_graphrag/
-
-import asyncio
 from typing import List
 
 from ragu.common.global_parameters import Settings
@@ -15,6 +13,7 @@ from ragu.search_engine.search_functional import (
     _find_most_related_community_from_entities,
 )
 from ragu.search_engine.types import LocalSearchResult
+from ragu.storage import Embedding
 from ragu.utils.token_truncation import TokenTruncation
 
 from ragu.common.prompts.prompt_storage import RAGUInstruction
@@ -79,13 +78,12 @@ class LocalSearchEngine(BaseEngine):
         :param top_k: Number of top entities to retrieve from the entity vector DB.
         :return: LocalSearchResult containing entities, relations, summaries, chunks, and document ids.
         """
-
-        entities_id = await self.knowledge_graph.index.entity_vector_db.query(query, top_k=top_k)
-        entities = await asyncio.gather(*[
-            self.knowledge_graph.get_entity(entity["__id__"])
-            for entity in entities_id
-        ])
-        entities = [data for data in entities if data is not None]
+        vectorized_query = await self.embedder(query)
+        embedding_hits = await self.knowledge_graph.index.entity_vector_db.query(
+            Embedding(vectorized_query[0]),
+            top_k=top_k,
+        )
+        entities = await self.knowledge_graph.index.get_entities([hit.id for hit in embedding_hits])
 
         relations = await _find_most_related_edges_from_entities(entities, self.knowledge_graph)
         relations = [relation for relation in relations if relation is not None]

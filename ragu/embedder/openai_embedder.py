@@ -102,13 +102,13 @@ class OpenAIEmbedder(BaseEmbedder):
             self,
             texts: Union[str, List[str]],
             progress_bar_desc=None
-    ) -> List[List[float] | None]:
+    ) -> List[List[float]]:
         """
         Compute embeddings for one text or a list of texts.
 
         :param texts: Input text or list of texts.
         :param progress_bar_desc: Optional progress bar description.
-        :return: Embeddings aligned with input order; failed items are ``None``.
+        :return: Embeddings aligned with input order.
         """
         if isinstance(texts, str):
             texts = [texts]

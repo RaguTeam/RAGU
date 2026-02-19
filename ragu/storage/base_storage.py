@@ -2,9 +2,8 @@ from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from typing import Union, Generic, TypeVar, List, Set, Optional, Tuple, Dict
 
-import numpy as np
-
 from ragu.graph.types import Entity, Relation
+from ragu.storage.types import Embedding, EmbeddingHit
 
 EdgeSpec = Tuple[str, str, Optional[str]]
 
@@ -44,22 +43,22 @@ class BaseVectorStorage(BaseStorage, ABC):
     """
 
     @abstractmethod
-    async def query(self, query: str, top_k: int) -> List[Dict]:
+    async def query(self, vectors: Embedding, top_k: int) -> List[EmbeddingHit]:
         """
-        Retrieve top-k nearest items for the query text.
+        Retrieve top-k nearest items for a batch of embedding vectors.
 
-        :param query: Input text query.
-        :param top_k: Maximum number of results to return.
-        :return: Vector store specific result payloads.
+        :param vectors: Query embedding vector.
+        :param top_k: Maximum number of results to return per query vector.
+        :return: A list of query hits with distance score and metadata.
         """
         ...
 
     @abstractmethod
-    async def upsert(self, data: Dict[str, np.ndarray]):
+    async def upsert(self, data: List[Embedding]) -> None:
         """
-        Insert or update vectorized records.
+        Insert or update embedding records.
 
-        :param data: Mapping from record ID to record payload.
+        :param data: Embedding records to upsert.
         """
         ...
 
