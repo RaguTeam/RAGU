@@ -14,8 +14,11 @@ from ragu.common.prompts.default_models import (
 )
 from ragu.common.prompts.messages import ChatMessages, render
 from ragu.common.prompts.prompt_storage import RAGUInstruction
+from ragu.common.prompts.icl_config import ICLConfig
+from ragu.common.prompts.icl_manager import InContextLearningManager
 from ragu.graph.types import Entity, Relation
 from ragu.models.llm import LLM
+from ragu.models.embedder import Embedder
 from ragu.triplet.base_artifact_extractor import BaseArtifactExtractor
 from ragu.triplet.prompts import (
     TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION,
@@ -36,11 +39,15 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
       3. Extract relations constrained by validated entities.
       4. Optionally validate relations against source chunk text and entity set.
       5. Convert stage outputs to graph `Entity` and `Relation` objects.
+
+    Supports in-context learning via InContextLearningManager when provided.
     """
 
     def __init__(
         self,
         llm: LLM,
+        embedder: Embedder | None = None,
+        icl_config: ICLConfig | None = None,
         do_entity_validation: bool | None = None,
         do_relation_validation: bool | None = None,
         language: str | None = None,
@@ -48,9 +55,11 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         relation_types: Optional[List[str]] = NEREL_RELATION_TYPES,
     ) -> None:
         """
-        Initialize the two-stage extractor.
+        Initialize two-stage extractor.
 
         :param llm: LLM backend used for extraction and validation calls.
+        :param embedder: Embedder for computing example embeddings (optional).
+        :param icl_config: ICL configuration (optional).
         :param do_entity_validation: If set, overrides entity validation toggle.
         :param do_relation_validation: If set, overrides relation validation toggle.
         :param language: Language hint injected into prompts.
@@ -66,12 +75,30 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         super().__init__(prompts=prompts)
 
         self.llm = llm
+        self.embedder = embedder
         self.language = language if language else Settings.language
         self.entity_types = ", ".join(entity_types) if entity_types else None
         self.relation_types = ", ".join(relation_types) if relation_types else None
 
         self.do_entity_validation = do_entity_validation
         self.do_relation_validation = do_relation_validation
+
+        # Initialize separate ICL managers for each stage
+        self.icl_entity: InContextLearningManager | None = None
+        self.icl_relation: InContextLearningManager | None = None
+        if icl_config and icl_config.enabled and embedder:
+            self.icl_entity = InContextLearningManager(
+                embedder=embedder,
+                example_file=f"{icl_config.examples_base_path}/entity_extraction_examples.json",
+                config=icl_config,
+                language=icl_config.language
+            )
+            self.icl_relation = InContextLearningManager(
+                embedder=embedder,
+                example_file=f"{icl_config.examples_base_path}/relation_extraction_examples.json",
+                config=icl_config,
+                language=icl_config.language
+            )
 
     @override
     async def extract(
@@ -153,6 +180,20 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         :param context: Chunk texts.
         :return: Per-chunk extracted entities.
         """
+
+        # Select ICL examples for entity extraction if manager is initialized
+        examples_list: List[List[dict[str, Any]] | None] = []
+        if self.icl_entity:
+            await self.icl_entity.initialize()
+            for chunk_text in context:
+                examples = await self.icl_entity.select_examples(
+                    query_text=chunk_text,
+                    num_examples=self.icl_entity.config.num_examples
+                )
+                examples_list.append(examples)
+        else:
+            examples_list = [None] * len(context)
+
         instruction: RAGUInstruction = self.get_prompt("entity_extraction")
         assert instruction.pydantic_model is EntitiesExtractionModel
 
@@ -161,6 +202,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             context=context,
             language=self.language,
             entity_types=self.entity_types,
+            examples=examples_list,
         )
 
         results = await self.llm.batch_chat_completion(  # type: ignore
@@ -187,6 +229,19 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         :param entities: Per-chunk entities from extraction stage.
         :return: Validated entities per chunk.
         """
+
+        # Select ICL examples for entity validation if manager is initialized
+        examples_list: List[List[dict[str, Any]] | None] = []
+        if self.icl_entity:
+            for chunk_text in context:
+                examples = await self.icl_entity.select_examples(
+                    query_text=chunk_text,
+                    num_examples=self.icl_entity.config.num_examples
+                )
+                examples_list.append(examples)
+        else:
+            examples_list = [None] * len(context)
+
         instruction: RAGUInstruction = self.get_prompt("entity_validation")
         assert instruction.pydantic_model is EntitiesExtractionModel
 
@@ -195,6 +250,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             context=context,
             entities=self._models_to_payload(entities),
             language=self.language,
+            examples=examples_list,
             entity_types=self.entity_types,
         )
 
@@ -222,6 +278,19 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         :param entities: Per-chunk validated entities.
         :return: Per-chunk extracted relations.
         """
+
+        # Select ICL examples for relation extraction if manager is initialized
+        examples_list: List[List[dict[str, Any]] | None] = []
+        if self.icl_relation:
+            for chunk_text in context:
+                examples = await self.icl_relation.select_examples(
+                    query_text=chunk_text,
+                    num_examples=self.icl_relation.config.num_examples
+                )
+                examples_list.append(examples)
+        else:
+            examples_list = [None] * len(context)
+
         instruction: RAGUInstruction = self.get_prompt("relation_extraction")
         assert instruction.pydantic_model is RelationsExtractionModel
 
@@ -231,6 +300,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             entities=self._models_to_payload(entities),
             language=self.language,
             relation_types=self.relation_types,
+            examples=examples_list,
         )
 
         results = await self.llm.batch_chat_completion(  # type: ignore
@@ -259,6 +329,19 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         :param relations: Per-chunk relation sets.
         :return: Validated relations per chunk.
         """
+
+        # Select ICL examples for relation validation if manager is initialized
+        examples_list: List[List[dict[str, Any]] | None] = []
+        if self.icl_relation:
+            for chunk_text in context:
+                examples = await self.icl_relation.select_examples(
+                    query_text=chunk_text,
+                    num_examples=self.icl_relation.config.num_examples
+                )
+                examples_list.append(examples)
+        else:
+            examples_list = [None] * len(context)
+
         instruction: RAGUInstruction = self.get_prompt("relation_validation")
         assert instruction.pydantic_model is RelationsExtractionModel
 
@@ -269,6 +352,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             relations=self._models_to_payload(relations),
             language=self.language,
             relation_types=self.relation_types,
+            examples=examples_list,
         )
 
         results = await self.llm.batch_chat_completion(  # type: ignore

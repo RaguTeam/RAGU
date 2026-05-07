@@ -9,8 +9,29 @@ from ragu.common.prompts.prompt_storage import RAGUInstruction
 
 
 DEFAULT_TWO_STAGE_ENTITIES_EXTRACTOR_PROMPT = """
-You are an expert entity extraction system. 
+You are an expert entity extraction system.
 Your task is to identify and extract all meaningful entities from the provided text. You must be thorough, precise, and consistent.
+
+{% if examples %}
+## EXAMPLES
+
+Study these examples carefully to understand expected extraction quality and format:
+
+{% for example in examples %}
+### Example {{ loop.index }}
+
+**Input Text:**
+{{ example.input_text }}
+
+**Expected Output:**
+Entities:
+{% for entity in example.output.entities %}
+- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
+{% endfor %}
+
+---
+{% endfor %}
+{% endif %}
 
 **Task**
 Analyze the given text and extract every significant entity. For each entity, provide:
@@ -46,9 +67,35 @@ Return the result as valid JSON matching the provided schema.
 
 
 DEFAULT_TWO_STAGE_ENTITIES_VALIDATOR_PROMPT = """
-You are an expert entity validation and correction system. 
-You are given a source text and a list of entities that were previously extracted from it. 
+You are an expert entity validation and correction system.
+You are given a source text and a list of entities that were previously extracted from it.
 Your task is to audit every entity for correctness, fix any errors, remove hallucinations, and add any entities that were missed.
+
+{% if examples %}
+## EXAMPLES
+
+Study these examples carefully to understand expected validation quality and format:
+
+{% for example in examples %}
+### Example {{ loop.index }}
+
+**Input Text:**
+{{ example.input_text }}
+
+**Entities for Validation:**
+{% for entity in example.output.entities %}
+- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
+{% endfor %}
+
+**Validated Output:**
+Entities:
+{% for entity in example.output.entities %}
+- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
+{% endfor %}
+
+---
+{% endfor %}
+{% endif %}
 
 ## TASK
 Perform a comprehensive validation of the provided entity list against the source text. You must execute ALL of the following steps:
@@ -109,13 +156,39 @@ Return the result as valid JSON matching the provided schema.
 
 
 DEFAULT_TWO_STAGE_RELATIONS_EXTRACTOR_PROMPT = """
-You are an expert relation extraction system. 
-You are given a source text and a list of entities that have already been extracted from it. 
+You are an expert relation extraction system.
+You are given a source text and a list of entities that have already been extracted from it.
 Your task is to identify and extract all meaningful relationships between these entities.
 
+{% if examples %}
+## EXAMPLES
+
+Study these examples carefully to understand expected extraction quality and format:
+
+{% for example in examples %}
+### Example {{ loop.index }}
+
+**Input Text:**
+{{ example.input_text }}
+
+**Entities:**
+{% for entity in example.entities %}
+- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
+{% endfor %}
+
+**Expected Output:**
+Relations:
+{% for relation in example.output.relations %}
+- {{ relation.source_entity }} → {{ relation.target_entity }} ({{ relation.relation_type }}, strength: {{ relation.relationship_strength }}): {{ relation.description }}
+{% endfor %}
+
+---
+{% endfor %}
+{% endif %}
+
 ## TASK
-Analyze the given text and the provided list of entities. 
-Determine ALL pairs (**source_entity**, **target_entity**) that are *explicitly or clearly implicitly connected* in the text. 
+Analyze the given text and the provided list of entities.
+Determine ALL pairs (**source_entity**, **target_entity**) that are *explicitly or clearly implicitly connected* in the text.
 
 For each relationship, provide:
 1. **source_entity** — The name of the source entity. MUST exactly match one of the provided entity names.
@@ -167,9 +240,40 @@ Return the result as valid JSON matching the provided schema.
 
 
 DEFAULT_TWO_STAGE_RELATIONS_VALIDATOR_PROMPT = """
-You are an expert relation validation and correction system. 
-You are given a source text, a validated list of entities, and a list of relations that were previously extracted. 
+You are an expert relation validation and correction system.
+You are given a source text, a validated list of entities, and a list of relations that were previously extracted.
 Your task is to audit every relation for correctness, fix any errors, remove unsupported relations, and add any relations that were missed.
+
+{% if examples %}
+## EXAMPLES
+
+Study these examples carefully to understand expected validation quality and format:
+
+{% for example in examples %}
+### Example {{ loop.index }}
+
+**Input Text:**
+{{ example.input_text }}
+
+**Entities:**
+{% for entity in example.entities %}
+- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
+{% endfor %}
+
+**Relations for Validation:**
+{% for relation in example.output.relations %}
+- {{ relation.source_entity }} → {{ relation.target_entity }} ({{ relation.relation_type }}, strength: {{ relation.relationship_strength }}): {{ relation.description }}
+{% endfor %}
+
+**Validated Output:**
+Relations:
+{% for relation in example.output.relations %}
+- {{ relation.source_entity }} → {{ relation.target_entity }} ({{ relation.relation_type }}, strength: {{ relation.relationship_strength }}): {{ relation.description }}
+{% endfor %}
+
+---
+{% endfor %}
+{% endif %}
 
 ## TASK
 Perform a comprehensive validation of the provided relation list against the source text and the entity set. You must execute ALL of the following steps:

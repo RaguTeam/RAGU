@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "languages": ["english", "russian"],
+  "total_examples": 0,
+  "generated_by": {
+    "generator_model": "unknown",
+    "judge_model": "unknown"
+  },
+  "generated_at": "2026-05-06T00:00:00Z",
+  "examples": []
+}

@@ -1,0 +1,63 @@
+# Configuration for ICL example generation script
+# This script generates few-shot examples for stabilizing LLM-based extractors
+
+# Output settings
+output_path: "ragu/common/prompts/icl_examples/"
+
+# Languages to generate examples for
+languages:
+  - "english"
+  - "russian"
+
+# Prompt types to generate examples for
+# Only artifact extraction related prompts
+prompt_types:
+  - "artifact_extraction"
+  - "entity_extraction"
+  - "relation_extraction"
+  - "artifact_validation"
+  - "entity_validation"
+  - "relation_validation"
+
+# Model configuration
+generator_model:
+  base_url: "${GENERATOR_BASE_URL}"
+  api_key: "${GENERATOR_API_KEY}"
+  model_name: "${GENERATOR_MODEL_NAME}"  # e.g., "gpt4o"
+  temperature: 0.2  # Low temperature for consistency
+
+judge_model:
+  base_url: "${JUDGE_BASE_URL}"
+  api_key: "${JUDGE_API_KEY}"
+  model_name: "${JUDGE_MODEL_NAME}"  # e.g., "qwen3.6-max-preview"
+  temperature: 0.0  # Deterministic for judgment
+  min_quality_rating: 8  # 1-10 scale, keep >= 8
+
+# Corpus generation settings
+corpus:
+  total_texts: 20  # 30-50 texts
+  domains:
+    - "technology"
+    - "medicine"
+    - "finance"
+    - "science"
+    - "business"
+  difficulty_levels:
+    - "easy"
+    - "medium"
+    - "hard"
+
+# Quality filters
+quality_filters:
+  min_entities: 1
+  max_entities: 12
+  min_relations: 0
+  max_relations: 10
+  min_text_length: 80
+  max_text_length: 1200
+ 
+# Incremental update settings
+incremental:
+  enabled: true
+  preserve_existing: true  # Keep existing examples when adding new ones
+  generate_new_ids: true  # Use UUID/time-based IDs for new examples

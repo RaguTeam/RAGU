@@ -1,0 +1,1746 @@
+{
+  "version": "1.0",
+  "languages": [
+    "english",
+    "russian"
+  ],
+  "total_examples": 9,
+  "generated_by": {
+    "generator_model": "openai/chatgpt-4o-latest",
+    "judge_model": "qwen/qwen3.6-max-preview"
+  },
+  "generated_at": "2026-05-07T14:38:10.651685Z",
+  "examples": [
+    {
+      "id": "bce9db79-8ed2-4ef0-bde0-7957b407e8e7",
+      "input_text": "Emma, a software engineer at TechNova Inc., recently attended the Global AI Summit in San Francisco. The event, organized by the Artificial Intelligence Alliance, showcased cutting-edge advancements in machine learning and robotics. During the summit, Emma had the opportunity to test the new AI-powered assistant, SmartBot Pro, developed by InnovateTech Labs. \n\nSmartBot Pro is designed to help users manage tasks more efficiently, offering features like voice recognition and real-time data analysis. Emma was impressed by its ability to integrate seamlessly with popular productivity tools like TaskFlow and CalendarSync. She also attended a keynote speech by Dr. Alan Carter, a renowned AI researcher, who discussed the ethical implications of deploying AI in healthcare systems.\n\nAfter the summit, Emma returned to TechNova’s headquarters in Seattle, where she shared her insights with her team. Inspired by the event, they began brainstorming ideas to incorporate AI into their upcoming product, the NovaDesk workstation. Emma believes that integrating AI into NovaDesk could revolutionize how professionals interact with their workspaces, making tasks faster and more intuitive.",
+      "metadata": {
+        "domain": "technology",
+        "difficulty": "easy",
+        "language": "english",
+        "generated_at": "2026-05-07T14:15:40.532525Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Emma",
+            "target_entity": "TechNova Inc.",
+            "relation_type": "WORKS_FOR",
+            "description": "Emma is employed as a software engineer at TechNova Inc.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Emma",
+            "target_entity": "Global AI Summit",
+            "relation_type": "ATTENDED",
+            "description": "Emma attended the Global AI Summit in San Francisco.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Global AI Summit",
+            "target_entity": "San Francisco",
+            "relation_type": "LOCATED_IN",
+            "description": "The Global AI Summit took place in San Francisco.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Global AI Summit",
+            "target_entity": "Artificial Intelligence Alliance",
+            "relation_type": "ORGANIZED_BY",
+            "description": "The Artificial Intelligence Alliance organized the Global AI Summit.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "SmartBot Pro",
+            "target_entity": "InnovateTech Labs",
+            "relation_type": "DEVELOPED_BY",
+            "description": "InnovateTech Labs developed SmartBot Pro, an AI-powered assistant.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "SmartBot Pro",
+            "target_entity": "TaskFlow",
+            "relation_type": "INTEGRATES_WITH",
+            "description": "SmartBot Pro integrates seamlessly with TaskFlow, a productivity tool.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "SmartBot Pro",
+            "target_entity": "CalendarSync",
+            "relation_type": "INTEGRATES_WITH",
+            "description": "SmartBot Pro integrates seamlessly with CalendarSync, a productivity tool.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Dr. Alan Carter",
+            "target_entity": "Global AI Summit",
+            "relation_type": "SPOKE_AT",
+            "description": "Dr. Alan Carter delivered a keynote speech at the Global AI Summit.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Dr. Alan Carter",
+            "target_entity": "Artificial Intelligence Alliance",
+            "relation_type": "ASSOCIATED_WITH",
+            "description": "Dr. Alan Carter, as a speaker, is associated with the Artificial Intelligence Alliance, the organizer of the summit.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Emma",
+            "target_entity": "Seattle",
+            "relation_type": "RETURNED_TO",
+            "description": "Emma returned to Seattle after attending the Global AI Summit.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "TechNova Inc.",
+            "target_entity": "Seattle",
+            "relation_type": "HEADQUARTERED_IN",
+            "description": "TechNova Inc.'s headquarters are located in Seattle.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Emma",
+            "target_entity": "NovaDesk workstation",
+            "relation_type": "CONTRIBUTES_TO",
+            "description": "Emma brainstormed ideas to incorporate AI into the NovaDesk workstation.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "TechNova Inc.",
+            "target_entity": "NovaDesk workstation",
+            "relation_type": "DEVELOPS",
+            "description": "TechNova Inc. is developing the NovaDesk workstation.",
+            "relationship_strength": 5
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Emma",
+            "entity_type": "PERSON",
+            "description": "Emma is a software engineer working at TechNova Inc. She attended the Global AI Summit and shared her insights with her team at TechNova's headquarters in Seattle."
+          },
+          {
+            "entity_name": "TechNova Inc.",
+            "entity_type": "ORGANIZATION",
+            "description": "TechNova Inc. is the company where Emma works as a software engineer. Its headquarters are located in Seattle."
+          },
+          {
+            "entity_name": "Global AI Summit",
+            "entity_type": "EVENT",
+            "description": "The Global AI Summit is an event held in San Francisco, organized by the Artificial Intelligence Alliance, showcasing advancements in machine learning and robotics."
+          },
+          {
+            "entity_name": "San Francisco",
+            "entity_type": "LOCATION",
+            "description": "San Francisco is the city where the Global AI Summit took place."
+          },
+          {
+            "entity_name": "Artificial Intelligence Alliance",
+            "entity_type": "ORGANIZATION",
+            "description": "The Artificial Intelligence Alliance is the organizer of the Global AI Summit."
+          },
+          {
+            "entity_name": "SmartBot Pro",
+            "entity_type": "PRODUCT",
+            "description": "SmartBot Pro is an AI-powered assistant developed by InnovateTech Labs, designed to help users manage tasks efficiently with features like voice recognition and real-time data analysis."
+          },
+          {
+            "entity_name": "InnovateTech Labs",
+            "entity_type": "ORGANIZATION",
+            "description": "InnovateTech Labs is the developer of SmartBot Pro, an AI-powered assistant."
+          },
+          {
+            "entity_name": "TaskFlow",
+            "entity_type": "PRODUCT",
+            "description": "TaskFlow is a popular productivity tool that integrates with SmartBot Pro."
+          },
+          {
+            "entity_name": "CalendarSync",
+            "entity_type": "PRODUCT",
+            "description": "CalendarSync is a popular productivity tool that integrates with SmartBot Pro."
+          },
+          {
+            "entity_name": "Dr. Alan Carter",
+            "entity_type": "PERSON",
+            "description": "Dr. Alan Carter is a renowned AI researcher who delivered a keynote speech at the Global AI Summit, discussing the ethical implications of deploying AI in healthcare systems."
+          },
+          {
+            "entity_name": "Seattle",
+            "entity_type": "LOCATION",
+            "description": "Seattle is the location of TechNova Inc.'s headquarters, where Emma returned after attending the Global AI Summit."
+          },
+          {
+            "entity_name": "NovaDesk workstation",
+            "entity_type": "PRODUCT",
+            "description": "The NovaDesk workstation is an upcoming product by TechNova Inc., which Emma and her team are brainstorming to incorporate AI into, aiming to revolutionize workspace interaction."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Emma",
+          "entity_type": "PERSON",
+          "description": "Emma is a software engineer working at TechNova Inc. She attended the Global AI Summit and shared her insights with her team at TechNova's headquarters in Seattle."
+        },
+        {
+          "entity_name": "TechNova Inc.",
+          "entity_type": "ORGANIZATION",
+          "description": "TechNova Inc. is the company where Emma works as a software engineer. Its headquarters are located in Seattle."
+        },
+        {
+          "entity_name": "Global AI Summit",
+          "entity_type": "EVENT",
+          "description": "The Global AI Summit is an event held in San Francisco, organized by the Artificial Intelligence Alliance, showcasing advancements in machine learning and robotics."
+        },
+        {
+          "entity_name": "San Francisco",
+          "entity_type": "LOCATION",
+          "description": "San Francisco is the city where the Global AI Summit took place."
+        },
+        {
+          "entity_name": "Artificial Intelligence Alliance",
+          "entity_type": "ORGANIZATION",
+          "description": "The Artificial Intelligence Alliance is the organizer of the Global AI Summit."
+        },
+        {
+          "entity_name": "SmartBot Pro",
+          "entity_type": "PRODUCT",
+          "description": "SmartBot Pro is an AI-powered assistant developed by InnovateTech Labs, designed to help users manage tasks efficiently with features like voice recognition and real-time data analysis."
+        },
+        {
+          "entity_name": "InnovateTech Labs",
+          "entity_type": "ORGANIZATION",
+          "description": "InnovateTech Labs is the developer of SmartBot Pro, an AI-powered assistant."
+        },
+        {
+          "entity_name": "TaskFlow",
+          "entity_type": "PRODUCT",
+          "description": "TaskFlow is a popular productivity tool that integrates with SmartBot Pro."
+        },
+        {
+          "entity_name": "CalendarSync",
+          "entity_type": "PRODUCT",
+          "description": "CalendarSync is a popular productivity tool that integrates with SmartBot Pro."
+        },
+        {
+          "entity_name": "Dr. Alan Carter",
+          "entity_type": "PERSON",
+          "description": "Dr. Alan Carter is a renowned AI researcher who delivered a keynote speech at the Global AI Summit, discussing the ethical implications of deploying AI in healthcare systems."
+        },
+        {
+          "entity_name": "Seattle",
+          "entity_type": "LOCATION",
+          "description": "Seattle is the location of TechNova Inc.'s headquarters, where Emma returned after attending the Global AI Summit."
+        },
+        {
+          "entity_name": "NovaDesk workstation",
+          "entity_type": "PRODUCT",
+          "description": "The NovaDesk workstation is an upcoming product by TechNova Inc., which Emma and her team are brainstorming to incorporate AI into, aiming to revolutionize workspace interaction."
+        }
+      ],
+      "quality_rating": 8
+    },
+    {
+      "id": "7855dbc5-d003-4b72-9c26-4249a5d1c59a",
+      "input_text": "In 2023, Elon Musk, the CEO of Tesla and SpaceX, announced a groundbreaking partnership between Neuralink and Stanford University during the annual TechFront Conference in San Francisco. The collaboration aims to accelerate the development of brain-computer interface (BCI) technology, which Neuralink has been pioneering. Musk emphasized that the partnership would leverage Stanford's expertise in neuroscience and Neuralink's advanced hardware capabilities to create devices capable of restoring motor functions in patients with spinal cord injuries.\n\nThe announcement also highlighted the involvement of Intel Corporation, which will provide high-performance processors to support the computational demands of the BCI systems. Intel's contribution is expected to enhance data processing speeds, enabling real-time communication between the brain and external devices. The first prototype, named NeuralCore, is scheduled for clinical trials at Stanford Medical Center next year.\n\nDuring the event, Dr. Susan Patel, a leading neuroscientist at Stanford, expressed optimism about the project, stating that it could revolutionize medical treatments for neurological disorders. Meanwhile, Musk hinted at future applications beyond healthcare, including augmented reality and advanced robotics. The collaboration has sparked significant interest in Silicon Valley, with investors closely monitoring its progress.\n\nThis initiative marks a pivotal moment in the intersection of technology and medicine, positioning Neuralink, Stanford University, and Intel as key players in shaping the future of human-machine interaction.",
+      "metadata": {
+        "domain": "technology",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-07T14:18:08.325381Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Elon Musk",
+            "target_entity": "Neuralink",
+            "relation_type": "ANNOUNCED_PARTNERSHIP",
+            "description": "Elon Musk announced the partnership between Neuralink and Stanford University during the TechFront Conference in 2023.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Neuralink",
+            "target_entity": "Stanford University",
+            "relation_type": "COLLABORATES_WITH",
+            "description": "Neuralink is collaborating with Stanford University to advance brain-computer interface technology, leveraging Stanford's expertise in neuroscience.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Intel Corporation",
+            "target_entity": "Neuralink",
+            "relation_type": "SUPPLIES_PROCESSORS",
+            "description": "Intel Corporation is providing high-performance processors to support the computational demands of Neuralink's BCI systems.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Neuralink",
+            "target_entity": "NeuralCore",
+            "relation_type": "DEVELOPS_PRODUCT",
+            "description": "Neuralink is developing NeuralCore, the first prototype of its BCI system, scheduled for clinical trials at Stanford Medical Center next year.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "NeuralCore",
+            "target_entity": "Stanford Medical Center",
+            "relation_type": "CLINICAL_TRIALS_AT",
+            "description": "NeuralCore is scheduled for clinical trials at Stanford Medical Center next year.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Dr. Susan Patel",
+            "target_entity": "Neuralink",
+            "relation_type": "SUPPORTS_PROJECT",
+            "description": "Dr. Susan Patel expressed optimism about the Neuralink-Stanford collaboration, highlighting its potential impact on medical treatments for neurological disorders.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Silicon Valley",
+            "target_entity": "Neuralink",
+            "relation_type": "INTERESTED_IN",
+            "description": "The collaboration between Neuralink and Stanford University has sparked significant interest in Silicon Valley.",
+            "relationship_strength": 3
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Elon Musk",
+            "entity_type": "PERSON",
+            "description": "Elon Musk is the CEO of Tesla and SpaceX, and he announced the partnership between Neuralink and Stanford University at the TechFront Conference in 2023."
+          },
+          {
+            "entity_name": "Tesla",
+            "entity_type": "ORGANIZATION",
+            "description": "Tesla is a company led by Elon Musk, known for its advancements in electric vehicles and renewable energy."
+          },
+          {
+            "entity_name": "SpaceX",
+            "entity_type": "ORGANIZATION",
+            "description": "SpaceX is a company led by Elon Musk, specializing in space exploration and aerospace technology."
+          },
+          {
+            "entity_name": "Neuralink",
+            "entity_type": "ORGANIZATION",
+            "description": "Neuralink is a company pioneering brain-computer interface (BCI) technology and is collaborating with Stanford University to develop devices for restoring motor functions in patients with spinal cord injuries."
+          },
+          {
+            "entity_name": "Stanford University",
+            "entity_type": "ORGANIZATION",
+            "description": "Stanford University is an academic institution collaborating with Neuralink to advance brain-computer interface technology, leveraging its expertise in neuroscience."
+          },
+          {
+            "entity_name": "TechFront Conference",
+            "entity_type": "EVENT",
+            "description": "The TechFront Conference is an annual event where the partnership between Neuralink and Stanford University was announced in 2023."
+          },
+          {
+            "entity_name": "San Francisco",
+            "entity_type": "LOCATION",
+            "description": "San Francisco is the city where the TechFront Conference took place in 2023."
+          },
+          {
+            "entity_name": "Intel Corporation",
+            "entity_type": "ORGANIZATION",
+            "description": "Intel Corporation is contributing high-performance processors to support the computational demands of Neuralink's BCI systems."
+          },
+          {
+            "entity_name": "NeuralCore",
+            "entity_type": "PRODUCT",
+            "description": "NeuralCore is the first prototype of Neuralink's BCI system, scheduled for clinical trials at Stanford Medical Center next year."
+          },
+          {
+            "entity_name": "Stanford Medical Center",
+            "entity_type": "ORGANIZATION",
+            "description": "Stanford Medical Center is the facility where the NeuralCore prototype will undergo clinical trials."
+          },
+          {
+            "entity_name": "Dr. Susan Patel",
+            "entity_type": "PERSON",
+            "description": "Dr. Susan Patel is a leading neuroscientist at Stanford University who expressed optimism about the Neuralink-Stanford collaboration."
+          },
+          {
+            "entity_name": "Silicon Valley",
+            "entity_type": "LOCATION",
+            "description": "Silicon Valley is a region known for its technological innovation, where the Neuralink-Stanford collaboration has sparked significant interest."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Elon Musk",
+          "entity_type": "PERSON",
+          "description": "Elon Musk is the CEO of Tesla and SpaceX, and he announced the partnership between Neuralink and Stanford University at the TechFront Conference in 2023."
+        },
+        {
+          "entity_name": "Tesla",
+          "entity_type": "ORGANIZATION",
+          "description": "Tesla is a company led by Elon Musk, known for its advancements in electric vehicles and renewable energy."
+        },
+        {
+          "entity_name": "SpaceX",
+          "entity_type": "ORGANIZATION",
+          "description": "SpaceX is a company led by Elon Musk, specializing in space exploration and aerospace technology."
+        },
+        {
+          "entity_name": "Neuralink",
+          "entity_type": "ORGANIZATION",
+          "description": "Neuralink is a company pioneering brain-computer interface (BCI) technology and is collaborating with Stanford University to develop devices for restoring motor functions in patients with spinal cord injuries."
+        },
+        {
+          "entity_name": "Stanford University",
+          "entity_type": "ORGANIZATION",
+          "description": "Stanford University is an academic institution collaborating with Neuralink to advance brain-computer interface technology, leveraging its expertise in neuroscience."
+        },
+        {
+          "entity_name": "TechFront Conference",
+          "entity_type": "EVENT",
+          "description": "The TechFront Conference is an annual event where the partnership between Neuralink and Stanford University was announced in 2023."
+        },
+        {
+          "entity_name": "San Francisco",
+          "entity_type": "LOCATION",
+          "description": "San Francisco is the city where the TechFront Conference took place in 2023."
+        },
+        {
+          "entity_name": "Intel Corporation",
+          "entity_type": "ORGANIZATION",
+          "description": "Intel Corporation is contributing high-performance processors to support the computational demands of Neuralink's BCI systems."
+        },
+        {
+          "entity_name": "NeuralCore",
+          "entity_type": "PRODUCT",
+          "description": "NeuralCore is the first prototype of Neuralink's BCI system, scheduled for clinical trials at Stanford Medical Center next year."
+        },
+        {
+          "entity_name": "Stanford Medical Center",
+          "entity_type": "ORGANIZATION",
+          "description": "Stanford Medical Center is the facility where the NeuralCore prototype will undergo clinical trials."
+        },
+        {
+          "entity_name": "Dr. Susan Patel",
+          "entity_type": "PERSON",
+          "description": "Dr. Susan Patel is a leading neuroscientist at Stanford University who expressed optimism about the Neuralink-Stanford collaboration."
+        },
+        {
+          "entity_name": "Silicon Valley",
+          "entity_type": "LOCATION",
+          "description": "Silicon Valley is a region known for its technological innovation, where the Neuralink-Stanford collaboration has sparked significant interest."
+        }
+      ],
+      "quality_rating": 8
+    },
+    {
+      "id": "dc93d8d9-ed9b-4609-8ece-e7494e3708ca",
+      "input_text": "Dr. Emily Carter, a physician at Green Valley Hospital in Chicago, recently spoke about the importance of flu vaccines during the annual Health Awareness Week. The event, organized by the American Medical Association (AMA), aimed to educate the public about preventing seasonal illnesses. Dr. Carter emphasized that the FluShield vaccine, developed by MedTech Pharmaceuticals, has shown a 90% effectiveness rate in reducing severe flu cases.\n\nDuring her presentation, she highlighted a study conducted by the University of Illinois, which tracked over 5,000 participants across the Midwest. The study revealed that individuals vaccinated with FluShield were significantly less likely to require hospitalization. Dr. Carter also mentioned that local clinics, including the Chicago Community Health Center, are offering free flu shots this month to increase accessibility.\n\nShe urged residents of Chicago and nearby areas to take advantage of these services, especially as flu season peaks in November. \"Vaccination is the best defense we have,\" Dr. Carter stated, adding that early prevention could save lives and reduce the strain on healthcare facilities.",
+      "metadata": {
+        "domain": "medicine",
+        "difficulty": "easy",
+        "language": "english",
+        "generated_at": "2026-05-07T14:23:35.400652Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Dr. Emily Carter",
+            "target_entity": "Green Valley Hospital",
+            "relation_type": "EMPLOYED_AT",
+            "description": "Dr. Emily Carter is a physician practicing at Green Valley Hospital in Chicago.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Dr. Emily Carter",
+            "target_entity": "Health Awareness Week",
+            "relation_type": "SPOKE_AT",
+            "description": "Dr. Emily Carter spoke about flu vaccines during the annual Health Awareness Week.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Health Awareness Week",
+            "target_entity": "American Medical Association",
+            "relation_type": "ORGANIZED_BY",
+            "description": "The American Medical Association organized the annual Health Awareness Week.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "FluShield",
+            "target_entity": "MedTech Pharmaceuticals",
+            "relation_type": "DEVELOPED_BY",
+            "description": "FluShield is a vaccine developed by MedTech Pharmaceuticals.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "University of Illinois",
+            "target_entity": "FluShield",
+            "relation_type": "STUDIED_EFFECTIVENESS_OF",
+            "description": "The University of Illinois conducted a study revealing the effectiveness of the FluShield vaccine.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Chicago Community Health Center",
+            "target_entity": "FluShield",
+            "relation_type": "OFFERS",
+            "description": "The Chicago Community Health Center is offering free flu shots of FluShield this month.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Dr. Emily Carter",
+            "target_entity": "Chicago",
+            "relation_type": "URGED_RESIDENTS_OF",
+            "description": "Dr. Emily Carter urged residents of Chicago to take advantage of flu vaccination services.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "November",
+            "target_entity": "FluShield",
+            "relation_type": "RECOMMENDED_DURING",
+            "description": "Dr. Emily Carter recommended FluShield vaccination during November as flu season peaks.",
+            "relationship_strength": 3
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Dr. Emily Carter",
+            "entity_type": "PERSON",
+            "description": "Dr. Emily Carter is a physician at Green Valley Hospital in Chicago who recently spoke about the importance of flu vaccines during the annual Health Awareness Week."
+          },
+          {
+            "entity_name": "Green Valley Hospital",
+            "entity_type": "ORGANIZATION",
+            "description": "Green Valley Hospital is a healthcare facility located in Chicago where Dr. Emily Carter practices as a physician."
+          },
+          {
+            "entity_name": "Chicago",
+            "entity_type": "LOCATION",
+            "description": "Chicago is a city in the United States where Green Valley Hospital is located and where Dr. Emily Carter practices medicine."
+          },
+          {
+            "entity_name": "Health Awareness Week",
+            "entity_type": "EVENT",
+            "description": "Health Awareness Week is an annual event aimed at educating the public about health-related topics, during which Dr. Emily Carter spoke about flu vaccines."
+          },
+          {
+            "entity_name": "American Medical Association",
+            "entity_type": "ORGANIZATION",
+            "description": "The American Medical Association (AMA) is an organization that organized the annual Health Awareness Week event to educate the public about preventing seasonal illnesses."
+          },
+          {
+            "entity_name": "FluShield",
+            "entity_type": "PRODUCT",
+            "description": "FluShield is a vaccine developed by MedTech Pharmaceuticals, noted for its 90% effectiveness rate in reducing severe flu cases."
+          },
+          {
+            "entity_name": "MedTech Pharmaceuticals",
+            "entity_type": "ORGANIZATION",
+            "description": "MedTech Pharmaceuticals is the developer of the FluShield vaccine, which has shown significant effectiveness in reducing severe flu cases."
+          },
+          {
+            "entity_name": "University of Illinois",
+            "entity_type": "ORGANIZATION",
+            "description": "The University of Illinois conducted a study tracking over 5,000 participants across the Midwest, revealing the effectiveness of the FluShield vaccine."
+          },
+          {
+            "entity_name": "Midwest",
+            "entity_type": "LOCATION",
+            "description": "The Midwest is a region in the United States where a study conducted by the University of Illinois tracked over 5,000 participants to evaluate the FluShield vaccine."
+          },
+          {
+            "entity_name": "Chicago Community Health Center",
+            "entity_type": "ORGANIZATION",
+            "description": "The Chicago Community Health Center is a local clinic offering free flu shots this month to increase accessibility to vaccinations."
+          },
+          {
+            "entity_name": "November",
+            "entity_type": "DATE",
+            "description": "November is the month during which flu season peaks, as mentioned by Dr. Emily Carter."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Dr. Emily Carter",
+          "entity_type": "PERSON",
+          "description": "Dr. Emily Carter is a physician at Green Valley Hospital in Chicago who recently spoke about the importance of flu vaccines during the annual Health Awareness Week."
+        },
+        {
+          "entity_name": "Green Valley Hospital",
+          "entity_type": "ORGANIZATION",
+          "description": "Green Valley Hospital is a healthcare facility located in Chicago where Dr. Emily Carter practices as a physician."
+        },
+        {
+          "entity_name": "Chicago",
+          "entity_type": "LOCATION",
+          "description": "Chicago is a city in the United States where Green Valley Hospital is located and where Dr. Emily Carter practices medicine."
+        },
+        {
+          "entity_name": "Health Awareness Week",
+          "entity_type": "EVENT",
+          "description": "Health Awareness Week is an annual event aimed at educating the public about health-related topics, during which Dr. Emily Carter spoke about flu vaccines."
+        },
+        {
+          "entity_name": "American Medical Association",
+          "entity_type": "ORGANIZATION",
+          "description": "The American Medical Association (AMA) is an organization that organized the annual Health Awareness Week event to educate the public about preventing seasonal illnesses."
+        },
+        {
+          "entity_name": "FluShield",
+          "entity_type": "PRODUCT",
+          "description": "FluShield is a vaccine developed by MedTech Pharmaceuticals, noted for its 90% effectiveness rate in reducing severe flu cases."
+        },
+        {
+          "entity_name": "MedTech Pharmaceuticals",
+          "entity_type": "ORGANIZATION",
+          "description": "MedTech Pharmaceuticals is the developer of the FluShield vaccine, which has shown significant effectiveness in reducing severe flu cases."
+        },
+        {
+          "entity_name": "University of Illinois",
+          "entity_type": "ORGANIZATION",
+          "description": "The University of Illinois conducted a study tracking over 5,000 participants across the Midwest, revealing the effectiveness of the FluShield vaccine."
+        },
+        {
+          "entity_name": "Midwest",
+          "entity_type": "LOCATION",
+          "description": "The Midwest is a region in the United States where a study conducted by the University of Illinois tracked over 5,000 participants to evaluate the FluShield vaccine."
+        },
+        {
+          "entity_name": "Chicago Community Health Center",
+          "entity_type": "ORGANIZATION",
+          "description": "The Chicago Community Health Center is a local clinic offering free flu shots this month to increase accessibility to vaccinations."
+        },
+        {
+          "entity_name": "November",
+          "entity_type": "DATE",
+          "description": "November is the month during which flu season peaks, as mentioned by Dr. Emily Carter."
+        }
+      ],
+      "quality_rating": 8
+    },
+    {
+      "id": "c15a3b5a-7263-4521-8464-a8c74ee02090",
+      "input_text": "Dr. Emily Carter, a renowned cardiologist at St. Mary’s Hospital in Boston, recently presented groundbreaking research at the International Cardiology Conference held in Geneva. Her study focused on the effectiveness of a new medication, CardioRelief, developed by MedTech Pharmaceuticals, in reducing the risk of heart attacks among high-risk patients. The clinical trials, conducted over two years at multiple locations including Boston and Chicago, involved 1,200 participants aged 45 to 70.\n\nDuring her presentation, Dr. Carter highlighted the collaboration between St. Mary’s Hospital and MedTech Pharmaceuticals, emphasizing the importance of partnerships in advancing medical innovation. She explained that CardioRelief works by targeting specific enzymes linked to arterial plaque buildup, significantly lowering cholesterol levels. The trials showed a 35% reduction in heart attack incidents compared to patients on standard treatments.\n\nThe conference also featured discussions on global cardiovascular health challenges, with representatives from the World Health Organization (WHO) stressing the need for accessible treatments in underserved regions. Dr. Carter expressed optimism about the potential for CardioRelief to be distributed globally, particularly in areas with limited healthcare infrastructure. However, she noted that regulatory approval from the Food and Drug Administration (FDA) is still pending, which could delay widespread availability.\n\nDr. Carter’s research has sparked interest among healthcare professionals and policymakers, marking a significant step forward in the fight against cardiovascular disease.",
+      "metadata": {
+        "domain": "medicine",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-07T14:24:46.227833Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Dr. Emily Carter",
+            "target_entity": "St. Mary’s Hospital",
+            "relation_type": "WORKS_AT",
+            "description": "Dr. Emily Carter is a cardiologist practicing at St. Mary’s Hospital in Boston.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Dr. Emily Carter",
+            "target_entity": "International Cardiology Conference",
+            "relation_type": "PRESENTED_AT",
+            "description": "Dr. Emily Carter presented her research on CardioRelief at the International Cardiology Conference held in Geneva.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "St. Mary’s Hospital",
+            "target_entity": "MedTech Pharmaceuticals",
+            "relation_type": "COLLABORATES_WITH",
+            "description": "St. Mary’s Hospital collaborated with MedTech Pharmaceuticals on the research for CardioRelief.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "CardioRelief",
+            "target_entity": "MedTech Pharmaceuticals",
+            "relation_type": "DEVELOPED_BY",
+            "description": "CardioRelief is a medication developed by MedTech Pharmaceuticals.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "International Cardiology Conference",
+            "target_entity": "Geneva",
+            "relation_type": "OCCURRED_IN",
+            "description": "The International Cardiology Conference took place in Geneva.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "CardioRelief",
+            "target_entity": "Boston",
+            "relation_type": "TRIAL_CONDUCTED_IN",
+            "description": "Clinical trials for CardioRelief were conducted in Boston.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "CardioRelief",
+            "target_entity": "Chicago",
+            "relation_type": "TRIAL_CONDUCTED_IN",
+            "description": "Clinical trials for CardioRelief were conducted in Chicago.",
+            "relationship_strength": 4
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Dr. Emily Carter",
+            "entity_type": "PERSON",
+            "description": "A renowned cardiologist at St. Mary’s Hospital in Boston who presented groundbreaking research on the medication CardioRelief at the International Cardiology Conference in Geneva."
+          },
+          {
+            "entity_name": "St. Mary’s Hospital",
+            "entity_type": "ORGANIZATION",
+            "description": "A medical institution in Boston where Dr. Emily Carter practices as a cardiologist and collaborates on innovative medical research."
+          },
+          {
+            "entity_name": "International Cardiology Conference",
+            "entity_type": "EVENT",
+            "description": "An event held in Geneva where Dr. Emily Carter presented her research on CardioRelief."
+          },
+          {
+            "entity_name": "Geneva",
+            "entity_type": "LOCATION",
+            "description": "The city where the International Cardiology Conference took place."
+          },
+          {
+            "entity_name": "CardioRelief",
+            "entity_type": "PRODUCT",
+            "description": "A new medication developed by MedTech Pharmaceuticals, shown to reduce the risk of heart attacks by targeting enzymes linked to arterial plaque buildup."
+          },
+          {
+            "entity_name": "MedTech Pharmaceuticals",
+            "entity_type": "ORGANIZATION",
+            "description": "The company that developed the medication CardioRelief and collaborated with St. Mary’s Hospital on its research."
+          },
+          {
+            "entity_name": "Boston",
+            "entity_type": "LOCATION",
+            "description": "One of the locations where clinical trials for CardioRelief were conducted."
+          },
+          {
+            "entity_name": "Chicago",
+            "entity_type": "LOCATION",
+            "description": "One of the locations where clinical trials for CardioRelief were conducted."
+          },
+          {
+            "entity_name": "World Health Organization (WHO)",
+            "entity_type": "ORGANIZATION",
+            "description": "An international organization that participated in the conference, discussing global cardiovascular health challenges."
+          },
+          {
+            "entity_name": "Food and Drug Administration (FDA)",
+            "entity_type": "ORGANIZATION",
+            "description": "The regulatory body responsible for approving the medication CardioRelief for widespread use."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Dr. Emily Carter",
+          "entity_type": "PERSON",
+          "description": "A renowned cardiologist at St. Mary’s Hospital in Boston who presented groundbreaking research on the medication CardioRelief at the International Cardiology Conference in Geneva."
+        },
+        {
+          "entity_name": "St. Mary’s Hospital",
+          "entity_type": "ORGANIZATION",
+          "description": "A medical institution in Boston where Dr. Emily Carter practices as a cardiologist and collaborates on innovative medical research."
+        },
+        {
+          "entity_name": "International Cardiology Conference",
+          "entity_type": "EVENT",
+          "description": "An event held in Geneva where Dr. Emily Carter presented her research on CardioRelief."
+        },
+        {
+          "entity_name": "Geneva",
+          "entity_type": "LOCATION",
+          "description": "The city where the International Cardiology Conference took place."
+        },
+        {
+          "entity_name": "CardioRelief",
+          "entity_type": "PRODUCT",
+          "description": "A new medication developed by MedTech Pharmaceuticals, shown to reduce the risk of heart attacks by targeting enzymes linked to arterial plaque buildup."
+        },
+        {
+          "entity_name": "MedTech Pharmaceuticals",
+          "entity_type": "ORGANIZATION",
+          "description": "The company that developed the medication CardioRelief and collaborated with St. Mary’s Hospital on its research."
+        },
+        {
+          "entity_name": "Boston",
+          "entity_type": "LOCATION",
+          "description": "One of the locations where clinical trials for CardioRelief were conducted."
+        },
+        {
+          "entity_name": "Chicago",
+          "entity_type": "LOCATION",
+          "description": "One of the locations where clinical trials for CardioRelief were conducted."
+        },
+        {
+          "entity_name": "World Health Organization (WHO)",
+          "entity_type": "ORGANIZATION",
+          "description": "An international organization that participated in the conference, discussing global cardiovascular health challenges."
+        },
+        {
+          "entity_name": "Food and Drug Administration (FDA)",
+          "entity_type": "ORGANIZATION",
+          "description": "The regulatory body responsible for approving the medication CardioRelief for widespread use."
+        }
+      ],
+      "quality_rating": 8
+    },
+    {
+      "id": "5d77fb0c-ad75-41e5-bda9-f0ff2232370e",
+      "input_text": "Dr. Eleanor Hayes, a renowned cardiologist at St. Vincent Medical Center in Chicago, presented groundbreaking research at the 2023 International Cardiology Symposium held in Vienna. Her study, funded by the American Heart Association, focused on the efficacy of CardioVax, a novel lipid-lowering pharmaceutical developed by Meditech Pharmaceuticals. The research involved a randomized clinical trial with 1,200 participants across three countries—United States, Germany, and Japan—over a span of 18 months. \n\nThe trial demonstrated that CardioVax significantly reduced LDL cholesterol levels by 45% compared to traditional statins, such as atorvastatin, while also exhibiting fewer adverse effects. Dr. Hayes emphasized the importance of integrating CardioVax into treatment protocols for patients with familial hypercholesterolemia, a genetic condition linked to premature cardiovascular disease. \n\nDuring her keynote speech, she highlighted collaboration with the World Health Organization (WHO) to address disparities in access to advanced cardiovascular treatments in low-income regions, particularly sub-Saharan Africa. The WHO plans to launch a pilot program in Nairobi, Kenya, to distribute CardioVax at subsidized rates, aiming to reduce the prevalence of heart disease in underserved populations. \n\nDr. Hayes concluded by urging regulatory agencies, including the U.S. Food and Drug Administration (FDA), to expedite the approval process for innovative therapies like CardioVax, citing its potential to save millions of lives globally.",
+      "metadata": {
+        "domain": "medicine",
+        "difficulty": "hard",
+        "language": "english",
+        "generated_at": "2026-05-07T14:25:57.873169Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Dr. Eleanor Hayes",
+            "target_entity": "St. Vincent Medical Center",
+            "relation_type": "AFFILIATED_WITH",
+            "description": "Dr. Eleanor Hayes is a renowned cardiologist practicing at St. Vincent Medical Center in Chicago.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Dr. Eleanor Hayes",
+            "target_entity": "2023 International Cardiology Symposium",
+            "relation_type": "PRESENTED_AT",
+            "description": "Dr. Eleanor Hayes presented groundbreaking research at the 2023 International Cardiology Symposium held in Vienna.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Dr. Eleanor Hayes",
+            "target_entity": "American Heart Association",
+            "relation_type": "FUNDED_BY",
+            "description": "Dr. Eleanor Hayes's research on CardioVax was funded by the American Heart Association.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "CardioVax",
+            "target_entity": "Meditech Pharmaceuticals",
+            "relation_type": "DEVELOPED_BY",
+            "description": "CardioVax is a novel lipid-lowering pharmaceutical developed by Meditech Pharmaceuticals.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "CardioVax",
+            "target_entity": "United States",
+            "relation_type": "TRIAL_CONDUCTED_IN",
+            "description": "The clinical trial for CardioVax was conducted in the United States.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "CardioVax",
+            "target_entity": "Germany",
+            "relation_type": "TRIAL_CONDUCTED_IN",
+            "description": "The clinical trial for CardioVax was conducted in Germany.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "CardioVax",
+            "target_entity": "Japan",
+            "relation_type": "TRIAL_CONDUCTED_IN",
+            "description": "The clinical trial for CardioVax was conducted in Japan.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "World Health Organization",
+            "target_entity": "sub-Saharan Africa",
+            "relation_type": "FOCUSED_ON",
+            "description": "The World Health Organization aims to address disparities in access to cardiovascular treatments in sub-Saharan Africa.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "World Health Organization",
+            "target_entity": "Nairobi, Kenya",
+            "relation_type": "PILOT_PROGRAM_IN",
+            "description": "The World Health Organization plans to launch a pilot program in Nairobi, Kenya to distribute CardioVax at subsidized rates.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Dr. Eleanor Hayes",
+            "target_entity": "U.S. Food and Drug Administration",
+            "relation_type": "URGED_TO_EXPEDITE_APPROVAL",
+            "description": "Dr. Eleanor Hayes urged the U.S. Food and Drug Administration to expedite the approval process for innovative therapies like CardioVax.",
+            "relationship_strength": 5
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Dr. Eleanor Hayes",
+            "entity_type": "PERSON",
+            "description": "Dr. Eleanor Hayes is a renowned cardiologist affiliated with St. Vincent Medical Center in Chicago. She presented groundbreaking research at the 2023 International Cardiology Symposium in Vienna."
+          },
+          {
+            "entity_name": "St. Vincent Medical Center",
+            "entity_type": "ORGANIZATION",
+            "description": "St. Vincent Medical Center is a medical institution located in Chicago where Dr. Eleanor Hayes practices."
+          },
+          {
+            "entity_name": "2023 International Cardiology Symposium",
+            "entity_type": "EVENT",
+            "description": "The 2023 International Cardiology Symposium is a conference held in Vienna where Dr. Eleanor Hayes presented her research."
+          },
+          {
+            "entity_name": "Vienna",
+            "entity_type": "LOCATION",
+            "description": "Vienna is the city where the 2023 International Cardiology Symposium took place."
+          },
+          {
+            "entity_name": "American Heart Association",
+            "entity_type": "ORGANIZATION",
+            "description": "The American Heart Association funded Dr. Eleanor Hayes's research on CardioVax."
+          },
+          {
+            "entity_name": "CardioVax",
+            "entity_type": "PRODUCT",
+            "description": "CardioVax is a novel lipid-lowering pharmaceutical developed by Meditech Pharmaceuticals, shown to significantly reduce LDL cholesterol levels."
+          },
+          {
+            "entity_name": "Meditech Pharmaceuticals",
+            "entity_type": "ORGANIZATION",
+            "description": "Meditech Pharmaceuticals is the developer of CardioVax, a novel lipid-lowering pharmaceutical."
+          },
+          {
+            "entity_name": "United States",
+            "entity_type": "LOCATION",
+            "description": "The United States is one of the three countries where the clinical trial for CardioVax was conducted."
+          },
+          {
+            "entity_name": "Germany",
+            "entity_type": "LOCATION",
+            "description": "Germany is one of the three countries where the clinical trial for CardioVax was conducted."
+          },
+          {
+            "entity_name": "Japan",
+            "entity_type": "LOCATION",
+            "description": "Japan is one of the three countries where the clinical trial for CardioVax was conducted."
+          },
+          {
+            "entity_name": "World Health Organization",
+            "entity_type": "ORGANIZATION",
+            "description": "The World Health Organization is collaborating to address disparities in access to cardiovascular treatments in low-income regions."
+          },
+          {
+            "entity_name": "sub-Saharan Africa",
+            "entity_type": "LOCATION",
+            "description": "Sub-Saharan Africa is a region where the WHO aims to improve access to cardiovascular treatments."
+          },
+          {
+            "entity_name": "Nairobi, Kenya",
+            "entity_type": "LOCATION",
+            "description": "Nairobi, Kenya is the location of the WHO's pilot program to distribute CardioVax at subsidized rates."
+          },
+          {
+            "entity_name": "U.S. Food and Drug Administration",
+            "entity_type": "ORGANIZATION",
+            "description": "The U.S. Food and Drug Administration is a regulatory agency urged to expedite the approval process for innovative therapies like CardioVax."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Dr. Eleanor Hayes",
+          "entity_type": "PERSON",
+          "description": "Dr. Eleanor Hayes is a renowned cardiologist affiliated with St. Vincent Medical Center in Chicago. She presented groundbreaking research at the 2023 International Cardiology Symposium in Vienna."
+        },
+        {
+          "entity_name": "St. Vincent Medical Center",
+          "entity_type": "ORGANIZATION",
+          "description": "St. Vincent Medical Center is a medical institution located in Chicago where Dr. Eleanor Hayes practices."
+        },
+        {
+          "entity_name": "2023 International Cardiology Symposium",
+          "entity_type": "EVENT",
+          "description": "The 2023 International Cardiology Symposium is a conference held in Vienna where Dr. Eleanor Hayes presented her research."
+        },
+        {
+          "entity_name": "Vienna",
+          "entity_type": "LOCATION",
+          "description": "Vienna is the city where the 2023 International Cardiology Symposium took place."
+        },
+        {
+          "entity_name": "American Heart Association",
+          "entity_type": "ORGANIZATION",
+          "description": "The American Heart Association funded Dr. Eleanor Hayes's research on CardioVax."
+        },
+        {
+          "entity_name": "CardioVax",
+          "entity_type": "PRODUCT",
+          "description": "CardioVax is a novel lipid-lowering pharmaceutical developed by Meditech Pharmaceuticals, shown to significantly reduce LDL cholesterol levels."
+        },
+        {
+          "entity_name": "Meditech Pharmaceuticals",
+          "entity_type": "ORGANIZATION",
+          "description": "Meditech Pharmaceuticals is the developer of CardioVax, a novel lipid-lowering pharmaceutical."
+        },
+        {
+          "entity_name": "United States",
+          "entity_type": "LOCATION",
+          "description": "The United States is one of the three countries where the clinical trial for CardioVax was conducted."
+        },
+        {
+          "entity_name": "Germany",
+          "entity_type": "LOCATION",
+          "description": "Germany is one of the three countries where the clinical trial for CardioVax was conducted."
+        },
+        {
+          "entity_name": "Japan",
+          "entity_type": "LOCATION",
+          "description": "Japan is one of the three countries where the clinical trial for CardioVax was conducted."
+        },
+        {
+          "entity_name": "World Health Organization",
+          "entity_type": "ORGANIZATION",
+          "description": "The World Health Organization is collaborating to address disparities in access to cardiovascular treatments in low-income regions."
+        },
+        {
+          "entity_name": "sub-Saharan Africa",
+          "entity_type": "LOCATION",
+          "description": "Sub-Saharan Africa is a region where the WHO aims to improve access to cardiovascular treatments."
+        },
+        {
+          "entity_name": "Nairobi, Kenya",
+          "entity_type": "LOCATION",
+          "description": "Nairobi, Kenya is the location of the WHO's pilot program to distribute CardioVax at subsidized rates."
+        },
+        {
+          "entity_name": "U.S. Food and Drug Administration",
+          "entity_type": "ORGANIZATION",
+          "description": "The U.S. Food and Drug Administration is a regulatory agency urged to expedite the approval process for innovative therapies like CardioVax."
+        }
+      ],
+      "quality_rating": 8
+    },
+    {
+      "id": "d3d2d153-a073-42b6-8489-5a87549e28a0",
+      "input_text": "In 2022, Morgan Stanley, a leading investment bank headquartered in New York City, announced a strategic partnership with BlackRock, the world's largest asset management firm. The collaboration aimed to enhance the integration of BlackRock's Aladdin platform, a financial risk management tool, into Morgan Stanley's wealth management services. This move was part of Morgan Stanley's broader initiative to expand its digital capabilities and improve client portfolio performance.\n\nDuring the annual Financial Technology Summit held in San Francisco, James Gorman, CEO of Morgan Stanley, emphasized the importance of leveraging advanced analytics and technology to stay competitive in the rapidly evolving financial sector. He highlighted that the partnership with BlackRock would allow the bank to offer more personalized investment strategies to its high-net-worth clients.\n\nMeanwhile, the Federal Reserve's decision to raise interest rates by 0.75% in response to inflation concerns created ripples across the financial markets. Analysts at Bloomberg predicted that this rate hike could impact the profitability of major financial institutions, including Morgan Stanley, as borrowing costs rise and market volatility increases.\n\nIn addition, the launch of BlackRock's new ESG-focused mutual fund, named \"Sustainable Growth Fund,\" was seen as a complementary product to Morgan Stanley's efforts to promote socially responsible investing. The fund targets companies with strong environmental, social, and governance practices, aligning with growing investor demand for sustainable financial products.\n\nThis collaboration between Morgan Stanley and BlackRock, coupled with macroeconomic shifts driven by the Federal Reserve, underscores the dynamic interplay between technology, policy, and innovation in shaping the future of the financial industry.",
+      "metadata": {
+        "domain": "finance",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-07T14:28:09.361353Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Morgan Stanley",
+            "target_entity": "BlackRock",
+            "relation_type": "PARTNERSHIP",
+            "description": "Morgan Stanley announced a strategic partnership with BlackRock to integrate BlackRock's Aladdin platform into its wealth management services.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Morgan Stanley",
+            "target_entity": "Aladdin",
+            "relation_type": "USES_TECHNOLOGY",
+            "description": "Morgan Stanley aims to enhance its wealth management services through the integration of BlackRock's Aladdin platform.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "James Gorman",
+            "target_entity": "Morgan Stanley",
+            "relation_type": "CEO_OF",
+            "description": "James Gorman is the CEO of Morgan Stanley and represents the organization in public statements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Federal Reserve",
+            "target_entity": "Morgan Stanley",
+            "relation_type": "IMPACTS_PROFITABILITY",
+            "description": "The Federal Reserve's decision to raise interest rates by 0.75% is predicted to impact the profitability of Morgan Stanley due to increased borrowing costs and market volatility.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "BlackRock",
+            "target_entity": "Sustainable Growth Fund",
+            "relation_type": "LAUNCHED_PRODUCT",
+            "description": "BlackRock launched the ESG-focused mutual fund named 'Sustainable Growth Fund', targeting companies with strong environmental, social, and governance practices.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Sustainable Growth Fund",
+            "target_entity": "Morgan Stanley",
+            "relation_type": "COMPLEMENTARY_PRODUCT",
+            "description": "The Sustainable Growth Fund is seen as complementary to Morgan Stanley's efforts to promote socially responsible investing.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "James Gorman",
+            "target_entity": "Financial Technology Summit",
+            "relation_type": "SPEAKER_AT",
+            "description": "James Gorman emphasized the importance of leveraging advanced analytics and technology during the Financial Technology Summit.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Bloomberg",
+            "target_entity": "Federal Reserve",
+            "relation_type": "ANALYZES_DECISION",
+            "description": "Bloomberg analysts predicted the impact of the Federal Reserve's rate hike on financial institutions.",
+            "relationship_strength": 3
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Morgan Stanley",
+            "entity_type": "ORGANIZATION",
+            "description": "Morgan Stanley is a leading investment bank headquartered in New York City. It is involved in wealth management services and is expanding its digital capabilities to improve client portfolio performance. The CEO is James Gorman."
+          },
+          {
+            "entity_name": "BlackRock",
+            "entity_type": "ORGANIZATION",
+            "description": "BlackRock is the world's largest asset management firm. It developed the Aladdin platform, a financial risk management tool, and launched the ESG-focused mutual fund named 'Sustainable Growth Fund'."
+          },
+          {
+            "entity_name": "Aladdin",
+            "entity_type": "TECHNOLOGY",
+            "description": "Aladdin is a financial risk management tool developed by BlackRock, used for enhancing wealth management services."
+          },
+          {
+            "entity_name": "James Gorman",
+            "entity_type": "PERSON",
+            "description": "James Gorman is the CEO of Morgan Stanley. He emphasized the importance of leveraging advanced analytics and technology during the Financial Technology Summit."
+          },
+          {
+            "entity_name": "Federal Reserve",
+            "entity_type": "ORGANIZATION",
+            "description": "The Federal Reserve is the central banking system of the United States. It raised interest rates by 0.75% in response to inflation concerns."
+          },
+          {
+            "entity_name": "Sustainable Growth Fund",
+            "entity_type": "PRODUCT",
+            "description": "The Sustainable Growth Fund is an ESG-focused mutual fund launched by BlackRock, targeting companies with strong environmental, social, and governance practices."
+          },
+          {
+            "entity_name": "Financial Technology Summit",
+            "entity_type": "EVENT",
+            "description": "The Financial Technology Summit is an annual event held in San Francisco, focusing on advancements in financial technology."
+          },
+          {
+            "entity_name": "Bloomberg",
+            "entity_type": "ORGANIZATION",
+            "description": "Bloomberg is a financial information and analytics company. Its analysts predicted the impact of the Federal Reserve's rate hike on financial institutions."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Morgan Stanley",
+          "entity_type": "ORGANIZATION",
+          "description": "Morgan Stanley is a leading investment bank headquartered in New York City. It is involved in wealth management services and is expanding its digital capabilities to improve client portfolio performance. The CEO is James Gorman."
+        },
+        {
+          "entity_name": "BlackRock",
+          "entity_type": "ORGANIZATION",
+          "description": "BlackRock is the world's largest asset management firm. It developed the Aladdin platform, a financial risk management tool, and launched the ESG-focused mutual fund named 'Sustainable Growth Fund'."
+        },
+        {
+          "entity_name": "Aladdin",
+          "entity_type": "TECHNOLOGY",
+          "description": "Aladdin is a financial risk management tool developed by BlackRock, used for enhancing wealth management services."
+        },
+        {
+          "entity_name": "James Gorman",
+          "entity_type": "PERSON",
+          "description": "James Gorman is the CEO of Morgan Stanley. He emphasized the importance of leveraging advanced analytics and technology during the Financial Technology Summit."
+        },
+        {
+          "entity_name": "Federal Reserve",
+          "entity_type": "ORGANIZATION",
+          "description": "The Federal Reserve is the central banking system of the United States. It raised interest rates by 0.75% in response to inflation concerns."
+        },
+        {
+          "entity_name": "Sustainable Growth Fund",
+          "entity_type": "PRODUCT",
+          "description": "The Sustainable Growth Fund is an ESG-focused mutual fund launched by BlackRock, targeting companies with strong environmental, social, and governance practices."
+        },
+        {
+          "entity_name": "Financial Technology Summit",
+          "entity_type": "EVENT",
+          "description": "The Financial Technology Summit is an annual event held in San Francisco, focusing on advancements in financial technology."
+        },
+        {
+          "entity_name": "Bloomberg",
+          "entity_type": "ORGANIZATION",
+          "description": "Bloomberg is a financial information and analytics company. Its analysts predicted the impact of the Federal Reserve's rate hike on financial institutions."
+        }
+      ],
+      "quality_rating": 9
+    },
+    {
+      "id": "029e4a99-e9aa-4277-bb52-4f5ab9b5019b",
+      "input_text": "Marie Curie, a renowned scientist, made groundbreaking discoveries in the field of radioactivity. She worked at the University of Paris, where she conducted experiments that led to the identification of two new elements: polonium and radium. Her research was supported by the French Academy of Sciences, an organization dedicated to advancing scientific knowledge. \n\nIn 1903, Curie and her husband, Pierre Curie, were awarded the Nobel Prize in Physics for their contributions to understanding radioactive phenomena. This event marked a significant milestone in science and brought global attention to their work. Later, in 1911, Marie Curie received a second Nobel Prize, this time in Chemistry, for isolating radium and studying its properties.\n\nThe discovery of radium had profound implications, particularly in medicine. It led to the development of radiation therapy, a treatment used to combat cancer. Hospitals around the world, including the Royal Marsden Hospital in London, began incorporating radium into their medical practices.\n\nMarie Curie's legacy continues to inspire scientists today. The Curie Institute, located in Paris, remains a leading research center in oncology and radiology. Her dedication to science and her ability to overcome challenges, such as working in male-dominated fields, have made her a symbol of perseverance and innovation.",
+      "metadata": {
+        "domain": "science",
+        "difficulty": "easy",
+        "language": "english",
+        "generated_at": "2026-05-07T14:30:41.128154Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Marie Curie",
+            "target_entity": "University of Paris",
+            "relation_type": "WORKED_AT",
+            "description": "Marie Curie conducted her groundbreaking research on radioactivity at the University of Paris.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Marie Curie",
+            "target_entity": "Polonium",
+            "relation_type": "DISCOVERED",
+            "description": "Marie Curie discovered the chemical element polonium during her research on radioactivity.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Marie Curie",
+            "target_entity": "Radium",
+            "relation_type": "DISCOVERED",
+            "description": "Marie Curie discovered and isolated the chemical element radium, which had significant implications in medicine and science.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Marie Curie",
+            "target_entity": "French Academy of Sciences",
+            "relation_type": "SUPPORTED_BY",
+            "description": "Marie Curie's research was supported by the French Academy of Sciences, an organization dedicated to advancing scientific knowledge.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Marie Curie",
+            "target_entity": "Pierre Curie",
+            "relation_type": "COLLABORATED_WITH",
+            "description": "Marie Curie collaborated with her husband, Pierre Curie, in her research on radioactivity.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Marie Curie",
+            "target_entity": "Nobel Prize in Physics",
+            "relation_type": "AWARDED",
+            "description": "Marie Curie was awarded the Nobel Prize in Physics in 1903 for her contributions to understanding radioactive phenomena.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Pierre Curie",
+            "target_entity": "Nobel Prize in Physics",
+            "relation_type": "AWARDED",
+            "description": "Pierre Curie was awarded the Nobel Prize in Physics in 1903 for his contributions to understanding radioactive phenomena.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Marie Curie",
+            "target_entity": "Nobel Prize in Chemistry",
+            "relation_type": "AWARDED",
+            "description": "Marie Curie was awarded the Nobel Prize in Chemistry in 1911 for isolating radium and studying its properties.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Radium",
+            "target_entity": "Radiation Therapy",
+            "relation_type": "USED_IN",
+            "description": "Radium, discovered by Marie Curie, was used in the development of radiation therapy to combat cancer.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Radiation Therapy",
+            "target_entity": "Royal Marsden Hospital",
+            "relation_type": "IMPLEMENTED_AT",
+            "description": "Radiation therapy, developed using radium, was implemented at the Royal Marsden Hospital in London for cancer treatment.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Marie Curie",
+            "target_entity": "Curie Institute",
+            "relation_type": "LEGACY_CONTINUED_BY",
+            "description": "Marie Curie's legacy continues through the Curie Institute, a leading research center in oncology and radiology located in Paris.",
+            "relationship_strength": 4
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Marie Curie",
+            "entity_type": "PERSON",
+            "description": "Marie Curie was a renowned scientist known for her groundbreaking discoveries in the field of radioactivity. She worked at the University of Paris and conducted experiments leading to the identification of the elements polonium and radium. She was awarded two Nobel Prizes: in 1903 in Physics, shared with Pierre Curie, and in 1911 in Chemistry for isolating radium and studying its properties. Her legacy continues to inspire scientists globally."
+          },
+          {
+            "entity_name": "University of Paris",
+            "entity_type": "ORGANIZATION",
+            "description": "The University of Paris was the institution where Marie Curie conducted her research on radioactivity, leading to significant scientific discoveries."
+          },
+          {
+            "entity_name": "Polonium",
+            "entity_type": "ELEMENT",
+            "description": "Polonium is a chemical element discovered by Marie Curie during her research on radioactivity."
+          },
+          {
+            "entity_name": "Radium",
+            "entity_type": "ELEMENT",
+            "description": "Radium is a chemical element discovered and isolated by Marie Curie, which had significant implications in medicine and science."
+          },
+          {
+            "entity_name": "French Academy of Sciences",
+            "entity_type": "ORGANIZATION",
+            "description": "The French Academy of Sciences is an organization dedicated to advancing scientific knowledge and supported Marie Curie's research."
+          },
+          {
+            "entity_name": "Pierre Curie",
+            "entity_type": "PERSON",
+            "description": "Pierre Curie was Marie Curie's husband and collaborator in her research on radioactivity. Together, they were awarded the Nobel Prize in Physics in 1903."
+          },
+          {
+            "entity_name": "Nobel Prize in Physics",
+            "entity_type": "AWARD",
+            "description": "The Nobel Prize in Physics was awarded to Marie and Pierre Curie in 1903 for their contributions to understanding radioactive phenomena."
+          },
+          {
+            "entity_name": "Nobel Prize in Chemistry",
+            "entity_type": "AWARD",
+            "description": "The Nobel Prize in Chemistry was awarded to Marie Curie in 1911 for isolating radium and studying its properties."
+          },
+          {
+            "entity_name": "Radiation Therapy",
+            "entity_type": "TECHNOLOGY",
+            "description": "Radiation therapy is a medical treatment developed using radium, discovered by Marie Curie, and is used to combat cancer."
+          },
+          {
+            "entity_name": "Royal Marsden Hospital",
+            "entity_type": "ORGANIZATION",
+            "description": "The Royal Marsden Hospital, located in London, was one of the hospitals that incorporated radium into their medical practices for cancer treatment."
+          },
+          {
+            "entity_name": "Curie Institute",
+            "entity_type": "ORGANIZATION",
+            "description": "The Curie Institute, located in Paris, is a leading research center in oncology and radiology, continuing the legacy of Marie Curie."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Marie Curie",
+          "entity_type": "PERSON",
+          "description": "Marie Curie was a renowned scientist known for her groundbreaking discoveries in the field of radioactivity. She worked at the University of Paris and conducted experiments leading to the identification of the elements polonium and radium. She was awarded two Nobel Prizes: in 1903 in Physics, shared with Pierre Curie, and in 1911 in Chemistry for isolating radium and studying its properties. Her legacy continues to inspire scientists globally."
+        },
+        {
+          "entity_name": "University of Paris",
+          "entity_type": "ORGANIZATION",
+          "description": "The University of Paris was the institution where Marie Curie conducted her research on radioactivity, leading to significant scientific discoveries."
+        },
+        {
+          "entity_name": "Polonium",
+          "entity_type": "ELEMENT",
+          "description": "Polonium is a chemical element discovered by Marie Curie during her research on radioactivity."
+        },
+        {
+          "entity_name": "Radium",
+          "entity_type": "ELEMENT",
+          "description": "Radium is a chemical element discovered and isolated by Marie Curie, which had significant implications in medicine and science."
+        },
+        {
+          "entity_name": "French Academy of Sciences",
+          "entity_type": "ORGANIZATION",
+          "description": "The French Academy of Sciences is an organization dedicated to advancing scientific knowledge and supported Marie Curie's research."
+        },
+        {
+          "entity_name": "Pierre Curie",
+          "entity_type": "PERSON",
+          "description": "Pierre Curie was Marie Curie's husband and collaborator in her research on radioactivity. Together, they were awarded the Nobel Prize in Physics in 1903."
+        },
+        {
+          "entity_name": "Nobel Prize in Physics",
+          "entity_type": "AWARD",
+          "description": "The Nobel Prize in Physics was awarded to Marie and Pierre Curie in 1903 for their contributions to understanding radioactive phenomena."
+        },
+        {
+          "entity_name": "Nobel Prize in Chemistry",
+          "entity_type": "AWARD",
+          "description": "The Nobel Prize in Chemistry was awarded to Marie Curie in 1911 for isolating radium and studying its properties."
+        },
+        {
+          "entity_name": "Radiation Therapy",
+          "entity_type": "TECHNOLOGY",
+          "description": "Radiation therapy is a medical treatment developed using radium, discovered by Marie Curie, and is used to combat cancer."
+        },
+        {
+          "entity_name": "Royal Marsden Hospital",
+          "entity_type": "ORGANIZATION",
+          "description": "The Royal Marsden Hospital, located in London, was one of the hospitals that incorporated radium into their medical practices for cancer treatment."
+        },
+        {
+          "entity_name": "Curie Institute",
+          "entity_type": "ORGANIZATION",
+          "description": "The Curie Institute, located in Paris, is a leading research center in oncology and radiology, continuing the legacy of Marie Curie."
+        }
+      ],
+      "quality_rating": 8
+    },
+    {
+      "id": "832ca15f-3a63-4897-8444-057d77923ffb",
+      "input_text": "In 1927, during the Solvay Conference held in Brussels, Belgium, Albert Einstein (PERSON) famously debated Niels Bohr (PERSON) over the foundational principles of quantum mechanics (EVENT). The conference, organized by the International Solvay Institutes for Physics and Chemistry (ORGANIZATION), was a pivotal moment in the history of modern science. Einstein, representing a deterministic view of the universe, challenged Bohr's probabilistic interpretation of quantum phenomena, particularly the implications of Heisenberg's uncertainty principle (PRODUCT). \n\nThe discussions centered around the Copenhagen interpretation (PRODUCT), which Bohr and Werner Heisenberg (PERSON) had developed to explain the behavior of subatomic particles. Einstein's skepticism was encapsulated in his remark, \"God does not play dice with the universe,\" a direct critique of the randomness proposed by quantum theory. Bohr countered by emphasizing the experimental evidence supporting quantum mechanics, including the results of the double-slit experiment (EVENT), which demonstrated the wave-particle duality of photons.\n\nThe Solvay Conference brought together leading scientists from across Europe, including Marie Curie (PERSON), who represented the University of Paris (ORGANIZATION). The event underscored the growing divide between classical physics and the emerging quantum paradigm. Ultimately, while Einstein's objections did not overturn quantum mechanics, they spurred further theoretical advancements, influencing later developments such as quantum field theory (PRODUCT). The debates at Brussels remain a cornerstone in the philosophy of science, illustrating the dynamic interplay between empirical evidence and theoretical interpretation.",
+      "metadata": {
+        "domain": "science",
+        "difficulty": "hard",
+        "language": "english",
+        "generated_at": "2026-05-07T14:33:08.713995Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Albert Einstein",
+            "target_entity": "Niels Bohr",
+            "relation_type": "DEBATED",
+            "description": "Albert Einstein debated Niels Bohr over the foundational principles of quantum mechanics during the 1927 Solvay Conference.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Albert Einstein",
+            "target_entity": "Heisenberg's uncertainty principle",
+            "relation_type": "CHALLENGED",
+            "description": "Albert Einstein challenged the implications of Heisenberg's uncertainty principle as part of his critique of quantum mechanics.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Niels Bohr",
+            "target_entity": "Copenhagen interpretation",
+            "relation_type": "DEFENDED",
+            "description": "Niels Bohr defended the Copenhagen interpretation of quantum mechanics during the debates at the 1927 Solvay Conference.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Werner Heisenberg",
+            "target_entity": "Copenhagen interpretation",
+            "relation_type": "DEVELOPED",
+            "description": "Werner Heisenberg, along with Niels Bohr, developed the Copenhagen interpretation to explain the behavior of subatomic particles.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Marie Curie",
+            "target_entity": "University of Paris",
+            "relation_type": "REPRESENTED",
+            "description": "Marie Curie represented the University of Paris at the 1927 Solvay Conference.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Solvay Conference",
+            "target_entity": "International Solvay Institutes for Physics and Chemistry",
+            "relation_type": "ORGANIZED_BY",
+            "description": "The Solvay Conference was organized by the International Solvay Institutes for Physics and Chemistry.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Solvay Conference",
+            "target_entity": "Brussels",
+            "relation_type": "LOCATED_IN",
+            "description": "The Solvay Conference was held in Brussels, Belgium.",
+            "relationship_strength": 5
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Solvay Conference",
+            "entity_type": "EVENT",
+            "description": "The Solvay Conference, held in 1927 in Brussels, Belgium, was a significant event in the history of modern science, organized by the International Solvay Institutes for Physics and Chemistry. It served as a platform for discussions on quantum mechanics among leading scientists."
+          },
+          {
+            "entity_name": "Brussels",
+            "entity_type": "LOCATION",
+            "description": "Brussels is the capital city of Belgium and the location where the 1927 Solvay Conference was held."
+          },
+          {
+            "entity_name": "Albert Einstein",
+            "entity_type": "PERSON",
+            "description": "Albert Einstein was a renowned physicist who participated in the 1927 Solvay Conference, advocating a deterministic view of the universe and challenging the probabilistic interpretation of quantum mechanics."
+          },
+          {
+            "entity_name": "Niels Bohr",
+            "entity_type": "PERSON",
+            "description": "Niels Bohr was a prominent physicist who debated Albert Einstein at the 1927 Solvay Conference, defending the Copenhagen interpretation of quantum mechanics."
+          },
+          {
+            "entity_name": "International Solvay Institutes for Physics and Chemistry",
+            "entity_type": "ORGANIZATION",
+            "description": "The International Solvay Institutes for Physics and Chemistry organized the 1927 Solvay Conference, fostering discussions on foundational principles of physics and chemistry."
+          },
+          {
+            "entity_name": "Heisenberg's uncertainty principle",
+            "entity_type": "CONCEPT",
+            "description": "Heisenberg's uncertainty principle is a fundamental concept in quantum mechanics that describes the inherent limitations in simultaneously measuring certain pairs of physical properties, such as position and momentum."
+          },
+          {
+            "entity_name": "Copenhagen interpretation",
+            "entity_type": "CONCEPT",
+            "description": "The Copenhagen interpretation is a theoretical framework developed by Niels Bohr and Werner Heisenberg to explain the behavior of subatomic particles within quantum mechanics."
+          },
+          {
+            "entity_name": "Werner Heisenberg",
+            "entity_type": "PERSON",
+            "description": "Werner Heisenberg was a physicist who, along with Niels Bohr, developed the Copenhagen interpretation of quantum mechanics."
+          },
+          {
+            "entity_name": "double-slit experiment",
+            "entity_type": "EXPERIMENT",
+            "description": "The double-slit experiment is a fundamental experiment in quantum mechanics that demonstrates the wave-particle duality of photons and other particles."
+          },
+          {
+            "entity_name": "Marie Curie",
+            "entity_type": "PERSON",
+            "description": "Marie Curie was a distinguished scientist who attended the 1927 Solvay Conference, representing the University of Paris."
+          },
+          {
+            "entity_name": "University of Paris",
+            "entity_type": "ORGANIZATION",
+            "description": "The University of Paris was represented by Marie Curie at the 1927 Solvay Conference."
+          },
+          {
+            "entity_name": "quantum field theory",
+            "entity_type": "CONCEPT",
+            "description": "Quantum field theory is a theoretical framework that extends quantum mechanics and was influenced by the debates and developments following the 1927 Solvay Conference."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Solvay Conference",
+          "entity_type": "EVENT",
+          "description": "The Solvay Conference, held in 1927 in Brussels, Belgium, was a significant event in the history of modern science, organized by the International Solvay Institutes for Physics and Chemistry. It served as a platform for discussions on quantum mechanics among leading scientists."
+        },
+        {
+          "entity_name": "Brussels",
+          "entity_type": "LOCATION",
+          "description": "Brussels is the capital city of Belgium and the location where the 1927 Solvay Conference was held."
+        },
+        {
+          "entity_name": "Albert Einstein",
+          "entity_type": "PERSON",
+          "description": "Albert Einstein was a renowned physicist who participated in the 1927 Solvay Conference, advocating a deterministic view of the universe and challenging the probabilistic interpretation of quantum mechanics."
+        },
+        {
+          "entity_name": "Niels Bohr",
+          "entity_type": "PERSON",
+          "description": "Niels Bohr was a prominent physicist who debated Albert Einstein at the 1927 Solvay Conference, defending the Copenhagen interpretation of quantum mechanics."
+        },
+        {
+          "entity_name": "International Solvay Institutes for Physics and Chemistry",
+          "entity_type": "ORGANIZATION",
+          "description": "The International Solvay Institutes for Physics and Chemistry organized the 1927 Solvay Conference, fostering discussions on foundational principles of physics and chemistry."
+        },
+        {
+          "entity_name": "Heisenberg's uncertainty principle",
+          "entity_type": "CONCEPT",
+          "description": "Heisenberg's uncertainty principle is a fundamental concept in quantum mechanics that describes the inherent limitations in simultaneously measuring certain pairs of physical properties, such as position and momentum."
+        },
+        {
+          "entity_name": "Copenhagen interpretation",
+          "entity_type": "CONCEPT",
+          "description": "The Copenhagen interpretation is a theoretical framework developed by Niels Bohr and Werner Heisenberg to explain the behavior of subatomic particles within quantum mechanics."
+        },
+        {
+          "entity_name": "Werner Heisenberg",
+          "entity_type": "PERSON",
+          "description": "Werner Heisenberg was a physicist who, along with Niels Bohr, developed the Copenhagen interpretation of quantum mechanics."
+        },
+        {
+          "entity_name": "double-slit experiment",
+          "entity_type": "EXPERIMENT",
+          "description": "The double-slit experiment is a fundamental experiment in quantum mechanics that demonstrates the wave-particle duality of photons and other particles."
+        },
+        {
+          "entity_name": "Marie Curie",
+          "entity_type": "PERSON",
+          "description": "Marie Curie was a distinguished scientist who attended the 1927 Solvay Conference, representing the University of Paris."
+        },
+        {
+          "entity_name": "University of Paris",
+          "entity_type": "ORGANIZATION",
+          "description": "The University of Paris was represented by Marie Curie at the 1927 Solvay Conference."
+        },
+        {
+          "entity_name": "quantum field theory",
+          "entity_type": "CONCEPT",
+          "description": "Quantum field theory is a theoretical framework that extends quantum mechanics and was influenced by the debates and developments following the 1927 Solvay Conference."
+        }
+      ],
+      "quality_rating": 9
+    },
+    {
+      "id": "d1c73dfd-4a34-402e-9683-b19d9d3a9839",
+      "input_text": "Sarah Johnson, the CEO of GreenTech Solutions, announced during the annual Business Innovation Summit in San Francisco that her company would be launching a new product, EcoCharge. GreenTech Solutions, a leading organization in sustainable technology, aims to revolutionize the renewable energy market with EcoCharge, a portable solar-powered charger designed for outdoor enthusiasts and remote workers.\n\nDuring her keynote speech, Sarah emphasized the importance of collaboration between businesses and environmental organizations. She revealed that GreenTech Solutions had partnered with the nonprofit group CleanFuture Alliance to ensure EcoCharge meets rigorous environmental standards. The partnership also includes a plan to donate 5% of EcoCharge's profits to reforestation projects in South America.\n\nEcoCharge will be available in major retail stores like TechMart and online platforms starting next month. Sarah highlighted that the product was developed in GreenTech’s innovation hub in Austin, Texas, where engineers and designers worked tirelessly to create a lightweight, efficient, and durable solution for renewable energy needs.\n\nThe launch event for EcoCharge is scheduled to take place in New York City, where GreenTech Solutions plans to showcase the product's features and demonstrate its capabilities. Sarah expressed confidence that EcoCharge would not only boost the company’s revenue but also contribute to a greener future.",
+      "metadata": {
+        "domain": "business",
+        "difficulty": "easy",
+        "language": "english",
+        "generated_at": "2026-05-07T14:34:32.523820Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Sarah Johnson",
+            "target_entity": "GreenTech Solutions",
+            "relation_type": "CEO_OF",
+            "description": "Sarah Johnson is the CEO of GreenTech Solutions, leading the organization.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Sarah Johnson",
+            "target_entity": "EcoCharge",
+            "relation_type": "ANNOUNCED_PRODUCT",
+            "description": "Sarah Johnson announced the launch of EcoCharge during the Business Innovation Summit.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Sarah Johnson",
+            "target_entity": "Business Innovation Summit",
+            "relation_type": "SPOKE_AT",
+            "description": "Sarah Johnson delivered a keynote speech at the Business Innovation Summit in San Francisco.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "GreenTech Solutions",
+            "target_entity": "EcoCharge",
+            "relation_type": "DEVELOPS_PRODUCT",
+            "description": "GreenTech Solutions developed EcoCharge, a portable solar-powered charger.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "GreenTech Solutions",
+            "target_entity": "CleanFuture Alliance",
+            "relation_type": "PARTNERED_WITH",
+            "description": "GreenTech Solutions partnered with CleanFuture Alliance to ensure EcoCharge meets environmental standards and supports reforestation projects.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "GreenTech Solutions",
+            "target_entity": "Austin, Texas",
+            "relation_type": "HAS_INNOVATION_HUB_IN",
+            "description": "GreenTech Solutions has an innovation hub in Austin, Texas, where EcoCharge was developed.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "EcoCharge",
+            "target_entity": "TechMart",
+            "relation_type": "AVAILABLE_AT",
+            "description": "EcoCharge will be available at major retail stores like TechMart.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "EcoCharge",
+            "target_entity": "South America",
+            "relation_type": "SUPPORTS_REFORESTATION_IN",
+            "description": "EcoCharge profits will support reforestation projects in South America.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "EcoCharge",
+            "target_entity": "New York City",
+            "relation_type": "LAUNCH_EVENT_IN",
+            "description": "The launch event for EcoCharge is scheduled to take place in New York City.",
+            "relationship_strength": 4
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Sarah Johnson",
+            "entity_type": "PERSON",
+            "description": "Sarah Johnson is the CEO of GreenTech Solutions and announced the launch of the EcoCharge product during the Business Innovation Summit in San Francisco."
+          },
+          {
+            "entity_name": "GreenTech Solutions",
+            "entity_type": "ORGANIZATION",
+            "description": "GreenTech Solutions is a leading organization in sustainable technology, aiming to revolutionize the renewable energy market with innovative products like EcoCharge."
+          },
+          {
+            "entity_name": "EcoCharge",
+            "entity_type": "PRODUCT",
+            "description": "EcoCharge is a portable solar-powered charger designed for outdoor enthusiasts and remote workers, developed by GreenTech Solutions."
+          },
+          {
+            "entity_name": "Business Innovation Summit",
+            "entity_type": "EVENT",
+            "description": "The Business Innovation Summit is an annual event where Sarah Johnson announced the launch of EcoCharge."
+          },
+          {
+            "entity_name": "San Francisco",
+            "entity_type": "LOCATION",
+            "description": "San Francisco is the city where the Business Innovation Summit took place."
+          },
+          {
+            "entity_name": "CleanFuture Alliance",
+            "entity_type": "ORGANIZATION",
+            "description": "CleanFuture Alliance is a nonprofit group partnered with GreenTech Solutions to ensure EcoCharge meets rigorous environmental standards and supports reforestation projects in South America."
+          },
+          {
+            "entity_name": "South America",
+            "entity_type": "LOCATION",
+            "description": "South America is the region where reforestation projects supported by EcoCharge profits will take place."
+          },
+          {
+            "entity_name": "TechMart",
+            "entity_type": "ORGANIZATION",
+            "description": "TechMart is one of the major retail stores where EcoCharge will be available."
+          },
+          {
+            "entity_name": "Austin, Texas",
+            "entity_type": "LOCATION",
+            "description": "Austin, Texas, is the location of GreenTech Solutions' innovation hub where EcoCharge was developed."
+          },
+          {
+            "entity_name": "New York City",
+            "entity_type": "LOCATION",
+            "description": "New York City is the location of the launch event for EcoCharge, where its features will be showcased."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Sarah Johnson",
+          "entity_type": "PERSON",
+          "description": "Sarah Johnson is the CEO of GreenTech Solutions and announced the launch of the EcoCharge product during the Business Innovation Summit in San Francisco."
+        },
+        {
+          "entity_name": "GreenTech Solutions",
+          "entity_type": "ORGANIZATION",
+          "description": "GreenTech Solutions is a leading organization in sustainable technology, aiming to revolutionize the renewable energy market with innovative products like EcoCharge."
+        },
+        {
+          "entity_name": "EcoCharge",
+          "entity_type": "PRODUCT",
+          "description": "EcoCharge is a portable solar-powered charger designed for outdoor enthusiasts and remote workers, developed by GreenTech Solutions."
+        },
+        {
+          "entity_name": "Business Innovation Summit",
+          "entity_type": "EVENT",
+          "description": "The Business Innovation Summit is an annual event where Sarah Johnson announced the launch of EcoCharge."
+        },
+        {
+          "entity_name": "San Francisco",
+          "entity_type": "LOCATION",
+          "description": "San Francisco is the city where the Business Innovation Summit took place."
+        },
+        {
+          "entity_name": "CleanFuture Alliance",
+          "entity_type": "ORGANIZATION",
+          "description": "CleanFuture Alliance is a nonprofit group partnered with GreenTech Solutions to ensure EcoCharge meets rigorous environmental standards and supports reforestation projects in South America."
+        },
+        {
+          "entity_name": "South America",
+          "entity_type": "LOCATION",
+          "description": "South America is the region where reforestation projects supported by EcoCharge profits will take place."
+        },
+        {
+          "entity_name": "TechMart",
+          "entity_type": "ORGANIZATION",
+          "description": "TechMart is one of the major retail stores where EcoCharge will be available."
+        },
+        {
+          "entity_name": "Austin, Texas",
+          "entity_type": "LOCATION",
+          "description": "Austin, Texas, is the location of GreenTech Solutions' innovation hub where EcoCharge was developed."
+        },
+        {
+          "entity_name": "New York City",
+          "entity_type": "LOCATION",
+          "description": "New York City is the location of the launch event for EcoCharge, where its features will be showcased."
+        }
+      ],
+      "quality_rating": 9
+    }
+  ]
+}

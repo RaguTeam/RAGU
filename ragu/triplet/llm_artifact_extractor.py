@@ -2,16 +2,17 @@ from __future__ import annotations
 
 from typing import Any, List, Tuple, Optional, cast
 
-from pydantic import BaseModel
-
 from ragu.common.logger import logger
 from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import Settings
 from ragu.common.prompts.default_models import ArtifactsModel
 from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.common.prompts.messages import ChatMessages, render
+from ragu.common.prompts.icl_config import ICLConfig
+from ragu.common.prompts.icl_manager import InContextLearningManager
 from ragu.graph.types import Entity, Relation
 from ragu.models.llm import LLM
+from ragu.models.embedder import Embedder
 from ragu.triplet.base_artifact_extractor import BaseArtifactExtractor
 from ragu.triplet.types import NEREL_ENTITY_TYPES, NEREL_RELATION_TYPES
 
@@ -25,11 +26,15 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
       2. Call the LLM to produce structured artifacts for each chunk.
       3. Optionally render and run `artifact_validation` to refine extracted artifacts.
       4. Convert model outputs into Entity/Relation objects, preserving source chunk ids.
+
+    Supports in-context learning via InContextLearningManager when provided.
     """
 
     def __init__(
         self,
         llm: LLM,
+        embedder: Embedder | None = None,
+        icl_config: ICLConfig | None = None,
         do_validation: bool = False,
         language: str | None = None,
         entity_types: Optional[List[str]] = NEREL_ENTITY_TYPES,
@@ -38,8 +43,9 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         """
         Initialize a new :class:`ArtifactsExtractorLLM`.
 
-        :param client: Language model client for generation and validation.
-        :param model_name: Model name to use for generation and validation.
+        :param llm: Language model for generation and validation.
+        :param embedder: Embedder for computing example embeddings (optional).
+        :param icl_config: ICL configuration (optional).
         :param do_validation: Whether to perform additional LLM-based validation of artifacts.
         :param language: Output text language.
         :param entity_types: List of entity types to guide extraction prompts.
@@ -49,10 +55,21 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         super().__init__(prompts=_PROMPTS)
 
         self.llm = llm
+        self.embedder = embedder
         self.do_validation = do_validation
         self.language = language if language else Settings.language
         self.entity_types = ", ".join(entity_types) if entity_types else None
         self.relation_types = ", ".join(relation_types) if relation_types else None
+
+        # Initialize ICL manager if config provided
+        self.icl_manager: InContextLearningManager | None = None
+        if icl_config and icl_config.enabled and embedder:
+            self.icl_manager = InContextLearningManager(
+                embedder=embedder,
+                example_file=f"{icl_config.examples_base_path}/artifact_extraction_examples.json",
+                config=icl_config,
+                language=icl_config.language
+            )
 
     async def extract(
         self,
@@ -78,6 +95,19 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
 
         context: List[str] = [chunk.content for chunk in chunks]
 
+        # Select ICL examples if manager is initialized
+        examples_list: List[List[dict[str, Any]] | None] = []
+        if self.icl_manager:
+            await self.icl_manager.initialize()
+            for chunk_text in context:
+                examples = await self.icl_manager.select_examples(
+                    query_text=chunk_text,
+                    num_examples=self.icl_manager.config.num_examples
+                )
+                examples_list.append(examples)
+        else:
+            examples_list = [None] * len(context)
+
         extraction_instruction: RAGUInstruction = self.get_prompt("artifact_extraction")
         assert extraction_instruction.pydantic_model is ArtifactsModel
         extraction_conversations: List[ChatMessages] = render(
@@ -86,6 +116,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             language=self.language,
             entity_types=self.entity_types,
             relation_types=self.relation_types,
+            examples=examples_list,
         )
 
         result_list = await self.llm.batch_chat_completion( # type: ignore
@@ -102,6 +133,18 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             )
         
         if self.do_validation:
+            # Select ICL examples for validation if manager is initialized
+            validation_examples_list: List[List[dict[str, Any]] | None] = []
+            if self.icl_manager:
+                for chunk_text in context:
+                    examples = await self.icl_manager.select_examples(
+                        query_text=chunk_text,
+                        num_examples=self.icl_manager.config.num_examples
+                    )
+                    validation_examples_list.append(examples)
+            else:
+                validation_examples_list = [None] * len(context)
+
             validation_instruction: RAGUInstruction = self.get_prompt("artifact_validation")
             assert validation_instruction.pydantic_model is ArtifactsModel
 
@@ -112,6 +155,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                 entity_types=self.entity_types,
                 relation_types=self.relation_types,
                 language=self.language,
+                examples=validation_examples_list,
             )
             
             result_list = await self.llm.batch_chat_completion( # type: ignore
