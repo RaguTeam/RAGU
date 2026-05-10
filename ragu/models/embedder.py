@@ -63,10 +63,11 @@ class Embedder(ABC):
 class EmbedderOpenAI(Embedder):
     """
     Adapts :class:`CachedAsyncOpenAI` to the :class:`Embedder` interface.
-
+    
     :param client: OpenAI-compatible backend client.
     :param model_name: Embedding model identifier.
-    :param dim: Expected embedding dimension.
+    :param dim: Embedding dimension. If ``None``, it is auto-detected on the
+        first call to :meth:`initialize` by sending a probe request.
     :param kwargs: Default kwargs merged into each ``embed_text`` call.
     
     Example:
@@ -75,6 +76,7 @@ class EmbedderOpenAI(Embedder):
         client=CachedAsyncOpenAI(),
         model_name='my-embedding-model',
     )
+    await embedder.initialize()  # auto-detects dim if not provided
     ```
     """
     
@@ -82,13 +84,30 @@ class EmbedderOpenAI(Embedder):
         self,
         client: CachedAsyncOpenAI,
         model_name: str,
-        dim: int,
+        dim: int | None = None,
         **kwargs: Any,
     ):
         self.client = client
         self.model_name = model_name
         self.kwargs = kwargs
         self._dim = dim
+
+    async def initialize(self) -> None:
+        """
+        Auto-detect embedding dimension if not explicitly provided.
+
+        Sends a single probe request and stores the resulting vector length
+        as ``self._dim``.  Safe to call multiple times — subsequent calls are
+        no-ops when ``dim`` is already known.
+        """
+        if self._dim is not None:
+            return
+        probe = await self.embed_text("probe")
+        self._dim = len(probe)
+        logger.debug(
+            f"Auto-detected embedding dim={self._dim} "
+            f"for model '{self.model_name}'"
+        )
     
     @override
     async def embed_text(
@@ -113,5 +132,16 @@ class EmbedderOpenAI(Embedder):
     @property
     @override
     def dim(self) -> int:
-        """Returns embedding dimension configured for this embedder."""
+        """
+        Returns embedding dimension.
+
+        :raises RuntimeError: If ``dim`` was not provided and
+            :meth:`initialize` has not been called yet.
+        """
+        if self._dim is None:
+            raise RuntimeError(
+                "Embedding dimension is not set. "
+                "Either pass dim= to the constructor or call "
+                "await embedder.initialize() first."
+            )
         return self._dim

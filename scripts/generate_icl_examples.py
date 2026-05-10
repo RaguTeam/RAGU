@@ -373,7 +373,9 @@ async def generate_artifacts(
     text: str,
     prompt_type: str,
     generator_llm: LLMOpenAI,
-    language: str
+    language: str,
+    entity_types: list[str] | None = None,
+    relation_types: list[str] | None = None,
 ) -> tuple[dict, dict]:
     """
     Extract artifacts from text using generator LLM.
@@ -391,10 +393,17 @@ async def generate_artifacts(
     """
     instruction = PROMPT_INSTRUCTIONS[prompt_type]
 
+    type_kwargs = {}
+    if entity_types:
+        type_kwargs["entity_types"] = entity_types
+    if relation_types:
+        type_kwargs["relation_types"] = relation_types
+
     if prompt_type == "artifact_extraction":
         result = await _call_llm(
             instruction, generator_llm,
             context=[text], language=language,
+            **type_kwargs,
         )
         return result.model_dump(), {}
 
@@ -402,6 +411,7 @@ async def generate_artifacts(
         result = await _call_llm(
             instruction, generator_llm,
             context=[text], language=language,
+            **type_kwargs,
         )
         return result.model_dump(), {}
 
@@ -409,11 +419,13 @@ async def generate_artifacts(
         entity_result = await _call_llm(
             TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION, generator_llm,
             context=[text], language=language,
+            **type_kwargs,
         )
         entities_payload = [e.model_dump() for e in entity_result.entities]
         result = await _call_llm(
             instruction, generator_llm,
             context=[text], entities=[entities_payload], language=language,
+            **type_kwargs,
         )
         output = result.model_dump()
         output["entities"] = entities_payload
@@ -423,10 +435,12 @@ async def generate_artifacts(
         extract_result = await _call_llm(
             DEFAULT_PROMPT_TEMPLATES["artifact_extraction"], generator_llm,
             context=[text], language=language,
+            **type_kwargs,
         )
         result = await _call_llm(
             instruction, generator_llm,
             context=[text], artifacts=[extract_result], language=language,
+            **type_kwargs,
         )
         return result.model_dump(), {}
 
@@ -434,11 +448,13 @@ async def generate_artifacts(
         entity_result = await _call_llm(
             TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION, generator_llm,
             context=[text], language=language,
+            **type_kwargs,
         )
         entities_payload = [e.model_dump() for e in entity_result.entities]
         result = await _call_llm(
             instruction, generator_llm,
             context=[text], entities=[entities_payload], language=language,
+            **type_kwargs,
         )
         return result.model_dump(), {}
 
@@ -446,12 +462,14 @@ async def generate_artifacts(
         entity_result = await _call_llm(
             TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION, generator_llm,
             context=[text], language=language,
+            **type_kwargs,
         )
         entities_payload = [e.model_dump() for e in entity_result.entities]
 
         relation_result = await _call_llm(
             TWO_STAGE_RELATION_EXTRACTION_INSTRUCTION, generator_llm,
             context=[text], entities=[entities_payload], language=language,
+            **type_kwargs,
         )
         relations_payload = [r.model_dump() for r in relation_result.relations]
 
@@ -459,6 +477,7 @@ async def generate_artifacts(
             instruction, generator_llm,
             context=[text], entities=[entities_payload],
             relations=[relations_payload], language=language,
+            **type_kwargs,
         )
         output = result.model_dump()
         output["entities"] = entities_payload
@@ -751,7 +770,9 @@ async def main(config_path: str, language: str | None = None) -> None:
                         text=item["text"],
                         prompt_type=prompt_type,
                         generator_llm=generator_llm,
-                        language=lang
+                        language=lang,
+                        entity_types=config.get("entity_types"),
+                        relation_types=config.get("relation_types"),
                     )
 
                     n_ent = len(artifacts.get("entities", []))

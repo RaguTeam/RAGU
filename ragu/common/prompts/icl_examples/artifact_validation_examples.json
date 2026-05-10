@@ -4,289 +4,126 @@
     "english",
     "russian"
   ],
-  "total_examples": 8,
+  "total_examples": 4,
   "generated_by": {
-    "generator_model": "openai/chatgpt-4o-latest",
+    "generator_model": "t-tech/T-pro-it-2.0",
     "judge_model": "qwen/qwen3.6-max-preview"
   },
-  "generated_at": "2026-05-07T15:01:04.581467Z",
+  "generated_at": "2026-05-08T14:28:27.161572Z",
   "examples": [
     {
-      "id": "02616408-3a30-4626-92a5-a53e9d509bdc",
-      "input_text": "Sarah, a software engineer at TechWave Solutions, recently attended the Global AI Summit in San Francisco. The event, organized by the International AI Association, showcased cutting-edge advancements in artificial intelligence and machine learning. During the summit, Sarah had the opportunity to test the latest version of NeuralNet Pro, a product developed by InnovateAI Labs. \n\nNeuralNet Pro is designed to optimize data analysis for businesses, offering faster processing and more accurate predictions. Sarah was impressed by its ability to integrate seamlessly with cloud platforms like Azure and AWS. She discussed its features with Dr. Michael Chen, the lead researcher at InnovateAI Labs, who explained how the product uses advanced neural network algorithms to improve efficiency.\n\nAfter the summit, Sarah returned to TechWave Solutions in Seattle and proposed adopting NeuralNet Pro for their upcoming project on predictive analytics. Her manager, Lisa Patel, agreed to explore the idea further and scheduled a meeting with InnovateAI Labs to discuss licensing options. Sarah believes this collaboration could significantly enhance their company's capabilities in data-driven decision-making.",
-      "metadata": {
-        "domain": "technology",
-        "difficulty": "easy",
-        "language": "english",
-        "generated_at": "2026-05-07T14:41:17.434751Z"
-      },
       "output": {
         "entities": [
           {
-            "entity_name": "Sarah",
-            "entity_type": "Person",
-            "description": "A software engineer at TechWave Solutions who attended the Global AI Summit."
+            "entity_name": "Emily Carter",
+            "entity_type": "PERSON",
+            "description": "Dr. Emily Carter is a pediatrician at Green Valley Hospital in Denver who spoke at the Annual Health Conference organized by the AMA."
           },
           {
-            "entity_name": "TechWave Solutions",
-            "entity_type": "Organization",
-            "description": "The company where Sarah works, located in Seattle."
+            "entity_name": "Green Valley Hospital",
+            "entity_type": "ORGANIZATION",
+            "description": "Green Valley Hospital is a healthcare facility located in Denver where Dr. Emily Carter practices."
           },
           {
-            "entity_name": "Global AI Summit",
-            "entity_type": "Event",
-            "description": "An event showcasing advancements in artificial intelligence and machine learning, held in San Francisco."
+            "entity_name": "Denver",
+            "entity_type": "LOCATION",
+            "description": "Denver is the city where Green Valley Hospital is located and where the Annual Health Conference took place."
           },
           {
-            "entity_name": "San Francisco",
-            "entity_type": "Location",
-            "description": "The city where the Global AI Summit took place."
+            "entity_name": "Annual Health Conference",
+            "entity_type": "EVENT",
+            "description": "The Annual Health Conference is an event organized by the American Medical Association to discuss advancements in medicine and public health."
           },
           {
-            "entity_name": "International AI Association",
-            "entity_type": "Organization",
-            "description": "The organizer of the Global AI Summit."
+            "entity_name": "American Medical Association",
+            "entity_type": "ORGANIZATION",
+            "description": "The American Medical Association organized the Annual Health Conference."
           },
           {
-            "entity_name": "NeuralNet Pro",
-            "entity_type": "Product",
-            "description": "A product developed by InnovateAI Labs designed to optimize data analysis for businesses."
+            "entity_name": "FluShield",
+            "entity_type": "PRODUCT",
+            "description": "FluShield is a vaccine developed by MedTech Pharmaceuticals to prevent seasonal influenza among children."
           },
           {
-            "entity_name": "InnovateAI Labs",
-            "entity_type": "Organization",
-            "description": "The developer of NeuralNet Pro."
+            "entity_name": "MedTech Pharmaceuticals",
+            "entity_type": "ORGANIZATION",
+            "description": "MedTech Pharmaceuticals is the developer of the FluShield vaccine."
           },
           {
-            "entity_name": "Dr. Michael Chen",
-            "entity_type": "Person",
-            "description": "The lead researcher at InnovateAI Labs who discussed NeuralNet Pro with Sarah."
+            "entity_name": "Centers for Disease Control and Prevention",
+            "entity_type": "ORGANIZATION",
+            "description": "The Centers for Disease Control and Prevention (CDC) is a government agency mentioned as a collaborator in vaccine distribution."
           },
           {
-            "entity_name": "Azure",
-            "entity_type": "Platform",
-            "description": "A cloud platform with which NeuralNet Pro integrates seamlessly."
+            "entity_name": "University of Colorado",
+            "entity_type": "ORGANIZATION",
+            "description": "The University of Colorado conducted a study demonstrating a 90% reduction in flu-related hospitalizations among vaccinated children."
           },
           {
-            "entity_name": "AWS",
-            "entity_type": "Platform",
-            "description": "A cloud platform with which NeuralNet Pro integrates seamlessly."
-          },
-          {
-            "entity_name": "Lisa Patel",
-            "entity_type": "Person",
-            "description": "Sarah's manager at TechWave Solutions."
+            "entity_name": "Denver Convention Center",
+            "entity_type": "LOCATION",
+            "description": "The Denver Convention Center is the venue where the Annual Health Conference was held."
           }
         ],
         "relations": [
           {
-            "source_entity": "Sarah",
-            "target_entity": "TechWave Solutions",
-            "relation_type": "Employment",
-            "description": "Sarah is employed as a software engineer at TechWave Solutions.",
+            "source_entity": "Emily Carter",
+            "target_entity": "Green Valley Hospital",
+            "relation_type": "WORKPLACE",
+            "description": "Dr. Emily Carter is a pediatrician at Green Valley Hospital.",
             "relationship_strength": 5
           },
           {
-            "source_entity": "Global AI Summit",
-            "target_entity": "San Francisco",
-            "relation_type": "Location",
-            "description": "The Global AI Summit was held in San Francisco.",
+            "source_entity": "Emily Carter",
+            "target_entity": "Annual Health Conference",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Dr. Emily Carter spoke at the Annual Health Conference.",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Global AI Summit",
-            "target_entity": "International AI Association",
-            "relation_type": "Organization",
-            "description": "The International AI Association organized the Global AI Summit.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "NeuralNet Pro",
-            "target_entity": "InnovateAI Labs",
-            "relation_type": "Development",
-            "description": "NeuralNet Pro was developed by InnovateAI Labs.",
+            "source_entity": "Annual Health Conference",
+            "target_entity": "American Medical Association",
+            "relation_type": "KNOWS",
+            "description": "The American Medical Association organized the Annual Health Conference.",
             "relationship_strength": 5
           },
           {
-            "source_entity": "Sarah",
-            "target_entity": "Dr. Michael Chen",
-            "relation_type": "Discussion",
-            "description": "Sarah discussed NeuralNet Pro with Dr. Michael Chen.",
-            "relationship_strength": 3
+            "source_entity": "FluShield",
+            "target_entity": "MedTech Pharmaceuticals",
+            "relation_type": "PRODUCES",
+            "description": "FluShield is a vaccine developed by MedTech Pharmaceuticals.",
+            "relationship_strength": 5
           },
           {
-            "source_entity": "Sarah",
-            "target_entity": "Lisa Patel",
-            "relation_type": "Professional",
-            "description": "Lisa Patel is Sarah's manager.",
+            "source_entity": "Emily Carter",
+            "target_entity": "FluShield",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Dr. Emily Carter discussed the benefits of FluShield during her presentation.",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Sarah",
-            "target_entity": "NeuralNet Pro",
-            "relation_type": "Proposal",
-            "description": "Sarah proposed adopting NeuralNet Pro for TechWave Solutions' upcoming project.",
+            "source_entity": "Emily Carter",
+            "target_entity": "Centers for Disease Control and Prevention",
+            "relation_type": "KNOWS",
+            "description": "Dr. Emily Carter emphasized collaboration with the CDC for vaccine access.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "University of Colorado",
+            "target_entity": "FluShield",
+            "relation_type": "AGENT",
+            "description": "The University of Colorado conducted a study on the effectiveness of FluShield.",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Lisa Patel",
-            "target_entity": "InnovateAI Labs",
-            "relation_type": "Meeting",
-            "description": "Lisa Patel scheduled a meeting with InnovateAI Labs to discuss licensing options for NeuralNet Pro.",
-            "relationship_strength": 3
+            "source_entity": "Annual Health Conference",
+            "target_entity": "Denver Convention Center",
+            "relation_type": "LOCATED_IN",
+            "description": "The Annual Health Conference was held at the Denver Convention Center.",
+            "relationship_strength": 5
           }
         ]
       },
-      "quality_rating": 9
-    },
-    {
-      "id": "f6b95f18-610b-44aa-be24-a807391cd1ad",
-      "input_text": "Dr. Elena Vasquez, a senior researcher at the Massachusetts Institute of Technology (MIT), unveiled her groundbreaking study on quantum computing during the 2023 International Conference on Computational Sciences held in Geneva, Switzerland. The research, funded by Intel Corporation, focuses on the development of a novel quantum processor, codenamed \"QubitX-3000,\" which promises to revolutionize cryptographic algorithms and data encryption methods. \n\nThe QubitX-3000 leverages advancements in superconducting materials and employs a proprietary cooling system developed by CryoTech Solutions, a leading innovator in cryogenic engineering based in Stockholm, Sweden. According to Dr. Vasquez, the processor achieves unprecedented levels of stability and coherence, enabling it to perform complex calculations at speeds exponentially faster than traditional silicon-based processors.\n\nDuring her keynote presentation, Dr. Vasquez highlighted a collaboration between MIT and the European Organization for Nuclear Research (CERN) to integrate quantum computing into particle physics simulations. This partnership aims to enhance the precision of experiments conducted at the Large Hadron Collider, located near Geneva. \n\nThe announcement has sparked interest from global tech giants, including Google DeepMind, which expressed intent to explore potential applications of QubitX-3000 in artificial intelligence research. Meanwhile, the United Nations Technology Innovation Lab (UNTIL) has proposed utilizing the processor for climate modeling to predict and mitigate the effects of global warming more effectively.\n\nAs the technology progresses, ethical considerations surrounding quantum computing's impact on cybersecurity and privacy are expected to dominate discussions among policymakers and industry leaders.",
-      "metadata": {
-        "domain": "technology",
-        "difficulty": "hard",
-        "language": "english",
-        "generated_at": "2026-05-07T14:45:03.443933Z"
-      },
-      "output": {
-        "entities": [
-          {
-            "entity_name": "Elena Vasquez",
-            "entity_type": "Person",
-            "description": "Dr. Elena Vasquez is a senior researcher at the Massachusetts Institute of Technology (MIT) and the lead of the study on quantum computing."
-          },
-          {
-            "entity_name": "Massachusetts Institute of Technology",
-            "entity_type": "Organization",
-            "description": "The Massachusetts Institute of Technology (MIT) is a prestigious academic institution where Dr. Vasquez conducts her research."
-          },
-          {
-            "entity_name": "Intel Corporation",
-            "entity_type": "Organization",
-            "description": "Intel Corporation is the funding organization for Dr. Vasquez's research on quantum computing."
-          },
-          {
-            "entity_name": "QubitX-3000",
-            "entity_type": "Technology",
-            "description": "The QubitX-3000 is a novel quantum processor developed as part of Dr. Vasquez's research, promising advancements in cryptographic algorithms."
-          },
-          {
-            "entity_name": "CryoTech Solutions",
-            "entity_type": "Organization",
-            "description": "CryoTech Solutions is a company specializing in cryogenic engineering and developed the cooling system for the QubitX-3000."
-          },
-          {
-            "entity_name": "European Organization for Nuclear Research",
-            "entity_type": "Organization",
-            "description": "The European Organization for Nuclear Research (CERN) collaborates with MIT to integrate quantum computing into particle physics simulations."
-          },
-          {
-            "entity_name": "Large Hadron Collider",
-            "entity_type": "Facility",
-            "description": "The Large Hadron Collider is a particle physics experiment facility near Geneva, benefiting from the integration of quantum computing."
-          },
-          {
-            "entity_name": "Google DeepMind",
-            "entity_type": "Organization",
-            "description": "Google DeepMind is a global tech giant interested in exploring applications of QubitX-3000 in artificial intelligence research."
-          },
-          {
-            "entity_name": "United Nations Technology Innovation Lab",
-            "entity_type": "Organization",
-            "description": "The United Nations Technology Innovation Lab (UNTIL) has proposed using the QubitX-3000 for climate modeling to address global warming."
-          },
-          {
-            "entity_name": "International Conference on Computational Sciences",
-            "entity_type": "Event",
-            "description": "The 2023 International Conference on Computational Sciences is an event held in Geneva, Switzerland, where Dr. Vasquez presented her research."
-          },
-          {
-            "entity_name": "Geneva",
-            "entity_type": "Location",
-            "description": "Geneva, Switzerland, is the location where the 2023 International Conference on Computational Sciences was held."
-          },
-          {
-            "entity_name": "Stockholm",
-            "entity_type": "Location",
-            "description": "Stockholm, Sweden, is where CryoTech Solutions, the developer of the QubitX-3000's cooling system, is based."
-          }
-        ],
-        "relations": [
-          {
-            "source_entity": "Elena Vasquez",
-            "target_entity": "Massachusetts Institute of Technology",
-            "relation_type": "affiliation",
-            "description": "Dr. Vasquez is a senior researcher at MIT.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Elena Vasquez",
-            "target_entity": "QubitX-3000",
-            "relation_type": "research",
-            "description": "Dr. Vasquez leads the research on the QubitX-3000 quantum processor.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Massachusetts Institute of Technology",
-            "target_entity": "European Organization for Nuclear Research",
-            "relation_type": "collaboration",
-            "description": "MIT collaborates with CERN to integrate quantum computing into particle physics simulations.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "QubitX-3000",
-            "target_entity": "CryoTech Solutions",
-            "relation_type": "development",
-            "description": "CryoTech Solutions developed the cooling system for the QubitX-3000.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "QubitX-3000",
-            "target_entity": "Google DeepMind",
-            "relation_type": "interest",
-            "description": "Google DeepMind is interested in exploring applications of QubitX-3000 in AI research.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "QubitX-3000",
-            "target_entity": "United Nations Technology Innovation Lab",
-            "relation_type": "proposal",
-            "description": "UNTIL has proposed using the QubitX-3000 for climate modeling.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "Elena Vasquez",
-            "target_entity": "Intel Corporation",
-            "relation_type": "funding",
-            "description": "Intel Corporation funds Dr. Vasquez's research on quantum computing.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Elena Vasquez",
-            "target_entity": "International Conference on Computational Sciences",
-            "relation_type": "presentation",
-            "description": "Dr. Vasquez presented her research at the 2023 International Conference on Computational Sciences.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "International Conference on Computational Sciences",
-            "target_entity": "Geneva",
-            "relation_type": "location",
-            "description": "The 2023 International Conference on Computational Sciences was held in Geneva, Switzerland.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "CryoTech Solutions",
-            "target_entity": "Stockholm",
-            "relation_type": "location",
-            "description": "CryoTech Solutions is based in Stockholm, Sweden.",
-            "relationship_strength": 3
-          }
-        ]
-      },
-      "quality_rating": 9
-    },
-    {
       "id": "51967c16-2d49-4d5d-9ea9-cae0d7b8a0df",
       "input_text": "Dr. Emily Carter, a pediatrician at Green Valley Hospital in Denver, recently spoke at the Annual Health Conference organized by the American Medical Association (AMA). During her presentation, she discussed the benefits of the new vaccine, FluShield, developed by MedTech Pharmaceuticals. According to Dr. Carter, FluShield has shown remarkable effectiveness in preventing seasonal influenza among children aged 6 months to 12 years. \n\nThe conference, held at the Denver Convention Center, brought together healthcare professionals from across the United States to address advancements in medicine and public health. Dr. Carter emphasized the importance of collaboration between hospitals, pharmaceutical companies, and government agencies like the Centers for Disease Control and Prevention (CDC) to ensure widespread access to vaccines. \n\nShe also highlighted a recent study conducted by the University of Colorado, which demonstrated a 90% reduction in flu-related hospitalizations among vaccinated children. Dr. Carter urged parents to consult their pediatricians and consider FluShield as part of their child’s immunization schedule.",
       "metadata": {
@@ -295,708 +132,592 @@
         "language": "english",
         "generated_at": "2026-05-07T14:47:18.721774Z"
       },
+      "quality_rating": 8
+    },
+    {
       "output": {
         "entities": [
           {
-            "entity_name": "Emily Carter",
-            "entity_type": "Person",
-            "description": "Dr. Emily Carter is a pediatrician at Green Valley Hospital in Denver who spoke at the Annual Health Conference organized by the AMA."
+            "entity_name": "OpenAI",
+            "entity_type": "ORGANIZATION",
+            "description": "A leading tech firm that unveiled an enhanced version of its GPT-4 model at the 2024 World Artificial Intelligence Conference, emphasizing improved reasoning capabilities for enterprise applications. Led by CEO Sam Altman."
           },
           {
-            "entity_name": "Green Valley Hospital",
-            "entity_type": "Organization",
-            "description": "Green Valley Hospital is a healthcare facility located in Denver where Dr. Emily Carter practices."
+            "entity_name": "Google DeepMind",
+            "entity_type": "ORGANIZATION",
+            "description": "A leading tech firm that demonstrated its Gemini AI system at the 2024 World Artificial Intelligence Conference, which integrates multimodal processing for text, images, and audio. Led by Demis Hassabis."
           },
           {
-            "entity_name": "Denver",
-            "entity_type": "Location",
-            "description": "Denver is the city where Green Valley Hospital is located and where the Annual Health Conference took place."
+            "entity_name": "Anthropic",
+            "entity_type": "ORGANIZATION",
+            "description": "A rising competitor in AI that introduced Claude 3, emphasizing superior safety protocols and nuanced conversation capabilities. Announced a strategic partnership with Microsoft to deploy Claude 3 on Azure."
           },
           {
-            "entity_name": "Annual Health Conference",
-            "entity_type": "Event",
-            "description": "The Annual Health Conference is an event organized by the American Medical Association to discuss advancements in medicine and public health."
+            "entity_name": "Microsoft",
+            "entity_type": "ORGANIZATION",
+            "description": "A tech giant that provides Azure, a cloud computing platform. Partnered with Anthropic to deploy Claude 3 on Azure, expanding its accessibility for businesses."
           },
           {
-            "entity_name": "American Medical Association",
-            "entity_type": "Organization",
-            "description": "The American Medical Association organized the Annual Health Conference."
+            "entity_name": "Sam Altman",
+            "entity_type": "PERSON",
+            "description": "CEO of OpenAI, who led the company's presentation of an enhanced GPT-4 model at the 2024 World Artificial Intelligence Conference."
           },
           {
-            "entity_name": "FluShield",
-            "entity_type": "Product",
-            "description": "FluShield is a vaccine developed by MedTech Pharmaceuticals to prevent seasonal influenza among children."
+            "entity_name": "Demis Hassabis",
+            "entity_type": "PERSON",
+            "description": "Leader of Google DeepMind, who demonstrated the Gemini AI system at the 2024 World Artificial Intelligence Conference."
           },
           {
-            "entity_name": "MedTech Pharmaceuticals",
-            "entity_type": "Organization",
-            "description": "MedTech Pharmaceuticals is the developer of the FluShield vaccine."
+            "entity_name": "GPT-4",
+            "entity_type": "PRODUCT",
+            "description": "An AI model developed by OpenAI, with an enhanced version unveiled at the 2024 World Artificial Intelligence Conference, emphasizing improved reasoning capabilities for enterprise applications."
           },
           {
-            "entity_name": "Centers for Disease Control and Prevention",
-            "entity_type": "Organization",
-            "description": "The Centers for Disease Control and Prevention (CDC) is a government agency mentioned as a collaborator in vaccine distribution."
+            "entity_name": "Gemini AI",
+            "entity_type": "PRODUCT",
+            "description": "An AI system developed by Google DeepMind, demonstrated at the 2024 World Artificial Intelligence Conference, which integrates multimodal processing for text, images, and audio."
           },
           {
-            "entity_name": "University of Colorado",
-            "entity_type": "Organization",
-            "description": "The University of Colorado conducted a study demonstrating a 90% reduction in flu-related hospitalizations among vaccinated children."
+            "entity_name": "Claude 3",
+            "entity_type": "PRODUCT",
+            "description": "An AI system developed by Anthropic, introduced at the 2024 World Artificial Intelligence Conference, emphasizing superior safety protocols and nuanced conversation capabilities."
           },
           {
-            "entity_name": "Denver Convention Center",
-            "entity_type": "Location",
-            "description": "The Denver Convention Center is the venue where the Annual Health Conference was held."
+            "entity_name": "Azure",
+            "entity_type": "PRODUCT",
+            "description": "A cloud computing platform provided by Microsoft, used for deploying AI systems like Claude 3 through Anthropic's strategic partnership."
+          },
+          {
+            "entity_name": "2024 World Artificial Intelligence Conference",
+            "entity_type": "EVENT",
+            "description": "A major event held in Shanghai where leading tech firms showcased breakthroughs in AI, including OpenAI's GPT-4, Google DeepMind's Gemini AI, and Anthropic's Claude 3."
+          },
+          {
+            "entity_name": "EU AI Act",
+            "entity_type": "LAW",
+            "description": "A regulatory framework imposing strict guidelines on high-risk AI systems, discussed at the conference. Experts warned it could slow innovation for startups like Anthropic while larger firms like OpenAI and Google DeepMind have resources to comply."
           }
         ],
         "relations": [
           {
-            "source_entity": "Emily Carter",
-            "target_entity": "Green Valley Hospital",
-            "relation_type": "Employment",
-            "description": "Dr. Emily Carter is a pediatrician at Green Valley Hospital.",
+            "source_entity": "OpenAI",
+            "target_entity": "Sam Altman",
+            "relation_type": "ORGANIZES",
+            "description": "OpenAI is led by CEO Sam Altman.",
             "relationship_strength": 5
           },
           {
-            "source_entity": "Emily Carter",
-            "target_entity": "Annual Health Conference",
-            "relation_type": "Speaker",
-            "description": "Dr. Emily Carter spoke at the Annual Health Conference.",
+            "source_entity": "Google DeepMind",
+            "target_entity": "Demis Hassabis",
+            "relation_type": "ORGANIZES",
+            "description": "Google DeepMind is led by Demis Hassabis.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Claude 3",
+            "relation_type": "PRODUCES",
+            "description": "Anthropic introduced Claude 3, emphasizing superior safety protocols and nuanced conversation capabilities.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Microsoft",
+            "relation_type": "KNOWS",
+            "description": "Anthropic announced a strategic partnership with Microsoft to deploy Claude 3 on Azure.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Microsoft",
+            "target_entity": "Azure",
+            "relation_type": "PRODUCES",
+            "description": "Microsoft provides Azure, a cloud computing platform used for deploying AI systems.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Azure",
+            "relation_type": "PART_OF",
+            "description": "Anthropic plans to deploy Claude 3 on Microsoft's Azure platform.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "EU AI Act",
+            "target_entity": "Anthropic",
+            "relation_type": "AGENT",
+            "description": "Experts warned that compliance with the EU AI Act could slow innovation for startups like Anthropic.",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Annual Health Conference",
-            "target_entity": "American Medical Association",
-            "relation_type": "Organization",
-            "description": "The American Medical Association organized the Annual Health Conference.",
+            "source_entity": "EU AI Act",
+            "target_entity": "OpenAI",
+            "relation_type": "AGENT",
+            "description": "The EU AI Act imposes strict guidelines on high-risk AI systems, which giants like OpenAI and Google DeepMind can navigate due to their resources.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "EU AI Act",
+            "target_entity": "Google DeepMind",
+            "relation_type": "AGENT",
+            "description": "The EU AI Act imposes strict guidelines on high-risk AI systems, which giants like OpenAI and Google DeepMind can navigate due to their resources.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "OpenAI",
+            "target_entity": "GPT-4",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "OpenAI unveiled an enhanced version of its GPT-4 model at the 2024 World Artificial Intelligence Conference.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google DeepMind",
+            "target_entity": "Gemini AI",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Google DeepMind demonstrated its Gemini AI system at the 2024 World Artificial Intelligence Conference.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Claude 3",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Anthropic introduced Claude 3 at the 2024 World Artificial Intelligence Conference.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "2024 World Artificial Intelligence Conference",
+            "target_entity": "OpenAI",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The conference brought together leading tech firms, including OpenAI, Google DeepMind, and Anthropic, to showcase AI advancements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "2024 World Artificial Intelligence Conference",
+            "target_entity": "Google DeepMind",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The conference brought together leading tech firms, including OpenAI, Google DeepMind, and Anthropic, to showcase AI advancements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "2024 World Artificial Intelligence Conference",
+            "target_entity": "Anthropic",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The conference brought together leading tech firms, including OpenAI, Google DeepMind, and Anthropic, to showcase AI advancements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "OpenAI",
+            "target_entity": "Google DeepMind",
+            "relation_type": "KNOWS",
+            "description": "OpenAI competes with Google DeepMind and Anthropic in AI advancements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "OpenAI",
+            "target_entity": "Anthropic",
+            "relation_type": "KNOWS",
+            "description": "OpenAI competes with Google DeepMind and Anthropic in AI advancements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google DeepMind",
+            "target_entity": "OpenAI",
+            "relation_type": "KNOWS",
+            "description": "Google DeepMind competes with OpenAI and Anthropic in AI advancements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google DeepMind",
+            "target_entity": "Anthropic",
+            "relation_type": "KNOWS",
+            "description": "Google DeepMind competes with OpenAI and Anthropic in AI advancements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "OpenAI",
+            "relation_type": "KNOWS",
+            "description": "Anthropic competes with OpenAI and Google DeepMind in AI advancements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Google DeepMind",
+            "relation_type": "KNOWS",
+            "description": "Anthropic competes with OpenAI and Google DeepMind in AI advancements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Microsoft",
+            "relation_type": "KNOWS",
+            "description": "Anthropic's partnership with Microsoft highlights growing interdependence among tech firms in AI development.",
+            "relationship_strength": 5
+          }
+        ]
+      },
+      "id": "0b213162-8546-4161-b9f1-60ac51ea3dfc",
+      "input_text": "**Advancements in AI: OpenAI, Google DeepMind, and Anthropic Compete at Shanghai Conference**  \n\nThe 2024 World Artificial Intelligence Conference in Shanghai brought together leading tech firms to showcase breakthroughs in artificial intelligence. OpenAI, led by CEO Sam Altman, unveiled an enhanced version of its GPT-4 model, emphasizing improved reasoning capabilities for enterprise applications. Meanwhile, Google DeepMind, under the leadership of Demis Hassabis, demonstrated its Gemini AI system, which integrates multimodal processing to handle text, images, and audio with greater efficiency.  \n\nAnthropic, a rising competitor, introduced Claude 3, touting its superior safety protocols and ability to engage in nuanced conversations. The company also announced a strategic partnership with Microsoft to deploy Claude 3 on Azure, expanding its accessibility for businesses.  \n\nRegulatory discussions dominated the sidelines, with attendees debating the implications of the EU AI Act, which imposes strict guidelines on high-risk AI systems. Experts warned that compliance could slow innovation, particularly for startups like Anthropic, while giants like OpenAI and Google DeepMind have the resources to navigate the new framework.  \n\nThe conference underscored the rapid evolution of AI, with companies racing to balance performance, safety, and ethical considerations. As competition intensifies, collaborations—such as Anthropic’s Azure deal—highlight the growing interdependence of tech firms in shaping the future of AI.  \n\n(Word count: 220)",
+      "metadata": {
+        "domain": "technology",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-07T18:36:58.352655Z"
+      },
+      "quality_rating": 8
+    },
+    {
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Эмили Картер",
+            "entity_type": "PERSON",
+            "description": "Доктор Эмили Картер — педиатр в больнице Грин-Вэлли Хоспитал в Денвере, выступавшая на Ежегодной конференции по здравоохранению, организованной Американской медицинской ассоциацией."
+          },
+          {
+            "entity_name": "Грин-Вэлли Хоспитал",
+            "entity_type": "ORGANIZATION",
+            "description": "Грин-Вэлли Хоспитал — медицинское учреждение в Денвере, где работает доктор Эмили Картер."
+          },
+          {
+            "entity_name": "Денвер",
+            "entity_type": "LOCATION",
+            "description": "Денвер — город, в котором расположена больница Грин-Вэлли Хоспитал и где проходила Ежегодная конференция по здравоохранению."
+          },
+          {
+            "entity_name": "Ежегодная конференция по здравоохранению",
+            "entity_type": "EVENT",
+            "description": "Ежегодная конференция по здравоохранению — мероприятие, организованное Американской медицинской ассоциацией для обсуждения достижений в медицине и общественном здравоохранении."
+          },
+          {
+            "entity_name": "Американская медицинская ассоциация",
+            "entity_type": "ORGANIZATION",
+            "description": "Американская медицинская ассоциация организовала Ежегодную конференцию по здравоохранению."
+          },
+          {
+            "entity_name": "FluShield",
+            "entity_type": "PRODUCT",
+            "description": "FluShield — вакцина, разработанная компанией MedTech Pharmaceuticals для профилактики сезонного гриппа у детей."
+          },
+          {
+            "entity_name": "MedTech Pharmaceuticals",
+            "entity_type": "ORGANIZATION",
+            "description": "MedTech Pharmaceuticals — разработчик вакцины FluShield."
+          },
+          {
+            "entity_name": "Центры по контролю и профилактике заболеваний",
+            "entity_type": "ORGANIZATION",
+            "description": "Центры по контролю и профилактике заболеваний (CDC) — государственное учреждение, упомянутое как партнер в распространении вакцин."
+          },
+          {
+            "entity_name": "Университет Колорадо",
+            "entity_type": "ORGANIZATION",
+            "description": "Университет Колорадо провел исследование, показавшее 90% снижение госпитализаций, связанных с гриппом, среди вакцинированных детей."
+          },
+          {
+            "entity_name": "Денверский конференц-центр",
+            "entity_type": "LOCATION",
+            "description": "Денверский конференц-центр — место проведения Ежегодной конференции по здравоохранению."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Эмили Картер",
+            "target_entity": "Грин-Вэлли Хоспитал",
+            "relation_type": "WORKPLACE",
+            "description": "Доктор Эмили Картер — педиатр в больнице Грин-Вэлли Хоспитал.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Эмили Картер",
+            "target_entity": "Ежегодная конференция по здравоохранению",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Доктор Эмили Картер выступила на Ежегодной конференции по здравоохранению.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Ежегодная конференция по здравоохранению",
+            "target_entity": "Американская медицинская ассоциация",
+            "relation_type": "KNOWS",
+            "description": "Американская медицинская ассоциация организовала Ежегодную конференцию по здравоохранению.",
             "relationship_strength": 5
           },
           {
             "source_entity": "FluShield",
             "target_entity": "MedTech Pharmaceuticals",
-            "relation_type": "Development",
-            "description": "FluShield is a vaccine developed by MedTech Pharmaceuticals.",
+            "relation_type": "PRODUCES",
+            "description": "FluShield — вакцина, разработанная компанией MedTech Pharmaceuticals.",
             "relationship_strength": 5
           },
           {
-            "source_entity": "Emily Carter",
+            "source_entity": "Эмили Картер",
             "target_entity": "FluShield",
-            "relation_type": "Advocacy",
-            "description": "Dr. Emily Carter discussed the benefits of FluShield during her presentation.",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Доктор Эмили Картер рассказала о преимуществах FluShield во время своей презентации.",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Emily Carter",
-            "target_entity": "Centers for Disease Control and Prevention",
-            "relation_type": "Collaboration",
-            "description": "Dr. Emily Carter emphasized collaboration with the CDC for vaccine access.",
+            "source_entity": "Эмили Картер",
+            "target_entity": "Центры по контролю и профилактике заболеваний",
+            "relation_type": "KNOWS",
+            "description": "Доктор Эмили Картер подчеркнула сотрудничество с CDC для обеспечения доступа к вакцинам.",
             "relationship_strength": 3
           },
           {
-            "source_entity": "University of Colorado",
+            "source_entity": "Университет Колорадо",
             "target_entity": "FluShield",
-            "relation_type": "Research",
-            "description": "The University of Colorado conducted a study on the effectiveness of FluShield.",
+            "relation_type": "AGENT",
+            "description": "Университет Колорадо провел исследование эффективности FluShield.",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Annual Health Conference",
-            "target_entity": "Denver Convention Center",
-            "relation_type": "Location",
-            "description": "The Annual Health Conference was held at the Denver Convention Center.",
+            "source_entity": "Ежегодная конференция по здравоохранению",
+            "target_entity": "Денверский конференц-центр",
+            "relation_type": "LOCATED_IN",
+            "description": "Ежегодная конференция по здравоохранению прошла в Денверском конференц-центре.",
             "relationship_strength": 5
           }
         ]
       },
-      "quality_rating": 8
-    },
-    {
-      "id": "de3efe98-4533-4e10-92a3-c32b15f5ee9f",
-      "input_text": "Dr. Emily Carter, a renowned cardiologist at St. Mary’s Medical Center in Boston, recently presented groundbreaking research at the International Cardiology Conference held in Geneva. Her study focused on the effectiveness of CardioPlus, a new medication developed by Meditech Pharmaceuticals, in reducing the risk of heart attacks among high-risk patients. \n\nThe clinical trials, conducted over two years, involved 1,200 participants from various locations, including New York, Chicago, and Los Angeles. Results showed that patients who took CardioPlus experienced a 35% reduction in cardiovascular events compared to those on standard treatments. Dr. Carter emphasized the importance of early intervention, particularly for individuals with a family history of heart disease or pre-existing conditions like hypertension.\n\nDuring her presentation, she also highlighted the collaboration between St. Mary’s Medical Center and the American Heart Association in promoting awareness about preventive measures. The initiative, known as \"Heart Health Now,\" includes educational workshops and free screenings in underserved communities. Dr. Carter expressed hope that advancements like CardioPlus, combined with public health efforts, could significantly improve outcomes for patients worldwide.",
+      "id": "51967a16-2d49-4d5d-9ea9-cae0d3b8a0ef",
+      "input_text": "Доктор Эмили Картер, педиатр в больнице Грин-Вэлли Хоспитал в Денвере, недавно выступила на Ежегодной конференции по здравоохранению, организованной Американской медицинской ассоциацией (AMA). Во время своей презентации она рассказала о преимуществах новой вакцины FluShield, разработанной компанией MedTech Pharmaceuticals. По словам доктора Картер, FluShield продемонстрировала замечательную эффективность в профилактике сезонного гриппа среди детей в возрасте от 6 месяцев до 12 лет.\n\nКонференция, проходившая в Денверском конференц-центре, собрала медицинских работников со всех Соединенных Штатов для обсуждения достижений в медицине и общественном здравоохранении. Доктор Картер подчеркнула важность сотрудничества между больницами, фармацевтическими компаниями и государственными учреждениями, такими как Центры по контролю и профилактике заболеваний (CDC), для обеспечения широкого доступа к вакцинам.\n\nОна также отметила недавнее исследование, проведенное Университетом Колорадо, которое показало 90% снижение госпитализаций, связанных с гриппом, среди вакцинированных детей. Доктор Картер призвала родителей проконсультироваться со своими педиатрами и рассмотреть возможность использования FluShield в рамках графика иммунизации своего ребенка.",
       "metadata": {
         "domain": "medicine",
-        "difficulty": "medium",
-        "language": "english",
-        "generated_at": "2026-05-07T14:48:17.179383Z"
-      },
-      "output": {
-        "entities": [
-          {
-            "entity_name": "Emily Carter",
-            "entity_type": "Person",
-            "description": "Dr. Emily Carter is a renowned cardiologist at St. Mary’s Medical Center in Boston."
-          },
-          {
-            "entity_name": "St. Mary’s Medical Center",
-            "entity_type": "Organization",
-            "description": "St. Mary’s Medical Center is a medical institution located in Boston."
-          },
-          {
-            "entity_name": "International Cardiology Conference",
-            "entity_type": "Event",
-            "description": "The International Cardiology Conference is an event held in Geneva where Dr. Carter presented her research."
-          },
-          {
-            "entity_name": "CardioPlus",
-            "entity_type": "Medication",
-            "description": "CardioPlus is a new medication developed by Meditech Pharmaceuticals aimed at reducing the risk of heart attacks."
-          },
-          {
-            "entity_name": "Meditech Pharmaceuticals",
-            "entity_type": "Organization",
-            "description": "Meditech Pharmaceuticals is the developer of the medication CardioPlus."
-          },
-          {
-            "entity_name": "American Heart Association",
-            "entity_type": "Organization",
-            "description": "The American Heart Association collaborated with St. Mary’s Medical Center to promote awareness about preventive measures."
-          },
-          {
-            "entity_name": "Heart Health Now",
-            "entity_type": "Initiative",
-            "description": "Heart Health Now is an initiative including educational workshops and free screenings in underserved communities."
-          },
-          {
-            "entity_name": "Clinical Trials",
-            "entity_type": "Study",
-            "description": "The clinical trials were conducted over two years involving 1,200 participants to evaluate the effectiveness of CardioPlus."
-          }
-        ],
-        "relations": [
-          {
-            "source_entity": "Emily Carter",
-            "target_entity": "St. Mary’s Medical Center",
-            "relation_type": "Employment",
-            "description": "Dr. Emily Carter is a cardiologist at St. Mary’s Medical Center.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Emily Carter",
-            "target_entity": "International Cardiology Conference",
-            "relation_type": "Presenter",
-            "description": "Dr. Emily Carter presented her research at the International Cardiology Conference.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "CardioPlus",
-            "target_entity": "Meditech Pharmaceuticals",
-            "relation_type": "Development",
-            "description": "CardioPlus was developed by Meditech Pharmaceuticals.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "St. Mary’s Medical Center",
-            "target_entity": "American Heart Association",
-            "relation_type": "Collaboration",
-            "description": "St. Mary’s Medical Center collaborated with the American Heart Association on the initiative Heart Health Now.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Heart Health Now",
-            "target_entity": "American Heart Association",
-            "relation_type": "Sponsorship",
-            "description": "The American Heart Association is involved in the initiative Heart Health Now.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "Clinical Trials",
-            "target_entity": "CardioPlus",
-            "relation_type": "Evaluation",
-            "description": "The clinical trials evaluated the effectiveness of CardioPlus in reducing cardiovascular events.",
-            "relationship_strength": 5
-          }
-        ]
-      },
-      "quality_rating": 8
-    },
-    {
-      "id": "fdd8e3e2-d317-4ce1-ba53-1a2961e2621a",
-      "input_text": "In 2022, Morgan Stanley, a leading investment bank headquartered in New York City, announced a strategic partnership with BlackRock, the world's largest asset management firm. The collaboration aimed to develop advanced financial products leveraging artificial intelligence to optimize portfolio management. During the Global Finance Summit held in London, James Gorman, CEO of Morgan Stanley, emphasized the importance of innovation in navigating volatile markets. He highlighted the firm's recent acquisition of E*TRADE, a digital trading platform, as a key step in expanding their retail investment services.\n\nMeanwhile, BlackRock's CEO, Larry Fink, discussed the growing demand for sustainable investment options. He revealed that BlackRock's flagship product, the iShares ESG ETF, had seen a 25% increase in assets under management over the past year. Both organizations agreed to focus on integrating ESG (Environmental, Social, and Governance) criteria into their joint initiatives, citing the Paris Climate Agreement as a driving force behind the shift toward green finance.\n\nThe partnership also included plans to establish a research center in San Francisco, aimed at fostering innovation in fintech. This move was supported by the California State Government, which pledged tax incentives to attract investment in the region. Analysts predict that this collaboration could reshape the financial landscape, particularly in the areas of sustainable investing and AI-driven asset management.",
-      "metadata": {
-        "domain": "finance",
-        "difficulty": "medium",
-        "language": "english",
-        "generated_at": "2026-05-07T14:52:02.107687Z"
-      },
-      "output": {
-        "entities": [
-          {
-            "entity_name": "Morgan Stanley",
-            "entity_type": "Organization",
-            "description": "A leading investment bank headquartered in New York City."
-          },
-          {
-            "entity_name": "BlackRock",
-            "entity_type": "Organization",
-            "description": "The world's largest asset management firm."
-          },
-          {
-            "entity_name": "James Gorman",
-            "entity_type": "Person",
-            "description": "CEO of Morgan Stanley."
-          },
-          {
-            "entity_name": "E*TRADE",
-            "entity_type": "Organization",
-            "description": "A digital trading platform recently acquired by Morgan Stanley."
-          },
-          {
-            "entity_name": "Larry Fink",
-            "entity_type": "Person",
-            "description": "CEO of BlackRock."
-          },
-          {
-            "entity_name": "iShares ESG ETF",
-            "entity_type": "Product",
-            "description": "BlackRock's flagship product focused on sustainable investment."
-          },
-          {
-            "entity_name": "Paris Climate Agreement",
-            "entity_type": "Agreement",
-            "description": "An international treaty aiming to combat climate change."
-          },
-          {
-            "entity_name": "San Francisco",
-            "entity_type": "Location",
-            "description": "The planned location for a research center focused on fintech innovation."
-          },
-          {
-            "entity_name": "California State Government",
-            "entity_type": "Organization",
-            "description": "The government body supporting the research center with tax incentives."
-          },
-          {
-            "entity_name": "Global Finance Summit",
-            "entity_type": "Event",
-            "description": "An event held in London where James Gorman discussed innovation in financial markets."
-          },
-          {
-            "entity_name": "London",
-            "entity_type": "Location",
-            "description": "The location of the Global Finance Summit."
-          }
-        ],
-        "relations": [
-          {
-            "source_entity": "Morgan Stanley",
-            "target_entity": "BlackRock",
-            "relation_type": "Partnership",
-            "description": "A strategic partnership to develop advanced financial products leveraging artificial intelligence.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Morgan Stanley",
-            "target_entity": "E*TRADE",
-            "relation_type": "Acquisition",
-            "description": "Morgan Stanley's acquisition of E*TRADE to expand retail investment services.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "BlackRock",
-            "target_entity": "iShares ESG ETF",
-            "relation_type": "Ownership",
-            "description": "BlackRock owns the iShares ESG ETF, a product focused on sustainable investment.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "BlackRock",
-            "target_entity": "Paris Climate Agreement",
-            "relation_type": "Alignment",
-            "description": "BlackRock aligns its initiatives with the goals of the Paris Climate Agreement.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "San Francisco",
-            "target_entity": "California State Government",
-            "relation_type": "Support",
-            "description": "The California State Government supports the establishment of a research center in San Francisco with tax incentives.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "James Gorman",
-            "target_entity": "Global Finance Summit",
-            "relation_type": "Participation",
-            "description": "James Gorman participated in the Global Finance Summit held in London.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "Global Finance Summit",
-            "target_entity": "London",
-            "relation_type": "Location",
-            "description": "The Global Finance Summit was held in London.",
-            "relationship_strength": 3
-          }
-        ]
-      },
-      "quality_rating": 8
-    },
-    {
-      "id": "d1e1c71d-805a-4b50-a94b-ee90468ad58b",
-      "input_text": "Marie Curie was a scientist who made groundbreaking discoveries in the field of chemistry and physics. She was born in Warsaw, Poland, and later moved to Paris, France, to study at the Sorbonne University. Curie is best known for her work on radioactivity, a term she coined. Alongside her husband, Pierre Curie, she discovered two new elements: polonium and radium. These discoveries were made in their laboratory, which was part of the University of Paris.\n\nIn 1903, Marie and Pierre Curie, along with Henri Becquerel, were awarded the Nobel Prize in Physics for their contributions to the understanding of radioactive phenomena. This event marked the first time a woman received a Nobel Prize. Later, in 1911, Marie Curie won a second Nobel Prize, this time in Chemistry, for her isolation of pure radium.\n\nThe Curie Institute, an organization founded in Paris, continues her legacy by conducting research in medicine and biology, particularly in cancer treatment. Her work has had a lasting impact on science and medicine, influencing advancements in X-ray technology and radiation therapy.\n\nMarie Curie’s achievements are celebrated worldwide, and her name is associated with numerous awards, schools, and research centers. Her dedication to science and humanity remains an inspiration to scientists and students alike.",
-      "metadata": {
-        "domain": "science",
         "difficulty": "easy",
-        "language": "english",
-        "generated_at": "2026-05-07T14:54:23.835228Z"
-      },
-      "output": {
-        "entities": [
-          {
-            "entity_name": "Marie Curie",
-            "entity_type": "Person",
-            "description": "A scientist known for her groundbreaking work in chemistry and physics, including the discovery of radioactivity and two elements, polonium and radium."
-          },
-          {
-            "entity_name": "Pierre Curie",
-            "entity_type": "Person",
-            "description": "A scientist and the husband of Marie Curie, known for his collaborative work with her on radioactivity."
-          },
-          {
-            "entity_name": "Henri Becquerel",
-            "entity_type": "Person",
-            "description": "A scientist who shared the 1903 Nobel Prize in Physics with Marie and Pierre Curie for contributions to the understanding of radioactive phenomena."
-          },
-          {
-            "entity_name": "Polonium",
-            "entity_type": "Element",
-            "description": "A chemical element discovered by Marie and Pierre Curie."
-          },
-          {
-            "entity_name": "Radium",
-            "entity_type": "Element",
-            "description": "A chemical element discovered by Marie and Pierre Curie."
-          },
-          {
-            "entity_name": "Curie Institute",
-            "entity_type": "Organization",
-            "description": "An organization founded in Paris that conducts research in medicine and biology, particularly in cancer treatment."
-          },
-          {
-            "entity_name": "Nobel Prize",
-            "entity_type": "Award",
-            "description": "An international award given annually in several categories, including Physics and Chemistry, recognizing significant contributions to humanity."
-          },
-          {
-            "entity_name": "Warsaw",
-            "entity_type": "Location",
-            "description": "The birthplace of Marie Curie, located in Poland."
-          },
-          {
-            "entity_name": "Sorbonne University",
-            "entity_type": "Organization",
-            "description": "The university in Paris where Marie Curie studied."
-          },
-          {
-            "entity_name": "University of Paris",
-            "entity_type": "Organization",
-            "description": "The institution where Marie and Pierre Curie's laboratory was located."
-          }
-        ],
-        "relations": [
-          {
-            "source_entity": "Marie Curie",
-            "target_entity": "Pierre Curie",
-            "relation_type": "Collaboration",
-            "description": "Marie and Pierre Curie collaborated on research in radioactivity, leading to significant discoveries.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Marie Curie",
-            "target_entity": "Henri Becquerel",
-            "relation_type": "Collaboration",
-            "description": "Marie Curie and Henri Becquerel shared the 1903 Nobel Prize in Physics for their work on radioactive phenomena.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Marie Curie",
-            "target_entity": "Polonium",
-            "relation_type": "Discovery",
-            "description": "Marie Curie discovered the element Polonium.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Marie Curie",
-            "target_entity": "Radium",
-            "relation_type": "Discovery",
-            "description": "Marie Curie discovered the element Radium.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Marie Curie",
-            "target_entity": "Curie Institute",
-            "relation_type": "Legacy",
-            "description": "The Curie Institute was founded to continue the legacy of Marie Curie.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Marie Curie",
-            "target_entity": "Warsaw",
-            "relation_type": "Birthplace",
-            "description": "Marie Curie was born in Warsaw, Poland.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "Marie Curie",
-            "target_entity": "Sorbonne University",
-            "relation_type": "Education",
-            "description": "Marie Curie studied at the Sorbonne University in Paris.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Marie Curie",
-            "target_entity": "University of Paris",
-            "relation_type": "Workplace",
-            "description": "Marie Curie's laboratory was part of the University of Paris.",
-            "relationship_strength": 4
-          }
-        ]
+        "language": "russian",
+        "generated_at": "2026-05-07T14:47:18.721774Z"
       },
       "quality_rating": 8
     },
     {
-      "id": "3e658d7f-067b-4dcd-9472-aca079edf0cb",
-      "input_text": "In 1928, Alexander Fleming, a Scottish bacteriologist working at St. Mary's Hospital in London, made a groundbreaking discovery that would revolutionize medicine. While studying Staphylococcus bacteria, Fleming noticed that a mold, later identified as *Penicillium notatum*, had accidentally contaminated one of his petri dishes. Remarkably, the mold appeared to inhibit bacterial growth around it. This observation led to the development of penicillin, the first widely-used antibiotic.\n\nThe discovery caught the attention of researchers at the University of Oxford, including Howard Florey and Ernst Boris Chain. Together, they worked to isolate and mass-produce penicillin during World War II, a period when bacterial infections posed a significant threat to soldiers. Their collaboration with pharmaceutical companies like Pfizer resulted in large-scale production, saving countless lives on the battlefield and beyond.\n\nThe success of penicillin marked the beginning of the antibiotic era, transforming healthcare globally. Today, the World Health Organization (WHO) emphasizes the importance of responsible antibiotic use to combat the growing threat of antimicrobial resistance, a phenomenon where bacteria evolve to resist the effects of antibiotics. This challenge underscores the need for continued research and innovation in microbiology and pharmacology.",
+      "output": {
+        "entities": [
+          {
+            "entity_name": "OpenAI",
+            "entity_type": "ORGANIZATION",
+            "description": "Ведущая технологическая компания, которая представила улучшенную версию своей модели GPT-4 на Всемирной конференции по искусственному интеллекту 2024 года, подчеркнув улучшенные возможности рассуждения для корпоративных приложений. Возглавляется генеральным директором Сэмом Альтманом."
+          },
+          {
+            "entity_name": "Google DeepMind",
+            "entity_type": "ORGANIZATION",
+            "description": "Ведущая технологическая компания, которая продемонстрировала свою систему искусственного интеллекта Gemini на Всемирной конференции по искусственному интеллекту 2024 года, интегрирующую мультимодальную обработку текста, изображений и аудио. Возглавляется Демисом Хассабисом."
+          },
+          {
+            "entity_name": "Anthropic",
+            "entity_type": "ORGANIZATION",
+            "description": "Растущий конкурент в области ИИ, который представил Claude 3, подчеркивая превосходные протоколы безопасности и возможности нюансированного разговора. Объявил о стратегическом партнерстве с Microsoft для развертывания Claude 3 на Azure."
+          },
+          {
+            "entity_name": "Microsoft",
+            "entity_type": "ORGANIZATION",
+            "description": "Технологический гигант, предоставляющий Azure, облачную вычислительную платформу. Партнерствует с Anthropic для развертывания Claude 3 на Azure, расширяя его доступность для бизнеса."
+          },
+          {
+            "entity_name": "Сэм Альтман",
+            "entity_type": "PERSON",
+            "description": "Генеральный директор OpenAI, который руководил презентацией компанией улучшенной модели GPT-4 на Всемирной конференции по искусственному интеллекту 2024 года."
+          },
+          {
+            "entity_name": "Демис Хассабис",
+            "entity_type": "PERSON",
+            "description": "Руководитель Google DeepMind, который продемонстрировал систему искусственного интеллекта Gemini на Всемирной конференции по искусственному интеллекту 2024 года."
+          },
+          {
+            "entity_name": "GPT-4",
+            "entity_type": "PRODUCT",
+            "description": "Модель ИИ, разработанная OpenAI, улучшенная версия которой была представлена на Всемирной конференции по искусственному интеллекту 2024 года, подчеркивающая улучшенные возможности рассуждения для корпоративных приложений."
+          },
+          {
+            "entity_name": "Gemini AI",
+            "entity_type": "PRODUCT",
+            "description": "Система ИИ, разработанная Google DeepMind, продемонстрированная на Всемирной конференции по искусственному интеллекту 2024 года, которая интегрирует мультимодальную обработку текста, изображений и аудио."
+          },
+          {
+            "entity_name": "Claude 3",
+            "entity_type": "PRODUCT",
+            "description": "Система ИИ, разработанная Anthropic, представленная на Всемирной конференции по искусственному интеллекту 2024 года, подчеркивающая превосходные протоколы безопасности и возможности нюансированного разговора."
+          },
+          {
+            "entity_name": "Azure",
+            "entity_type": "PRODUCT",
+            "description": "Облачная вычислительная платформа, предоставляемая Microsoft, используемая для развертывания систем ИИ, таких как Claude 3, в рамках стратегического партнерства Anthropic."
+          },
+          {
+            "entity_name": "Всемирная конференция по искусственному интеллекту 2024 года",
+            "entity_type": "EVENT",
+            "description": "Крупное мероприятие, прошедшее в Шанхае, где ведущие технологические компании продемонстрировали прорывы в области ИИ, включая GPT-4 от OpenAI, Gemini AI от Google DeepMind и Claude 3 от Anthropic."
+          },
+          {
+            "entity_name": "Закон ЕС об ИИ",
+            "entity_type": "LAW",
+            "description": "Регуляторная структура, налагающая строгие правила на высокорисковые системы ИИ, обсуждавшаяся на конференции. Эксперты предупредили, что она может замедлить инновации для стартапов вроде Anthropic, в то время как более крупные фирмы, такие как OpenAI и Google DeepMind, имеют ресурсы для соблюдения требований."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "OpenAI",
+            "target_entity": "Сэм Альтман",
+            "relation_type": "ORGANIZES",
+            "description": "OpenAI возглавляется генеральным директором Сэмом Альтманом.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google DeepMind",
+            "target_entity": "Демис Хассабис",
+            "relation_type": "ORGANIZES",
+            "description": "Google DeepMind возглавляется Демисом Хассабисом.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Claude 3",
+            "relation_type": "PRODUCES",
+            "description": "Anthropic представил Claude 3, подчеркивая превосходные протоколы безопасности и возможности нюансированного разговора.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Microsoft",
+            "relation_type": "KNOWS",
+            "description": "Anthropic объявил о стратегическом партнерстве с Microsoft для развертывания Claude 3 на Azure.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Microsoft",
+            "target_entity": "Azure",
+            "relation_type": "PRODUCES",
+            "description": "Microsoft предоставляет Azure, облачную вычислительную платформу, используемую для развертывания систем ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Azure",
+            "relation_type": "PART_OF",
+            "description": "Anthropic планирует развернуть Claude 3 на платформе Microsoft Azure.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Закон ЕС об ИИ",
+            "target_entity": "Anthropic",
+            "relation_type": "AGENT",
+            "description": "Эксперты предупредили, что соблюдение Закона ЕС об ИИ может замедлить инновации для стартапов вроде Anthropic.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Закон ЕС об ИИ",
+            "target_entity": "OpenAI",
+            "relation_type": "AGENT",
+            "description": "Закон ЕС об ИИ налагает строгие правила на высокорисковые системы ИИ, с которыми такие гиганты, как OpenAI и Google DeepMind, могут справиться благодаря своим ресурсам.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Закон ЕС об ИИ",
+            "target_entity": "Google DeepMind",
+            "relation_type": "AGENT",
+            "description": "Закон ЕС об ИИ налагает строгие правила на высокорисковые системы ИИ, с которыми такие гиганты, как OpenAI и Google DeepMind, могут справиться благодаря своим ресурсам.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "OpenAI",
+            "target_entity": "GPT-4",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "OpenAI представила улучшенную версию своей модели GPT-4 на Всемирной конференции по искусственному интеллекту 2024 года.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google DeepMind",
+            "target_entity": "Gemini AI",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Google DeepMind продемонстрировала свою систему искусственного интеллекта Gemini на Всемирной конференции по искусственному интеллекту 2024 года.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Claude 3",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Anthropic представил Claude 3 на Всемирной конференции по искусственному интеллекту 2024 года.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Всемирная конференция по искусственному интеллекту 2024 года",
+            "target_entity": "OpenAI",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Конференция собрала ведущие технологические компании, включая OpenAI, Google DeepMind и Anthropic, для демонстрации достижений в области ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Всемирная конференция по искусственному интеллекту 2024 года",
+            "target_entity": "Google DeepMind",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Конференция собрала ведущие технологические компании, включая OpenAI, Google DeepMind и Anthropic, для демонстрации достижений в области ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Всемирная конференция по искусственному интеллекту 2024 года",
+            "target_entity": "Anthropic",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Конференция собрала ведущие технологические компании, включая OpenAI, Google DeepMind и Anthropic, для демонстрации достижений в области ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "OpenAI",
+            "target_entity": "Google DeepMind",
+            "relation_type": "KNOWS",
+            "description": "OpenAI конкурирует с Google DeepMind и Anthropic в области достижений ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "OpenAI",
+            "target_entity": "Anthropic",
+            "relation_type": "KNOWS",
+            "description": "OpenAI конкурирует с Google DeepMind и Anthropic в области достижений ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google DeepMind",
+            "target_entity": "OpenAI",
+            "relation_type": "KNOWS",
+            "description": "Google DeepMind конкурирует с OpenAI и Anthropic в области достижений ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google DeepMind",
+            "target_entity": "Anthropic",
+            "relation_type": "KNOWS",
+            "description": "Google DeepMind конкурирует с OpenAI и Anthropic в области достижений ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "OpenAI",
+            "relation_type": "KNOWS",
+            "description": "Anthropic конкурирует с OpenAI и Google DeepMind в области достижений ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Google DeepMind",
+            "relation_type": "KNOWS",
+            "description": "Anthropic конкурирует с OpenAI и Google DeepMind в области достижений ИИ.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Anthropic",
+            "target_entity": "Microsoft",
+            "relation_type": "KNOWS",
+            "description": "Партнерство Anthropic с Microsoft подчеркивает растущую взаимозависимость технологических фирм в разработке ИИ.",
+            "relationship_strength": 5
+          }
+        ]
+      },
+      "id": "0d273162-8546-4191-b9f1-60ac52ea3dfa",
+      "input_text": "**Достижения в области ИИ: OpenAI, Google DeepMind и Anthropic соревнуются на конференции в Шанхае**  \n\nВсемирная конференция по искусственному интеллекту 2024 года в Шанхае собрала ведущие технологические компании для демонстрации прорывов в области искусственного интеллекта. OpenAI под руководством генерального директора Сэма Альтмана представила улучшенную версию своей модели GPT-4, подчеркнув улучшенные возможности рассуждения для корпоративных приложений. Тем временем Google DeepMind под руководством Демиса Хассабиса продемонстрировала свою систему искусственного интеллекта Gemini, которая интегрирует мультимодальную обработку для более эффективной работы с текстом, изображениями и аудио.  \n\nAnthropic, растущий конкурент, представил Claude 3, заявляя о его превосходных протоколах безопасности и способности вести нюансированные разговоры. Компания также объявила о стратегическом партнерстве с Microsoft для развертывания Claude 3 на Azure, расширяя его доступность для бизнеса.  \n\nРегуляторные обсуждения доминировали на полях конференции, участники обсуждали последствия Закона ЕС об ИИ, который налагает строгие правила на высокорисковые системы ИИ. Эксперты предупредили, что соблюдение требований может замедлить инновации, особенно для стартапов вроде Anthropic, в то время как такие гиганты, как OpenAI и Google DeepMind, имеют ресурсы для навигации в новых рамках.  \n\nКонференция подчеркнула быструю эволюцию ИИ: компании соревнуются в балансировании производительности, безопасности и этических соображений. По мере усиления конкуренции сотрудничество, такое как сделка Anthropic с Azure, подчеркивает растущую взаимозависимость технологических фирм в формировании будущего ИИ.  \n\n(Количество слов: 220)",
       "metadata": {
-        "domain": "science",
+        "domain": "technology",
         "difficulty": "medium",
-        "language": "english",
-        "generated_at": "2026-05-07T14:55:38.592022Z"
+        "language": "russian",
+        "generated_at": "2026-05-07T18:36:58.352655Z"
       },
-      "output": {
-        "entities": [
-          {
-            "entity_name": "Alexander Fleming",
-            "entity_type": "Person",
-            "description": "A Scottish bacteriologist who discovered penicillin in 1928."
-          },
-          {
-            "entity_name": "Penicillium notatum",
-            "entity_type": "Organism",
-            "description": "A mold that inhibits bacterial growth, leading to the discovery of penicillin."
-          },
-          {
-            "entity_name": "University of Oxford",
-            "entity_type": "Organization",
-            "description": "An academic institution where researchers contributed to the development of penicillin."
-          },
-          {
-            "entity_name": "Howard Florey",
-            "entity_type": "Person",
-            "description": "A researcher at the University of Oxford who worked on isolating and mass-producing penicillin."
-          },
-          {
-            "entity_name": "Ernst Boris Chain",
-            "entity_type": "Person",
-            "description": "A researcher at the University of Oxford who collaborated on penicillin development."
-          },
-          {
-            "entity_name": "Pfizer",
-            "entity_type": "Company",
-            "description": "A pharmaceutical company involved in the large-scale production of penicillin."
-          },
-          {
-            "entity_name": "World Health Organization",
-            "entity_type": "Organization",
-            "description": "An international organization emphasizing responsible antibiotic use."
-          },
-          {
-            "entity_name": "St. Mary's Hospital",
-            "entity_type": "Organization",
-            "description": "The hospital in London where Alexander Fleming conducted his research."
-          },
-          {
-            "entity_name": "Antibiotics",
-            "entity_type": "Concept",
-            "description": "Medicinal substances used to treat bacterial infections."
-          },
-          {
-            "entity_name": "Antimicrobial Resistance",
-            "entity_type": "Concept",
-            "description": "The phenomenon where bacteria evolve to resist the effects of antibiotics."
-          }
-        ],
-        "relations": [
-          {
-            "source_entity": "Alexander Fleming",
-            "target_entity": "Penicillium notatum",
-            "relation_type": "Discovery",
-            "description": "Alexander Fleming discovered the antibacterial properties of Penicillium notatum.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "University of Oxford",
-            "target_entity": "Penicillium notatum",
-            "relation_type": "Research",
-            "description": "Researchers at the University of Oxford worked on isolating and mass-producing penicillin derived from Penicillium notatum.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Howard Florey",
-            "target_entity": "Ernst Boris Chain",
-            "relation_type": "Collaboration",
-            "description": "Howard Florey and Ernst Boris Chain collaborated on penicillin development.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "University of Oxford",
-            "target_entity": "Pfizer",
-            "relation_type": "Partnership",
-            "description": "The University of Oxford collaborated with Pfizer for the large-scale production of penicillin.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "World Health Organization",
-            "target_entity": "Antibiotics",
-            "relation_type": "Advocacy",
-            "description": "The World Health Organization emphasizes responsible antibiotic use.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "Alexander Fleming",
-            "target_entity": "St. Mary's Hospital",
-            "relation_type": "Employment",
-            "description": "Alexander Fleming conducted his research at St. Mary's Hospital in London.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Antibiotics",
-            "target_entity": "Antimicrobial Resistance",
-            "relation_type": "Challenge",
-            "description": "Antimicrobial resistance poses a challenge to the effectiveness of antibiotics.",
-            "relationship_strength": 3
-          }
-        ]
-      },
-      "quality_rating": 9
-    },
-    {
-      "id": "61f07c0b-7a6f-4e2c-9f33-6a46c3f410c7",
-      "input_text": "Sarah Johnson, the CEO of GreenTech Solutions, announced during the annual Business Innovation Summit in San Francisco that her company plans to launch a new product, EcoCharge, by the end of the year. GreenTech Solutions, a leading organization in sustainable energy, has been working on EcoCharge, a portable solar-powered charger, for over two years. \n\nThe product is designed to help individuals reduce their reliance on traditional electricity sources, aligning with the company’s mission to promote eco-friendly technology. Sarah emphasized that EcoCharge will be available globally, starting with major markets like the United States, Germany, and Japan. \n\nDuring her keynote speech, Sarah also mentioned a strategic partnership with SolarFuture Inc., another prominent player in the renewable energy sector. This collaboration aims to enhance the efficiency of EcoCharge by integrating SolarFuture’s advanced photovoltaic technology. \n\nThe announcement was met with enthusiasm from attendees, including investors and environmental advocates. Many praised GreenTech Solutions for its commitment to innovation and sustainability. Sarah concluded her speech by inviting stakeholders to visit the company’s headquarters in Seattle next month for a hands-on demonstration of EcoCharge.",
-      "metadata": {
-        "domain": "business",
-        "difficulty": "easy",
-        "language": "english",
-        "generated_at": "2026-05-07T14:57:47.353499Z"
-      },
-      "output": {
-        "entities": [
-          {
-            "entity_name": "Sarah Johnson",
-            "entity_type": "Person",
-            "description": "The CEO of GreenTech Solutions who announced the launch of EcoCharge."
-          },
-          {
-            "entity_name": "GreenTech Solutions",
-            "entity_type": "Organization",
-            "description": "A leading organization in sustainable energy, developing the EcoCharge product."
-          },
-          {
-            "entity_name": "EcoCharge",
-            "entity_type": "Product",
-            "description": "A portable solar-powered charger developed by GreenTech Solutions."
-          },
-          {
-            "entity_name": "United States",
-            "entity_type": "Location",
-            "description": "One of the major markets where EcoCharge will be launched."
-          },
-          {
-            "entity_name": "Germany",
-            "entity_type": "Location",
-            "description": "One of the major markets where EcoCharge will be launched."
-          },
-          {
-            "entity_name": "Japan",
-            "entity_type": "Location",
-            "description": "One of the major markets where EcoCharge will be launched."
-          },
-          {
-            "entity_name": "SolarFuture Inc.",
-            "entity_type": "Organization",
-            "description": "A prominent player in the renewable energy sector collaborating with GreenTech Solutions."
-          },
-          {
-            "entity_name": "Seattle",
-            "entity_type": "Location",
-            "description": "The location of GreenTech Solutions' headquarters."
-          },
-          {
-            "entity_name": "San Francisco",
-            "entity_type": "Location",
-            "description": "The location where Sarah Johnson announced the launch of EcoCharge."
-          },
-          {
-            "entity_name": "Business Innovation Summit",
-            "entity_type": "Event",
-            "description": "The event during which Sarah Johnson announced the launch of EcoCharge."
-          }
-        ],
-        "relations": [
-          {
-            "source_entity": "Sarah Johnson",
-            "target_entity": "GreenTech Solutions",
-            "relation_type": "Leadership",
-            "description": "Sarah Johnson is the CEO of GreenTech Solutions.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "GreenTech Solutions",
-            "target_entity": "EcoCharge",
-            "relation_type": "Development",
-            "description": "GreenTech Solutions is the developer of the EcoCharge product.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "EcoCharge",
-            "target_entity": "United States",
-            "relation_type": "Market Launch",
-            "description": "EcoCharge will be launched in the United States.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "EcoCharge",
-            "target_entity": "Germany",
-            "relation_type": "Market Launch",
-            "description": "EcoCharge will be launched in Germany.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "EcoCharge",
-            "target_entity": "Japan",
-            "relation_type": "Market Launch",
-            "description": "EcoCharge will be launched in Japan.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "GreenTech Solutions",
-            "target_entity": "SolarFuture Inc.",
-            "relation_type": "Partnership",
-            "description": "GreenTech Solutions has a strategic partnership with SolarFuture Inc. to enhance EcoCharge.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "GreenTech Solutions",
-            "target_entity": "Seattle",
-            "relation_type": "Headquarters",
-            "description": "GreenTech Solutions' headquarters is located in Seattle.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Sarah Johnson",
-            "target_entity": "San Francisco",
-            "relation_type": "Announcement Location",
-            "description": "Sarah Johnson announced the launch of EcoCharge in San Francisco.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Sarah Johnson",
-            "target_entity": "Business Innovation Summit",
-            "relation_type": "Event Participation",
-            "description": "Sarah Johnson announced the launch of EcoCharge during the Business Innovation Summit.",
-            "relationship_strength": 4
-          }
-        ]
-      },
-      "quality_rating": 9
+      "quality_rating": 8
     }
   ]
 }

@@ -131,8 +131,18 @@ docs = read_text_from_files("path/to/your/files")
 chunker = SimpleChunker(max_chunk_size=1000)
 
 # Set up artifact extractor
+from ragu.common.prompts import ICLConfig
+
+icl_config = ICLConfig(
+    enabled=True,
+    num_examples=2,
+    language="english",
+)
+
 artifact_extractor = TwoStageArtifactsExtractorLLM(
     llm=llm,
+    embedder=embedder,
+    icl_config=icl_config,
     do_entity_validation=True,
     do_relation_validation=True,
 )
@@ -301,23 +311,40 @@ BuilderArguments(
 )
 ```
 
-#### Storage Settings
+---
 
-RAGU stores graph structure, KV data, and vectors through pluggable adapters. See [storage docs](ragu/storage/README.md), [graph storage adapters](ragu/storage/graph_storage_adapters/README.md), and [vector DB adapters](ragu/storage/vdb_storage_adapters/README.md).
+#### In-Context Learning (Few-Shot Examples)
+
+RAGU extractors can use few-shot examples to improve extraction quality. When enabled, the extractor selects the most relevant examples by semantic similarity and includes them in the LLM prompt.
 
 ```python
-from ragu import StorageArguments
-from ragu.storage.vdb_storage_adapters.qdrant_vdb import QdrantVectorDBStorage
+from ragu.common.prompts import ICLConfig
 
-storage_settings = StorageArguments(
-    vdb_storage_type=QdrantVectorDBStorage,
-    vdb_storage_kwargs={
-        "location": ":memory:",
-        # Use sparse_type="bm25", "bm42", or "splade" for hybrid retrieval.
-    },
+icl_config = ICLConfig(
+    enabled=True,               # Enable/disable ICL
+    num_examples=2,             # Number of examples per extraction call (1-3 recommended)
+    language="english",         # Filter examples by language ("english" or "russian")
+    similarity_threshold=0.3,   # Minimum cosine similarity for example selection
+    cache_embeddings=True,      # Cache example embeddings in memory
+)
+
+artifact_extractor = TwoStageArtifactsExtractorLLM(
+    llm=llm,
+    embedder=embedder,          # Required when using ICL
+    icl_config=icl_config,
 )
 ```
+
+Both `ArtifactsExtractorLLM` and `TwoStageArtifactsExtractorLLM` support ICL. You need an `embedder` to compute example embeddings. Pre-built example files ship with RAGU in `ragu/common/prompts/icl_examples/`.
+
+To generate custom examples for your domain, use the generation script:
+
+```bash
+python scripts/generate_icl_examples.py --config config/icl_generation.yaml
+```
+
 ---
+
 
 ### Knowledge Graph Construction
 Each text in corpus is processed to extract structured information. It consist of:
@@ -371,12 +398,12 @@ Each text in corpus is processed to extract structured information. It consist o
 #### 1. Default Pipeline
 
 File: ragu/triplet/llm_artifact_extractor.py.
-A baseline pipeline that uses LLM to extract entities, relations, and their descriptions in a single step.
+A baseline pipeline that uses LLM to extract entities, relations, and their descriptions in a single step. Supports optional in-context learning with few-shot examples and artifact validation.
 
 #### 2. Two-stage LLM Pipeline
 
 File: ragu/triplet/two_stage_extractor.py.
-Extracts entities first, then extracts relations constrained by the entity list. It can separately validate entity and relation outputs.
+Extracts entities first, then extracts relations constrained by the entity list. It can separately validate entity and relation outputs. Supports optional in-context learning with few-shot examples.
 
 #### 3. [RAGU-lm](https://huggingface.co/RaguTeam/RAGU-lm) (for russian language)
 A compact model (Qwen-3-0.6B) fine-tuned on the NEREL dataset.

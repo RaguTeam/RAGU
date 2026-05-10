@@ -249,8 +249,9 @@ class InContextLearningManager:
                 continue
             similarities.append(self._cosine_similarity(query_embedding, emb))
 
+        similarities_array = np.array(similarities)
         indices = np.where(
-            np.array(similarities) >= self.config.similarity_threshold
+            similarities_array >= self.config.similarity_threshold
         )[0]
 
         if len(indices) == 0:
@@ -260,7 +261,7 @@ class InContextLearningManager:
             )
             return []
 
-        top_indices = indices[np.argsort(similarities[indices])[-num_examples:]][::-1]
+        top_indices = indices[np.argsort(similarities_array[indices])[-num_examples:]][::-1]
 
         selected_examples = []
         for idx in top_indices:
