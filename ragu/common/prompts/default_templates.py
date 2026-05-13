@@ -1,33 +1,7 @@
-DEFAULT_ARTIFACTS_EXTRACTOR_PROMPT = """
+DEFAULT_ARTIFACTS_EXTRACTOR_SYSTEM = """
 **-Goal-**
 A text document and a list of entity types are given.
 It is necessary to identify all entities of the specified types in the text, as well as all relationships between the identified entities.
-
-{% if examples %}
-## EXAMPLES
-
-Study these examples carefully to understand expected extraction quality and format:
-
-{% for example in examples %}
-### Example {{ loop.index }}
-
-**Input Text:**
-{{ example.input_text }}
-
-**Expected Output:**
-Entities:
-{% for entity in example.output.entities %}
-- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
-{% endfor %}
-
-Relations:
-{% for relation in example.output.relations %}
-- {{ relation.source_entity }} → {{ relation.target_entity }} ({{ relation.relation_type }}, strength: {{ relation.relationship_strength }}): {{ relation.description }}
-{% endfor %}
-
----
-{% endfor %}
-{% endif %}
 
 **-Steps-**
 1. **Identify all entities.**
@@ -54,41 +28,18 @@ Relations:
     - **relationship_strength**: A numeric value representing the strength of the relationship between the entities, ranging from 0 to 5,
     where 0 = weak connection and 5 = strong connection.
 
-Text:
-{{ context }}
-
 Provide the answer in the following language: {{ language }}
 Return the result as valid JSON matching the provided schema.
 """
 
-DEFAULT_ARTIFACTS_VALIDATOR_PROMPT = """
+DEFAULT_ARTIFACTS_EXTRACTOR_USER = """
+Text:
+{{ context }}
+"""
+
+DEFAULT_ARTIFACTS_VALIDATOR_SYSTEM = """
 **Goal**
 Validate correctness and completeness of entities and relationships against the given text.
-
-{% if examples %}
-## EXAMPLES
-
-Study these examples carefully to understand expected validation quality and format:
-
-{% for example in examples %}
-### Example {{ loop.index }}
-
-**Input Text:**
-{{ example.input_text }}
-
-**Entities for Validation:**
-{% for entity in example.output.entities %}
-- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
-{% endfor %}
-
-**Relations for Validation:**
-{% for relation in example.output.relations %}
-- {{ relation.source_entity }} → {{ relation.target_entity }} ({{ relation.relation_type }}, strength: {{ relation.relationship_strength }}): {{ relation.description }}
-{% endfor %}
-
----
-{% endfor %}
-{% endif %}
 
 **Instructions**
 1. Add missing entities with correct types and descriptions.
@@ -99,14 +50,16 @@ Study these examples carefully to understand expected validation quality and for
 The entity type must be one of the following: {{ entity_types }}
 {% endif %}
 
+Provide the answer in the following language: {{ language }}
+Return the result as valid JSON matching the provided schema.
+"""
+
+DEFAULT_ARTIFACTS_VALIDATOR_USER = """
 Triplets for validation:
 {{ artifacts }}
 
 Text for validation:
 {{ context }}
-
-Provide the answer in the following language: {{ language }}
-Return the result as valid JSON matching the provided schema.
 """
 
 DEFAULT_COMMUNITY_REPORT_PROMPT = """

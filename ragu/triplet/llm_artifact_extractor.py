@@ -7,7 +7,7 @@ from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import Settings
 from ragu.common.prompts.default_models import ArtifactsModel
 from ragu.common.prompts.prompt_storage import RAGUInstruction
-from ragu.common.prompts.messages import ChatMessages, render
+from ragu.common.prompts.messages import ChatMessages, render_with_few_shots
 from ragu.common.prompts.icl_config import ICLConfig
 from ragu.common.prompts.icl_manager import InContextLearningManager
 from ragu.graph.types import Entity, Relation
@@ -110,13 +110,14 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
 
         extraction_instruction: RAGUInstruction = self.get_prompt("artifact_extraction")
         assert extraction_instruction.pydantic_model is ArtifactsModel
-        extraction_conversations: List[ChatMessages] = render(
+        extraction_conversations: List[ChatMessages] = render_with_few_shots(
             extraction_instruction.messages,
+            examples_list=examples_list,
+            few_shot_formatter=extraction_instruction.few_shot_formatter,
             context=context,
             language=self.language,
             entity_types=self.entity_types,
             relation_types=self.relation_types,
-            examples=examples_list,
         )
 
         result_list = await self.llm.batch_chat_completion( # type: ignore
@@ -148,14 +149,15 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             validation_instruction: RAGUInstruction = self.get_prompt("artifact_validation")
             assert validation_instruction.pydantic_model is ArtifactsModel
 
-            validation_conversations: List[ChatMessages] = render(
+            validation_conversations: List[ChatMessages] = render_with_few_shots(
                 validation_instruction.messages,
+                examples_list=validation_examples_list,
+                few_shot_formatter=validation_instruction.few_shot_formatter,
                 artifacts=result_list,
                 context=context,
                 entity_types=self.entity_types,
                 relation_types=self.relation_types,
                 language=self.language,
-                examples=validation_examples_list,
             )
             
             result_list = await self.llm.batch_chat_completion( # type: ignore

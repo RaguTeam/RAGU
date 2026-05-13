@@ -209,7 +209,7 @@ class QdrantVectorDBStorage(BaseVectorStorage):
 
         filename_path = Path(self.filename)
         self.collection_name = (collection_name or
-                                str(Path(resolved_storage_folder) / filename_path.stem).replace("/", "_"))
+                                str(Path(resolved_storage_folder) / filename_path.stem).replace("/", "_").replace("\\", "_"))
         self._client_path = None if remote_kwargs else str(Path(path) if path is not None else filename_path.parent)
         self._client_kwargs = {**remote_kwargs, **client_kwargs}
 

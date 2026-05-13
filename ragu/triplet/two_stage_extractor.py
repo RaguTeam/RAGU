@@ -12,7 +12,7 @@ from ragu.common.prompts.default_models import (
     EntitiesExtractionModel,
     RelationsExtractionModel,
 )
-from ragu.common.prompts.messages import ChatMessages, render
+from ragu.common.prompts.messages import ChatMessages, render_with_few_shots
 from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.common.prompts.icl_config import ICLConfig
 from ragu.common.prompts.icl_manager import InContextLearningManager
@@ -197,12 +197,13 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         instruction: RAGUInstruction = self.get_prompt("entity_extraction")
         assert instruction.pydantic_model is EntitiesExtractionModel
 
-        conversations: List[ChatMessages] = render(
+        conversations: List[ChatMessages] = render_with_few_shots(
             instruction.messages,
+            examples_list=examples_list,
+            few_shot_formatter=instruction.few_shot_formatter,
             context=context,
             language=self.language,
             entity_types=self.entity_types,
-            examples=examples_list,
         )
 
         results = await self.llm.batch_chat_completion(  # type: ignore
@@ -245,12 +246,13 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         instruction: RAGUInstruction = self.get_prompt("entity_validation")
         assert instruction.pydantic_model is EntitiesExtractionModel
 
-        conversations: List[ChatMessages] = render(
+        conversations: List[ChatMessages] = render_with_few_shots(
             instruction.messages,
+            examples_list=examples_list,
+            few_shot_formatter=instruction.few_shot_formatter,
             context=context,
             entities=self._models_to_payload(entities),
             language=self.language,
-            examples=examples_list,
             entity_types=self.entity_types,
         )
 
@@ -294,13 +296,14 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         instruction: RAGUInstruction = self.get_prompt("relation_extraction")
         assert instruction.pydantic_model is RelationsExtractionModel
 
-        conversations: List[ChatMessages] = render(
+        conversations: List[ChatMessages] = render_with_few_shots(
             instruction.messages,
+            examples_list=examples_list,
+            few_shot_formatter=instruction.few_shot_formatter,
             context=context,
             entities=self._models_to_payload(entities),
             language=self.language,
             relation_types=self.relation_types,
-            examples=examples_list,
         )
 
         results = await self.llm.batch_chat_completion(  # type: ignore
@@ -345,14 +348,15 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         instruction: RAGUInstruction = self.get_prompt("relation_validation")
         assert instruction.pydantic_model is RelationsExtractionModel
 
-        conversations: List[ChatMessages] = render(
+        conversations: List[ChatMessages] = render_with_few_shots(
             instruction.messages,
+            examples_list=examples_list,
+            few_shot_formatter=instruction.few_shot_formatter,
             context=context,
             entities=self._models_to_payload(entities),
             relations=self._models_to_payload(relations),
             language=self.language,
             relation_types=self.relation_types,
-            examples=examples_list,
         )
 
         results = await self.llm.batch_chat_completion(  # type: ignore

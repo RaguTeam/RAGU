@@ -4,34 +4,19 @@ from ragu.common.prompts.default_models import (
     EntitiesExtractionModel,
     RelationsExtractionModel,
 )
-from ragu.common.prompts.messages import ChatMessages, UserMessage
+from ragu.common.prompts.few_shot import (
+    format_entity_extraction_example,
+    format_entity_validation_example,
+    format_relation_extraction_example,
+    format_relation_validation_example,
+)
+from ragu.common.prompts.messages import ChatMessages, SystemMessage, UserMessage
 from ragu.common.prompts.prompt_storage import RAGUInstruction
 
 
-DEFAULT_TWO_STAGE_ENTITIES_EXTRACTOR_PROMPT = """
+DEFAULT_TWO_STAGE_ENTITIES_EXTRACTOR_SYSTEM = """
 You are an expert entity extraction system.
 Your task is to identify and extract all meaningful entities from the provided text. You must be thorough, precise, and consistent.
-
-{% if examples %}
-## EXAMPLES
-
-Study these examples carefully to understand expected extraction quality and format:
-
-{% for example in examples %}
-### Example {{ loop.index }}
-
-**Input Text:**
-{{ example.input_text }}
-
-**Expected Output:**
-Entities:
-{% for entity in example.output.entities %}
-- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
-{% endfor %}
-
----
-{% endfor %}
-{% endif %}
 
 **Task**
 Analyze the given text and extract every significant entity. For each entity, provide:
@@ -58,44 +43,20 @@ Analyze the given text and extract every significant entity. For each entity, pr
 - Keep types general enough to be reusable but specific enough to be informative.
 {% endif %}
 
-Text:
-{{ context }}
-
 Provide the answer in the following language: {{ language }}
 Return the result as valid JSON matching the provided schema.
 """
 
+DEFAULT_TWO_STAGE_ENTITIES_EXTRACTOR_USER = """
+Text:
+{{ context }}
+"""
 
-DEFAULT_TWO_STAGE_ENTITIES_VALIDATOR_PROMPT = """
+
+DEFAULT_TWO_STAGE_ENTITIES_VALIDATOR_SYSTEM = """
 You are an expert entity validation and correction system.
 You are given a source text and a list of entities that were previously extracted from it.
 Your task is to audit every entity for correctness, fix any errors, remove hallucinations, and add any entities that were missed.
-
-{% if examples %}
-## EXAMPLES
-
-Study these examples carefully to understand expected validation quality and format:
-
-{% for example in examples %}
-### Example {{ loop.index }}
-
-**Input Text:**
-{{ example.input_text }}
-
-**Entities for Validation:**
-{% for entity in example.output.entities %}
-- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
-{% endfor %}
-
-**Validated Output:**
-Entities:
-{% for entity in example.output.entities %}
-- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
-{% endfor %}
-
----
-{% endfor %}
-{% endif %}
 
 ## TASK
 Perform a comprehensive validation of the provided entity list against the source text. You must execute ALL of the following steps:
@@ -141,7 +102,11 @@ Perform a comprehensive validation of the provided entity list against the sourc
 - **Coreference resolution**: Ensure pronouns and definite descriptions ("the company", "he", "the report") are NOT listed as separate entities. Their information should be attributed to the canonical entity they refer to.
 - **Output ALL entities**: Your response must include the complete, final entity list — corrected originals AND newly added entities combined. Do not return only the changes.
 
+Provide the answer in the following language: {{ language }}
+Return the result as valid JSON matching the provided schema.
+"""
 
+DEFAULT_TWO_STAGE_ENTITIES_VALIDATOR_USER = """
 Entities for validation:
 {% for entity in entities -%}
 - entity_name: {{ entity.entity_name }}, entity_type: {{ entity.entity_type }}, description: {{ entity.description }}
@@ -149,42 +114,13 @@ Entities for validation:
 
 Text:
 {{ context }}
-
-Provide the answer in the following language: {{ language }}
-Return the result as valid JSON matching the provided schema.
 """
 
 
-DEFAULT_TWO_STAGE_RELATIONS_EXTRACTOR_PROMPT = """
+DEFAULT_TWO_STAGE_RELATIONS_EXTRACTOR_SYSTEM = """
 You are an expert relation extraction system.
 You are given a source text and a list of entities that have already been extracted from it.
 Your task is to identify and extract all meaningful relationships between these entities.
-
-{% if examples %}
-## EXAMPLES
-
-Study these examples carefully to understand expected extraction quality and format:
-
-{% for example in examples %}
-### Example {{ loop.index }}
-
-**Input Text:**
-{{ example.input_text }}
-
-**Entities:**
-{% for entity in example.entities %}
-- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
-{% endfor %}
-
-**Expected Output:**
-Relations:
-{% for relation in example.output.relations %}
-- {{ relation.source_entity }} → {{ relation.target_entity }} ({{ relation.relation_type }}, strength: {{ relation.relationship_strength }}): {{ relation.description }}
-{% endfor %}
-
----
-{% endfor %}
-{% endif %}
 
 ## TASK
 Analyze the given text and the provided list of entities.
@@ -226,54 +162,25 @@ For each relationship, provide:
 - Keep labels general enough to be reusable but specific enough to be informative.
 {% endif %}
 
-Text:
-{{ context }}
-
-Entities:
-{% for entity in entities %} 
-- **{{ entity.entity_name }}** ({{ entity.entity_type }}): {{ entity.description }} 
-{% endfor %}
-
 Provide the answer in the following language: {{ language }}
 Return the result as valid JSON matching the provided schema.
 """
 
+DEFAULT_TWO_STAGE_RELATIONS_EXTRACTOR_USER = """
+Text:
+{{ context }}
 
-DEFAULT_TWO_STAGE_RELATIONS_VALIDATOR_PROMPT = """
+Entities:
+{% for entity in entities %}
+- **{{ entity.entity_name }}** ({{ entity.entity_type }}): {{ entity.description }}
+{% endfor %}
+"""
+
+
+DEFAULT_TWO_STAGE_RELATIONS_VALIDATOR_SYSTEM = """
 You are an expert relation validation and correction system.
 You are given a source text, a validated list of entities, and a list of relations that were previously extracted.
 Your task is to audit every relation for correctness, fix any errors, remove unsupported relations, and add any relations that were missed.
-
-{% if examples %}
-## EXAMPLES
-
-Study these examples carefully to understand expected validation quality and format:
-
-{% for example in examples %}
-### Example {{ loop.index }}
-
-**Input Text:**
-{{ example.input_text }}
-
-**Entities:**
-{% for entity in example.entities %}
-- {{ entity.entity_name }} ({{ entity.entity_type }}): {{ entity.description }}
-{% endfor %}
-
-**Relations for Validation:**
-{% for relation in example.output.relations %}
-- {{ relation.source_entity }} → {{ relation.target_entity }} ({{ relation.relation_type }}, strength: {{ relation.relationship_strength }}): {{ relation.description }}
-{% endfor %}
-
-**Validated Output:**
-Relations:
-{% for relation in example.output.relations %}
-- {{ relation.source_entity }} → {{ relation.target_entity }} ({{ relation.relation_type }}, strength: {{ relation.relationship_strength }}): {{ relation.description }}
-{% endfor %}
-
----
-{% endfor %}
-{% endif %}
 
 ## TASK
 Perform a comprehensive validation of the provided relation list against the source text and the entity set. You must execute ALL of the following steps:
@@ -340,8 +247,11 @@ Perform a comprehensive validation of the provided relation list against the sou
 - **Endpoint integrity**: EVERY `source_entity` and `target_entity` in the final output MUST exactly match a name from the provided entity list. No exceptions.
 - **Output ALL relations**: Your response must include the complete, final relation list — corrected originals AND newly added relations combined. Do not return only the changes.
 
-## Given data
+Provide the answer in the following language: {{ language }}
+Return the result as valid JSON matching the provided schema.
+"""
 
+DEFAULT_TWO_STAGE_RELATIONS_VALIDATOR_USER = """
 Entities:
 {% for entity in entities -%}
 - {{ entity.entity_name }} ({{ entity.entity_type }})
@@ -354,51 +264,56 @@ Relations for validation:
 
 Text:
 {{ context }}
-
-Provide the answer in the following language: {{ language }}
-Return the result as valid JSON matching the provided schema.
 """
 
 
 TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION = RAGUInstruction(
     messages=ChatMessages.from_messages(
         [
-            UserMessage(content=DEFAULT_TWO_STAGE_ENTITIES_EXTRACTOR_PROMPT),
+            SystemMessage(content=DEFAULT_TWO_STAGE_ENTITIES_EXTRACTOR_SYSTEM),
+            UserMessage(content=DEFAULT_TWO_STAGE_ENTITIES_EXTRACTOR_USER),
         ]
     ),
     pydantic_model=EntitiesExtractionModel,
     description="Prompt for extracting entities from text.",
+    few_shot_formatter=format_entity_extraction_example,
 )
 
 
 TWO_STAGE_ENTITY_VALIDATION_INSTRUCTION = RAGUInstruction(
     messages=ChatMessages.from_messages(
         [
-            UserMessage(content=DEFAULT_TWO_STAGE_ENTITIES_VALIDATOR_PROMPT),
+            SystemMessage(content=DEFAULT_TWO_STAGE_ENTITIES_VALIDATOR_SYSTEM),
+            UserMessage(content=DEFAULT_TWO_STAGE_ENTITIES_VALIDATOR_USER),
         ]
     ),
     pydantic_model=EntitiesExtractionModel,
     description="Prompt for validating extracted entities against text.",
+    few_shot_formatter=format_entity_validation_example,
 )
 
 
 TWO_STAGE_RELATION_EXTRACTION_INSTRUCTION = RAGUInstruction(
     messages=ChatMessages.from_messages(
         [
-            UserMessage(content=DEFAULT_TWO_STAGE_RELATIONS_EXTRACTOR_PROMPT),
+            SystemMessage(content=DEFAULT_TWO_STAGE_RELATIONS_EXTRACTOR_SYSTEM),
+            UserMessage(content=DEFAULT_TWO_STAGE_RELATIONS_EXTRACTOR_USER),
         ]
     ),
     pydantic_model=RelationsExtractionModel,
     description="Prompt for extracting relations between known entities.",
+    few_shot_formatter=format_relation_extraction_example,
 )
 
 
 TWO_STAGE_RELATION_VALIDATION_INSTRUCTION = RAGUInstruction(
     messages=ChatMessages.from_messages(
         [
-            UserMessage(content=DEFAULT_TWO_STAGE_RELATIONS_VALIDATOR_PROMPT),
+            SystemMessage(content=DEFAULT_TWO_STAGE_RELATIONS_VALIDATOR_SYSTEM),
+            UserMessage(content=DEFAULT_TWO_STAGE_RELATIONS_VALIDATOR_USER),
         ]
     ),
     pydantic_model=RelationsExtractionModel,
     description="Prompt for validating extracted relations against text.",
+    few_shot_formatter=format_relation_validation_example,
 )

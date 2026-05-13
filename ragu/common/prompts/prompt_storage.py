@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Type
+from typing import Callable, Type
 
 from pydantic import BaseModel
 
@@ -16,8 +16,10 @@ from ragu.common.prompts.default_models import (
     RewriteQuery,
 )
 from ragu.common.prompts.default_templates import (
-    DEFAULT_ARTIFACTS_EXTRACTOR_PROMPT,
-    DEFAULT_ARTIFACTS_VALIDATOR_PROMPT,
+    DEFAULT_ARTIFACTS_EXTRACTOR_SYSTEM,
+    DEFAULT_ARTIFACTS_EXTRACTOR_USER,
+    DEFAULT_ARTIFACTS_VALIDATOR_SYSTEM,
+    DEFAULT_ARTIFACTS_VALIDATOR_USER,
     DEFAULT_COMMUNITY_REPORT_PROMPT,
     DEFAULT_RELATIONSHIP_SUMMARIZER_PROMPT,
     DEFAULT_ENTITY_SUMMARIZER_PROMPT,
@@ -35,10 +37,15 @@ from ragu.common.prompts.default_templates import (
     DEFAULT_QUERY_REWRITE_PROMPT,
     DEFAULT_RAGU_LM_SYSTEM_PROMPT,
 )
+from ragu.common.prompts.few_shot import (
+    FewShotFormatter,
+    format_artifact_extraction_example,
+    format_artifact_validation_example,
+)
 from ragu.common.prompts.messages import (
     ChatMessages,
     UserMessage,
-    SystemMessage
+    SystemMessage,
 )
 
 
@@ -47,27 +54,32 @@ class RAGUInstruction:
     messages: ChatMessages
     pydantic_model: Type[BaseModel] | Type[str] = str
     description: str | None = None
+    few_shot_formatter: FewShotFormatter | None = None
 
 
 DEFAULT_PROMPT_TEMPLATES: dict[str, RAGUInstruction] = {
     "artifact_extraction": RAGUInstruction(
         messages=ChatMessages.from_messages(
             [
-                UserMessage(content=DEFAULT_ARTIFACTS_EXTRACTOR_PROMPT),
+                SystemMessage(content=DEFAULT_ARTIFACTS_EXTRACTOR_SYSTEM),
+                UserMessage(content=DEFAULT_ARTIFACTS_EXTRACTOR_USER),
             ]
         ),
         pydantic_model=ArtifactsModel,
         description="Prompt for extracting artifacts (entities and relations) from a text passage.",
+        few_shot_formatter=format_artifact_extraction_example,
     ),
 
     "artifact_validation": RAGUInstruction(
         messages=ChatMessages.from_messages(
             [
-                UserMessage(content=DEFAULT_ARTIFACTS_VALIDATOR_PROMPT),
+                SystemMessage(content=DEFAULT_ARTIFACTS_VALIDATOR_SYSTEM),
+                UserMessage(content=DEFAULT_ARTIFACTS_VALIDATOR_USER),
             ]
         ),
         pydantic_model=ArtifactsModel,
         description="Prompt for validating extracted artifacts against a schema.",
+        few_shot_formatter=format_artifact_validation_example,
     ),
 
     "community_report": RAGUInstruction(
