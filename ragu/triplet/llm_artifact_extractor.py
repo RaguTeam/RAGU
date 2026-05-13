@@ -71,31 +71,16 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                 language=icl_config.language
             )
 
-    async def extract(
+    async def _extract_artifacts(
         self,
-        chunks: List[Chunk],
-        *args: Any,
-        **kwargs: Any,
-    ) -> Tuple[List[Entity], List[Relation]]:
+        context: List[str],
+    ) -> List[ArtifactsModel]:
         """
-        Extract entities and relations from a collection of chunks.
+        Run artifact extraction for a batch of texts.
 
-        Steps:
-          1) Batch-render the extraction prompt with `context=<chunk_texts>`,
-          2) Generate structured artifacts per chunk,
-          3) Optionally validate artifacts against the original context,
-          4) Convert artifacts into Entity/Relation objects.
-
-        :param chunks: Iterable of Chunk objects.
-        :return: (entities, relations) extracted from all chunks.
+        :param context: Chunk texts.
+        :return: Per-chunk extracted artifacts.
         """
-
-        entities_result: List[Entity] = []
-        relations_result: List[Relation] = []
-
-        context: List[str] = [chunk.content for chunk in chunks]
-
-        # Select ICL examples if manager is initialized
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
             await self.icl_manager.initialize()
@@ -108,71 +93,115 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         else:
             examples_list = [None] * len(context)
 
-        extraction_instruction: RAGUInstruction = self.get_prompt("artifact_extraction")
-        assert extraction_instruction.pydantic_model is ArtifactsModel
-        extraction_conversations: List[ChatMessages] = render_with_few_shots(
-            extraction_instruction.messages,
+        instruction: RAGUInstruction = self.get_prompt("artifact_extraction")
+        assert instruction.pydantic_model is ArtifactsModel
+        conversations: List[ChatMessages] = render_with_few_shots(
+            instruction.messages,
             examples_list=examples_list,
-            few_shot_formatter=extraction_instruction.few_shot_formatter,
+            few_shot_formatter=instruction.few_shot_formatter,
             context=context,
             language=self.language,
             entity_types=self.entity_types,
             relation_types=self.relation_types,
         )
 
-        result_list = await self.llm.batch_chat_completion( # type: ignore
-            [c.to_openai() for c in extraction_conversations],
-            output_schema=extraction_instruction.pydantic_model or str, # type: ignore
+        result_list = await self.llm.batch_chat_completion(
+            [c.to_openai() for c in conversations],
+            output_schema=instruction.pydantic_model or str,
             desc="Extracting a knowledge graph from chunks",
         )
         result_list = cast(list[ArtifactsModel], result_list)
 
-        for artifacts, chunk in zip(result_list, chunks):
+        for artifacts in result_list:
             logger.debug(
                 f'Got {len(artifacts.entities)} entities'
                 f' and {len(artifacts.relations)} relations for chunk'
             )
-        
-        if self.do_validation:
-            # Select ICL examples for validation if manager is initialized
-            validation_examples_list: List[List[dict[str, Any]] | None] = []
-            if self.icl_manager:
-                for chunk_text in context:
-                    examples = await self.icl_manager.select_examples(
-                        query_text=chunk_text,
-                        num_examples=self.icl_manager.config.num_examples
-                    )
-                    validation_examples_list.append(examples)
-            else:
-                validation_examples_list = [None] * len(context)
 
-            validation_instruction: RAGUInstruction = self.get_prompt("artifact_validation")
-            assert validation_instruction.pydantic_model is ArtifactsModel
+        return result_list
 
-            validation_conversations: List[ChatMessages] = render_with_few_shots(
-                validation_instruction.messages,
-                examples_list=validation_examples_list,
-                few_shot_formatter=validation_instruction.few_shot_formatter,
-                artifacts=result_list,
-                context=context,
-                entity_types=self.entity_types,
-                relation_types=self.relation_types,
-                language=self.language,
-            )
-            
-            result_list = await self.llm.batch_chat_completion( # type: ignore
-                [c.to_openai() for c in validation_conversations],
-                output_schema=validation_instruction.pydantic_model or str, # type: ignore
-                desc="Validation of extracted artifacts",
-            )
-            result_list = cast(list[ArtifactsModel], result_list)
+    async def _validate_artifacts(
+        self,
+        context: List[str],
+        artifacts: List[ArtifactsModel],
+    ) -> List[ArtifactsModel]:
+        """
+        Run artifact validation for a batch of texts and their extracted artifacts.
 
-
-            for artifacts, chunk in zip(result_list, chunks):
-                logger.debug(
-                    f'After validation got {len(artifacts.entities)} entities'
-                    f' and {len(artifacts.relations)} relations for chunk'
+        :param context: Chunk texts.
+        :param artifacts: Per-chunk extracted artifacts from extraction stage.
+        :return: Per-chunk validated artifacts.
+        """
+        examples_list: List[List[dict[str, Any]] | None] = []
+        if self.icl_manager:
+            for chunk_text in context:
+                examples = await self.icl_manager.select_examples(
+                    query_text=chunk_text,
+                    num_examples=self.icl_manager.config.num_examples
                 )
+                examples_list.append(examples)
+        else:
+            examples_list = [None] * len(context)
+
+        instruction: RAGUInstruction = self.get_prompt("artifact_validation")
+        assert instruction.pydantic_model is ArtifactsModel
+
+        conversations: List[ChatMessages] = render_with_few_shots(
+            instruction.messages,
+            examples_list=examples_list,
+            few_shot_formatter=instruction.few_shot_formatter,
+            artifacts=artifacts,
+            context=context,
+            entity_types=self.entity_types,
+            relation_types=self.relation_types,
+            language=self.language,
+        )
+
+        result_list = await self.llm.batch_chat_completion(
+            [c.to_openai() for c in conversations],
+            output_schema=instruction.pydantic_model or str,
+            desc="Validation of extracted artifacts",
+        )
+        result_list = cast(list[ArtifactsModel], result_list)
+
+        for artifacts_validated in result_list:
+            logger.debug(
+                f'After validation got {len(artifacts_validated.entities)} entities'
+                f' and {len(artifacts_validated.relations)} relations for chunk'
+            )
+
+        return result_list
+
+    async def extract(
+        self,
+        chunks: List[Chunk],
+        *args: Any,
+        **kwargs: Any,
+    ) -> Tuple[List[Entity], List[Relation]]:
+        """
+        Extract entities and relations from a collection of chunks.
+
+        Steps:
+          1) Batch-render the extraction prompt with ``context=<chunk_texts>``,
+          2) Generate structured artifacts per chunk,
+          3) Optionally validate artifacts against the original context,
+          4) Convert artifacts into Entity/Relation objects.
+
+        :param chunks: Iterable of Chunk objects.
+        :return: (entities, relations) extracted from all chunks.
+        """
+        if not chunks:
+            return [], []
+
+        context: List[str] = [chunk.content for chunk in chunks]
+
+        result_list = await self._extract_artifacts(context)
+
+        if self.do_validation:
+            result_list = await self._validate_artifacts(context, result_list)
+
+        entities_result: List[Entity] = []
+        relations_result: List[Relation] = []
 
         for artifacts, chunk in zip(result_list, chunks):
 
@@ -191,7 +220,6 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
 
             entities_result.extend(current_chunk_entities)
 
-            # Parse relations
             for relation in artifacts.relations:
                 subject_name = relation.source_entity
                 object_name = relation.target_entity
@@ -214,7 +242,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                         object_id=object_entity.id,
                         relation_type=relation.relation_type or "UNKNOWN",
                         description=relation.description,
-                        relation_strength=float(relation.relationship_strength), # type: ignore
+                        relation_strength=float(relation.relationship_strength),
                         source_chunk_id=[chunk.id],
                     )
                     relations_result.append(relation)

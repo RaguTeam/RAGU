@@ -33,7 +33,14 @@ judge_model:
   temperature: 0.0  # Deterministic for judgment
   min_quality_rating: 8  # 1-10 scale, keep >= 8
 
-# Corpus generation settings
+# Custom input texts (optional)
+# When set, texts are loaded from this path instead of being synthesized.
+# Supported formats: directory of .txt files, .json array, or single .txt file.
+# Can also be set via --input-texts CLI flag (overrides this setting).
+# input_texts:
+#   path: "path/to/texts/"
+
+# Corpus generation settings (used when input_texts is not set)
 corpus:
   total_texts: 20  # 30-50 texts
   domains:

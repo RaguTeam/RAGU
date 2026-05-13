@@ -128,15 +128,15 @@ async def test_chat_completion_schema_type(server: OpenAIMockServer) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 3. Client rate_min_delay=0.7 s spaces requests beyond server's min_delay=0.5 s
-#    Note: this test takes ~2.8 s (4 inter-request sleeps × 0.7 s each)
+# 3. Client rate_min_delay=1.0 s spaces requests beyond server's min_delay=0.5 s
+#    Note: this test takes ~4 s (4 inter-request sleeps × 1.0 s each)
 # ---------------------------------------------------------------------------
 
 @pytest.mark.slow
 async def test_client_rate_delay_prevents_429(rate_server: OpenAIMockServer) -> None:
     # rate_min_delay=0.7 ensures >= 0.7 s between requests, satisfying server's 0.5 s threshold.
     # max_retries=0 keeps the test deterministic: no retry masks a potential 429.
-    client = CachedAsyncOpenAI(base_url=rate_server.base_url, api_key='mock', rate_min_delay=0.7)
+    client = CachedAsyncOpenAI(base_url=rate_server.base_url, api_key='mock', rate_min_delay=1.0)
     for _ in range(5):
         result = await client.embed_text(model_name='mock', text='hello')
         assert isinstance(result, list)

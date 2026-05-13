@@ -1,9 +1,9 @@
 """
 Generate in-context learning examples for RAGU extractors.
 
-This script synthesizes a corpus of texts, generates artifacts
-using a large LLM (generator), evaluates quality using another
-large LLM (judge), and saves examples to JSON files.
+This script synthesizes or loads a corpus of texts, generates artifacts
+using RAGU's built-in extractors, evaluates quality using an LLM judge
+with structured output, and saves examples to JSON files.
 """
 
 from __future__ import annotations
@@ -12,11 +12,10 @@ import argparse
 import asyncio
 import json
 import os
-import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 from uuid import uuid4
 
 import yaml
@@ -24,28 +23,24 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from pydantic import BaseModel, Field, conint
+
 from ragu.common.logger import logger
-from ragu.common.prompts.messages import render as render_messages
-from ragu.common.prompts.prompt_storage import DEFAULT_PROMPT_TEMPLATES
 from ragu.models.llm import LLMOpenAI
 from ragu.models.openai import CachedAsyncOpenAI
-
-from ragu.triplet.prompts import (
-    TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION,
-    TWO_STAGE_ENTITY_VALIDATION_INSTRUCTION,
-    TWO_STAGE_RELATION_EXTRACTION_INSTRUCTION,
-    TWO_STAGE_RELATION_VALIDATION_INSTRUCTION,
-)
+from ragu.triplet.llm_artifact_extractor import ArtifactsExtractorLLM
+from ragu.triplet.two_stage_extractor import TwoStageArtifactsExtractorLLM
 
 
-PROMPT_INSTRUCTIONS = {
-    "artifact_extraction": DEFAULT_PROMPT_TEMPLATES["artifact_extraction"],
-    "artifact_validation": DEFAULT_PROMPT_TEMPLATES["artifact_validation"],
-    "entity_extraction": TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION,
-    "entity_validation": TWO_STAGE_ENTITY_VALIDATION_INSTRUCTION,
-    "relation_extraction": TWO_STAGE_RELATION_EXTRACTION_INSTRUCTION,
-    "relation_validation": TWO_STAGE_RELATION_VALIDATION_INSTRUCTION,
-}
+class JudgeRatingModel(BaseModel):
+    rating: conint(ge=1, le=10) = Field(
+        ...,
+        description="Overall quality rating from 1 (poor) to 10 (excellent)",
+    )
+    explanation: str = Field(
+        ...,
+        description="Brief 1-2 sentence explanation of the rating",
+    )
 
 
 def load_config(config_path: str) -> dict:
@@ -79,7 +74,7 @@ def load_config(config_path: str) -> dict:
 def _build_synthesis_prompt(
     domain: str,
     difficulty: str,
-    language: str
+    language: str,
 ) -> str:
     """
     Build prompt for text synthesis.
@@ -122,10 +117,73 @@ Return only the plain text without any additional comments.
     return prompt.strip()
 
 
-def _build_judge_prompt(
-    example: dict,
-    prompt_type: str,
-) -> str:
+def load_input_texts(path: str) -> list[dict]:
+    """
+    Load texts from a file or directory for example generation.
+
+    :param path: Path to a .txt file, .json file, or directory of .txt files.
+    :return: List of dicts with text, domain, difficulty, language keys.
+    """
+    path_obj = Path(path)
+    if not path_obj.exists():
+        raise ValueError(f"Input path does not exist: {path}")
+
+    results: list[dict] = []
+
+    if path_obj.is_dir():
+        for txt_file in sorted(path_obj.glob("*.txt")):
+            text = txt_file.read_text(encoding="utf-8").strip()
+            if text:
+                results.append({
+                    "text": text,
+                    "domain": txt_file.stem,
+                    "difficulty": "medium",
+                    "language": "english",
+                })
+    elif path_obj.suffix == ".json":
+        with open(path_obj, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        items = data if isinstance(data, list) else data.get("texts", [])
+        for item in items:
+            if isinstance(item, str):
+                results.append({
+                    "text": item,
+                    "domain": "general",
+                    "difficulty": "medium",
+                    "language": "english",
+                })
+            elif isinstance(item, dict):
+                results.append({
+                    "text": item["text"],
+                    "domain": item.get("domain", "general"),
+                    "difficulty": item.get("difficulty", "medium"),
+                    "language": item.get("language", "english"),
+                })
+    elif path_obj.suffix == ".txt":
+        text = path_obj.read_text(encoding="utf-8").strip()
+        if text:
+            results.append({
+                "text": text,
+                "domain": path_obj.stem,
+                "difficulty": "medium",
+                "language": "english",
+            })
+    else:
+        raise ValueError(f"Unsupported input format: {path_obj.suffix}")
+
+    logger.info(f"Loaded {len(results)} texts from {path}")
+    return results
+
+
+def _text_preview(text: str, max_len: int = 120) -> str:
+    """Return a truncated single-line preview of text for logging."""
+    single = text.replace("\n", " ")
+    if len(single) > max_len:
+        return single[:max_len] + "..."
+    return single
+
+
+def _build_judge_prompt(example: dict, prompt_type: str) -> str:
     """
     Build prompt for quality evaluation.
 
@@ -139,12 +197,14 @@ def _build_judge_prompt(
     relation_count = len(output.get("relations", []))
 
     entities_list = "\n".join([
-        f"   - {e.get('entity_name', 'Unknown')} ({e.get('entity_type', 'Unknown')}): {e.get('description', 'No description')[:80]}"
+        f"   - {e.get('entity_name', 'Unknown')} ({e.get('entity_type', 'Unknown')}): "
+        f"{e.get('description', 'No description')[:80]}"
         for e in output.get("entities", [])
     ])
 
     relations_list = "\n".join([
-        f"   - {r.get('source_entity', 'Unknown')} → {r.get('target_entity', 'Unknown')} ({r.get('relation_type', 'Unknown')}): {r.get('description', 'No description')[:80]}"
+        f"   - {r.get('source_entity', 'Unknown')} → {r.get('target_entity', 'Unknown')} "
+        f"({r.get('relation_type', 'Unknown')}): {r.get('description', 'No description')[:80]}"
         for r in output.get("relations", [])
     ])
 
@@ -165,13 +225,14 @@ def _build_judge_prompt(
         task_description = "relation extraction"
 
     criteria_lines = [
-        "1. Accuracy: Are all extracted items correct and grounded in the text? Check each claim against the source text. Penalize hallucinations — items not supported by the text.",
-        "2. Completeness: Did it miss obvious items that should have been extracted from the text?",
+        "1. Accuracy: Are all extracted items correct and grounded in the text? "
+        "Check each claim against the source text. Penalize hallucinations.",
+        "2. Completeness: Did it miss obvious items that should have been extracted?",
         "3. Quality: Are types, descriptions, and other fields appropriate and informative?",
     ]
     if has_entities:
         criteria_lines.append(
-            f"4. Entities: Are entity names properly normalized (capitalized, canonical form)? "
+            f"4. Entities: Are entity names properly normalized? "
             f"Are descriptions detailed and self-contained? ({entity_count} extracted)"
         )
     if has_relations:
@@ -184,9 +245,13 @@ def _build_judge_prompt(
 
     data_lines = [f"**Input Text:**\n{example['input_text']}\n"]
     if has_entities:
-        data_lines.append(f"\n**Extracted Entities ({entity_count}):**\n{entities_list}")
+        data_lines.append(
+            f"\n**Extracted Entities ({entity_count}):**\n{entities_list}"
+        )
     if has_relations:
-        data_lines.append(f"\n**Extracted Relations ({relation_count}):**\n{relations_list}")
+        data_lines.append(
+            f"\n**Extracted Relations ({relation_count}):**\n{relations_list}"
+        )
     data_section = "\n".join(data_lines)
 
     prompt = f"""
@@ -202,84 +267,80 @@ Evaluate the quality of this {task_description} example.
 - 4-6: Acceptable quality (some errors, mostly correct, minor issues)
 - 7-8: Good quality (minor issues, mostly accurate, well-grounded)
 - 9-10: Excellent quality (no errors, highly accurate, perfect extraction)
-
-Rate the overall quality from 1 to 10 based on the criteria above.
-
-Provide your answer in the following format:
-Rating: [1-10]
-Explanation: [Brief 1-2 sentence explanation]
 """
     return prompt.strip()
 
 
-def _extract_rating_from_text(text: str) -> int | None:
-    """
-    Extract numeric rating from LLM response.
-
-    :param text: LLM response text.
-    :return: Numeric rating or None.
-    """
-    patterns = [
-        r"Rating:\s*(\d+)",
-        r"(\d+)\s*/\s*10",
-    ]
-
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            try:
-                rating_str = match.group(1)
-                rating = int(rating_str)
-                if 1 <= rating <= 10:
-                    logger.debug(f"Extracted rating: {rating}")
-                    return rating
-            except (ValueError, IndexError) as e:
-                logger.debug(f"Failed to parse rating from '{match.group(1)}': {e}")
-                continue
-
-    logger.warning(f"Could not extract rating from text: {text[:200]}")
-    return None
-
-
-async def _call_llm(
-    instruction,
-    generator_llm: LLMOpenAI,
-    **render_kwargs,
-):
-    """
-    Render instruction template and call generator LLM.
-
-    All Jinja2 templates use StrictUndefined, so optional parameters
-    (examples, entity_types, relation_types) must be explicitly passed
-    as None when not provided.
-
-    :param instruction: RAGUInstruction to use.
-    :param generator_llm: Generator LLM instance.
-    :param render_kwargs: Keyword arguments passed to render().
-    :return: Pydantic model instance from LLM response.
-    """
-    defaults = {
-        "examples": None,
-        "entity_types": None,
-        "relation_types": None,
-    }
-    for k, v in defaults.items():
-        render_kwargs.setdefault(k, v)
-
-    convs = render_messages(instruction.messages, **render_kwargs)
-    result = await generator_llm.chat_completion(
-        conversation=convs[0].to_openai(),
-        output_schema=instruction.pydantic_model,
-        temperature=generator_llm.kwargs.get("temperature", 0.2),
+def _has_entities(prompt_type: str) -> bool:
+    return prompt_type in (
+        "artifact_extraction", "artifact_validation",
+        "entity_extraction", "entity_validation",
+        "relation_extraction", "relation_validation",
     )
-    return result
+
+
+def _has_relations(prompt_type: str) -> bool:
+    return prompt_type in (
+        "artifact_extraction", "artifact_validation",
+        "relation_extraction", "relation_validation",
+    )
+
+
+def _clean_and_validate_output(
+    output: dict,
+    prompt_type: str,
+) -> tuple[bool, dict]:
+    """
+    Filter relations with endpoints not in entity list and check non-empty.
+
+    :param output: Output dict with entities and/or relations.
+    :param prompt_type: Prompt type to determine which checks to apply.
+    :return: Tuple of (is_valid, cleaned_output).
+    """
+    cleaned = dict(output)
+
+    if _has_entities(prompt_type) and "entities" in cleaned:
+        if not cleaned["entities"]:
+            return False, cleaned
+
+    if _has_relations(prompt_type) and "relations" in cleaned:
+        entity_names = {e["entity_name"] for e in cleaned.get("entities", [])}
+        valid_relations = []
+        for r in cleaned["relations"]:
+            source = r.get("source_entity", "")
+            target = r.get("target_entity", "")
+            if source in entity_names and target in entity_names:
+                valid_relations.append(r)
+            else:
+                logger.debug(
+                    f"Dropping relation with invalid endpoints: "
+                    f"{source} -> {target}"
+                )
+        removed = len(cleaned["relations"]) - len(valid_relations)
+        if removed:
+            logger.info(
+                f"Removed {removed} relations with invalid endpoints "
+                f"(kept {len(valid_relations)})"
+            )
+        cleaned["relations"] = valid_relations
+
+    return True, cleaned
+
+
+def _make_metadata(item: dict, language: str, now: str) -> dict:
+    return {
+        "domain": item["domain"],
+        "difficulty": item["difficulty"],
+        "language": item.get("language", language),
+        "generated_at": now,
+    }
 
 
 async def synthesize_corpus(
     generator_llm: LLMOpenAI,
     config: dict,
-    language: str
-) -> List[dict]:
+    language: str,
+) -> list[dict]:
     """
     Generate text corpus using large LLM.
 
@@ -319,7 +380,7 @@ async def synthesize_corpus(
                 synthesis_prompt = _build_synthesis_prompt(
                     domain=domain,
                     difficulty=difficulty,
-                    language=language
+                    language=language,
                 )
 
                 try:
@@ -328,7 +389,7 @@ async def synthesize_corpus(
                             {"role": "user", "content": synthesis_prompt}
                         ],
                         output_schema=str,
-                        temperature=generator_llm.kwargs.get("temperature", 0.2)
+                        temperature=generator_llm.kwargs.get("temperature", 0.2),
                     )
 
                     text_clean = text.strip()
@@ -344,14 +405,10 @@ async def synthesize_corpus(
                         "text": text_clean,
                         "domain": domain,
                         "difficulty": difficulty,
-                        "language": language
+                        "language": language,
                     })
                     count += 1
                     domain_successes += 1
-                    logger.debug(
-                        f"  Generated text ({len(text_clean)} chars): "
-                        f"\"{_text_preview(text_clean)}\""
-                    )
 
                 except Exception as e:
                     logger.warning(
@@ -363,297 +420,392 @@ async def synthesize_corpus(
                 f"{domain}/{difficulty}"
             )
 
-    logger.info(
-        f"Synthesized {len(corpus)} texts for language '{language}'"
-    )
+    logger.info(f"Synthesized {len(corpus)} texts for language '{language}'")
     return corpus
 
 
-async def generate_artifacts(
-    text: str,
+async def generate_examples_for_prompt_type(
     prompt_type: str,
+    corpus: list[dict],
     generator_llm: LLMOpenAI,
     language: str,
     entity_types: list[str] | None = None,
     relation_types: list[str] | None = None,
-) -> tuple[dict, dict]:
+) -> list[dict]:
     """
-    Extract artifacts from text using generator LLM.
+    Generate ICL examples using RAGU extractors for a specific prompt type.
 
-    For multi-stage prompt types (relation extraction/validation), performs
-    prerequisite extraction steps automatically before calling the target prompt.
+    Instantiates the appropriate extractor and calls its internal batch
+    methods, which use ``batch_chat_completion`` for concurrent LLM calls.
 
-    :param text: Input text.
-    :param prompt_type: Type of prompt (entity_extraction, etc.).
+    :param prompt_type: One of artifact_extraction, artifact_validation,
+        entity_extraction, entity_validation, relation_extraction,
+        relation_validation.
+    :param corpus: List of corpus items with text, domain, difficulty.
     :param generator_llm: Generator LLM instance.
     :param language: Target language.
-    :return: Tuple of (output_dict, context_dict) where output_dict contains
-             the extraction result and context_dict contains additional data
-             needed for example structure (e.g. entities for relation prompts).
+    :param entity_types: Optional allowed entity types.
+    :param relation_types: Optional allowed relation types.
+    :return: List of example dicts ready for judging.
     """
-    instruction = PROMPT_INSTRUCTIONS[prompt_type]
+    context = [item["text"] for item in corpus]
+    now = datetime.now().isoformat() + "Z"
 
-    type_kwargs = {}
-    if entity_types:
-        type_kwargs["entity_types"] = entity_types
-    if relation_types:
-        type_kwargs["relation_types"] = relation_types
-
-    if prompt_type == "artifact_extraction":
-        result = await _call_llm(
-            instruction, generator_llm,
-            context=[text], language=language,
-            **type_kwargs,
-        )
-        return result.model_dump(), {}
-
-    elif prompt_type == "entity_extraction":
-        result = await _call_llm(
-            instruction, generator_llm,
-            context=[text], language=language,
-            **type_kwargs,
-        )
-        return result.model_dump(), {}
-
-    elif prompt_type == "relation_extraction":
-        entity_result = await _call_llm(
-            TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION, generator_llm,
-            context=[text], language=language,
-            **type_kwargs,
-        )
-        entities_payload = [e.model_dump() for e in entity_result.entities]
-        result = await _call_llm(
-            instruction, generator_llm,
-            context=[text], entities=[entities_payload], language=language,
-            **type_kwargs,
-        )
-        output = result.model_dump()
-        output["entities"] = entities_payload
-        return output, {"entities": entities_payload}
-
-    elif prompt_type == "artifact_validation":
-        extract_result = await _call_llm(
-            DEFAULT_PROMPT_TEMPLATES["artifact_extraction"], generator_llm,
-            context=[text], language=language,
-            **type_kwargs,
-        )
-        result = await _call_llm(
-            instruction, generator_llm,
-            context=[text], artifacts=[extract_result], language=language,
-            **type_kwargs,
-        )
-        return result.model_dump(), {}
-
-    elif prompt_type == "entity_validation":
-        entity_result = await _call_llm(
-            TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION, generator_llm,
-            context=[text], language=language,
-            **type_kwargs,
-        )
-        entities_payload = [e.model_dump() for e in entity_result.entities]
-        result = await _call_llm(
-            instruction, generator_llm,
-            context=[text], entities=[entities_payload], language=language,
-            **type_kwargs,
-        )
-        return result.model_dump(), {}
-
-    elif prompt_type == "relation_validation":
-        entity_result = await _call_llm(
-            TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION, generator_llm,
-            context=[text], language=language,
-            **type_kwargs,
-        )
-        entities_payload = [e.model_dump() for e in entity_result.entities]
-
-        relation_result = await _call_llm(
-            TWO_STAGE_RELATION_EXTRACTION_INSTRUCTION, generator_llm,
-            context=[text], entities=[entities_payload], language=language,
-            **type_kwargs,
-        )
-        relations_payload = [r.model_dump() for r in relation_result.relations]
-
-        result = await _call_llm(
-            instruction, generator_llm,
-            context=[text], entities=[entities_payload],
-            relations=[relations_payload], language=language,
-            **type_kwargs,
-        )
-        output = result.model_dump()
-        output["entities"] = entities_payload
-        return output, {"entities": entities_payload}
-
-    else:
-        raise ValueError(f"Unknown prompt type: {prompt_type}")
-
-
-def _text_preview(text: str, max_len: int = 120) -> str:
-    """Return a truncated single-line preview of text for logging."""
-    single = text.replace("\n", " ")
-    if len(single) > max_len:
-        return single[:max_len] + "..."
-    return single
-
-
-def _cleanup_artifacts(artifacts: dict, prompt_type: str) -> dict:
-    """
-    Remove invalid entries from LLM-generated artifacts.
-
-    Strips entities missing required fields and relations whose endpoints
-    are not in the entity list. Modifies the dict in place.
-
-    :param artifacts: Output dict with 'entities' and/or 'relations'.
-    :param prompt_type: Prompt type to determine which sections to clean.
-    :return: Cleaned artifacts dict.
-    """
-    has_entities = prompt_type in (
-        "artifact_extraction", "artifact_validation",
-        "entity_extraction", "entity_validation",
-        "relation_extraction", "relation_validation",
-    )
-    has_relations = prompt_type in (
-        "artifact_extraction", "artifact_validation",
-        "relation_extraction", "relation_validation",
-    )
-
-    if has_entities and "entities" in artifacts:
-        cleaned = []
-        for e in artifacts["entities"]:
-            if not e.get("entity_name") or not e.get("entity_type"):
-                logger.debug(f"Dropping entity without name/type: {e}")
-                continue
-            if not e.get("description"):
-                logger.debug(f"Dropping entity without description: {e.get('entity_name')}")
-                continue
-            cleaned.append(e)
-        removed = len(artifacts["entities"]) - len(cleaned)
-        if removed:
-            logger.debug(f"Removed {removed} invalid entities")
-        artifacts["entities"] = cleaned
-
-    if has_relations and "relations" in artifacts:
-        entity_names = {e["entity_name"] for e in artifacts.get("entities", [])}
-        cleaned = []
-        for r in artifacts["relations"]:
-            source = r.get("source_entity", "")
-            target = r.get("target_entity", "")
-            if source in entity_names and target in entity_names:
-                cleaned.append(r)
-            else:
-                logger.debug(
-                    f"Dropping relation with invalid endpoints: "
-                    f"{source} -> {target}"
-                )
-        removed = len(artifacts["relations"]) - len(cleaned)
-        if removed:
-            logger.info(
-                f"Removed {removed} relations with invalid endpoints "
-                f"(kept {len(cleaned)})"
+    try:
+        if prompt_type == "artifact_extraction":
+            return await _generate_artifact_extraction(
+                context, corpus, generator_llm, language,
+                entity_types, relation_types, now,
             )
-        artifacts["relations"] = cleaned
+        elif prompt_type == "artifact_validation":
+            return await _generate_artifact_validation(
+                context, corpus, generator_llm, language,
+                entity_types, relation_types, now,
+            )
+        elif prompt_type == "entity_extraction":
+            return await _generate_entity_extraction(
+                context, corpus, generator_llm, language,
+                entity_types, relation_types, now,
+            )
+        elif prompt_type == "entity_validation":
+            return await _generate_entity_validation(
+                context, corpus, generator_llm, language,
+                entity_types, relation_types, now,
+            )
+        elif prompt_type == "relation_extraction":
+            return await _generate_relation_extraction(
+                context, corpus, generator_llm, language,
+                entity_types, relation_types, now,
+            )
+        elif prompt_type == "relation_validation":
+            return await _generate_relation_validation(
+                context, corpus, generator_llm, language,
+                entity_types, relation_types, now,
+            )
+        else:
+            raise ValueError(f"Unknown prompt type: {prompt_type}")
 
-    return artifacts
+    except Exception as e:
+        logger.warning(
+            f"Failed to generate examples for {prompt_type}: {e}"
+        )
+        logger.debug(
+            f"Error details: {type(e).__name__}: {e}", exc_info=True
+        )
+        return []
 
 
-async def judge_example(
-    example: dict,
+async def _generate_artifact_extraction(
+    context: list[str],
+    corpus: list[dict],
+    generator_llm: LLMOpenAI,
+    language: str,
+    entity_types: list[str] | None,
+    relation_types: list[str] | None,
+    now: str,
+) -> list[dict]:
+    extractor = ArtifactsExtractorLLM(
+        llm=generator_llm,
+        do_validation=False,
+        language=language,
+        entity_types=entity_types,
+        relation_types=relation_types,
+    )
+    results = await extractor._extract_artifacts(context)
+
+    examples = []
+    for item, model in zip(corpus, results):
+        output = model.model_dump()
+        is_valid, output = _clean_and_validate_output(output, "artifact_extraction")
+        if not is_valid:
+            logger.info(
+                f"  Skipping: no entities for "
+                f"\"{_text_preview(item['text'])}\""
+            )
+            continue
+        examples.append({
+            "input_text": item["text"],
+            "metadata": _make_metadata(item, language, now),
+            "output": output,
+        })
+    return examples
+
+
+async def _generate_artifact_validation(
+    context: list[str],
+    corpus: list[dict],
+    generator_llm: LLMOpenAI,
+    language: str,
+    entity_types: list[str] | None,
+    relation_types: list[str] | None,
+    now: str,
+) -> list[dict]:
+    extractor = ArtifactsExtractorLLM(
+        llm=generator_llm,
+        do_validation=True,
+        language=language,
+        entity_types=entity_types,
+        relation_types=relation_types,
+    )
+    extracted = await extractor._extract_artifacts(context)
+    results = await extractor._validate_artifacts(context, extracted)
+
+    examples = []
+    for item, model in zip(corpus, results):
+        output = model.model_dump()
+        is_valid, output = _clean_and_validate_output(
+            output, "artifact_validation"
+        )
+        if not is_valid:
+            logger.info(
+                f"  Skipping: no entities for "
+                f"\"{_text_preview(item['text'])}\""
+            )
+            continue
+        examples.append({
+            "input_text": item["text"],
+            "metadata": _make_metadata(item, language, now),
+            "output": output,
+        })
+    return examples
+
+
+async def _generate_entity_extraction(
+    context: list[str],
+    corpus: list[dict],
+    generator_llm: LLMOpenAI,
+    language: str,
+    entity_types: list[str] | None,
+    relation_types: list[str] | None,
+    now: str,
+) -> list[dict]:
+    extractor = TwoStageArtifactsExtractorLLM(
+        llm=generator_llm,
+        language=language,
+        entity_types=entity_types,
+        relation_types=relation_types,
+    )
+    results = await extractor._extract_entities(context)
+
+    examples = []
+    for item, model in zip(corpus, results):
+        output = model.model_dump()
+        output["relations"] = []
+        is_valid, output = _clean_and_validate_output(
+            output, "entity_extraction"
+        )
+        if not is_valid:
+            logger.info(
+                f"  Skipping: no entities for "
+                f"\"{_text_preview(item['text'])}\""
+            )
+            continue
+        examples.append({
+            "input_text": item["text"],
+            "metadata": _make_metadata(item, language, now),
+            "output": output,
+        })
+    return examples
+
+
+async def _generate_entity_validation(
+    context: list[str],
+    corpus: list[dict],
+    generator_llm: LLMOpenAI,
+    language: str,
+    entity_types: list[str] | None,
+    relation_types: list[str] | None,
+    now: str,
+) -> list[dict]:
+    extractor = TwoStageArtifactsExtractorLLM(
+        llm=generator_llm,
+        do_entity_validation=True,
+        language=language,
+        entity_types=entity_types,
+        relation_types=relation_types,
+    )
+    entity_models = await extractor._extract_entities(context)
+    results = await extractor._validate_entities(context, entity_models)
+
+    examples = []
+    for item, model in zip(corpus, results):
+        output = model.model_dump()
+        output["relations"] = []
+        is_valid, output = _clean_and_validate_output(
+            output, "entity_validation"
+        )
+        if not is_valid:
+            logger.info(
+                f"  Skipping: no entities for "
+                f"\"{_text_preview(item['text'])}\""
+            )
+            continue
+        examples.append({
+            "input_text": item["text"],
+            "metadata": _make_metadata(item, language, now),
+            "output": output,
+        })
+    return examples
+
+
+async def _generate_relation_extraction(
+    context: list[str],
+    corpus: list[dict],
+    generator_llm: LLMOpenAI,
+    language: str,
+    entity_types: list[str] | None,
+    relation_types: list[str] | None,
+    now: str,
+) -> list[dict]:
+    extractor = TwoStageArtifactsExtractorLLM(
+        llm=generator_llm,
+        language=language,
+        entity_types=entity_types,
+        relation_types=relation_types,
+    )
+    entity_models = await extractor._extract_entities(context)
+    relation_models = await extractor._extract_relations(
+        context, entity_models
+    )
+
+    examples = []
+    for item, ent_model, rel_model in zip(corpus, entity_models, relation_models):
+        entities_payload = [e.model_dump() for e in ent_model.entities]
+        output = rel_model.model_dump()
+        output["entities"] = entities_payload
+        is_valid, output = _clean_and_validate_output(
+            output, "relation_extraction"
+        )
+        if not is_valid:
+            logger.info(
+                f"  Skipping: invalid output for "
+                f"\"{_text_preview(item['text'])}\""
+            )
+            continue
+        examples.append({
+            "input_text": item["text"],
+            "metadata": _make_metadata(item, language, now),
+            "output": output,
+            "entities": entities_payload,
+        })
+    return examples
+
+
+async def _generate_relation_validation(
+    context: list[str],
+    corpus: list[dict],
+    generator_llm: LLMOpenAI,
+    language: str,
+    entity_types: list[str] | None,
+    relation_types: list[str] | None,
+    now: str,
+) -> list[dict]:
+    extractor = TwoStageArtifactsExtractorLLM(
+        llm=generator_llm,
+        do_relation_validation=True,
+        language=language,
+        entity_types=entity_types,
+        relation_types=relation_types,
+    )
+    entity_models = await extractor._extract_entities(context)
+    relation_models = await extractor._extract_relations(
+        context, entity_models
+    )
+    validated = await extractor._validate_relations(
+        context, entity_models, relation_models
+    )
+
+    examples = []
+    for item, ent_model, rel_model in zip(
+        corpus, entity_models, validated
+    ):
+        entities_payload = [e.model_dump() for e in ent_model.entities]
+        output = rel_model.model_dump()
+        output["entities"] = entities_payload
+        is_valid, output = _clean_and_validate_output(
+            output, "relation_validation"
+        )
+        if not is_valid:
+            logger.info(
+                f"  Skipping: invalid output for "
+                f"\"{_text_preview(item['text'])}\""
+            )
+            continue
+        examples.append({
+            "input_text": item["text"],
+            "metadata": _make_metadata(item, language, now),
+            "output": output,
+            "entities": entities_payload,
+        })
+    return examples
+
+
+async def judge_examples_batch(
+    examples: list[dict],
     judge_llm: LLMOpenAI,
     config: dict,
     prompt_type: str,
-) -> tuple[bool, int | None]:
+) -> list[dict]:
     """
-    Evaluate example quality using judge LLM.
+    Evaluate examples in batch using judge LLM with structured output.
 
-    :param example: Example dictionary with input_text and output.
+    :param examples: List of example dicts with input_text and output.
     :param judge_llm: Judge LLM instance.
     :param config: Configuration dictionary.
     :param prompt_type: Prompt type to tailor evaluation criteria.
-    :return: Tuple of (is_good, quality_rating).
+    :return: List of examples that passed quality threshold with rating.
     """
-    judge_prompt = _build_judge_prompt(example, prompt_type)
+    if not examples:
+        return []
+
+    min_rating = config["judge_model"]["min_quality_rating"]
+    judge_kwargs = {}
+    if "anthropic" not in judge_llm.model_name.lower():
+        judge_kwargs["temperature"] = 0.0
+
+    conversations = []
+    for example in examples:
+        judge_prompt = _build_judge_prompt(example, prompt_type)
+        conversations.append([{"role": "user", "content": judge_prompt}])
 
     try:
-        llm_kwargs = {"output_schema": str}
-        if "anthropic" not in judge_llm.model_name.lower():
-            llm_kwargs["temperature"] = 0.0
-
-        rating_text = await judge_llm.chat_completion(
-            conversation=[{"role": "user", "content": judge_prompt}],
-            **llm_kwargs,
+        ratings = await judge_llm.batch_chat_completion(
+            conversations=conversations,
+            output_schema=JudgeRatingModel,
+            desc=f"Judging {prompt_type} examples",
+            **judge_kwargs,
         )
-
-        rating = _extract_rating_from_text(rating_text)
-        min_rating = config["judge_model"]["min_quality_rating"]
-
-        is_good = rating is not None and rating >= min_rating
-        return is_good, rating
-
     except Exception as e:
-        logger.warning(f"Failed to judge example: {e}")
-        return False, None
+        logger.warning(f"Batch judging failed for {prompt_type}: {e}")
+        return []
 
+    accepted = []
+    for example, rating_result in zip(examples, ratings):
+        rating = rating_result.rating
+        if rating >= min_rating:
+            example["quality_rating"] = rating
+            accepted.append(example)
+            logger.info(
+                f"  ACCEPTED (rating: {rating}/10): "
+                f"\"{_text_preview(example['input_text'])}\""
+            )
+        else:
+            logger.info(
+                f"  REJECTED (rating: {rating}/10, min: {min_rating}): "
+                f"\"{_text_preview(example['input_text'])}\""
+            )
 
-def validate_example(
-    example: dict,
-    prompt_type: str,
-) -> tuple[bool, str]:
-    """
-    Validate example for semantic correctness.
-
-    Checks that extracted data is structurally complete and internally
-    consistent. Does NOT enforce arbitrary limits on text length or
-    entity/relation counts — those are soft recommendations for the
-    synthesis stage, not quality gates.
-
-    :param example: Example dictionary.
-    :param prompt_type: Prompt type to determine which checks to apply.
-    :return: Tuple of (is_valid, reason). reason is empty string on success.
-    """
-    output = example["output"]
-
-    has_entities = prompt_type in (
-        "artifact_extraction", "artifact_validation",
-        "entity_extraction", "entity_validation",
-        "relation_extraction", "relation_validation",
+    logger.info(
+        f"Judged {len(examples)} examples, {len(accepted)} accepted "
+        f"(min rating: {min_rating})"
     )
-    has_relations = prompt_type in (
-        "artifact_extraction", "artifact_validation",
-        "relation_extraction", "relation_validation",
-    )
-
-    if has_entities:
-        entities = output.get("entities", [])
-        if not entities:
-            return False, "No entities extracted"
-
-        for entity in entities:
-            if not entity.get("entity_name") or not entity.get("entity_type"):
-                return False, (
-                    f"Entity missing name or type: {entity}"
-                )
-            if not entity.get("description"):
-                return False, (
-                    f"Entity missing description: {entity.get('entity_name')}"
-                )
-
-    if has_relations:
-        entity_names = {e["entity_name"] for e in output.get("entities", [])}
-        for relation in output.get("relations", []):
-            source = relation.get("source_entity")
-            target = relation.get("target_entity")
-            if source not in entity_names or target not in entity_names:
-                return False, (
-                    f"Relation endpoints not in entity list: "
-                    f"{source} -> {target}"
-                )
-
-    return True, ""
+    return accepted
 
 
 def save_examples(
-    examples: List[dict],
+    examples: list[dict],
     output_file: str,
-    config: dict
+    config: dict,
 ) -> None:
     """
     Save examples to JSON file.
@@ -690,10 +842,10 @@ def save_examples(
         "total_examples": len(all_examples),
         "generated_by": {
             "generator_model": config["generator_model"]["model_name"],
-            "judge_model": config["judge_model"]["model_name"]
+            "judge_model": config["judge_model"]["model_name"],
         },
         "generated_at": datetime.now().isoformat() + "Z",
-        "examples": all_examples
+        "examples": all_examples,
     }
 
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -708,12 +860,17 @@ def save_examples(
     )
 
 
-async def main(config_path: str, language: str | None = None) -> None:
+async def main(
+    config_path: str,
+    language: str | None = None,
+    input_texts_path: str | None = None,
+) -> None:
     """
     Main entry point for ICL example generation.
 
     :param config_path: Path to YAML configuration file.
     :param language: Specific language to generate (None for all).
+    :param input_texts_path: Path to custom texts (None to synthesize).
     """
     config = load_config(config_path)
 
@@ -724,7 +881,7 @@ async def main(config_path: str, language: str | None = None) -> None:
             api_key=config["generator_model"]["api_key"],
         ),
         model_name=config["generator_model"]["model_name"],
-        temperature=config["generator_model"].get("temperature", 0.2)
+        temperature=config["generator_model"].get("temperature", 0.2),
     )
 
     logger.info("Initializing judge LLM...")
@@ -738,125 +895,63 @@ async def main(config_path: str, language: str | None = None) -> None:
             api_key=config["judge_model"]["api_key"],
         ),
         model_name=config["judge_model"]["model_name"],
-        **judge_kwargs
+        **judge_kwargs,
     )
 
     languages = [language] if language else config["languages"]
 
     for lang in languages:
-        logger.info(f"\n{'='*60}")
+        logger.info(f"\n{'=' * 60}")
         logger.info(f"Processing language: {lang}")
-        logger.info(f"{'='*60}\n")
+        logger.info(f"{'=' * 60}\n")
 
-        corpus = await synthesize_corpus(
-            generator_llm, config, lang
-        )
+        texts_path = input_texts_path or config.get("input_texts", {}).get("path")
+        if texts_path:
+            logger.info(f"Loading texts from {texts_path}")
+            corpus = load_input_texts(texts_path)
+            for item in corpus:
+                item["language"] = lang
+        else:
+            corpus = await synthesize_corpus(generator_llm, config, lang)
+
+        if not corpus:
+            logger.warning(f"No texts available for language '{lang}', skipping")
+            continue
+
+        entity_types = config.get("entity_types")
+        relation_types = config.get("relation_types")
 
         for prompt_type in config["prompt_types"]:
             logger.info(f"\nGenerating examples for: {prompt_type}")
 
-            all_examples = []
-            processed_count = 0
-
-            for idx, item in enumerate(corpus, 1):
-                text_preview = _text_preview(item["text"])
-                logger.info(
-                    f"[{idx}/{len(corpus)}] Processing "
-                    f"{item['domain']}/{item['difficulty']}: "
-                    f"\"{text_preview}\""
-                )
-                try:
-                    artifacts, extra_context = await generate_artifacts(
-                        text=item["text"],
-                        prompt_type=prompt_type,
-                        generator_llm=generator_llm,
-                        language=lang,
-                        entity_types=config.get("entity_types"),
-                        relation_types=config.get("relation_types"),
-                    )
-
-                    n_ent = len(artifacts.get("entities", []))
-                    n_rel = len(artifacts.get("relations", []))
-                    logger.info(
-                        f"  Generated: {n_ent} entities, {n_rel} relations"
-                    )
-
-                    example = {
-                        "id": str(uuid4()) if config["incremental"].get(
-                            "generate_new_ids", True
-                        ) else None,
-                        "input_text": item["text"],
-                        "metadata": {
-                            "domain": item["domain"],
-                            "difficulty": item["difficulty"],
-                            "language": lang,
-                            "generated_at": datetime.now().isoformat() + "Z"
-                        },
-                        "output": artifacts,
-                    }
-
-                    if "entities" in extra_context:
-                        example["entities"] = extra_context["entities"]
-
-                    _cleanup_artifacts(example["output"], prompt_type)
-
-                    n_ent_a = len(example["output"].get("entities", []))
-                    n_rel_a = len(example["output"].get("relations", []))
-                    if n_ent_a != n_ent or n_rel_a != n_rel:
-                        logger.info(
-                            f"  After cleanup: {n_ent_a} entities, "
-                            f"{n_rel_a} relations"
-                        )
-
-                    valid, reason = validate_example(example, prompt_type)
-                    if not valid:
-                        logger.info(
-                            f"  REJECTED by validation: {reason}\n"
-                            f"  Text: \"{text_preview}\""
-                        )
-                        continue
-
-                    is_good, rating = await judge_example(
-                        example, judge_llm, config, prompt_type
-                    )
-
-                    if is_good and rating is not None:
-                        example["quality_rating"] = rating
-                        all_examples.append(example)
-                        logger.info(
-                            f"  ACCEPTED (rating: {rating}/10)"
-                        )
-                        processed_count += 1
-                    else:
-                        logger.info(
-                            f"  REJECTED by judge (rating: {rating}/10, "
-                            f"min: {config['judge_model']['min_quality_rating']})\n"
-                            f"  Text: \"{text_preview}\""
-                        )
-
-                except Exception as e:
-                    logger.warning(
-                        f"  ERROR processing {item['domain']}/"
-                        f"{item['difficulty']}: {e}\n"
-                        f"  Text: \"{text_preview}\""
-                    )
-                    logger.debug(f"Error details: {type(e).__name__}: {e}", exc_info=True)
-
-            logger.info(
-                f"Processed {processed_count}/{len(corpus)} texts successfully, "
-                f"generated {len(all_examples)} valid examples"
+            examples = await generate_examples_for_prompt_type(
+                prompt_type=prompt_type,
+                corpus=corpus,
+                generator_llm=generator_llm,
+                language=lang,
+                entity_types=entity_types,
+                relation_types=relation_types,
             )
 
-            if all_examples:
+            if not examples:
+                logger.warning(f"No valid examples generated for {prompt_type}")
+                continue
+
+            accepted = await judge_examples_batch(
+                examples=examples,
+                judge_llm=judge_llm,
+                config=config,
+                prompt_type=prompt_type,
+            )
+
+            if accepted:
                 output_file = os.path.join(
                     config["output_path"],
-                    f"{prompt_type}_examples.json"
+                    f"{prompt_type}_examples.json",
                 )
-                save_examples(all_examples, output_file, config)
+                save_examples(accepted, output_file, config)
             else:
-                logger.warning(
-                    f"No valid examples generated for {prompt_type}"
-                )
+                logger.warning(f"No examples passed judge for {prompt_type}")
 
     logger.info("\nExample generation complete!")
 
@@ -869,16 +964,22 @@ if __name__ == "__main__":
         "--config",
         type=str,
         default="config/icl_generation.yaml",
-        help="Path to YAML configuration file"
+        help="Path to YAML configuration file",
     )
     parser.add_argument(
         "--language",
         type=str,
         default=None,
         choices=["english", "russian"],
-        help="Generate examples for specific language only"
+        help="Generate examples for specific language only",
+    )
+    parser.add_argument(
+        "--input-texts",
+        type=str,
+        default=None,
+        help="Path to custom texts (directory of .txt, .json array, or single .txt)",
     )
 
     args = parser.parse_args()
 
-    asyncio.run(main(args.config, args.language))
+    asyncio.run(main(args.config, args.language, args.input_texts))
