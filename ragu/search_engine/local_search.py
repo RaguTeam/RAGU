@@ -8,6 +8,7 @@ from jinja2 import Template
 
 from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import Settings
+from ragu.common.logger import logger
 from ragu.common.prompts.messages import ChatMessages, render
 from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.graph.graph_retrieve_backend import GraphRetriever
@@ -267,10 +268,14 @@ class LocalSearchEngine(BaseEngine):
             language=self.language,
         )
         rendered: ChatMessages = rendered_conversations[0]
-        response = await self.llm.chat_completion(
-            conversation=rendered.to_openai(),
-            output_schema=instruction.pydantic_model or str, # type: ignore
-        ) # type: ignore
+        try:
+            response = await self.llm.chat_completion(
+                conversation=rendered.to_openai(),
+                output_schema=instruction.pydantic_model or str, # type: ignore
+            ) # type: ignore
+        except Exception as e:
+            logger.warning("Local search LLM query failed: {}: {}", type(e).__name__, e)
+            response = ""
 
         return SearchEngineResponse(
             query=query,

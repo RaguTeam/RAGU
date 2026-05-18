@@ -142,15 +142,21 @@ class EntitySummarizer(RaguGenerativeModule):
             assert self.llm
             output_schema = instruction.pydantic_model
             assert output_schema is EntityDescriptionModel
-            response: Sequence[EntityDescriptionModel] = await self.llm.batch_chat_completion(
-                conversations=[c.to_openai() for c in rendered_list],
-                output_schema=output_schema,
-                desc="Entity summarization",
-            ) # type: ignore
+            try:
+                response: Sequence[EntityDescriptionModel] = await self.llm.batch_chat_completion(
+                    conversations=[c.to_openai() for c in rendered_list],
+                    output_schema=output_schema,
+                    desc="Entity summarization",
+                ) # type: ignore
 
-            for i, summary in enumerate(response):
-                if summary:
-                    entities_to_summarize[i].description = summary.description
+                for i, summary in enumerate(response):
+                    if summary and getattr(summary, 'description', None) is not None:
+                        entities_to_summarize[i].description = summary.description
+            except Exception as e:
+                logger.warning(
+                    "Entity summarization failed: {}: {}. Keeping original descriptions.",
+                    type(e).__name__, e,
+                )
         else:
             entities_to_summarize = [Entity(**row) for _, row in entity_multi_desc.iterrows()]
 
@@ -210,12 +216,19 @@ class EntitySummarizer(RaguGenerativeModule):
                     language=self.language,
                 )
 
-                result = await self.llm.batch_chat_completion(
-                    [c.to_openai() for c in rendered_list],
-                    output_schema=instruction.pydantic_model,
-                    desc="Map reduce for clustering",
-                )
-                result_description.extend([r.content for r in result if r])
+                try:
+                    result = await self.llm.batch_chat_completion(
+                        [c.to_openai() for c in rendered_list],
+                        output_schema=instruction.pydantic_model,
+                        desc="Map reduce for clustering",
+                    )
+                    result_description.extend([r.content for r in result if r and getattr(r, 'content', None)])
+                except Exception as e:
+                    logger.warning(
+                        "Cluster summarization failed: {}: {}. Using raw descriptions.",
+                        type(e).__name__, e,
+                    )
+                    result_description.extend(texts)
 
             return " ".join(result_description)
 
@@ -333,14 +346,20 @@ class RelationSummarizer(RaguGenerativeModule):
 
             output_schema = instruction.pydantic_model
             assert output_schema is RelationDescriptionModel
-            response: List[RelationDescriptionModel] = await self.llm.batch_chat_completion(
-                [c.to_openai() for c in rendered_list],
-                output_schema=output_schema,
-            ) # type: ignore
+            try:
+                response: List[RelationDescriptionModel] = await self.llm.batch_chat_completion(
+                    [c.to_openai() for c in rendered_list],
+                    output_schema=output_schema,
+                ) # type: ignore
 
-            for i, summary in enumerate(response):
-                if summary:
-                    relations_to_summarize[i].description = summary.description
+                for i, summary in enumerate(response):
+                    if summary and getattr(summary, 'description', None) is not None:
+                        relations_to_summarize[i].description = summary.description
+            except Exception as e:
+                logger.warning(
+                    "Relation summarization failed: {}: {}. Keeping original descriptions.",
+                    type(e).__name__, e,
+                )
         else:
             relations_to_summarize = [Relation(**row) for _, row in relation_multi_desc.iterrows()]
 

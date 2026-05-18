@@ -195,10 +195,23 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
 
         context: List[str] = [chunk.content for chunk in chunks]
 
-        result_list = await self._extract_artifacts(context)
+        try:
+            result_list = await self._extract_artifacts(context)
+        except Exception as e:
+            logger.warning(
+                "Artifact extraction failed for {} chunks: {}: {}",
+                len(context), type(e).__name__, e,
+            )
+            return [], []
 
         if self.do_validation:
-            result_list = await self._validate_artifacts(context, result_list)
+            try:
+                result_list = await self._validate_artifacts(context, result_list)
+            except Exception as e:
+                logger.warning(
+                    "Artifact validation failed: {}: {}. Using unvalidated results.",
+                    type(e).__name__, e,
+                )
 
         entities_result: List[Entity] = []
         relations_result: List[Relation] = []

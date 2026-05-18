@@ -11,7 +11,7 @@ from ragu.graph.types import Community, Entity, Relation
 
 
 @pytest.mark.asyncio
-async def test_community_summarizer_llm_exception_propagates(monkeypatch):
+async def test_community_summarizer_llm_exception_returns_empty(monkeypatch):
     llm = AsyncMock()
     llm.batch_chat_completion = AsyncMock(side_effect=RuntimeError("boom"))
     summarizer = CommunitySummarizer(llm=llm)
@@ -49,5 +49,5 @@ async def test_community_summarizer_llm_exception_propagates(monkeypatch):
     )
     community = Community(level=1, cluster_id=1, entities=[entity], relations=[relation])
 
-    with pytest.raises(RuntimeError, match="boom"):
-        await summarizer.summarize([community])
+    result = await summarizer.summarize([community])
+    assert result == []

@@ -1,6 +1,7 @@
 from typing import List, Dict, Tuple
 from typing_extensions import override
 
+from ragu.common.logger import logger
 from ragu.common.prompts.default_models import SubQuery, QueryPlan, RewriteQuery
 from ragu.search_engine.base_engine import BaseEngine, SearchEngineResponse, SearchEngineRetrieve
 from ragu.search_engine.search_functional import _topological_sort
@@ -53,12 +54,15 @@ class QueryPlanEngine(BaseEngine):
         )
         rendered = rendered_list[0]
 
-        response: QueryPlan = await self.engine.llm.chat_completion(    # type: ignore
-            rendered.to_openai(),
-            output_schema=instruction.pydantic_model,
-        )
-
-        return response.subqueries
+        try:
+            response: QueryPlan = await self.engine.llm.chat_completion(    # type: ignore
+                rendered.to_openai(),
+                output_schema=instruction.pydantic_model,
+            )
+            return response.subqueries
+        except Exception as e:
+            logger.warning("Query decomposition failed: {}: {}", type(e).__name__, e)
+            return [SubQuery(id="q1", query=query)]
 
     async def _rewrite_subquery(self, subquery: SubQuery, context: Dict[str, SearchEngineResponse]) -> SubQuery:
         """
@@ -81,12 +85,16 @@ class QueryPlanEngine(BaseEngine):
         )
         rendered = rendered_list[0]
 
-        response: List[RewriteQuery | str] = await self.engine.llm.chat_completion(
-            rendered.to_openai(),
-            output_schema=instruction.pydantic_model,
-        )
+        try:
+            response: List[RewriteQuery | str] = await self.engine.llm.chat_completion(
+                rendered.to_openai(),
+                output_schema=instruction.pydantic_model,
+            )
+            rewritten = response.query if isinstance(response, RewriteQuery) else response
+        except Exception as e:
+            logger.warning("Query rewrite failed: {}: {}", type(e).__name__, e)
+            rewritten = subquery.query
 
-        rewritten = response.query if isinstance(response, RewriteQuery) else response
         return subquery.model_copy(update={"query": rewritten})
 
     async def _answer_subquery(
@@ -127,20 +135,39 @@ class QueryPlanEngine(BaseEngine):
                  subquery answer, ``retrieval`` is the final subquery retrieval,
                  and ``payload`` contains all subquery responses by ID.
         """
-        subqueries = await self.process_query(query)
+        try:
+            subqueries = await self.process_query(query)
+        except Exception as e:
+            logger.warning("Query planning failed: {}: {}", type(e).__name__, e)
+            subqueries = [SubQuery(id="q1", query=query)]
+
         ordered = _topological_sort(subqueries)
 
         context: Dict[str,  SearchEngineResponse] = {}
         retrieve: Dict[str, SearchEngineRetrieve] = {}
         for subquery in ordered:
-            rewritten_subquery, response = await self._answer_subquery(subquery, context)
-            context[subquery.id] = response
-            retrieve[subquery.id] = response.retrieval
+            try:
+                rewritten_subquery, response = await self._answer_subquery(subquery, context)
+                context[subquery.id] = response
+                retrieve[subquery.id] = response.retrieval
+            except Exception as e:
+                logger.warning(
+                    "Subquery '{}' failed: {}: {}",
+                    subquery.id, type(e).__name__, e,
+                )
+                context[subquery.id] = SearchEngineResponse(
+                    query=subquery.query, response="", retrieval=None, payload={}  # type: ignore[arg-type]
+                )
+
+        if not context:
+            return SearchEngineResponse(
+                query=query, response="", retrieval=None, payload={}  # type: ignore[arg-type]
+            )
 
         return SearchEngineResponse(
             query=query,
             response=context[ordered[-1].id].response,
-            retrieval=retrieve[ordered[-1].id],
+            retrieval=retrieve.get(ordered[-1].id),  # type: ignore[arg-type]
             payload=context,
         )
 

@@ -180,24 +180,50 @@ class InMemoryGraphBuilder:
             return [], [], [], [], chunks
 
         # Step 1: extract entities and relations
-        entities, relations = await self.artifact_extractor(chunks)
+        try:
+            entities, relations = await self.artifact_extractor(chunks)
+        except Exception as e:
+            logger.warning("Extraction failed: {}: {}", type(e).__name__, e)
+            entities, relations = [], []
 
         # Step 2: summarize similar artifacts' descriptions
-        entities = await self.entity_summarizer.run(entities)
-        relations = await self.relation_summarizer.run(relations)
+        try:
+            entities = await self.entity_summarizer.run(entities)
+        except Exception as e:
+            logger.warning("Entity summarization failed: {}: {}", type(e).__name__, e)
+
+        try:
+            relations = await self.relation_summarizer.run(relations)
+        except Exception as e:
+            logger.warning("Relation summarization failed: {}: {}", type(e).__name__, e)
 
         # Step 3: use additional modules
         if self.additional_pipeline:
             for additional_module in self.additional_pipeline:
-               entities, relations = await additional_module.run(entities, relations)
+                try:
+                   entities, relations = await additional_module.run(entities, relations)
+                except Exception as e:
+                    logger.warning(
+                        "Additional module {} failed: {}: {}",
+                        type(additional_module).__name__, type(e).__name__, e,
+                    )
 
         # Step 4. get community summary
         communities: List[Community] = []
         summaries: List[CommunitySummary] = []
         if self.build_parameters.make_community_summary:
-            communities = await self.cluster_graph(entities, relations)
+            try:
+                communities = await self.cluster_graph(entities, relations)
+            except Exception as e:
+                logger.warning("Community detection failed: {}: {}", type(e).__name__, e)
+                communities = []
+
             if communities:
-                summaries = await self.community_summarizer.summarize(communities)
+                try:
+                    summaries = await self.community_summarizer.summarize(communities)
+                except Exception as e:
+                    logger.warning("Community summarization failed: {}: {}", type(e).__name__, e)
+                    summaries = []
 
         return entities, relations, summaries, communities, chunks
 

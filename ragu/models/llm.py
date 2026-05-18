@@ -1,6 +1,8 @@
 from __future__ import annotations
+import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Sequence, TypeVar
+from tqdm import tqdm
 from tqdm.asyncio import tqdm_asyncio
 from typing_extensions import override
 
@@ -39,6 +41,7 @@ class LLM(ABC):
         conversations: list[list[ChatCompletionMessageParam]],
         output_schema: type[T] = str,
         desc: str | None = None,
+        continue_on_error: bool = True,
         **kwargs: Any,
     ) -> Sequence[T]:
         """
@@ -47,18 +50,58 @@ class LLM(ABC):
         :param conversations: List of conversation message lists.
         :param output_schema: Output schema applied to each call.
         :param desc: Optional tqdm progress description.
+        :param continue_on_error: If ``True`` (default), log a warning and
+            return a fallback value for failed calls instead of raising.
+            If ``False``, raise on the first failure.
         :param kwargs: Extra kwargs forwarded to each call.
         :returns: Responses in the same order as input conversations.
         """
         logger.debug(f'Calling batch_chat_completion with size {len(conversations)}')
-        return await tqdm_asyncio.gather(*[ # type: ignore
-            self.chat_completion(
-                conversation=conversation,
-                output_schema=output_schema,
-                **kwargs,
+
+        if not continue_on_error:
+            return await tqdm_asyncio.gather(*[
+                self.chat_completion(
+                    conversation=conversation,
+                    output_schema=output_schema,
+                    **kwargs,
+                )
+                for conversation in conversations
+            ], desc=desc)
+
+        tasks = [
+            asyncio.ensure_future(
+                self.chat_completion(
+                    conversation=conversation,
+                    output_schema=output_schema,
+                    **kwargs,
+                )
             )
             for conversation in conversations
-        ], desc=desc)
+        ]
+
+        results: list[T] = [None] * len(tasks)  # type: ignore[assignment]
+        pending: set[asyncio.Future[Any]] = set(tasks)
+        pbar = tqdm(total=len(tasks), desc=desc)
+
+        while pending:
+            done, pending = await asyncio.wait(pending, return_when=asyncio.FIRST_COMPLETED)
+            for task in done:
+                idx = tasks.index(task)
+                try:
+                    results[idx] = task.result()
+                except Exception as e:
+                    logger.warning(
+                        "batch_chat_completion failed for item {}: {}: {}",
+                        idx, type(e).__name__, e,
+                    )
+                    if issubclass(output_schema, str):
+                        results[idx] = ""  # type: ignore[assignment]
+                    else:
+                        results[idx] = output_schema.model_construct()  # type: ignore[assignment]
+                pbar.update(1)
+
+        pbar.close()
+        return results
         
 
 

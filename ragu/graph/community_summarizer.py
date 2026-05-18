@@ -4,6 +4,7 @@ from jinja2 import Template
 
 from ragu.common.base import RaguGenerativeModule
 from ragu.common.global_parameters import Settings
+from ragu.common.logger import logger
 from ragu.common.prompts.default_models import CommunityReportModel
 from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.common.prompts.messages import ChatMessages, render
@@ -62,19 +63,28 @@ class CommunitySummarizer(RaguGenerativeModule):
 
         output_schema = instruction.pydantic_model
         assert output_schema is CommunityReportModel
-        summaries: List[CommunityReportModel] = await self.llm.batch_chat_completion( # type: ignore
-            [c.to_openai() for c in rendered_list],
-            output_schema=output_schema,
-            desc="Summarized communities",
-        )
+        try:
+            summaries: List[CommunityReportModel] = await self.llm.batch_chat_completion( # type: ignore
+                [c.to_openai() for c in rendered_list],
+                output_schema=output_schema,
+                desc="Summarized communities",
+            )
+        except Exception as e:
+            logger.warning(
+                "Community summarization failed: {}: {}",
+                type(e).__name__, e,
+            )
+            return []
 
-        output: List[CommunitySummary] = [
-            CommunitySummary(
+        output: List[CommunitySummary] = []
+        for community, summary in zip(sorted_communities, summaries):
+            if summary is None or getattr(summary, 'title', None) is None:
+                logger.warning("Skipping community {}: summarization returned empty result", community.id)
+                continue
+            output.append(CommunitySummary(
                 id=community.id,
                 summary=self.combine_report_text(summary),
-            )
-            for (community, summary) in zip(sorted_communities, summaries)
-        ]
+            ))
 
         return output
 

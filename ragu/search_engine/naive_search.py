@@ -5,6 +5,7 @@ from typing import Any, Optional, List, Literal
 from jinja2 import Template
 from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import Settings
+from ragu.common.logger import logger
 from ragu.graph.graph_retrieve_backend import GraphRetriever
 from ragu.graph.knowledge_graph import KnowledgeGraph
 from ragu.models.embedder import Embedder
@@ -202,10 +203,14 @@ class NaiveSearchEngine(BaseEngine):
         )
         rendered: ChatMessages = rendered_list[0]
 
-        answer = await self.llm.chat_completion(
-            conversation=rendered.to_openai(),
-            output_schema=instruction.pydantic_model
-        ) # type: ignore
+        try:
+            answer = await self.llm.chat_completion(
+                conversation=rendered.to_openai(),
+                output_schema=instruction.pydantic_model
+            ) # type: ignore
+        except Exception as e:
+            logger.warning("Naive search LLM query failed: {}: {}", type(e).__name__, e)
+            answer = ""
 
         return SearchEngineResponse(
             query=query,

@@ -7,6 +7,7 @@ from jinja2 import Template
 from typing_extensions import override
 
 from ragu.common.global_parameters import Settings
+from ragu.common.logger import logger
 from ragu.models.llm import LLM
 from ragu.search_engine.base_engine import BaseEngine, SearchEngineRetrieve, SearchEngineResponse
 from ragu.common.prompts.prompt_storage import RAGUInstruction
@@ -237,10 +238,14 @@ class MixSearchEngine(BaseEngine):
         )
         rendered = rendered_list[0]
 
-        response = await self.llm.chat_completion(
-            conversation=rendered.to_openai(),
-            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
-        )  # type: ignore[return-value]
+        try:
+            response = await self.llm.chat_completion(
+                conversation=rendered.to_openai(),
+                output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+            )  # type: ignore[return-value]
+        except Exception as e:
+            logger.warning("Mix search LLM query failed: {}: {}", type(e).__name__, e)
+            response = ""
 
         # TODO: maybe it is good idea to pass every child engine metrics in 'metrics' field here.
         return SearchEngineResponse(

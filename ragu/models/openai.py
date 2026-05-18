@@ -16,7 +16,7 @@ from openai.types.chat import (
     ChatCompletionMessageParam,
     ParsedChatCompletion,
 )
-from tenacity import retry, stop_after_attempt, wait_chain, wait_fixed, before_sleep_log
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_chain, wait_fixed, before_sleep_log
 from aiolimiter import AsyncLimiter
 
 from ragu.models.caching import ResponseCachingMixin
@@ -25,6 +25,14 @@ from ragu.common.logger import logger
 
 
 T = TypeVar('T', BaseModel, str)
+
+DEFAULT_RETRY_TIMES_SEC: Sequence[float] = (2, 4, 8)
+
+
+def _is_retryable_exception(exc: BaseException) -> bool:
+    from openai import APITimeoutError, InternalServerError, RateLimitError, APIConnectionError
+    return isinstance(exc, (APITimeoutError, InternalServerError, RateLimitError, APIConnectionError))
+
 
 @dataclass
 class CachedAsyncOpenAI(ResponseCachingMixin):
@@ -57,13 +65,16 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
     - `rate_max_per_minute`: max requests per minute
     - `rate_max_simultaneous`: max simultaneous requests
 
-    Allows retrying: for example, if `retry_times=(4, 8, 16)`, will
-    retry in 4, then 8, then 16 seconds on exception, and finally
-    raise it. In rate limiting, each retrying attempt is considered
-    a new request.
+    Allows retrying: for example, if `retry_times_sec=(2, 4, 8)`, will
+    retry in 2, then 4, then 8 seconds on a retryable exception, and
+    finally raise it. Only transient errors (APITimeoutError,
+    InternalServerError, RateLimitError, APIConnectionError) are
+    retried. Non-retryable errors (ContentFilterFinishReasonError,
+    ValueError, BadRequestError, etc.) are raised immediately.
+    In rate limiting, each retrying attempt is considered a new request.
 
     NOTE: This class sets max_retries=0 in AsyncOpenAI, because
-    it uses its own `retry_times_sec` mechanism. TODO is this ok?
+    it uses its own `retry_times_sec` mechanism.
 
     So, these mechanisms are independent: rate limiting delays
     requests, and retrying handles exceptions.
@@ -82,7 +93,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         rate_min_delay: float | None = None,
         rate_max_per_minute: int | None = None,
         rate_max_simultaneous: int | None = None,
-        retry_times_sec: Sequence[float] | None = None,
+        retry_times_sec: Sequence[float] | None = DEFAULT_RETRY_TIMES_SEC,
         max_completion_tokens: int | None = None,
         cache: MutableMapping[str, Any] | str | Path | None = None,
         cache_prefix: str = 'openai',
@@ -99,6 +110,10 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         :param rate_max_per_minute: Maximum number of requests per minute.
         :param rate_max_simultaneous: Maximum number of concurrent requests.
         :param retry_times_sec: Retry wait schedule in seconds, e.g. ``(4, 8)``.
+            Defaults to ``(2, 4, 8)`` (3 retries with exponential backoff).
+            Set to ``None`` to disable retries. Only retryable exceptions
+            (APITimeoutError, InternalServerError, RateLimitError,
+            APIConnectionError) are retried.
         :param max_completion_tokens: Maximum number of tokens in the completion.
             Passed to ``max_completion_tokens`` in API calls. Useful when
             structured output parsing fails due to length limits.
@@ -164,10 +179,11 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         # add retrying decorators
         if retry_times_sec:
             retrying_decorator = retry(
+                retry=retry_if_exception(_is_retryable_exception),
                 stop=stop_after_attempt(len(retry_times_sec) + 1),
                 wait=wait_chain(*[wait_fixed(t) for t in retry_times_sec]),
                 before_sleep=before_sleep_log(
-                    LoguruAdapter('logger'), logging.DEBUG
+                    LoguruAdapter('logger'), logging.WARNING
                 ),
                 reraise=True
             )

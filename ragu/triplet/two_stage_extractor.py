@@ -120,17 +120,45 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         relations_result: List[Relation] = []
         context: List[str] = [chunk.content for chunk in chunks]
 
-        entity_results = await self._extract_entities(context)
-        if self.do_entity_validation:
-            entity_results = await self._validate_entities(context, entity_results)
-
-        relation_results = await self._extract_relations(context, entity_results)
-        if self.do_relation_validation:
-            relation_results = await self._validate_relations(
-                context=context,
-                entities=entity_results,
-                relations=relation_results,
+        try:
+            entity_results = await self._extract_entities(context)
+        except Exception as e:
+            logger.warning(
+                "Entity extraction failed for {} chunks: {}: {}",
+                len(context), type(e).__name__, e,
             )
+            return [], []
+
+        if self.do_entity_validation:
+            try:
+                entity_results = await self._validate_entities(context, entity_results)
+            except Exception as e:
+                logger.warning(
+                    "Entity validation failed: {}: {}. Using unvalidated entities.",
+                    type(e).__name__, e,
+                )
+
+        try:
+            relation_results = await self._extract_relations(context, entity_results)
+        except Exception as e:
+            logger.warning(
+                "Relation extraction failed for {} chunks: {}: {}",
+                len(context), type(e).__name__, e,
+            )
+            return entities_result, []
+
+        if self.do_relation_validation:
+            try:
+                relation_results = await self._validate_relations(
+                    context=context,
+                    entities=entity_results,
+                    relations=relation_results,
+                )
+            except Exception as e:
+                logger.warning(
+                    "Relation validation failed: {}: {}. Using unvalidated relations.",
+                    type(e).__name__, e,
+                )
 
         for entities_model, relations_model, chunk in zip(entity_results, relation_results, chunks):
             current_chunk_entities: List[Entity] = []

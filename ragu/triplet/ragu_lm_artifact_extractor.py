@@ -82,30 +82,36 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
 
         contexts = [ChunkContext(chunk=chunk) for chunk in chunks]
 
-        # Stage 1: Extract raw entities from chunks
-        logger.info(f"Stage 1/4: Extracting entities from {len(chunks)} chunks...")
-        await self._batch_extract_entities(contexts)
-        total_raw = sum(len(ctx.raw_entities) for ctx in contexts)
-        logger.info(f"Extracted {total_raw} raw entities from {len(chunks)} chunks")
+        try:
+            # Stage 1: Extract raw entities from chunks
+            logger.info(f"Stage 1/4: Extracting entities from {len(chunks)} chunks...")
+            await self._batch_extract_entities(contexts)
+            total_raw = sum(len(ctx.raw_entities) for ctx in contexts)
+            logger.info(f"Extracted {total_raw} raw entities from {len(chunks)} chunks")
 
-        # Stage 2: Normalize entities
-        logger.info(f"Stage 2/4: Normalizing {total_raw} entities...")
-        await self._batch_normalize_entities(contexts)
-        total_normalized = sum(len(ctx.normalized_entities) for ctx in contexts)
-        logger.info(f"Normalized to {total_normalized} entities")
+            # Stage 2: Normalize entities
+            logger.info(f"Stage 2/4: Normalizing {total_raw} entities...")
+            await self._batch_normalize_entities(contexts)
+            total_normalized = sum(len(ctx.normalized_entities) for ctx in contexts)
+            logger.info(f"Normalized to {total_normalized} entities")
 
-        # Stage 3: Generate descriptions for entities
-        logger.info(f"Stage 3/4: Generating descriptions for {total_normalized} entities...")
-        await self._batch_generate_descriptions(contexts)
-        total_entities = sum(len(ctx.entities) for ctx in contexts)
-        logger.info(f"Created {total_entities} entity objects")
+            # Stage 3: Generate descriptions for entities
+            logger.info(f"Stage 3/4: Generating descriptions for {total_normalized} entities...")
+            await self._batch_generate_descriptions(contexts)
+            total_entities = sum(len(ctx.entities) for ctx in contexts)
+            logger.info(f"Created {total_entities} entity objects")
 
-        # Stage 4: Extract relations for entity pairs
-        total_pairs = sum(len(ctx.entities) * (len(ctx.entities) - 1) for ctx in contexts)
-        logger.info(f"Stage 4/4: Extracting relations for {total_pairs} entity pairs...")
-        await self._batch_extract_relations(contexts)
-        total_relations = sum(len(ctx.relations) for ctx in contexts)
-        logger.info(f"Extracted {total_relations} relations")
+            # Stage 4: Extract relations for entity pairs
+            total_pairs = sum(len(ctx.entities) * (len(ctx.entities) - 1) for ctx in contexts)
+            logger.info(f"Stage 4/4: Extracting relations for {total_pairs} entity pairs...")
+            await self._batch_extract_relations(contexts)
+            total_relations = sum(len(ctx.relations) for ctx in contexts)
+            logger.info(f"Extracted {total_relations} relations")
+        except Exception as e:
+            logger.warning(
+                "RAGU-LM extraction pipeline failed: {}: {}. Returning partial results.",
+                type(e).__name__, e,
+            )
 
         all_entities = [e for ctx in contexts for e in ctx.entities]
         all_relations = [r for ctx in contexts for r in ctx.relations]
