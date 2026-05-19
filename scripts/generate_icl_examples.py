@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+from lingua import Language, LanguageDetectorBuilder
 import yaml
 
 
@@ -117,13 +118,17 @@ Return only the plain text without any additional comments.
     return prompt.strip()
 
 
-def load_input_texts(path: str) -> list[dict]:
+def load_input_texts(path: str, languages: list[str]) -> list[dict]:
     """
     Load texts from a file or directory for example generation.
 
     :param path: Path to a .txt file, .json file, or directory of .txt files.
     :return: List of dicts with text, domain, difficulty, language keys.
     """
+
+    prepared_languages = [Language(it.upper()) for it in languages]
+    detector = LanguageDetectorBuilder.from_languages(*prepared_languages).with_preloaded_language_models().build()
+
     path_obj = Path(path)
     if not path_obj.exists():
         raise ValueError(f"Input path does not exist: {path}")
@@ -138,7 +143,7 @@ def load_input_texts(path: str) -> list[dict]:
                     "text": text,
                     "domain": txt_file.stem,
                     "difficulty": "medium",
-                    "language": "english",
+                    "language": detector.detect_language_of(text).name.lower(),
                 })
     elif path_obj.suffix == ".json":
         with open(path_obj, "r", encoding="utf-8") as f:
@@ -150,14 +155,14 @@ def load_input_texts(path: str) -> list[dict]:
                     "text": item,
                     "domain": "general",
                     "difficulty": "medium",
-                    "language": "english",
+                    "language": detector.detect_language_of(item).name.lower(),
                 })
             elif isinstance(item, dict):
                 results.append({
                     "text": item["text"],
                     "domain": item.get("domain", "general"),
                     "difficulty": item.get("difficulty", "medium"),
-                    "language": item.get("language", "english"),
+                    "language": item.get("language", detector.detect_language_of(item["text"]).name.lower()),
                 })
     elif path_obj.suffix == ".txt":
         text = path_obj.read_text(encoding="utf-8").strip()
@@ -166,7 +171,7 @@ def load_input_texts(path: str) -> list[dict]:
                 "text": text,
                 "domain": path_obj.stem,
                 "difficulty": "medium",
-                "language": "english",
+                "language": detector.detect_language_of(text).name.lower(),
             })
     else:
         raise ValueError(f"Unsupported input format: {path_obj.suffix}")
@@ -957,7 +962,7 @@ async def main(
         texts_path = input_texts_path or config.get("input_texts", {}).get("path")
         if texts_path:
             logger.info(f"Loading texts from {texts_path}")
-            corpus = list(filter(lambda it: it["language"] == lang, load_input_texts(texts_path)))
+            corpus = list(filter(lambda it: it["language"] == lang, load_input_texts(texts_path, languages)))
         else:
             corpus = await synthesize_corpus(generator_llm, config, lang)
 
