@@ -9,7 +9,7 @@ from ragu.common.prompts.default_models import ArtifactsModel
 from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.common.prompts.messages import ChatMessages, render_with_few_shots
 from ragu.common.prompts.icl_config import ICLConfig
-from ragu.common.prompts.icl_manager import InContextLearningManager
+from ragu.common.prompts.icl_manager import InContextLearningManager, resolve_example_path
 from ragu.graph.types import Entity, Relation
 from ragu.models.llm import LLM
 from ragu.models.embedder import Embedder
@@ -66,7 +66,10 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         if icl_config and icl_config.enabled and embedder:
             self.icl_manager = InContextLearningManager(
                 embedder=embedder,
-                example_file=f"{icl_config.examples_base_path}/artifact_extraction_examples.json",
+                example_file=resolve_example_path(
+                    icl_config.examples_base_path,
+                    "artifact_extraction_examples.json",
+                ),
                 config=icl_config,
                 language=icl_config.language
             )

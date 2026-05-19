@@ -42,7 +42,8 @@ from pydantic import (
     Field,
     conint,
     confloat,
-    model_validator
+    field_validator,
+    model_validator,
 )
 
 
@@ -50,6 +51,11 @@ class EntityModel(BaseModel):
     entity_name: str = Field(..., description="Normalized entity name, capitalized")
     entity_type: str = Field(..., description="Entity type")
     description: str = Field(..., description="Detailed description of the entity from the text")
+
+    @field_validator("entity_type")
+    @classmethod
+    def _normalize_entity_type(cls, v: str) -> str:
+        return v.split(" (")[0].strip() if v else "UNKNOWN"
 
 
 class RelationModel(BaseModel):
@@ -60,6 +66,11 @@ class RelationModel(BaseModel):
     relationship_strength: conint(ge=0, le=5) = Field(
         ..., description="Relationship strength 0–5 (0 = weak, 5 = strong)"
     )
+
+    @field_validator("relation_type")
+    @classmethod
+    def _normalize_relation_type(cls, v: str) -> str:
+        return v.split(" (")[0].strip() if v else "UNKNOWN"
 
 
 class ArtifactsModel(BaseModel):

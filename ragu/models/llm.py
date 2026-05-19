@@ -8,6 +8,7 @@ from typing_extensions import override
 
 from openai.types.chat import ChatCompletionMessageParam
 from pydantic import BaseModel
+from pydantic_core import PydanticUndefined
 
 from ragu.common.logger import logger
 from ragu.models.openai import CachedAsyncOpenAI
@@ -97,7 +98,15 @@ class LLM(ABC):
                     if issubclass(output_schema, str):
                         results[idx] = ""  # type: ignore[assignment]
                     else:
-                        results[idx] = output_schema.model_construct()  # type: ignore[assignment]
+                        fallback = {}
+                        for _name, _fi in output_schema.model_fields.items():
+                            if _fi.default is not PydanticUndefined:
+                                fallback[_name] = _fi.default
+                            elif callable(_fi.default_factory):
+                                fallback[_name] = _fi.default_factory()
+                            else:
+                                fallback[_name] = None
+                        results[idx] = output_schema.model_construct(**fallback)  # type: ignore[assignment]
                 pbar.update(1)
 
         pbar.close()

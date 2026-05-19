@@ -175,6 +175,49 @@ def load_input_texts(path: str) -> list[dict]:
     return results
 
 
+def deduplicate_corpus(corpus: list[dict]) -> list[dict]:
+    """
+    Remove duplicate texts from corpus based on exact content match.
+
+    :param corpus: List of corpus items.
+    :return: Deduplicated list preserving insertion order.
+    """
+    seen: set[str] = set()
+    unique: list[dict] = []
+    for item in corpus:
+        text = item["text"].strip()
+        if text not in seen:
+            seen.add(text)
+            unique.append(item)
+    duplicates = len(corpus) - len(unique)
+    if duplicates:
+        logger.info(f"Removed {duplicates} duplicate texts from corpus")
+    return unique
+
+
+def load_existing_texts(output_path: str, prompt_type: str) -> set[str]:
+    """
+    Load input texts already saved in examples file for a given prompt type.
+
+    :param output_path: Directory containing example JSON files.
+    :param prompt_type: Prompt type to load examples for.
+    :return: Set of stripped input texts from existing examples.
+    """
+    filepath = os.path.join(output_path, f"{prompt_type}_examples.json")
+    if not os.path.exists(filepath):
+        return set()
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return {
+            ex["input_text"].strip()
+            for ex in data.get("examples", [])
+        }
+    except (json.JSONDecodeError, KeyError) as e:
+        logger.warning(f"Could not read existing examples from {filepath}: {e}")
+        return set()
+
+
 def _text_preview(text: str, max_len: int = 120) -> str:
     """Return a truncated single-line preview of text for logging."""
     single = text.replace("\n", " ")
@@ -781,7 +824,13 @@ async def judge_examples_batch(
 
     accepted = []
     for example, rating_result in zip(examples, ratings):
-        rating = rating_result.rating
+        rating = getattr(rating_result, 'rating', None)
+        if rating is None:
+            logger.warning(
+                f"  SKIPPED (no rating returned): "
+                f"\"{_text_preview(example['input_text'])}\""
+            )
+            continue
         if rating >= min_rating:
             example["quality_rating"] = rating
             accepted.append(example)
@@ -908,11 +957,11 @@ async def main(
         texts_path = input_texts_path or config.get("input_texts", {}).get("path")
         if texts_path:
             logger.info(f"Loading texts from {texts_path}")
-            corpus = load_input_texts(texts_path)
-            for item in corpus:
-                item["language"] = lang
+            corpus = list(filter(lambda it: it["language"] == lang, load_input_texts(texts_path)))
         else:
             corpus = await synthesize_corpus(generator_llm, config, lang)
+
+        corpus = deduplicate_corpus(corpus)
 
         if not corpus:
             logger.warning(f"No texts available for language '{lang}', skipping")
@@ -924,9 +973,30 @@ async def main(
         for prompt_type in config["prompt_types"]:
             logger.info(f"\nGenerating examples for: {prompt_type}")
 
+            existing_texts = load_existing_texts(config["output_path"], prompt_type)
+            corpus_for_type = [
+                it for it in corpus
+                if it["text"].strip() not in existing_texts
+            ]
+
+            if not corpus_for_type:
+                logger.info(
+                    f"All {len(corpus)} texts already processed for "
+                    f"{prompt_type}, skipping"
+                )
+                continue
+
+            skipped = len(corpus) - len(corpus_for_type)
+            if skipped:
+                logger.info(
+                    f"Skipping {skipped} texts already in "
+                    f"{prompt_type}_examples.json, "
+                    f"processing {len(corpus_for_type)}"
+                )
+
             examples = await generate_examples_for_prompt_type(
                 prompt_type=prompt_type,
-                corpus=corpus,
+                corpus=corpus_for_type,
                 generator_llm=generator_llm,
                 language=lang,
                 entity_types=entity_types,

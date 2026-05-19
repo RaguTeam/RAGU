@@ -74,7 +74,7 @@ Perform a comprehensive validation of the provided entity list against the sourc
 ### STEP 3 — FIX incorrect entity types
 - Verify each entity's type is accurate given how the entity is described and used in the text.
 {% if entity_types %}
-- Every entity MUST use one of the following allowed types: {{ entity_types | join(', ') }}
+- Every entity MUST use one of the following allowed types: {{ entity_types }}
 {% else %}
 - Ensure types are concise, consistent UPPER_CASE labels (e.g., PERSON, ORGANIZATION, LOCATION, EVENT, PRODUCT, CONCEPT, TECHNOLOGY, DATE, METRIC, DOCUMENT, LAW).
 - Ensure type consistency: the same kind of entity must always receive the same type label across the entire list. Do not use "COMPANY" for one and "ORGANIZATION" for another if they are equivalent categories.
@@ -203,7 +203,7 @@ Perform a comprehensive validation of the provided relation list against the sou
 ### STEP 4 — FIX incorrect relation types
 - Verify each relation's type accurately reflects the nature of the relationship as described in the text.
 {% if relation_types %}
-- Every relation MUST use one of the following allowed types: {{ relation_types | join(', ') }}
+- Every relation MUST use one of the following allowed types: {{ relation_types }}
 {% else %}
 - Ensure types are concise, consistent UPPER_SNAKE_CASE labels (e.g., CEO_OF, LOCATED_IN, PRODUCES, PART_OF, ANNOUNCED_AT, SUBSIDIARY_OF, FOUNDED_BY, CAUSES, PRESENTED_AT, WORKS_FOR, HOSTS).
 - Ensure type consistency: the same kind of relationship must always receive the same type label across the entire list.

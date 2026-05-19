@@ -15,7 +15,7 @@ from ragu.common.prompts.default_models import (
 from ragu.common.prompts.messages import ChatMessages, render_with_few_shots
 from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.common.prompts.icl_config import ICLConfig
-from ragu.common.prompts.icl_manager import InContextLearningManager
+from ragu.common.prompts.icl_manager import InContextLearningManager, resolve_example_path
 from ragu.graph.types import Entity, Relation
 from ragu.models.llm import LLM
 from ragu.models.embedder import Embedder
@@ -89,13 +89,19 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         if icl_config and icl_config.enabled and embedder:
             self.icl_entity = InContextLearningManager(
                 embedder=embedder,
-                example_file=f"{icl_config.examples_base_path}/entity_extraction_examples.json",
+                example_file=resolve_example_path(
+                    icl_config.examples_base_path,
+                    "entity_extraction_examples.json",
+                ),
                 config=icl_config,
                 language=icl_config.language
             )
             self.icl_relation = InContextLearningManager(
                 embedder=embedder,
-                example_file=f"{icl_config.examples_base_path}/relation_extraction_examples.json",
+                example_file=resolve_example_path(
+                    icl_config.examples_base_path,
+                    "relation_extraction_examples.json",
+                ),
                 config=icl_config,
                 language=icl_config.language
             )

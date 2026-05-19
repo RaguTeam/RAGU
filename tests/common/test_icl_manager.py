@@ -5,7 +5,7 @@ import pytest
 
 from ragu.models.embedder import Embedder
 from ragu.common.prompts.icl_config import ICLConfig
-from ragu.common.prompts.icl_manager import Example, InContextLearningManager
+from ragu.common.prompts.icl_manager import Example, InContextLearningManager, resolve_example_path
 
 
 class DeterministicEmbedder(Embedder):
@@ -302,3 +302,57 @@ class TestEmbeddingCaching:
         )
         await manager.initialize()
         assert len(manager._embeddings) == 0
+
+
+class TestResolveExamplePath:
+    def test_none_returns_builtin_path(self):
+        result = resolve_example_path(None, "artifact_extraction_examples.json")
+        assert result.endswith("artifact_extraction_examples.json")
+        assert "icl_examples" in result
+
+    def test_none_returns_existing_file(self):
+        from pathlib import Path
+        result = resolve_example_path(None, "artifact_extraction_examples.json")
+        assert Path(result).exists()
+
+    def test_absolute_path_passed_through(self, tmp_path):
+        base = str(tmp_path / "my_examples")
+        result = resolve_example_path(base, "test.json")
+        assert result == str(tmp_path / "my_examples" / "test.json")
+
+    def test_relative_path_resolved_from_cwd(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        result = resolve_example_path("custom_dir", "test.json")
+        assert result == str(tmp_path / "custom_dir" / "test.json")
+
+
+class TestBuiltinExamples:
+    @pytest.mark.asyncio
+    async def test_load_builtin_artifact_examples(self, embedder):
+        config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
+        path = resolve_example_path(None, "artifact_extraction_examples.json")
+        manager = InContextLearningManager(
+            embedder=embedder, example_file=path, config=config,
+        )
+        await manager.initialize()
+        assert len(manager.examples) > 0
+
+    @pytest.mark.asyncio
+    async def test_load_builtin_entity_examples(self, embedder):
+        config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
+        path = resolve_example_path(None, "entity_extraction_examples.json")
+        manager = InContextLearningManager(
+            embedder=embedder, example_file=path, config=config,
+        )
+        await manager.initialize()
+        assert len(manager.examples) > 0
+
+    @pytest.mark.asyncio
+    async def test_load_builtin_relation_examples(self, embedder):
+        config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
+        path = resolve_example_path(None, "relation_extraction_examples.json")
+        manager = InContextLearningManager(
+            embedder=embedder, example_file=path, config=config,
+        )
+        await manager.initialize()
+        assert len(manager.examples) > 0

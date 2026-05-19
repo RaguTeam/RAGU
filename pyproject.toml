@@ -48,6 +48,9 @@ test = [
 [tool.setuptools.packages.find]
 include = ["ragu*"]
 
+[tool.setuptools.package-data]
+"ragu" = ["common/prompts/icl_examples/*.json"]
+
 [tool.coverage.run]
 omit = [
     "tests/*",

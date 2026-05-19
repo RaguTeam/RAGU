@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Dict, Any
 from uuid import uuid4
 
@@ -28,6 +29,25 @@ import numpy as np
 from ragu.common.logger import logger
 from ragu.models.embedder import Embedder
 from ragu.common.prompts.icl_config import ICLConfig
+
+_BUILTIN_EXAMPLES_DIR = Path(__file__).parent / "icl_examples"
+
+
+def resolve_example_path(base_path: str | None, filename: str) -> str:
+    """
+    Resolve the full path to an ICL example file.
+
+    :param base_path: Custom base directory, or ``None`` to use the
+        built-in examples shipped with the package.
+    :param filename: JSON file name (e.g. ``"artifact_extraction_examples.json"``).
+    :return: Absolute path as a string.
+    """
+    if base_path is None:
+        return str(_BUILTIN_EXAMPLES_DIR / filename)
+    p = Path(base_path)
+    if not p.is_absolute():
+        p = Path.cwd() / p
+    return str(p / filename)
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,11 +88,13 @@ class InContextLearningManager:
 
     Example usage:
     ```python
+    from ragu.common.prompts.icl_manager import resolve_example_path
+
     embedder = EmbedderOpenAI(client=client, model_name="text-embedding-3-small", dim=1536)
     config = ICLConfig(num_examples=2, language="english")
     manager = InContextLearningManager(
         embedder=embedder,
-        example_file="ragu/common/prompts/icl_examples/artifact_extraction_examples.json",
+        example_file=resolve_example_path(None, "artifact_extraction_examples.json"),
         config=config,
         language="english"
     )

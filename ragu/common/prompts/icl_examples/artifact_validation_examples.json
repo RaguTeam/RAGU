@@ -4,720 +4,3205 @@
     "english",
     "russian"
   ],
-  "total_examples": 4,
+  "total_examples": 18,
   "generated_by": {
-    "generator_model": "t-tech/T-pro-it-2.0",
-    "judge_model": "qwen/qwen3.6-max-preview"
+    "generator_model": "openai/gpt-5.1",
+    "judge_model": "google/gemini-2.5-pro"
   },
-  "generated_at": "2026-05-08T14:28:27.161572Z",
+  "generated_at": "2026-05-19T21:13:01.570830Z",
   "examples": [
     {
+      "input_text": "The highly anticipated criminal trial for Sam Bankman-Fried, former CEO of bankrupt crypto exchange FTX, started Tuesday to determine whether he’s guilty of seven counts of fraud and conspiracy.\nSBF, as he’s known, has pleaded not-guilty to some seven charges of fraud and conspiracy.\nThe second week of the trial’s standout testimony came from Alameda Research’s former CEO Caroline Ellison, who claimed she took $14 billion from customers to repay debts to lenders, using them as a line of credit under the instruction of SBF.\nThe prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:47:35.276125Z"
+      },
       "output": {
         "entities": [
           {
-            "entity_name": "Emily Carter",
-            "entity_type": "PERSON",
-            "description": "Dr. Emily Carter is a pediatrician at Green Valley Hospital in Denver who spoke at the Annual Health Conference organized by the AMA."
-          },
-          {
-            "entity_name": "Green Valley Hospital",
-            "entity_type": "ORGANIZATION",
-            "description": "Green Valley Hospital is a healthcare facility located in Denver where Dr. Emily Carter practices."
-          },
-          {
-            "entity_name": "Denver",
-            "entity_type": "LOCATION",
-            "description": "Denver is the city where Green Valley Hospital is located and where the Annual Health Conference took place."
-          },
-          {
-            "entity_name": "Annual Health Conference",
+            "entity_name": "Criminal Trial",
             "entity_type": "EVENT",
-            "description": "The Annual Health Conference is an event organized by the American Medical Association to discuss advancements in medicine and public health."
+            "description": "Criminal trial to determine whether Sam Bankman-Fried is guilty of seven counts of fraud and conspiracy"
           },
           {
-            "entity_name": "American Medical Association",
+            "entity_name": "Sam Bankman-Fried",
+            "entity_type": "PERSON",
+            "description": "Sam Bankman-Fried, also referred to as SBF, former CEO of bankrupt crypto exchange FTX and founder of FTX, defendant in the criminal trial on fraud and conspiracy charges"
+          },
+          {
+            "entity_name": "SBF",
+            "entity_type": "PERSON",
+            "description": "Initialism and nickname for Sam Bankman-Fried"
+          },
+          {
+            "entity_name": "Chief Executive Officer",
+            "entity_type": "PROFESSION",
+            "description": "Chief executive officer role held by Sam Bankman-Fried at FTX and by Caroline Ellison at Alameda Research"
+          },
+          {
+            "entity_name": "FTX",
             "entity_type": "ORGANIZATION",
-            "description": "The American Medical Association organized the Annual Health Conference."
+            "description": "Bankrupt cryptocurrency exchange founded by Sam Bankman-Fried and at the center of the fraud and conspiracy case"
           },
           {
-            "entity_name": "FluShield",
+            "entity_name": "Alameda Research",
+            "entity_type": "ORGANIZATION",
+            "description": "Alameda Research, a trading firm whose former CEO was Caroline Ellison, involved in taking customer funds from FTX to repay lenders"
+          },
+          {
+            "entity_name": "Caroline Ellison",
+            "entity_type": "PERSON",
+            "description": "Caroline Ellison, former CEO of Alameda Research and key prosecution witness who testified about taking $14 billion from customers to repay debts to lenders under SBF’s instruction"
+          },
+          {
+            "entity_name": "14 Billion",
+            "entity_type": "MONEY",
+            "description": "Sum of $14,000,000,000 allegedly taken from customers to repay debts to lenders"
+          },
+          {
+            "entity_name": "Debts",
+            "entity_type": "MONEY",
+            "description": "Debts owed by Alameda Research (or related entities) to lenders, allegedly repaid using $14 billion taken from customers"
+          },
+          {
+            "entity_name": "Lenders",
+            "entity_type": "PERSON",
+            "description": "Lenders to whom debts were owed and who were repaid using customers’ funds, according to Caroline Ellison’s testimony"
+          },
+          {
+            "entity_name": "Line Of Credit",
             "entity_type": "PRODUCT",
-            "description": "FluShield is a vaccine developed by MedTech Pharmaceuticals to prevent seasonal influenza among children."
+            "description": "Line of credit allegedly created or used by taking $14 billion from customers to repay lenders, under instruction of SBF"
           },
           {
-            "entity_name": "MedTech Pharmaceuticals",
+            "entity_name": "Prosecution",
             "entity_type": "ORGANIZATION",
-            "description": "MedTech Pharmaceuticals is the developer of the FluShield vaccine."
+            "description": "The prosecution, the side in the criminal trial arguing that Sam Bankman-Fried knowingly committed fraud to gain wealth, power and influence"
           },
           {
-            "entity_name": "Centers for Disease Control and Prevention",
+            "entity_name": "Defense",
             "entity_type": "ORGANIZATION",
-            "description": "The Centers for Disease Control and Prevention (CDC) is a government agency mentioned as a collaborator in vaccine distribution."
+            "description": "The defense, the legal team arguing on behalf of Sam Bankman-Fried that he acted in good faith and did not intend to commit fraud or steal"
           },
           {
-            "entity_name": "University of Colorado",
-            "entity_type": "ORGANIZATION",
-            "description": "The University of Colorado conducted a study demonstrating a 90% reduction in flu-related hospitalizations among vaccinated children."
+            "entity_name": "Seven Counts",
+            "entity_type": "CRIME",
+            "description": "Seven counts brought in the criminal case against Sam Bankman-Fried, consisting of fraud and conspiracy charges"
           },
           {
-            "entity_name": "Denver Convention Center",
-            "entity_type": "LOCATION",
-            "description": "The Denver Convention Center is the venue where the Annual Health Conference was held."
+            "entity_name": "Fraud",
+            "entity_type": "CRIME",
+            "description": "Fraud, a criminal offense forming part of the charges against Sam Bankman-Fried"
+          },
+          {
+            "entity_name": "Conspiracy",
+            "entity_type": "CRIME",
+            "description": "Conspiracy, a criminal offense forming part of the charges against Sam Bankman-Fried"
+          },
+          {
+            "entity_name": "Second Week Of Trial",
+            "entity_type": "EVENT",
+            "description": "The second week of the criminal trial during which standout testimony from Caroline Ellison occurred"
+          },
+          {
+            "entity_name": "Not-Guilty Plea",
+            "entity_type": "EVENT",
+            "description": "Plea of not guilty entered by Sam Bankman-Fried to some seven charges of fraud and conspiracy"
+          },
+          {
+            "entity_name": "Customers",
+            "entity_type": "PERSON",
+            "description": "Customers whose funds were allegedly taken by Caroline Ellison to repay debts to lenders"
           }
         ],
         "relations": [
           {
-            "source_entity": "Emily Carter",
-            "target_entity": "Green Valley Hospital",
+            "source_entity": "Sam Bankman-Fried",
+            "target_entity": "Criminal Trial",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The criminal trial is being held to determine whether Sam Bankman-Fried is guilty of fraud and conspiracy",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Criminal Trial",
+            "target_entity": "Sam Bankman-Fried",
+            "relation_type": "HAS_PARTICIPANT",
+            "description": "Sam Bankman-Fried is the defendant whose case is being adjudicated in the criminal trial",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Sam Bankman-Fried",
+            "target_entity": "Chief Executive Officer",
+            "relation_type": "WORKS_AS",
+            "description": "Sam Bankman-Fried previously served as CEO of FTX",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Sam Bankman-Fried",
+            "target_entity": "FTX",
             "relation_type": "WORKPLACE",
-            "description": "Dr. Emily Carter is a pediatrician at Green Valley Hospital.",
+            "description": "Sam Bankman-Fried was CEO of FTX",
             "relationship_strength": 5
           },
           {
-            "source_entity": "Emily Carter",
-            "target_entity": "Annual Health Conference",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Dr. Emily Carter spoke at the Annual Health Conference.",
+            "source_entity": "Caroline Ellison",
+            "target_entity": "Chief Executive Officer",
+            "relation_type": "WORKS_AS",
+            "description": "Caroline Ellison previously served as CEO of Alameda Research",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Caroline Ellison",
+            "target_entity": "Alameda Research",
+            "relation_type": "WORKPLACE",
+            "description": "Caroline Ellison worked at and led Alameda Research",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Sam Bankman-Fried",
+            "target_entity": "SBF",
+            "relation_type": "ALTERNATIVE_NAME",
+            "description": "SBF is an alternative name for Sam Bankman-Fried",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "SBF",
+            "target_entity": "Sam Bankman-Fried",
+            "relation_type": "ALTERNATIVE_NAME",
+            "description": "Sam Bankman-Fried is the person referred to by the nickname SBF",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "FTX",
+            "target_entity": "Sam Bankman-Fried",
+            "relation_type": "FOUNDED_BY",
+            "description": "Sam Bankman-Fried founded FTX",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Annual Health Conference",
-            "target_entity": "American Medical Association",
-            "relation_type": "KNOWS",
-            "description": "The American Medical Association organized the Annual Health Conference.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "FluShield",
-            "target_entity": "MedTech Pharmaceuticals",
-            "relation_type": "PRODUCES",
-            "description": "FluShield is a vaccine developed by MedTech Pharmaceuticals.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Emily Carter",
-            "target_entity": "FluShield",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Dr. Emily Carter discussed the benefits of FluShield during her presentation.",
+            "source_entity": "Fraud",
+            "target_entity": "Seven Counts",
+            "relation_type": "PART_OF",
+            "description": "The seven counts in the criminal trial consist of fraud and conspiracy",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Emily Carter",
-            "target_entity": "Centers for Disease Control and Prevention",
-            "relation_type": "KNOWS",
-            "description": "Dr. Emily Carter emphasized collaboration with the CDC for vaccine access.",
+            "source_entity": "Conspiracy",
+            "target_entity": "Seven Counts",
+            "relation_type": "PART_OF",
+            "description": "The seven counts in the criminal trial consist of fraud and conspiracy",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Sam Bankman-Fried",
+            "target_entity": "Seven Counts",
+            "relation_type": "CHARGED_WITH",
+            "description": "Sam Bankman-Fried is charged with seven counts of fraud and conspiracy",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Caroline Ellison",
+            "target_entity": "Criminal Trial",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Caroline Ellison testified in the criminal trial as a key witness",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Caroline Ellison",
+            "target_entity": "14 Billion",
+            "relation_type": "HANDLES",
+            "description": "Caroline Ellison stated that she took $14 billion from customers",
             "relationship_strength": 3
           },
           {
-            "source_entity": "University of Colorado",
-            "target_entity": "FluShield",
-            "relation_type": "AGENT",
-            "description": "The University of Colorado conducted a study on the effectiveness of FluShield.",
+            "source_entity": "14 Billion",
+            "target_entity": "Debts",
+            "relation_type": "USED_FOR",
+            "description": "The $14 billion was used to repay debts to lenders",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Debts",
+            "target_entity": "Lenders",
+            "relation_type": "OWED_TO",
+            "description": "Debts were owed to lenders",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "14 Billion",
+            "target_entity": "Line Of Credit",
+            "relation_type": "USED_AS",
+            "description": "Customer funds amounting to $14 billion functioned as a line of credit",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Caroline Ellison",
+            "target_entity": "Sam Bankman-Fried",
+            "relation_type": "DIRECTED_BY",
+            "description": "Caroline Ellison said she acted under the instruction of SBF when taking the funds",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Annual Health Conference",
-            "target_entity": "Denver Convention Center",
-            "relation_type": "LOCATED_IN",
-            "description": "The Annual Health Conference was held at the Denver Convention Center.",
+            "source_entity": "Prosecution",
+            "target_entity": "Criminal Trial",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The prosecution is the party in the criminal trial presenting the case against Sam Bankman-Fried",
             "relationship_strength": 5
+          },
+          {
+            "source_entity": "Defense",
+            "target_entity": "Criminal Trial",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The defense is the party in the criminal trial representing Sam Bankman-Fried",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Sam Bankman-Fried",
+            "target_entity": "Fraud",
+            "relation_type": "ACCUSED_OF",
+            "description": "The prosecution accuses Sam Bankman-Fried of knowingly committing fraud",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Sam Bankman-Fried",
+            "target_entity": "Conspiracy",
+            "relation_type": "ACCUSED_OF",
+            "description": "The prosecution accuses Sam Bankman-Fried of conspiracy",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Caroline Ellison",
+            "target_entity": "Second Week Of Trial",
+            "relation_type": "OCCURS_IN",
+            "description": "Caroline Ellison’s standout testimony occurred in the second week of the trial",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Second Week Of Trial",
+            "target_entity": "Criminal Trial",
+            "relation_type": "PART_OF",
+            "description": "The second week is a temporal segment of the overall criminal trial",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Sam Bankman-Fried",
+            "target_entity": "Not-Guilty Plea",
+            "relation_type": "PERFORMS",
+            "description": "Sam Bankman-Fried entered a not-guilty plea to the fraud and conspiracy charges",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Not-Guilty Plea",
+            "target_entity": "Seven Counts",
+            "relation_type": "REGARDING",
+            "description": "The not-guilty plea concerns the seven fraud and conspiracy charges",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "14 Billion",
+            "target_entity": "Customers",
+            "relation_type": "OWNED_BY",
+            "description": "The $14 billion taken came from customers",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Customers",
+            "target_entity": "FTX",
+            "relation_type": "ASSOCIATED_WITH",
+            "description": "Customers had funds on FTX that were allegedly taken and used as a line of credit",
+            "relationship_strength": 3
           }
         ]
       },
-      "id": "51967c16-2d49-4d5d-9ea9-cae0d7b8a0df",
-      "input_text": "Dr. Emily Carter, a pediatrician at Green Valley Hospital in Denver, recently spoke at the Annual Health Conference organized by the American Medical Association (AMA). During her presentation, she discussed the benefits of the new vaccine, FluShield, developed by MedTech Pharmaceuticals. According to Dr. Carter, FluShield has shown remarkable effectiveness in preventing seasonal influenza among children aged 6 months to 12 years. \n\nThe conference, held at the Denver Convention Center, brought together healthcare professionals from across the United States to address advancements in medicine and public health. Dr. Carter emphasized the importance of collaboration between hospitals, pharmaceutical companies, and government agencies like the Centers for Disease Control and Prevention (CDC) to ensure widespread access to vaccines. \n\nShe also highlighted a recent study conducted by the University of Colorado, which demonstrated a 90% reduction in flu-related hospitalizations among vaccinated children. Dr. Carter urged parents to consult their pediatricians and consider FluShield as part of their child’s immunization schedule.",
-      "metadata": {
-        "domain": "medicine",
-        "difficulty": "easy",
-        "language": "english",
-        "generated_at": "2026-05-07T14:47:18.721774Z"
-      },
-      "quality_rating": 8
+      "quality_rating": 10,
+      "id": "d4ced260-0c57-45b4-8dbb-a5eb01c30c6b"
     },
     {
+      "input_text": "\"And if the Braves let this be the story of their series, that's on them.\nBut while Nocturne could have easily settled and coasted on classic Castlevania vibes, the new show steps its game up considerably by using the franchise’s iconic lore to challenge your understanding of what it truly means to fight for freedom, equality, and fraternity.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:47:35.276125Z"
+      },
       "output": {
         "entities": [
           {
-            "entity_name": "OpenAI",
+            "entity_name": "Braves",
             "entity_type": "ORGANIZATION",
-            "description": "A leading tech firm that unveiled an enhanced version of its GPT-4 model at the 2024 World Artificial Intelligence Conference, emphasizing improved reasoning capabilities for enterprise applications. Led by CEO Sam Altman."
+            "description": "American professional baseball team referred to as the Braves (likely the Atlanta Braves), mentioned as a team in a series context"
           },
           {
-            "entity_name": "Google DeepMind",
-            "entity_type": "ORGANIZATION",
-            "description": "A leading tech firm that demonstrated its Gemini AI system at the 2024 World Artificial Intelligence Conference, which integrates multimodal processing for text, images, and audio. Led by Demis Hassabis."
+            "entity_name": "Castlevania",
+            "entity_type": "WORK_OF_ART",
+            "description": "Television/animated series franchise titled Castlevania, providing classic vibes and iconic lore referenced by the text"
           },
           {
-            "entity_name": "Anthropic",
-            "entity_type": "ORGANIZATION",
-            "description": "A rising competitor in AI that introduced Claude 3, emphasizing superior safety protocols and nuanced conversation capabilities. Announced a strategic partnership with Microsoft to deploy Claude 3 on Azure."
+            "entity_name": "Nocturne",
+            "entity_type": "WORK_OF_ART",
+            "description": "New television show titled Castlevania: Nocturne (referred to as Nocturne), set within or derived from the Castlevania franchise"
           },
+          {
+            "entity_name": "Freedom",
+            "entity_type": "IDEOLOGY",
+            "description": "Abstract concept referenced as something the characters or themes fight for; the lore challenges the understanding of what it means to fight for freedom"
+          },
+          {
+            "entity_name": "Equality",
+            "entity_type": "IDEOLOGY",
+            "description": "Abstract concept referenced alongside freedom and fraternity; the lore challenges the understanding of what it means to fight for equality"
+          },
+          {
+            "entity_name": "Fraternity",
+            "entity_type": "IDEOLOGY",
+            "description": "Abstract concept referenced alongside freedom and equality; the lore challenges the understanding of what it means to fight for fraternity, and evokes the historical motto ‘liberty, equality, fraternity’"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Nocturne",
+            "target_entity": "Castlevania",
+            "relation_type": "PART_OF",
+            "description": "Nocturne is a new show that belongs to or is part of the broader Castlevania franchise",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Nocturne",
+            "target_entity": "Castlevania",
+            "relation_type": "BASED_ON",
+            "description": "The lore and world of the Castlevania franchise underpins and gives rise to the story and themes of Nocturne",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Nocturne",
+            "target_entity": "Freedom",
+            "relation_type": "THEMATIC_RELATION",
+            "description": "The narrative of Nocturne explores and interrogates the meaning of fighting for freedom",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Nocturne",
+            "target_entity": "Equality",
+            "relation_type": "THEMATIC_RELATION",
+            "description": "The narrative of Nocturne explores and interrogates the meaning of fighting for equality",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Nocturne",
+            "target_entity": "Fraternity",
+            "relation_type": "THEMATIC_RELATION",
+            "description": "The narrative of Nocturne explores and interrogates the meaning of fighting for fraternity",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "248cb5d8-4142-4899-80fa-9f9e88ec4a94"
+    },
+    {
+      "input_text": "Monday’s trial hearing revealed plenty of juicy tidbits, including the $26.3 billion Google spent making itself the default search engine across platforms in 2021, how Google tried to take it further and have Chrome preinstalled on iPhones and more.\nThe company did accomplish that goal, but in doing so, it inadvertently and profoundly changed how the internet looked.\nThe case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:47:35.276125Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "2021",
+            "entity_type": "DATE",
+            "description": "The year 2021 mentioned as the time when Google spent $26.3 billion to be the default search engine across platforms."
+          },
+          {
+            "entity_name": "$26.3 Billion",
+            "entity_type": "MONEY",
+            "description": "The amount of money, 26.3 billion US dollars, that Google spent to make itself the default search engine across platforms in 2021."
+          },
+          {
+            "entity_name": "Google",
+            "entity_type": "ORGANIZATION",
+            "description": "A multinational technology company that spent $26.3 billion to be the default search engine, tried to have Chrome preinstalled on iPhones, and is accused of siphoning off news publishers’ content, readers, and ad revenue through anticompetitive means."
+          },
+          {
+            "entity_name": "Chrome",
+            "entity_type": "PRODUCT",
+            "description": "A web browser developed by Google, which Google tried to have preinstalled on iPhones."
+          },
+          {
+            "entity_name": "Iphone",
+            "entity_type": "PRODUCT",
+            "description": "A line of smartphones developed by Apple Inc., on which Google tried to have its Chrome browser preinstalled."
+          },
+          {
+            "entity_name": "Monday Trial Hearing",
+            "entity_type": "EVENT",
+            "description": "The trial hearing that took place on Monday, during which information was revealed about Google’s spending and conduct."
+          },
+          {
+            "entity_name": "Case",
+            "entity_type": "EVENT",
+            "description": "A court case filed by Helena World Chronicle against Google, alleging that Google siphons off news publishers’ content, readers, and ad revenue through anticompetitive means."
+          },
+          {
+            "entity_name": "Helena World Chronicle",
+            "entity_type": "ORGANIZATION",
+            "description": "A news publisher based in the US state of Arkansas that filed the case against Google, alleging anticompetitive behavior."
+          },
+          {
+            "entity_name": "Arkansas",
+            "entity_type": "STATE_OR_PROVINCE",
+            "description": "The US state where Helena World Chronicle is based."
+          },
+          {
+            "entity_name": "Monday",
+            "entity_type": "DATE",
+            "description": "The day of the week on which the trial hearing took place."
+          },
+          {
+            "entity_name": "News Publishers",
+            "entity_type": "ORGANIZATION",
+            "description": "News publishers whose content, readers, and ad revenue are allegedly siphoned off by Google through anticompetitive means."
+          },
+          {
+            "entity_name": "Readers",
+            "entity_type": "PERSON",
+            "description": "Readers of news publishers whose attention is allegedly siphoned off by Google."
+          },
+          {
+            "entity_name": "Ad Revenue",
+            "entity_type": "MONEY",
+            "description": "Advertising revenue that news publishers allegedly lose due to Google’s anticompetitive behavior."
+          },
+          {
+            "entity_name": "Anticompetitive Means",
+            "entity_type": "CRIME",
+            "description": "Anticompetitive means allegedly used by Google to siphon off news publishers’ content, readers, and ad revenue."
+          },
+          {
+            "entity_name": "Internet",
+            "entity_type": "LOCATION",
+            "description": "The internet ecosystem whose appearance and structure were profoundly changed as a result of Google achieving default search status."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Google",
+            "target_entity": "Monday Trial Hearing",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The Monday trial hearing is the context in which details about Google’s spending and conduct were revealed.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Monday Trial Hearing",
+            "target_entity": "Case",
+            "relation_type": "SUBEVENT_OF",
+            "description": "The Monday trial hearing is held regarding the case filed against Google.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "$26.3 Billion",
+            "relation_type": "EXPENDITURE",
+            "description": "Google spent $26.3 billion in connection with making itself the default search engine across platforms.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "$26.3 Billion",
+            "target_entity": "2021",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The expenditure of $26.3 billion occurred in the year 2021.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Chrome",
+            "relation_type": "PRODUCES",
+            "description": "Google attempted to have its Chrome browser preinstalled on iPhones.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Chrome",
+            "target_entity": "Iphone",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Google attempted to have Chrome integrated as a preinstalled browser on iPhones.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Case",
+            "relation_type": "AGENT",
+            "description": "The case was filed by Helena World Chronicle against Google.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Arkansas",
+            "relation_type": "ORIGINS_FROM",
+            "description": "Helena World Chronicle originates from the state of Arkansas.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Case",
+            "target_entity": "Google",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Google is the defendant/target organization in the case filed by Helena World Chronicle.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Monday Trial Hearing",
+            "target_entity": "Monday",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The Monday trial hearing occurred on Monday.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Case",
+            "target_entity": "Google",
+            "relation_type": "LEGAL_CLAIM_AGAINST",
+            "description": "The case argues that Google siphons off news publishers’ content, readers, and ad revenue.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Case",
+            "target_entity": "News Publishers",
+            "relation_type": "AFFECTS",
+            "description": "The case concerns harms allegedly suffered by news publishers.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "News Publishers",
+            "target_entity": "Readers",
+            "relation_type": "HAS_AUDIENCE",
+            "description": "News publishers have readers whose attention is allegedly siphoned off.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "News Publishers",
+            "target_entity": "Ad Revenue",
+            "relation_type": "HAS_ASSET",
+            "description": "News publishers earn advertising revenue that is allegedly siphoned off.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Anticompetitive Means",
+            "relation_type": "USES_METHOD",
+            "description": "The case alleges that Google uses anticompetitive means.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Case",
+            "target_entity": "Anticompetitive Means",
+            "relation_type": "SUBJECT_OF",
+            "description": "The case is about the alleged use of anticompetitive means.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Internet",
+            "relation_type": "INFLUENCES",
+            "description": "Google’s accomplishment of becoming the default search engine changed how the internet looked.",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 9,
+      "id": "b94ff094-893e-4272-8286-da779743c8b6"
+    },
+    {
+      "input_text": "She admits that she may have misinterpreted the evidence, but maintains that Google manipulates Search to maximise ad revenue.\nThis whole line of argument is called “market definition.” If the court decides the relevant market is phones and app stores, not specifically Android ones, then Google’s on the road to victory.\nGoogle unveils new hardware: This week was Google’s annual hardware event, where the search and consumer tech giant showed off what it’s been working on.\nThe case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:47:35.276125Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Google",
+            "entity_type": "ORGANIZATION",
+            "description": "Multinational technology company that operates the Google Search engine and other consumer technology products; central subject accused of manipulating search and ad markets and unveiling new hardware"
+          },
+          {
+            "entity_name": "Search",
+            "entity_type": "PRODUCT",
+            "description": "Online search engine product operated by Google that is alleged to be manipulated to maximise advertising revenue"
+          },
+          {
+            "entity_name": "Ad revenue",
+            "entity_type": "MONEY",
+            "description": "Advertising revenue that Google is alleged to maximise or divert via manipulation of Search and anticompetitive practices"
+          },
+          {
+            "entity_name": "Market definition",
+            "entity_type": "LAW",
+            "description": "Legal argument line in the antitrust context concerning how the relevant market is defined (e.g., phones and app stores vs specifically Android ones)"
+          },
+          {
+            "entity_name": "Android",
+            "entity_type": "PRODUCT",
+            "description": "Mobile operating system platform whose app stores may define a narrower market in the court’s analysis"
+          },
+          {
+            "entity_name": "Phones",
+            "entity_type": "PRODUCT",
+            "description": "Broad product category of mobile phones mentioned as a possible relevant market in the legal argument"
+          },
+          {
+            "entity_name": "App stores",
+            "entity_type": "PRODUCT",
+            "description": "Digital distribution platforms for applications mentioned as part of the potential relevant market definition"
+          },
+          {
+            "entity_name": "Google annual hardware event",
+            "entity_type": "EVENT",
+            "description": "Annual event organized by Google focused on announcing and showcasing new hardware products"
+          },
+          {
+            "entity_name": "Hardware",
+            "entity_type": "PRODUCT",
+            "description": "New physical technology devices that Google unveils at its annual hardware event"
+          },
+          {
+            "entity_name": "Arkansas",
+            "entity_type": "STATE_OR_PROVINCE",
+            "description": "U.S. state where the publisher Helena World Chronicle is based"
+          },
+          {
+            "entity_name": "Helena World Chronicle",
+            "entity_type": "ORGANIZATION",
+            "description": "Arkansas-based news publisher that filed the antitrust case against Google"
+          },
+          {
+            "entity_name": "Court",
+            "entity_type": "ORGANIZATION",
+            "description": "Judicial body that will decide how to define the relevant market in the antitrust case involving Google"
+          },
+          {
+            "entity_name": "Antitrust case",
+            "entity_type": "EVENT",
+            "description": "Legal proceeding in which Helena World Chronicle accuses Google of anticompetitive conduct including siphoning content, readers, and ad revenue"
+          },
+          {
+            "entity_name": "News publishers",
+            "entity_type": "ORGANIZATION",
+            "description": "News publishers in general whose content, readers, and ad revenue are allegedly siphoned off by Google through anticompetitive means"
+          },
+          {
+            "entity_name": "Readers",
+            "entity_type": "PERSON",
+            "description": "Readers of news publishers, allegedly diverted by Google through its practices"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Google",
+            "target_entity": "Search",
+            "relation_type": "PRODUCES",
+            "description": "Google operates and controls the Search product referenced in the text",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Search",
+            "target_entity": "Ad revenue",
+            "relation_type": "INCOME",
+            "description": "Google is alleged to manipulate its Search product to maximise advertising revenue",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Market definition",
+            "target_entity": "Google",
+            "relation_type": "LAW",
+            "description": "Market definition is the legal/antitrust concept framing the argument about what the relevant market is in the court case",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Android",
+            "target_entity": "Phones",
+            "relation_type": "PART_OF",
+            "description": "Android is one of the specific platforms considered within the broader phones and app stores market in the market definition argument",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Android",
+            "target_entity": "App stores",
+            "relation_type": "PART_OF",
+            "description": "Android app stores are a subset of the broader app stores category in the legal market definition discussion",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Google annual hardware event",
+            "relation_type": "ORGANIZES",
+            "description": "Google organizes and hosts its annual hardware event where it showcases new devices",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Hardware",
+            "target_entity": "Google annual hardware event",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "The Google annual hardware event is where Google unveils new hardware products",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Arkansas",
+            "relation_type": "LOCATED_IN",
+            "description": "Helena World Chronicle is based in the U.S. state of Arkansas",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Google",
+            "relation_type": "AGENT",
+            "description": "Helena World Chronicle filed a legal case against Google alleging anticompetitive siphoning of content, readers, and ad revenue",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Court",
+            "target_entity": "Market definition",
+            "relation_type": "DECIDES",
+            "description": "The court will decide how to define the relevant market in the case involving Google",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Antitrust case",
+            "relation_type": "FILES",
+            "description": "Helena World Chronicle initiated an antitrust case against Google",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Antitrust case",
+            "relation_type": "DEFENDANT_IN",
+            "description": "Google is the defendant or target organization in the antitrust case filed by Helena World Chronicle",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Antitrust case",
+            "target_entity": "News publishers",
+            "relation_type": "AFFECTS",
+            "description": "News publishers are the group whose content and business metrics are allegedly affected by Google’s anticompetitive behavior described in the antitrust case",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Antitrust case",
+            "target_entity": "Readers",
+            "relation_type": "AFFECTS",
+            "description": "Readers are allegedly siphoned away from news publishers by Google through the practices challenged in the antitrust case",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Antitrust case",
+            "target_entity": "Ad revenue",
+            "relation_type": "CONCERNS",
+            "description": "Ad revenue is one of the main economic aspects at stake in the antitrust case against Google",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "49e9cf86-96f8-4f21-8045-d162da6d48c7"
+    },
+    {
+      "input_text": "Monday’s trial hearing revealed plenty of juicy tidbits, including the $26.3 billion Google spent making itself the default search engine across platforms in 2021, how Google tried to take it further and have Chrome preinstalled on iPhones and more.\nFor all the other benefits they get from Android, Google could solve this problem today if they wanted to.\nThis whole line of argument is called “market definition.” If the court decides the relevant market is phones and app stores, not specifically Android ones, then Google’s on the road to victory.\nThe case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:47:35.276125Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "2021",
+            "entity_type": "DATE",
+            "description": "The year 2021, when Google spent $26.3 billion to make itself the default search engine across platforms"
+          },
+          {
+            "entity_name": "$26.3 Billion",
+            "entity_type": "MONEY",
+            "description": "A sum of 26.3 billion U.S. dollars that Google spent to make itself the default search engine across platforms in 2021"
+          },
+          {
+            "entity_name": "Google",
+            "entity_type": "ORGANIZATION",
+            "description": "A large technology company that spent $26.3 billion to be the default search engine, tried to have Chrome preinstalled on iPhones, benefits from Android, and is the defendant in an antitrust case brought by Helena World Chronicle"
+          },
+          {
+            "entity_name": "Chrome",
+            "entity_type": "PRODUCT",
+            "description": "A web browser developed by Google that Google tried to have preinstalled on iPhones"
+          },
+          {
+            "entity_name": "Iphones",
+            "entity_type": "PRODUCT",
+            "description": "A line of smartphones produced by Apple, on which Google tried to have Chrome preinstalled"
+          },
+          {
+            "entity_name": "Android",
+            "entity_type": "PRODUCT",
+            "description": "A mobile operating system/platform developed by Google, from which Google derives various benefits and which is relevant to the market-definition discussion in the case"
+          },
+          {
+            "entity_name": "Trial Hearing",
+            "entity_type": "EVENT",
+            "description": "A legal trial hearing held on a Monday concerning Google’s conduct, including its spending to be the default search engine and related antitrust issues"
+          },
+          {
+            "entity_name": "Case",
+            "entity_type": "EVENT",
+            "description": "A legal case filed by Helena World Chronicle that argues Google siphons off news publishers’ content, readers, and ad revenue through anticompetitive means"
+          },
+          {
+            "entity_name": "Market Definition",
+            "entity_type": "IDEOLOGY",
+            "description": "The concept and line of legal/economic argument concerning how the relevant market should be defined, referred to in the text as “market definition”"
+          },
+          {
+            "entity_name": "Helena World Chronicle",
+            "entity_type": "ORGANIZATION",
+            "description": "A publisher based in Arkansas that filed the case against Google, alleging anticompetitive conduct affecting news publishers"
+          },
+          {
+            "entity_name": "Arkansas",
+            "entity_type": "STATE_OR_PROVINCE",
+            "description": "A U.S. state where Helena World Chronicle is based"
+          },
+          {
+            "entity_name": "Court",
+            "entity_type": "ORGANIZATION",
+            "description": "A court that will decide how the relevant market is defined in the case and thus affect Google’s chances of victory"
+          },
+          {
+            "entity_name": "Phones",
+            "entity_type": "PRODUCT",
+            "description": "A general category of computing devices that includes smartphones and is a candidate for the relevant market definition in the case"
+          },
+          {
+            "entity_name": "App Stores",
+            "entity_type": "PRODUCT",
+            "description": "Digital distribution platforms for mobile applications, discussed as part of the possible relevant market definition in the case"
+          },
+          {
+            "entity_name": "News Publishers",
+            "entity_type": "ORGANIZATION",
+            "description": "A group of news publishers whose content, readers, and ad revenue are allegedly siphoned off by Google through anticompetitive means"
+          },
+          {
+            "entity_name": "Ad Revenue",
+            "entity_type": "MONEY",
+            "description": "Revenue generated from advertising, which the case alleges is siphoned off by Google from news publishers"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Google",
+            "target_entity": "$26.3 Billion",
+            "relation_type": "EXPENDITURE",
+            "description": "Google spent $26.3 billion to secure default search engine status across platforms in 2021",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "$26.3 Billion",
+            "target_entity": "2021",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The expenditure of $26.3 billion by Google occurred in 2021",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Trial Hearing",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Google is the organization whose conduct is examined in the Monday trial hearing",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Trial Hearing",
+            "target_entity": "Case",
+            "relation_type": "SUBEVENT_OF",
+            "description": "The trial hearing is part of the broader legal case described in the text",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Case",
+            "relation_type": "AGENT",
+            "description": "Helena World Chronicle filed the case against Google alleging anticompetitive behavior",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Arkansas",
+            "relation_type": "LOCATED_IN",
+            "description": "Helena World Chronicle is based in the state of Arkansas",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Chrome",
+            "relation_type": "PRODUCES",
+            "description": "Google produces the Chrome web browser, which it tried to have preinstalled on iPhones",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Android",
+            "relation_type": "OWNER_OF",
+            "description": "Google derives benefits from and controls the Android platform, which is central to the market-definition argument",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Market Definition",
+            "target_entity": "Case",
+            "relation_type": "PART_OF",
+            "description": "The legal and economic argument in the case concerns how the market is defined, referred to as market definition",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Court",
+            "target_entity": "Market Definition",
+            "relation_type": "DECIDES_ON",
+            "description": "The court will decide how the relevant market is defined in the case",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Market Definition",
+            "target_entity": "Google",
+            "relation_type": "AFFECTS",
+            "description": "The court’s decision on the relevant market will determine Google’s likelihood of winning the case",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Market Definition",
+            "target_entity": "Phones",
+            "relation_type": "INVOLVES",
+            "description": "Market definition discussion includes whether the relevant market is phones in general rather than specifically Android devices",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Market Definition",
+            "target_entity": "App Stores",
+            "relation_type": "INVOLVES",
+            "description": "Market definition discussion includes whether the relevant market is app stores in general rather than specifically Android ones",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "News Publishers",
+            "target_entity": "Google",
+            "relation_type": "HARMED_PARTY",
+            "description": "The case argues that Google siphons off news publishers’ content, readers, and ad revenue through anticompetitive means",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Ad Revenue",
+            "relation_type": "SIPHONED_FROM",
+            "description": "The case alleges that Google diverts advertising revenue away from news publishers",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "News Publishers",
+            "relation_type": "SIPHONED_FROM",
+            "description": "The case describes Google as siphoning off news publishers’ readers",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Case",
+            "target_entity": "Court",
+            "relation_type": "HEARD_BY",
+            "description": "The case is filed in a court",
+            "relationship_strength": 3
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "0db0699b-cebf-4657-8160-550b496eda0f"
+    },
+    {
+      "input_text": "The ride-hail company claims that the rate of sexual assault reported on the app decreased 38% between its first and second reports.\nHundreds of women have filed lawsuits against Uber claiming the company hasn’t done enough to prevent instances of sexual assault by drivers.\nThe survivors in the joined lawsuit also allege that Uber’s “fast and shallow background checks” are substandard and designed to make it as easy as possible for drivers to sign up quickly.\nIn the third quarter, Uber generated $394 million in operating income and $219 million worth of net income.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:47:35.276125Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Uber",
+            "entity_type": "ORGANIZATION",
+            "description": "Ride-hail company providing app-based transportation services and subject of the lawsuits and safety claims in the text"
+          },
+          {
+            "entity_name": "Sexual assault",
+            "entity_type": "CRIME",
+            "description": "Acts of sexual violence that are reported on Uber’s app and which the company claims have decreased"
+          },
+          {
+            "entity_name": "App",
+            "entity_type": "PRODUCT",
+            "description": "App-based software platform through which users request rides and where incidents such as sexual assault are reported"
+          },
+          {
+            "entity_name": "Survivor",
+            "entity_type": "PERSON",
+            "description": "Hundreds of women who experienced sexual assault connected to Uber rides and have filed lawsuits"
+          },
+          {
+            "entity_name": "Driver",
+            "entity_type": "PERSON",
+            "description": "Drivers working for or using the Uber platform to provide ride-hail services, some of whom are alleged perpetrators of sexual assault"
+          },
+          {
+            "entity_name": "Background check",
+            "entity_type": "EVENT",
+            "description": "Background checking procedure used by Uber to screen drivers, described as “fast and shallow” and alleged to be substandard"
+          },
+          {
+            "entity_name": "Third quarter",
+            "entity_type": "DATE",
+            "description": "The third quarter of a financial year in which Uber’s financial results are reported"
+          },
+          {
+            "entity_name": "394 million",
+            "entity_type": "MONEY",
+            "description": "Amount of operating income generated by Uber in the third quarter, equal to 394 million dollars"
+          },
+          {
+            "entity_name": "219 million",
+            "entity_type": "MONEY",
+            "description": "Amount of net income generated by Uber in the third quarter, equal to 219 million dollars"
+          },
+          {
+            "entity_name": "38%",
+            "entity_type": "PERCENT",
+            "description": "Claimed percentage decrease in reported sexual assault rate on Uber’s app between the first and second safety reports"
+          },
+          {
+            "entity_name": "Lawsuit",
+            "entity_type": "EVENT",
+            "description": "Legal actions filed against Uber by survivors alleging inadequate safety measures and background checks"
+          },
+          {
+            "entity_name": "First report",
+            "entity_type": "EVENT",
+            "description": "The first safety report referenced by Uber regarding rates of sexual assault on its app"
+          },
+          {
+            "entity_name": "Second report",
+            "entity_type": "EVENT",
+            "description": "The second safety report referenced by Uber regarding rates of sexual assault on its app"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Uber",
+            "target_entity": "Sexual assault",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Uber claims that the rate of sexual assault reported on its app decreased by 38% between its first and second reports",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Sexual assault",
+            "target_entity": "App",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Sexual assault incidents are reported via the Uber app",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Survivor",
+            "target_entity": "Uber",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Survivors have filed lawsuits against Uber",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Driver",
+            "target_entity": "Sexual assault",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Survivors allege that Uber drivers committed sexual assault",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "Background check",
+            "relation_type": "AGENT",
+            "description": "Survivors allege that Uber’s background checks on drivers are fast, shallow, and substandard",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Third quarter",
+            "target_entity": "Uber",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The third quarter is the time period in which Uber generated operating and net income",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "394 million",
+            "relation_type": "INCOME",
+            "description": "Uber generated 394 million dollars in operating income in the third quarter",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "219 million",
+            "relation_type": "INCOME",
+            "description": "Uber generated 219 million dollars in net income in the third quarter",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "38%",
+            "target_entity": "Sexual assault",
+            "relation_type": "PERCENT",
+            "description": "The 38% value quantifies the decrease in the rate of sexual assault reported on the Uber app",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Survivor",
+            "target_entity": "Lawsuit",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Survivors have filed lawsuits (joined lawsuit) related to sexual assaults connected to Uber rides",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "Lawsuit",
+            "relation_type": "DEFENDANT_IN",
+            "description": "Uber is the defendant company in the lawsuits filed by survivors",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Driver",
+            "target_entity": "Lawsuit",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Drivers are alleged perpetrators in the lawsuits concerning sexual assault incidents",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Lawsuit",
+            "target_entity": "Sexual assault",
+            "relation_type": "ABOUT",
+            "description": "The lawsuits concern allegations of sexual assault",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Background check",
+            "target_entity": "Driver",
+            "relation_type": "APPLIES_TO",
+            "description": "Background checks are applied to drivers as part of Uber’s onboarding process",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "Driver",
+            "relation_type": "AGENT",
+            "description": "Uber conducts or commissions background checks on drivers",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "First report",
+            "target_entity": "Second report",
+            "relation_type": "CHANGE_BETWEEN",
+            "description": "The 38% decrease refers to the change in sexual assault rates between the first and second reports",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "First report",
+            "target_entity": "Sexual assault",
+            "relation_type": "REPORTS_ON",
+            "description": "Sexual assault rates are measured and reported in the first report",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Second report",
+            "target_entity": "Sexual assault",
+            "relation_type": "REPORTS_ON",
+            "description": "Sexual assault rates are measured and reported in the second report",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "714b1ce9-55ab-430e-a86c-8a42bfffc279"
+    },
+    {
+      "input_text": "Speaking to the publication, she said she connected with Kelce in July, after he confessed on his podcast that he tried and failed to give her a friendship bracelet with his phone number on it during one of her Eras Tour shows.\nNow, Swift has shared that she has nothing to hide in her new relationship with Kelce.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T21:00:51.015285Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Swift",
+            "entity_type": "PERSON",
+            "description": "Taylor Swift, the woman speaking to the publication about her connection and relationship with Travis Kelce"
+          },
+          {
+            "entity_name": "Kelce",
+            "entity_type": "PERSON",
+            "description": "Travis Kelce, the person Swift connected with and is now in a relationship with"
+          },
+          {
+            "entity_name": "July",
+            "entity_type": "DATE",
+            "description": "July, the month when Swift connected with Kelce after his podcast confession"
+          },
+          {
+            "entity_name": "Podcast",
+            "entity_type": "WORK_OF_ART",
+            "description": "Kelce’s podcast, where he confessed he tried and failed to give Swift a friendship bracelet with his phone number"
+          },
+          {
+            "entity_name": "Friendship bracelet",
+            "entity_type": "PRODUCT",
+            "description": "Friendship bracelet that Kelce tried and failed to give Swift with his phone number on it"
+          },
+          {
+            "entity_name": "Phone number",
+            "entity_type": "NUMBER",
+            "description": "Kelce’s phone number written on the friendship bracelet he tried to give Swift"
+          },
+          {
+            "entity_name": "Eras Tour",
+            "entity_type": "EVENT",
+            "description": "One of Swift’s Eras Tour shows where Kelce tried to give her the friendship bracelet"
+          },
+          {
+            "entity_name": "Relationship",
+            "entity_type": "EVENT",
+            "description": "New romantic relationship between Swift and Kelce, about which Swift says she has nothing to hide"
+          },
+          {
+            "entity_name": "Publication",
+            "entity_type": "ORGANIZATION",
+            "description": "An unspecified publication Swift spoke to about her connection with Kelce"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Swift",
+            "target_entity": "Relationship",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Swift and Kelce are in a new relationship",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Kelce",
+            "target_entity": "Relationship",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Kelce and Swift are in a new relationship",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Kelce",
+            "target_entity": "Podcast",
+            "relation_type": "AGENT",
+            "description": "Kelce confessed on his podcast about trying to give Swift a friendship bracelet",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Swift",
+            "target_entity": "July",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Swift connected with Kelce in July after his podcast confession",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Kelce",
+            "target_entity": "July",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Kelce’s connection with Swift is described as occurring in July",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Kelce",
+            "target_entity": "Friendship bracelet",
+            "relation_type": "OWNER_OF",
+            "description": "Kelce tried to give the friendship bracelet to Swift",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Phone number",
+            "target_entity": "Friendship bracelet",
+            "relation_type": "PART_OF",
+            "description": "Kelce’s phone number was written on the friendship bracelet",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Friendship bracelet",
+            "target_entity": "Eras Tour",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "The attempt to give the friendship bracelet occurred during one of Swift’s Eras Tour shows",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Swift",
+            "target_entity": "Eras Tour",
+            "relation_type": "ORGANIZES",
+            "description": "The Eras Tour is Swift’s concert tour, implicitly associated with her work",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Swift",
+            "target_entity": "Publication",
+            "relation_type": "SPOKE_TO",
+            "description": "Swift spoke to the publication about her connection with Kelce",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Relationship",
+            "target_entity": "Kelce",
+            "relation_type": "HAS_PARTNER",
+            "description": "Swift’s new relationship is with Kelce",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Relationship",
+            "target_entity": "Swift",
+            "relation_type": "HAS_PARTNER",
+            "description": "Swift’s new relationship involves Swift as one of the partners",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Podcast",
+            "target_entity": "Friendship bracelet",
+            "relation_type": "ABOUT",
+            "description": "Kelce’s podcast confession was about his attempt to give Swift the friendship bracelet",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 9,
+      "id": "0a269b97-6472-4084-8877-97b83151e350"
+    },
+    {
+      "input_text": "Microsoft also has a stripped-down Elite Series 2 “Core” version for $129.99, which is the same controller in white-and-black, red-and-black, or blue-and-black finishes without the rear paddles, accessory charging case, or extra stick toppers and D-pad.\nWhile these models are still quite new, versions that actual humans buy have begun receiving discounts.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T21:00:51.015285Z"
+      },
+      "output": {
+        "entities": [
           {
             "entity_name": "Microsoft",
             "entity_type": "ORGANIZATION",
-            "description": "A tech giant that provides Azure, a cloud computing platform. Partnered with Anthropic to deploy Claude 3 on Azure, expanding its accessibility for businesses."
+            "description": "A technology company that produces the Elite Series 2 Core controller mentioned in the text."
           },
           {
-            "entity_name": "Sam Altman",
-            "entity_type": "PERSON",
-            "description": "CEO of OpenAI, who led the company's presentation of an enhanced GPT-4 model at the 2024 World Artificial Intelligence Conference."
-          },
-          {
-            "entity_name": "Demis Hassabis",
-            "entity_type": "PERSON",
-            "description": "Leader of Google DeepMind, who demonstrated the Gemini AI system at the 2024 World Artificial Intelligence Conference."
-          },
-          {
-            "entity_name": "GPT-4",
+            "entity_name": "Elite Series 2 Core",
             "entity_type": "PRODUCT",
-            "description": "An AI model developed by OpenAI, with an enhanced version unveiled at the 2024 World Artificial Intelligence Conference, emphasizing improved reasoning capabilities for enterprise applications."
+            "description": "The stripped-down Elite Series 2 “Core” controller, available for $129.99 in multiple color finishes and lacking certain accessories like rear paddles, accessory charging case, extra stick toppers, and D-pad."
           },
           {
-            "entity_name": "Gemini AI",
-            "entity_type": "PRODUCT",
-            "description": "An AI system developed by Google DeepMind, demonstrated at the 2024 World Artificial Intelligence Conference, which integrates multimodal processing for text, images, and audio."
+            "entity_name": "129.99",
+            "entity_type": "MONEY",
+            "description": "A price of 129.99 US dollars for the Elite Series 2 Core controller."
           },
           {
-            "entity_name": "Claude 3",
-            "entity_type": "PRODUCT",
-            "description": "An AI system developed by Anthropic, introduced at the 2024 World Artificial Intelligence Conference, emphasizing superior safety protocols and nuanced conversation capabilities."
+            "entity_name": "White-and-black",
+            "entity_type": "OTHER",
+            "description": "A color finish option for the Elite Series 2 Core controller."
           },
           {
-            "entity_name": "Azure",
-            "entity_type": "PRODUCT",
-            "description": "A cloud computing platform provided by Microsoft, used for deploying AI systems like Claude 3 through Anthropic's strategic partnership."
+            "entity_name": "Red-and-black",
+            "entity_type": "OTHER",
+            "description": "A color finish option for the Elite Series 2 Core controller."
           },
           {
-            "entity_name": "2024 World Artificial Intelligence Conference",
-            "entity_type": "EVENT",
-            "description": "A major event held in Shanghai where leading tech firms showcased breakthroughs in AI, including OpenAI's GPT-4, Google DeepMind's Gemini AI, and Anthropic's Claude 3."
-          },
-          {
-            "entity_name": "EU AI Act",
-            "entity_type": "LAW",
-            "description": "A regulatory framework imposing strict guidelines on high-risk AI systems, discussed at the conference. Experts warned it could slow innovation for startups like Anthropic while larger firms like OpenAI and Google DeepMind have resources to comply."
+            "entity_name": "Blue-and-black",
+            "entity_type": "OTHER",
+            "description": "A color finish option for the Elite Series 2 Core controller."
           }
         ],
         "relations": [
           {
-            "source_entity": "OpenAI",
-            "target_entity": "Sam Altman",
-            "relation_type": "ORGANIZES",
-            "description": "OpenAI is led by CEO Sam Altman.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Google DeepMind",
-            "target_entity": "Demis Hassabis",
-            "relation_type": "ORGANIZES",
-            "description": "Google DeepMind is led by Demis Hassabis.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Claude 3",
-            "relation_type": "PRODUCES",
-            "description": "Anthropic introduced Claude 3, emphasizing superior safety protocols and nuanced conversation capabilities.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Microsoft",
-            "relation_type": "KNOWS",
-            "description": "Anthropic announced a strategic partnership with Microsoft to deploy Claude 3 on Azure.",
-            "relationship_strength": 5
-          },
-          {
             "source_entity": "Microsoft",
-            "target_entity": "Azure",
+            "target_entity": "Elite Series 2 Core",
             "relation_type": "PRODUCES",
-            "description": "Microsoft provides Azure, a cloud computing platform used for deploying AI systems.",
+            "description": "Microsoft produces the Elite Series 2 Core controller.",
             "relationship_strength": 5
           },
           {
-            "source_entity": "Anthropic",
-            "target_entity": "Azure",
-            "relation_type": "PART_OF",
-            "description": "Anthropic plans to deploy Claude 3 on Microsoft's Azure platform.",
+            "source_entity": "129.99",
+            "target_entity": "Elite Series 2 Core",
+            "relation_type": "PRICE_OF",
+            "description": "The price of the Elite Series 2 Core controller is $129.99.",
             "relationship_strength": 5
           },
           {
-            "source_entity": "EU AI Act",
-            "target_entity": "Anthropic",
-            "relation_type": "AGENT",
-            "description": "Experts warned that compliance with the EU AI Act could slow innovation for startups like Anthropic.",
+            "source_entity": "Elite Series 2 Core",
+            "target_entity": "White-and-black",
+            "relation_type": "HAS_VARIANT",
+            "description": "The Elite Series 2 Core controller is available in a white-and-black color finish.",
             "relationship_strength": 4
           },
           {
-            "source_entity": "EU AI Act",
-            "target_entity": "OpenAI",
-            "relation_type": "AGENT",
-            "description": "The EU AI Act imposes strict guidelines on high-risk AI systems, which giants like OpenAI and Google DeepMind can navigate due to their resources.",
-            "relationship_strength": 3
+            "source_entity": "Elite Series 2 Core",
+            "target_entity": "Red-and-black",
+            "relation_type": "HAS_VARIANT",
+            "description": "The Elite Series 2 Core controller is available in a red-and-black color finish.",
+            "relationship_strength": 4
           },
           {
-            "source_entity": "EU AI Act",
-            "target_entity": "Google DeepMind",
-            "relation_type": "AGENT",
-            "description": "The EU AI Act imposes strict guidelines on high-risk AI systems, which giants like OpenAI and Google DeepMind can navigate due to their resources.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "OpenAI",
-            "target_entity": "GPT-4",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "OpenAI unveiled an enhanced version of its GPT-4 model at the 2024 World Artificial Intelligence Conference.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Google DeepMind",
-            "target_entity": "Gemini AI",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Google DeepMind demonstrated its Gemini AI system at the 2024 World Artificial Intelligence Conference.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Claude 3",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Anthropic introduced Claude 3 at the 2024 World Artificial Intelligence Conference.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "2024 World Artificial Intelligence Conference",
-            "target_entity": "OpenAI",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "The conference brought together leading tech firms, including OpenAI, Google DeepMind, and Anthropic, to showcase AI advancements.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "2024 World Artificial Intelligence Conference",
-            "target_entity": "Google DeepMind",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "The conference brought together leading tech firms, including OpenAI, Google DeepMind, and Anthropic, to showcase AI advancements.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "2024 World Artificial Intelligence Conference",
-            "target_entity": "Anthropic",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "The conference brought together leading tech firms, including OpenAI, Google DeepMind, and Anthropic, to showcase AI advancements.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "OpenAI",
-            "target_entity": "Google DeepMind",
-            "relation_type": "KNOWS",
-            "description": "OpenAI competes with Google DeepMind and Anthropic in AI advancements.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "OpenAI",
-            "target_entity": "Anthropic",
-            "relation_type": "KNOWS",
-            "description": "OpenAI competes with Google DeepMind and Anthropic in AI advancements.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Google DeepMind",
-            "target_entity": "OpenAI",
-            "relation_type": "KNOWS",
-            "description": "Google DeepMind competes with OpenAI and Anthropic in AI advancements.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Google DeepMind",
-            "target_entity": "Anthropic",
-            "relation_type": "KNOWS",
-            "description": "Google DeepMind competes with OpenAI and Anthropic in AI advancements.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "OpenAI",
-            "relation_type": "KNOWS",
-            "description": "Anthropic competes with OpenAI and Google DeepMind in AI advancements.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Google DeepMind",
-            "relation_type": "KNOWS",
-            "description": "Anthropic competes with OpenAI and Google DeepMind in AI advancements.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Microsoft",
-            "relation_type": "KNOWS",
-            "description": "Anthropic's partnership with Microsoft highlights growing interdependence among tech firms in AI development.",
-            "relationship_strength": 5
+            "source_entity": "Elite Series 2 Core",
+            "target_entity": "Blue-and-black",
+            "relation_type": "HAS_VARIANT",
+            "description": "The Elite Series 2 Core controller is available in a blue-and-black color finish.",
+            "relationship_strength": 4
           }
         ]
       },
-      "id": "0b213162-8546-4161-b9f1-60ac51ea3dfc",
-      "input_text": "**Advancements in AI: OpenAI, Google DeepMind, and Anthropic Compete at Shanghai Conference**  \n\nThe 2024 World Artificial Intelligence Conference in Shanghai brought together leading tech firms to showcase breakthroughs in artificial intelligence. OpenAI, led by CEO Sam Altman, unveiled an enhanced version of its GPT-4 model, emphasizing improved reasoning capabilities for enterprise applications. Meanwhile, Google DeepMind, under the leadership of Demis Hassabis, demonstrated its Gemini AI system, which integrates multimodal processing to handle text, images, and audio with greater efficiency.  \n\nAnthropic, a rising competitor, introduced Claude 3, touting its superior safety protocols and ability to engage in nuanced conversations. The company also announced a strategic partnership with Microsoft to deploy Claude 3 on Azure, expanding its accessibility for businesses.  \n\nRegulatory discussions dominated the sidelines, with attendees debating the implications of the EU AI Act, which imposes strict guidelines on high-risk AI systems. Experts warned that compliance could slow innovation, particularly for startups like Anthropic, while giants like OpenAI and Google DeepMind have the resources to navigate the new framework.  \n\nThe conference underscored the rapid evolution of AI, with companies racing to balance performance, safety, and ethical considerations. As competition intensifies, collaborations—such as Anthropic’s Azure deal—highlight the growing interdependence of tech firms in shaping the future of AI.  \n\n(Word count: 220)",
+      "quality_rating": 8,
+      "id": "bd81874d-74f9-4850-90b8-c115833efd45"
+    },
+    {
+      "input_text": "From there, you can claim your welcome bonus, which can come in many forms (be sure to read the requirements of any welcome bonus before using it).\nBut sportsbooks are also gathering this information, and they begin to tighten the NBA Rookie of the Year lines in response.",
       "metadata": {
-        "domain": "technology",
+        "domain": "general",
         "difficulty": "medium",
         "language": "english",
-        "generated_at": "2026-05-07T18:36:58.352655Z"
+        "generated_at": "2026-05-19T21:00:51.015285Z"
       },
-      "quality_rating": 8
-    },
-    {
       "output": {
         "entities": [
           {
-            "entity_name": "Эмили Картер",
-            "entity_type": "PERSON",
-            "description": "Доктор Эмили Картер — педиатр в больнице Грин-Вэлли Хоспитал в Денвере, выступавшая на Ежегодной конференции по здравоохранению, организованной Американской медицинской ассоциацией."
-          },
-          {
-            "entity_name": "Грин-Вэлли Хоспитал",
+            "entity_name": "Nba",
             "entity_type": "ORGANIZATION",
-            "description": "Грин-Вэлли Хоспитал — медицинское учреждение в Денвере, где работает доктор Эмили Картер."
+            "description": "National Basketball Association, the main professional basketball league referenced in the phrase 'NBA Rookie of the Year'"
           },
           {
-            "entity_name": "Денвер",
-            "entity_type": "LOCATION",
-            "description": "Денвер — город, в котором расположена больница Грин-Вэлли Хоспитал и где проходила Ежегодная конференция по здравоохранению."
+            "entity_name": "Rookie Of The Year",
+            "entity_type": "AWARD",
+            "description": "Rookie of the Year award in the NBA context, referenced as 'NBA Rookie of the Year'"
           },
           {
-            "entity_name": "Ежегодная конференция по здравоохранению",
-            "entity_type": "EVENT",
-            "description": "Ежегодная конференция по здравоохранению — мероприятие, организованное Американской медицинской ассоциацией для обсуждения достижений в медицине и общественном здравоохранении."
-          },
-          {
-            "entity_name": "Американская медицинская ассоциация",
+            "entity_name": "Sportsbooks",
             "entity_type": "ORGANIZATION",
-            "description": "Американская медицинская ассоциация организовала Ежегодную конференцию по здравоохранению."
-          },
-          {
-            "entity_name": "FluShield",
-            "entity_type": "PRODUCT",
-            "description": "FluShield — вакцина, разработанная компанией MedTech Pharmaceuticals для профилактики сезонного гриппа у детей."
-          },
-          {
-            "entity_name": "MedTech Pharmaceuticals",
-            "entity_type": "ORGANIZATION",
-            "description": "MedTech Pharmaceuticals — разработчик вакцины FluShield."
-          },
-          {
-            "entity_name": "Центры по контролю и профилактике заболеваний",
-            "entity_type": "ORGANIZATION",
-            "description": "Центры по контролю и профилактике заболеваний (CDC) — государственное учреждение, упомянутое как партнер в распространении вакцин."
-          },
-          {
-            "entity_name": "Университет Колорадо",
-            "entity_type": "ORGANIZATION",
-            "description": "Университет Колорадо провел исследование, показавшее 90% снижение госпитализаций, связанных с гриппом, среди вакцинированных детей."
-          },
-          {
-            "entity_name": "Денверский конференц-центр",
-            "entity_type": "LOCATION",
-            "description": "Денверский конференц-центр — место проведения Ежегодной конференции по здравоохранению."
+            "description": "A type of sports betting operator referenced in the context of gathering information and tightening lines"
           }
         ],
         "relations": [
           {
-            "source_entity": "Эмили Картер",
-            "target_entity": "Грин-Вэлли Хоспитал",
-            "relation_type": "WORKPLACE",
-            "description": "Доктор Эмили Картер — педиатр в больнице Грин-Вэлли Хоспитал.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Эмили Картер",
-            "target_entity": "Ежегодная конференция по здравоохранению",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Доктор Эмили Картер выступила на Ежегодной конференции по здравоохранению.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Ежегодная конференция по здравоохранению",
-            "target_entity": "Американская медицинская ассоциация",
-            "relation_type": "KNOWS",
-            "description": "Американская медицинская ассоциация организовала Ежегодную конференцию по здравоохранению.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "FluShield",
-            "target_entity": "MedTech Pharmaceuticals",
-            "relation_type": "PRODUCES",
-            "description": "FluShield — вакцина, разработанная компанией MedTech Pharmaceuticals.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Эмили Картер",
-            "target_entity": "FluShield",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Доктор Эмили Картер рассказала о преимуществах FluShield во время своей презентации.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Эмили Картер",
-            "target_entity": "Центры по контролю и профилактике заболеваний",
-            "relation_type": "KNOWS",
-            "description": "Доктор Эмили Картер подчеркнула сотрудничество с CDC для обеспечения доступа к вакцинам.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "Университет Колорадо",
-            "target_entity": "FluShield",
-            "relation_type": "AGENT",
-            "description": "Университет Колорадо провел исследование эффективности FluShield.",
-            "relationship_strength": 4
-          },
-          {
-            "source_entity": "Ежегодная конференция по здравоохранению",
-            "target_entity": "Денверский конференц-центр",
-            "relation_type": "LOCATED_IN",
-            "description": "Ежегодная конференция по здравоохранению прошла в Денверском конференц-центре.",
-            "relationship_strength": 5
-          }
-        ]
-      },
-      "id": "51967a16-2d49-4d5d-9ea9-cae0d3b8a0ef",
-      "input_text": "Доктор Эмили Картер, педиатр в больнице Грин-Вэлли Хоспитал в Денвере, недавно выступила на Ежегодной конференции по здравоохранению, организованной Американской медицинской ассоциацией (AMA). Во время своей презентации она рассказала о преимуществах новой вакцины FluShield, разработанной компанией MedTech Pharmaceuticals. По словам доктора Картер, FluShield продемонстрировала замечательную эффективность в профилактике сезонного гриппа среди детей в возрасте от 6 месяцев до 12 лет.\n\nКонференция, проходившая в Денверском конференц-центре, собрала медицинских работников со всех Соединенных Штатов для обсуждения достижений в медицине и общественном здравоохранении. Доктор Картер подчеркнула важность сотрудничества между больницами, фармацевтическими компаниями и государственными учреждениями, такими как Центры по контролю и профилактике заболеваний (CDC), для обеспечения широкого доступа к вакцинам.\n\nОна также отметила недавнее исследование, проведенное Университетом Колорадо, которое показало 90% снижение госпитализаций, связанных с гриппом, среди вакцинированных детей. Доктор Картер призвала родителей проконсультироваться со своими педиатрами и рассмотреть возможность использования FluShield в рамках графика иммунизации своего ребенка.",
-      "metadata": {
-        "domain": "medicine",
-        "difficulty": "easy",
-        "language": "russian",
-        "generated_at": "2026-05-07T14:47:18.721774Z"
-      },
-      "quality_rating": 8
-    },
-    {
-      "output": {
-        "entities": [
-          {
-            "entity_name": "OpenAI",
-            "entity_type": "ORGANIZATION",
-            "description": "Ведущая технологическая компания, которая представила улучшенную версию своей модели GPT-4 на Всемирной конференции по искусственному интеллекту 2024 года, подчеркнув улучшенные возможности рассуждения для корпоративных приложений. Возглавляется генеральным директором Сэмом Альтманом."
-          },
-          {
-            "entity_name": "Google DeepMind",
-            "entity_type": "ORGANIZATION",
-            "description": "Ведущая технологическая компания, которая продемонстрировала свою систему искусственного интеллекта Gemini на Всемирной конференции по искусственному интеллекту 2024 года, интегрирующую мультимодальную обработку текста, изображений и аудио. Возглавляется Демисом Хассабисом."
-          },
-          {
-            "entity_name": "Anthropic",
-            "entity_type": "ORGANIZATION",
-            "description": "Растущий конкурент в области ИИ, который представил Claude 3, подчеркивая превосходные протоколы безопасности и возможности нюансированного разговора. Объявил о стратегическом партнерстве с Microsoft для развертывания Claude 3 на Azure."
-          },
-          {
-            "entity_name": "Microsoft",
-            "entity_type": "ORGANIZATION",
-            "description": "Технологический гигант, предоставляющий Azure, облачную вычислительную платформу. Партнерствует с Anthropic для развертывания Claude 3 на Azure, расширяя его доступность для бизнеса."
-          },
-          {
-            "entity_name": "Сэм Альтман",
-            "entity_type": "PERSON",
-            "description": "Генеральный директор OpenAI, который руководил презентацией компанией улучшенной модели GPT-4 на Всемирной конференции по искусственному интеллекту 2024 года."
-          },
-          {
-            "entity_name": "Демис Хассабис",
-            "entity_type": "PERSON",
-            "description": "Руководитель Google DeepMind, который продемонстрировал систему искусственного интеллекта Gemini на Всемирной конференции по искусственному интеллекту 2024 года."
-          },
-          {
-            "entity_name": "GPT-4",
-            "entity_type": "PRODUCT",
-            "description": "Модель ИИ, разработанная OpenAI, улучшенная версия которой была представлена на Всемирной конференции по искусственному интеллекту 2024 года, подчеркивающая улучшенные возможности рассуждения для корпоративных приложений."
-          },
-          {
-            "entity_name": "Gemini AI",
-            "entity_type": "PRODUCT",
-            "description": "Система ИИ, разработанная Google DeepMind, продемонстрированная на Всемирной конференции по искусственному интеллекту 2024 года, которая интегрирует мультимодальную обработку текста, изображений и аудио."
-          },
-          {
-            "entity_name": "Claude 3",
-            "entity_type": "PRODUCT",
-            "description": "Система ИИ, разработанная Anthropic, представленная на Всемирной конференции по искусственному интеллекту 2024 года, подчеркивающая превосходные протоколы безопасности и возможности нюансированного разговора."
-          },
-          {
-            "entity_name": "Azure",
-            "entity_type": "PRODUCT",
-            "description": "Облачная вычислительная платформа, предоставляемая Microsoft, используемая для развертывания систем ИИ, таких как Claude 3, в рамках стратегического партнерства Anthropic."
-          },
-          {
-            "entity_name": "Всемирная конференция по искусственному интеллекту 2024 года",
-            "entity_type": "EVENT",
-            "description": "Крупное мероприятие, прошедшее в Шанхае, где ведущие технологические компании продемонстрировали прорывы в области ИИ, включая GPT-4 от OpenAI, Gemini AI от Google DeepMind и Claude 3 от Anthropic."
-          },
-          {
-            "entity_name": "Закон ЕС об ИИ",
-            "entity_type": "LAW",
-            "description": "Регуляторная структура, налагающая строгие правила на высокорисковые системы ИИ, обсуждавшаяся на конференции. Эксперты предупредили, что она может замедлить инновации для стартапов вроде Anthropic, в то время как более крупные фирмы, такие как OpenAI и Google DeepMind, имеют ресурсы для соблюдения требований."
-          }
-        ],
-        "relations": [
-          {
-            "source_entity": "OpenAI",
-            "target_entity": "Сэм Альтман",
-            "relation_type": "ORGANIZES",
-            "description": "OpenAI возглавляется генеральным директором Сэмом Альтманом.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Google DeepMind",
-            "target_entity": "Демис Хассабис",
-            "relation_type": "ORGANIZES",
-            "description": "Google DeepMind возглавляется Демисом Хассабисом.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Claude 3",
-            "relation_type": "PRODUCES",
-            "description": "Anthropic представил Claude 3, подчеркивая превосходные протоколы безопасности и возможности нюансированного разговора.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Microsoft",
-            "relation_type": "KNOWS",
-            "description": "Anthropic объявил о стратегическом партнерстве с Microsoft для развертывания Claude 3 на Azure.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Microsoft",
-            "target_entity": "Azure",
-            "relation_type": "PRODUCES",
-            "description": "Microsoft предоставляет Azure, облачную вычислительную платформу, используемую для развертывания систем ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Azure",
+            "source_entity": "Rookie Of The Year",
+            "target_entity": "Nba",
             "relation_type": "PART_OF",
-            "description": "Anthropic планирует развернуть Claude 3 на платформе Microsoft Azure.",
+            "description": "The Rookie of the Year award is an award given within the NBA context (NBA Rookie of the Year)",
             "relationship_strength": 5
           },
           {
-            "source_entity": "Закон ЕС об ИИ",
-            "target_entity": "Anthropic",
-            "relation_type": "AGENT",
-            "description": "Эксперты предупредили, что соблюдение Закона ЕС об ИИ может замедлить инновации для стартапов вроде Anthropic.",
+            "source_entity": "Sportsbooks",
+            "target_entity": "Rookie Of The Year",
+            "relation_type": "ADJUSTS_LINES_FOR",
+            "description": "Sportsbooks adjust or tighten betting lines for the NBA Rookie of the Year award",
             "relationship_strength": 4
           },
           {
-            "source_entity": "Закон ЕС об ИИ",
-            "target_entity": "OpenAI",
-            "relation_type": "AGENT",
-            "description": "Закон ЕС об ИИ налагает строгие правила на высокорисковые системы ИИ, с которыми такие гиганты, как OpenAI и Google DeepMind, могут справиться благодаря своим ресурсам.",
+            "source_entity": "Sportsbooks",
+            "target_entity": "Nba",
+            "relation_type": "OFFERS_BETS_ON",
+            "description": "Sportsbooks set and manage betting lines related to the NBA league",
             "relationship_strength": 3
-          },
-          {
-            "source_entity": "Закон ЕС об ИИ",
-            "target_entity": "Google DeepMind",
-            "relation_type": "AGENT",
-            "description": "Закон ЕС об ИИ налагает строгие правила на высокорисковые системы ИИ, с которыми такие гиганты, как OpenAI и Google DeepMind, могут справиться благодаря своим ресурсам.",
-            "relationship_strength": 3
-          },
-          {
-            "source_entity": "OpenAI",
-            "target_entity": "GPT-4",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "OpenAI представила улучшенную версию своей модели GPT-4 на Всемирной конференции по искусственному интеллекту 2024 года.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Google DeepMind",
-            "target_entity": "Gemini AI",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Google DeepMind продемонстрировала свою систему искусственного интеллекта Gemini на Всемирной конференции по искусственному интеллекту 2024 года.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Claude 3",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Anthropic представил Claude 3 на Всемирной конференции по искусственному интеллекту 2024 года.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Всемирная конференция по искусственному интеллекту 2024 года",
-            "target_entity": "OpenAI",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Конференция собрала ведущие технологические компании, включая OpenAI, Google DeepMind и Anthropic, для демонстрации достижений в области ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Всемирная конференция по искусственному интеллекту 2024 года",
-            "target_entity": "Google DeepMind",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Конференция собрала ведущие технологические компании, включая OpenAI, Google DeepMind и Anthropic, для демонстрации достижений в области ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Всемирная конференция по искусственному интеллекту 2024 года",
-            "target_entity": "Anthropic",
-            "relation_type": "PARTICIPANT_IN",
-            "description": "Конференция собрала ведущие технологические компании, включая OpenAI, Google DeepMind и Anthropic, для демонстрации достижений в области ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "OpenAI",
-            "target_entity": "Google DeepMind",
-            "relation_type": "KNOWS",
-            "description": "OpenAI конкурирует с Google DeepMind и Anthropic в области достижений ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "OpenAI",
-            "target_entity": "Anthropic",
-            "relation_type": "KNOWS",
-            "description": "OpenAI конкурирует с Google DeepMind и Anthropic в области достижений ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Google DeepMind",
-            "target_entity": "OpenAI",
-            "relation_type": "KNOWS",
-            "description": "Google DeepMind конкурирует с OpenAI и Anthropic в области достижений ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Google DeepMind",
-            "target_entity": "Anthropic",
-            "relation_type": "KNOWS",
-            "description": "Google DeepMind конкурирует с OpenAI и Anthropic в области достижений ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "OpenAI",
-            "relation_type": "KNOWS",
-            "description": "Anthropic конкурирует с OpenAI и Google DeepMind в области достижений ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Google DeepMind",
-            "relation_type": "KNOWS",
-            "description": "Anthropic конкурирует с OpenAI и Google DeepMind в области достижений ИИ.",
-            "relationship_strength": 5
-          },
-          {
-            "source_entity": "Anthropic",
-            "target_entity": "Microsoft",
-            "relation_type": "KNOWS",
-            "description": "Партнерство Anthropic с Microsoft подчеркивает растущую взаимозависимость технологических фирм в разработке ИИ.",
-            "relationship_strength": 5
           }
         ]
       },
-      "id": "0d273162-8546-4191-b9f1-60ac52ea3dfa",
-      "input_text": "**Достижения в области ИИ: OpenAI, Google DeepMind и Anthropic соревнуются на конференции в Шанхае**  \n\nВсемирная конференция по искусственному интеллекту 2024 года в Шанхае собрала ведущие технологические компании для демонстрации прорывов в области искусственного интеллекта. OpenAI под руководством генерального директора Сэма Альтмана представила улучшенную версию своей модели GPT-4, подчеркнув улучшенные возможности рассуждения для корпоративных приложений. Тем временем Google DeepMind под руководством Демиса Хассабиса продемонстрировала свою систему искусственного интеллекта Gemini, которая интегрирует мультимодальную обработку для более эффективной работы с текстом, изображениями и аудио.  \n\nAnthropic, растущий конкурент, представил Claude 3, заявляя о его превосходных протоколах безопасности и способности вести нюансированные разговоры. Компания также объявила о стратегическом партнерстве с Microsoft для развертывания Claude 3 на Azure, расширяя его доступность для бизнеса.  \n\nРегуляторные обсуждения доминировали на полях конференции, участники обсуждали последствия Закона ЕС об ИИ, который налагает строгие правила на высокорисковые системы ИИ. Эксперты предупредили, что соблюдение требований может замедлить инновации, особенно для стартапов вроде Anthropic, в то время как такие гиганты, как OpenAI и Google DeepMind, имеют ресурсы для навигации в новых рамках.  \n\nКонференция подчеркнула быструю эволюцию ИИ: компании соревнуются в балансировании производительности, безопасности и этических соображений. По мере усиления конкуренции сотрудничество, такое как сделка Anthropic с Azure, подчеркивает растущую взаимозависимость технологических фирм в формировании будущего ИИ.  \n\n(Количество слов: 220)",
+      "quality_rating": 8,
+      "id": "35154bec-8024-499e-adb5-0353da1fc935"
+    },
+    {
+      "input_text": "Should RA move on him, Schmidt’s backing would be largely supported by the Super Rugby franchises, with several sources telling The Roar that the experienced coach is exactly the type of person the Wallabies need.\nThe QRU has also expressed their desire for Rugby Australia to reinstate the annual $1.7 million in funding to each of the Super Rugby franchises that was withdrawn following the Covid pandemic to help keep the game afloat.",
       "metadata": {
-        "domain": "technology",
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T21:00:51.015285Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Rugby Australia",
+            "entity_type": "ORGANIZATION",
+            "description": "Rugby Australia, the national governing organization for rugby union in Australia, referred to as RA"
+          },
+          {
+            "entity_name": "Schmidt",
+            "entity_type": "PERSON",
+            "description": "Schmidt, an experienced coach being considered for a role with Rugby Australia and the Wallabies"
+          },
+          {
+            "entity_name": "Super Rugby Franchise",
+            "entity_type": "ORGANIZATION",
+            "description": "The Super Rugby franchises, professional rugby union club teams participating in the Super Rugby competition"
+          },
+          {
+            "entity_name": "The Roar",
+            "entity_type": "ORGANIZATION",
+            "description": "The Roar, a media outlet / publication reporting on rugby and sport"
+          },
+          {
+            "entity_name": "Wallabies",
+            "entity_type": "ORGANIZATION",
+            "description": "Wallabies, the Australian national rugby union team"
+          },
+          {
+            "entity_name": "Queensland Rugby Union",
+            "entity_type": "ORGANIZATION",
+            "description": "QRU, the Queensland Rugby Union, a member union under Rugby Australia"
+          },
+          {
+            "entity_name": "Covid Pandemic",
+            "entity_type": "EVENT",
+            "description": "Covid pandemic, the global coronavirus disease pandemic that led to funding changes"
+          },
+          {
+            "entity_name": "1.7 Million",
+            "entity_type": "MONEY",
+            "description": "Annual funding amount of 1.7 million dollars to each Super Rugby franchise"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Rugby Australia",
+            "target_entity": "Schmidt",
+            "relation_type": "AGENT",
+            "description": "Rugby Australia (RA) is considering moving on Schmidt for a coaching role",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Wallabies",
+            "target_entity": "Schmidt",
+            "relation_type": "NEEDS",
+            "description": "Schmidt is described as exactly the type of person/coach the Wallabies need",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Super Rugby Franchise",
+            "target_entity": "Schmidt",
+            "relation_type": "SUPPORTS",
+            "description": "Super Rugby franchises would largely support Schmidt if Rugby Australia moves on him",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "The Roar",
+            "target_entity": "Rugby Australia",
+            "relation_type": "REPORTS_ON",
+            "description": "The Roar reports on the situation involving Schmidt and Rugby Australia",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Queensland Rugby Union",
+            "target_entity": "Rugby Australia",
+            "relation_type": "PART_OF",
+            "description": "The Queensland Rugby Union operates under or within Rugby Australia as a member union",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Rugby Australia",
+            "target_entity": "1.7 Million",
+            "relation_type": "EXPENDITURE",
+            "description": "Rugby Australia provides annual funding of 1.7 million dollars to each Super Rugby franchise",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Queensland Rugby Union",
+            "target_entity": "Rugby Australia",
+            "relation_type": "REQUESTS",
+            "description": "QRU is requesting that Rugby Australia reinstate the 1.7 million annual funding to Super Rugby franchises",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "1.7 Million",
+            "target_entity": "Super Rugby Franchise",
+            "relation_type": "FUNDS",
+            "description": "The 1.7 million annual funding is directed to each Super Rugby franchise",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "1.7 Million",
+            "target_entity": "Covid Pandemic",
+            "relation_type": "HAS_CAUSE",
+            "description": "Withdrawal of the 1.7 million funding followed the Covid pandemic",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "f3c1100d-55d6-4a3a-ba17-8825a0bfd166"
+    },
+    {
+      "input_text": "Консорциум израильских компанией Elbit Systems и Bluebird провел летные испытания грузоподъемного беспилотного летательного аппарата Flying Elephant («Летающий слон»). Как сообщает Flightglobal, проверки были признаны успешными. По словам источников портала, знакомых с программой испытаний, аппарат очень точно доставлял грузы в сложных условиях. Другие подробности не уточняются.Аппарат представляет собой моторизованный параплан, в котором за управление крылом отвечают сервоприводы. Flying Elephant оснащен двигателем мощностью 300 лошадиных сил. Беспилотник будет использовать для перемещения к заданной точке координаты GPS и сможет развивать скорость до 83 километров в час.Перевозка грузов при помощи Flying Elephant будет осуществляться на специальном амортизированном поддоне с универсальными креплениями. Израильские военные намерены использовать новый аппарат для доставки провизии и боеприпасов общей массой 1,5 тонны. Разработку Flying Elephant израильские военные заказали в 2011 году.Василий Сычёв",
+      "metadata": {
+        "domain": "general",
         "difficulty": "medium",
         "language": "russian",
-        "generated_at": "2026-05-07T18:36:58.352655Z"
+        "generated_at": "2026-05-19T21:10:58.832375Z"
       },
-      "quality_rating": 8
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Elbit Systems",
+            "entity_type": "ORGANIZATION",
+            "description": "Израильская оборонная компания, участник консорциума по разработке и испытаниям беспилотного летательного аппарата Flying Elephant"
+          },
+          {
+            "entity_name": "Bluebird",
+            "entity_type": "ORGANIZATION",
+            "description": "Израильская компания, входящая в консорциум с Elbit Systems и участвующая в разработке и летных испытаниях Flying Elephant"
+          },
+          {
+            "entity_name": "Flying Elephant",
+            "entity_type": "PRODUCT",
+            "description": "Грузоподъемный беспилотный летательный аппарат (моторизованный параплан) с двигателем мощностью 300 лошадиных сил и максимальной скоростью около 83 километров в час, предназначенный для доставки грузов, провизии и боеприпасов массой до 1,5 тонн; также известен под русским названием «Летающий слон»"
+          },
+          {
+            "entity_name": "Летающий слон",
+            "entity_type": "PRODUCT",
+            "description": "Русскоязычное название грузоподъемного беспилотного летательного аппарата Flying Elephant"
+          },
+          {
+            "entity_name": "Flightglobal",
+            "entity_type": "ORGANIZATION",
+            "description": "Специализированный авиационный новостной портал, сообщающий об испытаниях Flying Elephant"
+          },
+          {
+            "entity_name": "GPS",
+            "entity_type": "PRODUCT",
+            "description": "Система глобального позиционирования, по координатам которой беспилотник Flying Elephant будет перемещаться к заданной точке"
+          },
+          {
+            "entity_name": "Израильские военные",
+            "entity_type": "ORGANIZATION",
+            "description": "Вооруженные силы Израиля, являющиеся заказчиком разработки и предполагаемым пользователем беспилотного аппарата Flying Elephant для доставки провизии и боеприпасов"
+          },
+          {
+            "entity_name": "300",
+            "entity_type": "NUMBER",
+            "description": "Количество лошадиных сил, характеризующее мощность двигателя беспилотного аппарата Flying Elephant"
+          },
+          {
+            "entity_name": "83",
+            "entity_type": "NUMBER",
+            "description": "Количество километров в час, до которой Flying Elephant способен развивать скорость"
+          },
+          {
+            "entity_name": "1,5",
+            "entity_type": "NUMBER",
+            "description": "Масса в тоннах (1,5 тонны), которую Flying Elephant сможет перевозить в виде провизии и боеприпасов"
+          },
+          {
+            "entity_name": "2011",
+            "entity_type": "DATE",
+            "description": "Год, в котором израильские военные заказали разработку беспилотного аппарата Flying Elephant"
+          },
+          {
+            "entity_name": "Василий Сычёв",
+            "entity_type": "PERSON",
+            "description": "Фамилия и имя автора текста или журналиста, подготовившего материал о Flying Elephant"
+          },
+          {
+            "entity_name": "Израиль",
+            "entity_type": "COUNTRY",
+            "description": "Израиль, страна происхождения компаний Elbit Systems и Bluebird, а также страна, чьи военные являются заказчиками Flying Elephant"
+          },
+          {
+            "entity_name": "Амортизированный поддон",
+            "entity_type": "PRODUCT",
+            "description": "Специальный амортизированный поддон с универсальными креплениями, на котором осуществляется перевозка грузов аппаратом Flying Elephant"
+          },
+          {
+            "entity_name": "Грузы",
+            "entity_type": "PRODUCT",
+            "description": "Грузы, которые доставляет беспилотный аппарат Flying Elephant"
+          },
+          {
+            "entity_name": "Провизия",
+            "entity_type": "PRODUCT",
+            "description": "Провизия, один из видов грузов, доставляемых беспилотным аппаратом Flying Elephant"
+          },
+          {
+            "entity_name": "Боеприпасы",
+            "entity_type": "PRODUCT",
+            "description": "Боеприпасы, один из видов грузов, доставляемых беспилотным аппаратом Flying Elephant"
+          },
+          {
+            "entity_name": "Консорциум Elbit Systems и Bluebird",
+            "entity_type": "ORGANIZATION",
+            "description": "Консорциум израильских компаний Elbit Systems и Bluebird, проводивший летные испытания Flying Elephant"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Elbit Systems",
+            "target_entity": "Flying Elephant",
+            "relation_type": "PRODUCES",
+            "description": "Elbit Systems вместе с Bluebird образуют консорциум, разработавший и испытывающий Flying Elephant",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Bluebird",
+            "target_entity": "Flying Elephant",
+            "relation_type": "PRODUCES",
+            "description": "Bluebird в составе консорциума с Elbit Systems участвует в разработке и испытаниях Flying Elephant",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Flightglobal",
+            "target_entity": "Flying Elephant",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Flightglobal сообщил о летных испытаниях аппарата Flying Elephant",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Flying Elephant",
+            "target_entity": "GPS",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Flying Elephant использует координаты GPS для перемещения к заданной точке",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Израильские военные",
+            "target_entity": "Flying Elephant",
+            "relation_type": "OWNER_OF",
+            "description": "Израильские военные являются заказчиками разработки Flying Elephant",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Израильские военные",
+            "target_entity": "Flying Elephant",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Израильские военные намерены использовать Flying Elephant для доставки провизии и боеприпасов",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Flying Elephant",
+            "target_entity": "2011",
+            "relation_type": "START_TIME",
+            "description": "Израильские военные в 2011 году заказали разработку Flying Elephant",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Elbit Systems",
+            "target_entity": "Израиль",
+            "relation_type": "LOCATED_IN",
+            "description": "Elbit Systems является израильской компанией, происходящей из Израиля",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Bluebird",
+            "target_entity": "Израиль",
+            "relation_type": "LOCATED_IN",
+            "description": "Bluebird является израильской компанией, происходящей из Израиля",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Израильские военные",
+            "target_entity": "Израиль",
+            "relation_type": "LOCATED_IN",
+            "description": "Израильские военные относятся к Вооруженным силам Израиля и базируются в Израиле",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Flying Elephant",
+            "target_entity": "Летающий слон",
+            "relation_type": "ALTERNATIVE_NAME",
+            "description": "Летающий слон является русским названием беспилотного аппарата Flying Elephant",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Flying Elephant",
+            "target_entity": "300",
+            "relation_type": "HAS_ATTRIBUTE",
+            "description": "Flying Elephant оснащен двигателем мощностью 300 лошадиных сил",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Flying Elephant",
+            "target_entity": "83",
+            "relation_type": "HAS_ATTRIBUTE",
+            "description": "Flying Elephant способен развивать скорость до 83 километров в час",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Flying Elephant",
+            "target_entity": "1,5",
+            "relation_type": "HAS_ATTRIBUTE",
+            "description": "Flying Elephant перевозит грузы общей массой 1,5 тонны",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Амортизированный поддон",
+            "target_entity": "Flying Elephant",
+            "relation_type": "PART_OF",
+            "description": "Перевозка грузов осуществляется на специальном амортизированном поддоне",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Flying Elephant",
+            "target_entity": "Провизия",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Flying Elephant используется для доставки провизии",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Flying Elephant",
+            "target_entity": "Боеприпасы",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Flying Elephant используется для доставки боеприпасов",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Flying Elephant",
+            "target_entity": "Грузы",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Грузы перевозятся с помощью Flying Elephant",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Elbit Systems",
+            "target_entity": "Консорциум Elbit Systems и Bluebird",
+            "relation_type": "PART_OF",
+            "description": "Elbit Systems входит в консорциум, проводивший испытания Flying Elephant",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Bluebird",
+            "target_entity": "Консорциум Elbit Systems и Bluebird",
+            "relation_type": "PART_OF",
+            "description": "Bluebird входит в консорциум, проводивший испытания Flying Elephant",
+            "relationship_strength": 5
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "198a15a1-1d89-4a0e-9aaa-b63cbc0a3583"
+    },
+    {
+      "input_text": "Лингвисты и психологи из Калифорнийского университета и Университета Карнеги—Меллон обнаружили, что языки, в которых используется одно общее слово для обозначения снега и льда, в среднем распространены в странах с более теплым климатом. Исследование ученых опубликовано в журнале PLOS ONE.\nАвторы работы проанализировали около 250 языков из базы данных IDS+ (она включает в себя списки слов на разных языках), а также данные, полученные из Твиттера и языковых словарей и справочников. В своей работе они хотели подтвердить на примере использования слов «снег» и «лед», что окружающая среда непосредственным образом влияет на язык.Лингвисты изучили, в каких языках для обозначения снега и льда используются разные слова, а в каких одинаковые. В результате, они обнаружили около 50 языков, где снег и лед обозначаются одним словом. Затем исследователи посмотрели, где именно используются эти языки и какие средние температуры там преобладают.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-19T21:10:58.832375Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Лингвисты",
+            "entity_type": "PROFESSION",
+            "description": "Специалисты, занимающиеся научным изучением языка, участвующие в описанном исследовании"
+          },
+          {
+            "entity_name": "Психологи",
+            "entity_type": "PROFESSION",
+            "description": "Специалисты, изучающие психику и поведение людей, участвующие в описанном исследовании"
+          },
+          {
+            "entity_name": "Калифорнийский университет",
+            "entity_type": "ORGANIZATION",
+            "description": "Американский университет в штате Калифорния, место работы части авторов исследования"
+          },
+          {
+            "entity_name": "Университет Карнеги—Меллон",
+            "entity_type": "ORGANIZATION",
+            "description": "Американский исследовательский университет «Карнеги—Меллон», место работы части авторов исследования"
+          },
+          {
+            "entity_name": "PLOS ONE",
+            "entity_type": "WORK_OF_ART",
+            "description": "Название научного журнала, в котором опубликовано описанное исследование"
+          },
+          {
+            "entity_name": "IDS+",
+            "entity_type": "WORK_OF_ART",
+            "description": "База данных IDS+, включающая списки слов на разных языках, использованная авторами исследования"
+          },
+          {
+            "entity_name": "Твиттер",
+            "entity_type": "ORGANIZATION",
+            "description": "Социальная сеть микроблогов, откуда брались дополнительные языковые данные"
+          },
+          {
+            "entity_name": "Языковой словарь",
+            "entity_type": "WORK_OF_ART",
+            "description": "Языковые словари, использованные как источник данных в исследовании"
+          },
+          {
+            "entity_name": "Справочник",
+            "entity_type": "WORK_OF_ART",
+            "description": "Справочные издания по языкам, использованные как источник данных в исследовании"
+          },
+          {
+            "entity_name": "Снег",
+            "entity_type": "PRODUCT",
+            "description": "Русское слово, обозначающее атмосферные осадки в виде снежинок, выступающее объектом анализа в работе"
+          },
+          {
+            "entity_name": "Лед",
+            "entity_type": "PRODUCT",
+            "description": "Русское слово, обозначающее замёрзшую воду, выступающее объектом анализа в работе"
+          },
+          {
+            "entity_name": "Страна",
+            "entity_type": "COUNTRY",
+            "description": "Страны с более тёплым климатом, в которых, по результатам исследования, чаще встречаются языки с одним общим словом для «снега» и «льда»"
+          },
+          {
+            "entity_name": "Температура",
+            "entity_type": "NUMBER",
+            "description": "Средние температуры в регионах распространения изученных языков, с которыми сопоставлялись языковые данные"
+          },
+          {
+            "entity_name": "Исследование",
+            "entity_type": "EVENT",
+            "description": "Описанное в тексте научное исследование влияния среды на использование слов «снег» и «лед»"
+          },
+          {
+            "entity_name": "250",
+            "entity_type": "NUMBER",
+            "description": "Примерно 250 языков, проанализированных авторами исследования"
+          },
+          {
+            "entity_name": "50",
+            "entity_type": "NUMBER",
+            "description": "Примерно 50 языков, в которых снег и лед обозначаются одним словом"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Лингвисты",
+            "target_entity": "Исследование",
+            "relation_type": "AGENT",
+            "description": "Лингвисты участвовали в проведении описанного исследования",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Психологи",
+            "target_entity": "Исследование",
+            "relation_type": "AGENT",
+            "description": "Психологи участвовали в проведении описанного исследования",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Лингвисты",
+            "target_entity": "Калифорнийский университет",
+            "relation_type": "WORKPLACE",
+            "description": "Лингвисты работают в Калифорнийском университете (по тексту — происходят из него)",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Психологи",
+            "target_entity": "Калифорнийский университет",
+            "relation_type": "WORKPLACE",
+            "description": "Психологи работают в Калифорнийском университете",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Лингвисты",
+            "target_entity": "Университет Карнеги—Меллон",
+            "relation_type": "WORKPLACE",
+            "description": "Лингвисты работают в Университете Карнеги—Меллон",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Психологи",
+            "target_entity": "Университет Карнеги—Меллон",
+            "relation_type": "WORKPLACE",
+            "description": "Психологи работают в Университете Карнеги—Меллон",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Исследование",
+            "target_entity": "PLOS ONE",
+            "relation_type": "PUBLISHED_IN",
+            "description": "Исследование опубликовано в журнале PLOS ONE",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "IDS+",
+            "target_entity": "Исследование",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Исследование опиралось на данные из базы IDS+",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Твиттер",
+            "target_entity": "Исследование",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Исследование опиралось на данные, полученные из Твиттера",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Языковой словарь",
+            "target_entity": "Исследование",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Языковые словари использовались как источник данных в исследовании",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Справочник",
+            "target_entity": "Исследование",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Языковые справочники использовались как источник данных в исследовании",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Снег",
+            "target_entity": "Исследование",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Слова «снег» и «лед» являются объектами анализа в исследовании",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Лед",
+            "target_entity": "Исследование",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Слова «лед» и «снег» являются объектами анализа в исследовании",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Исследование",
+            "target_entity": "Страна",
+            "relation_type": "STUDY_SUBJECT_LOCATION",
+            "description": "Исследование рассматривает распространение языков в странах с более тёплым климатом",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Температура",
+            "target_entity": "Исследование",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "В исследовании сопоставлялись данные о языках и средние температуры регионов",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Исследование",
+            "target_entity": "250",
+            "relation_type": "QUANTIFIED_BY",
+            "description": "В исследовании было проанализировано около 250 языков",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Исследование",
+            "target_entity": "50",
+            "relation_type": "RESULT_QUANTITY",
+            "description": "Исследование выявило около 50 языков, где снег и лед обозначаются одним словом",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "709fd5a9-5890-49b9-bb9f-a006d33c13cf"
+    },
+    {
+      "input_text": "Компания Nokia использовала квадрокоптеры Telco со смартфонами на борту для анализа загруженности сотовой сети в Дубае на стадионе Дубай Спортс Сити. Пресс-релиз опубликован на сайте компании.Собранные данные автоматически отправлялись на сервера Nokia, где система анализировала информацию и уведомляла сотрудников о необходимости внесения изменений в конфигурацию сотовой сети.Также компания заявила о начале использования дронов для аудита состояния вышек сотовой связи. Дрон с установленной камерой подлетает к вышке на безопасную дистанцию, позволяя оператору произвести внешний осмотр оборудования.Ранее тесты качества покрытия мобильной сети, подобные проведенным в Дубае, выполнялись сотрудниками компании пешком или на машинах. Использование дронов позволило ощутимо ускорить процесс с меньшими трудозатратами.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-19T21:10:58.832375Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Nokia",
+            "entity_type": "ORGANIZATION",
+            "description": "Международная телекоммуникационная компания, использовавшая квадрокоптеры и дроны для анализа загруженности и аудита состояния сотовой сети"
+          },
+          {
+            "entity_name": "Telco",
+            "entity_type": "PRODUCT",
+            "description": "Квадрокоптеры, использованные компанией Nokia, на борту которых были установлены смартфоны для анализа загруженности сотовой сети"
+          },
+          {
+            "entity_name": "Смартфон",
+            "entity_type": "PRODUCT",
+            "description": "Смартфоны, установленные на борту квадрокоптеров для сбора данных о загруженности сотовой сети"
+          },
+          {
+            "entity_name": "Сотовая сеть",
+            "entity_type": "PRODUCT",
+            "description": "Сотовая сеть, чья загруженность анализировалась с помощью квадрокоптеров и дронов; также объект конфигурационных изменений"
+          },
+          {
+            "entity_name": "Дубай",
+            "entity_type": "CITY",
+            "description": "Город, в котором проводился анализ загруженности сотовой сети с применением квадрокоптеров и где ранее проводились тесты качества покрытия мобильной сети"
+          },
+          {
+            "entity_name": "Дубай Спортс Сити",
+            "entity_type": "FACILITY",
+            "description": "Стадион в Дубае, на котором проводился анализ загруженности сотовой сети с помощью квадрокоптеров Nokia"
+          },
+          {
+            "entity_name": "Сайт",
+            "entity_type": "FACILITY",
+            "description": "Сайт компании Nokia, на котором был опубликован пресс-релиз о применении квадрокоптеров и дронов"
+          },
+          {
+            "entity_name": "Сервер",
+            "entity_type": "FACILITY",
+            "description": "Серверы компании Nokia, на которые автоматически отправлялись собранные данные для последующего анализа"
+          },
+          {
+            "entity_name": "Система",
+            "entity_type": "PRODUCT",
+            "description": "Система анализа, работавшая на серверах Nokia, которая обрабатывала данные и уведомляла сотрудников о необходимости изменения конфигурации сети"
+          },
+          {
+            "entity_name": "Сотрудник",
+            "entity_type": "PERSON",
+            "description": "Сотрудники компании Nokia, получавшие уведомления от системы о необходимости внесения изменений в конфигурацию сети и ранее выполнявшие тесты покрытия пешком или на машинах"
+          },
+          {
+            "entity_name": "Вышка сотовой связи",
+            "entity_type": "FACILITY",
+            "description": "Вышки сотовой связи, состояние которых проверялось при помощи дронов с установленной камерой"
+          },
+          {
+            "entity_name": "Оператор",
+            "entity_type": "PERSON",
+            "description": "Оператор, управляющий дроном при визуальном внешнем осмотре оборудования на вышке"
+          },
+          {
+            "entity_name": "Оборудование",
+            "entity_type": "PRODUCT",
+            "description": "Оборудование сотовой связи, установленное на вышках и подлежащее внешнему осмотру с помощью дрона"
+          },
+          {
+            "entity_name": "Дрон",
+            "entity_type": "PRODUCT",
+            "description": "Дроны (включая квадрокоптеры), применяемые для анализа загруженности сотовой сети и аудита состояния вышек; оснащаются камерами"
+          },
+          {
+            "entity_name": "Машина",
+            "entity_type": "PRODUCT",
+            "description": "Машины, с помощью которых ранее выполнялись тесты качества покрытия мобильной сети до использования дронов"
+          },
+          {
+            "entity_name": "Камера",
+            "entity_type": "PRODUCT",
+            "description": "Камера, установленная на дроне и используемая для визуального внешнего осмотра оборудования на вышке"
+          },
+          {
+            "entity_name": "Конфигурация сотовой сети",
+            "entity_type": "PRODUCT",
+            "description": "Конфигурация сотовой сети, подлежащая изменению по результатам анализа системы"
+          },
+          {
+            "entity_name": "Тесты качества покрытия",
+            "entity_type": "EVENT",
+            "description": "Тесты качества покрытия мобильной сети, ранее выполнявшиеся сотрудниками пешком или на машинах"
+          },
+          {
+            "entity_name": "Аудит состояния вышек",
+            "entity_type": "EVENT",
+            "description": "Процесс аудита состояния вышек сотовой связи с использованием дронов"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Nokia",
+            "target_entity": "Telco",
+            "relation_type": "OWNER_OF",
+            "description": "Компания Nokia использует квадрокоптеры Telco как своё техническое средство для анализа загруженности сети",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Nokia",
+            "target_entity": "Смартфон",
+            "relation_type": "OWNER_OF",
+            "description": "Компания Nokia размещает смартфоны на борту квадрокоптеров Telco для сбора данных",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Telco",
+            "target_entity": "Сотовая сеть",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Квадрокоптеры Telco со смартфонами используются для анализа загруженности сотовой сети",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Смартфон",
+            "target_entity": "Сотовая сеть",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Смартфоны на борту квадрокоптера участвуют в анализе загруженности сотовой сети",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Сотовая сеть",
+            "target_entity": "Дубай",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "Анализ загруженности сотовой сети при помощи квадрокоптеров проводился в городе Дубай",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Дубай Спортс Сити",
+            "target_entity": "Дубай",
+            "relation_type": "LOCATED_IN",
+            "description": "Анализ загруженности сети проводился на стадионе Дубай Спортс Сити в Дубае",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Nokia",
+            "target_entity": "Сайт",
+            "relation_type": "OWNER_OF",
+            "description": "Компания Nokia опубликовала пресс-релиз на собственном сайте",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Nokia",
+            "target_entity": "Сервер",
+            "relation_type": "OWNER_OF",
+            "description": "Собранные данные отправлялись на серверы Nokia для анализа",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Система",
+            "target_entity": "Сервер",
+            "relation_type": "PART_OF",
+            "description": "Система анализа данных работала на серверах Nokia",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Система",
+            "target_entity": "Сотрудник",
+            "relation_type": "AGENT",
+            "description": "Система уведомляла сотрудников Nokia о необходимости изменений в конфигурации сети",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Дрон",
+            "target_entity": "Вышка сотовой связи",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Дроны используются компанией Nokia для аудита состояния вышек сотовой связи",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Оператор",
+            "target_entity": "Дрон",
+            "relation_type": "AGENT",
+            "description": "Оператор управляет дроном, который подлетает к вышке для внешнего осмотра оборудования",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Оператор",
+            "target_entity": "Оборудование",
+            "relation_type": "AGENT",
+            "description": "Оператор при помощи дрона выполняет внешний осмотр оборудования",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Оборудование",
+            "target_entity": "Вышка сотовой связи",
+            "relation_type": "PART_OF",
+            "description": "Оборудование является частью инфраструктуры на вышке сотовой связи",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Вышка сотовой связи",
+            "target_entity": "Сотовая сеть",
+            "relation_type": "PART_OF",
+            "description": "Вышка сотовой связи является частью инфраструктуры сотовой сети",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Сотрудник",
+            "target_entity": "Сотовая сеть",
+            "relation_type": "AGENT",
+            "description": "Сотрудники компании Nokia ранее выполняли тесты качества покрытия мобильной сети пешком или на машинах",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Машина",
+            "target_entity": "Сотовая сеть",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Машины использовались сотрудниками при тестировании качества покрытия сети",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Nokia",
+            "target_entity": "Аудит состояния вышек",
+            "relation_type": "AGENT",
+            "description": "Nokia инициировала использование дронов для аудита состояния вышек сотовой связи",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Аудит состояния вышек",
+            "target_entity": "Вышка сотовой связи",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "Аудит состояния вышек проводится на вышках сотовой связи",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Дрон",
+            "target_entity": "Аудит состояния вышек",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Дрон участвует в аудите состояния вышек",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Камера",
+            "target_entity": "Дрон",
+            "relation_type": "PART_OF",
+            "description": "Камера установлена на дроне и используется при осмотре оборудования",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Система",
+            "target_entity": "Конфигурация сотовой сети",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Система анализирует конфигурацию сотовой сети и инициирует изменения",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Конфигурация сотовой сети",
+            "target_entity": "Сотовая сеть",
+            "relation_type": "PART_OF",
+            "description": "Конфигурация сотовой сети является частью сотовой сети",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Тесты качества покрытия",
+            "target_entity": "Дубай",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "Тесты качества покрытия мобильной сети проводятся в Дубае, аналогично описанным испытаниям",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Сотрудник",
+            "target_entity": "Тесты качества покрытия",
+            "relation_type": "AGENT",
+            "description": "Сотрудники являются исполнителями тестов качества покрытия сети",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Машина",
+            "target_entity": "Тесты качества покрытия",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Машины используются как средство для проведения тестов качества покрытия",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 9,
+      "id": "8e9150dc-59f4-433e-8d23-63f33d763e7b"
+    },
+    {
+      "input_text": "Организаторы первых гонок беспилотных автомобилей Roborace продемонстрировали прототип электромобиля, предназначенный для разработчиков. Электромобиль под названием DevBot будет использоваться командами при разработке и отладке системы управления беспилотным автомобилем, сообщает ArsTechnica.DevBot оснащен той же силовой установкой и электроникой, что и автомобили, которые будут участвовать в заезде, однако дополнительно на него установлена кабина пилота. Официально презентация болида назначена на 24 августа и состоится на трассе Донингтон Парк в Лестершире.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-19T21:10:58.832375Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Roborace",
+            "entity_type": "EVENT",
+            "description": "Серия первых гонок беспилотных автомобилей"
+          },
+          {
+            "entity_name": "DevBot",
+            "entity_type": "PRODUCT",
+            "description": "Прототип электрического автомобиля, предназначенный для разработчиков систем управления беспилотным автомобилем Roborace"
+          },
+          {
+            "entity_name": "ArsTechnica",
+            "entity_type": "ORGANIZATION",
+            "description": "Интернет-издание, опубликовавшее сообщение о DevBot и Roborace"
+          },
+          {
+            "entity_name": "24 август",
+            "entity_type": "DATE",
+            "description": "Дата официальной презентации болида DevBot"
+          },
+          {
+            "entity_name": "Донингтон Парк",
+            "entity_type": "FACILITY",
+            "description": "Автогоночная трасса, на которой состоится официальная презентация болида DevBot"
+          },
+          {
+            "entity_name": "Лестершир",
+            "entity_type": "STATE_OR_PROVINCE",
+            "description": "Графство (административный округ) в Англии, где расположена трасса Донингтон Парк"
+          },
+          {
+            "entity_name": "Организаторы Roborace",
+            "entity_type": "ORGANIZATION",
+            "description": "Организаторы первых гонок беспилотных автомобилей Roborace (без указания конкретных лиц или организации)"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "DevBot",
+            "target_entity": "Roborace",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Прототип электромобиля DevBot предназначен для использования разработчиками в контексте гонок Roborace",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "ArsTechnica",
+            "target_entity": "DevBot",
+            "relation_type": "AGENT",
+            "description": "Издание ArsTechnica сообщает информацию о прототипе DevBot и гонках Roborace",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "DevBot",
+            "target_entity": "24 август",
+            "relation_type": "START_TIME",
+            "description": "Презентация болида DevBot состоится 24 августа",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "DevBot",
+            "target_entity": "Донингтон Парк",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "Презентация болида DevBot пройдет на трассе Донингтон Парк",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Донингтон Парк",
+            "target_entity": "Лестершир",
+            "relation_type": "LOCATED_IN",
+            "description": "Трасса Донингтон Парк расположена в графстве Лестершир",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Организаторы Roborace",
+            "target_entity": "DevBot",
+            "relation_type": "CREATOR_OF",
+            "description": "Организаторы Roborace продемонстрировали прототип электромобиля DevBot",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Организаторы Roborace",
+            "target_entity": "Roborace",
+            "relation_type": "ORGANIZES",
+            "description": "Организаторы Roborace проводят гонки Roborace",
+            "relationship_strength": 5
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "e4691536-cdc9-4cee-8882-314d5c3e9824"
+    },
+    {
+      "input_text": "Сегодня в Стокгольме были объявлены лауреаты Нобелевской премии по химии. 107-я премия присуждена Томасу Линдалю, Полу Модричу и Азиз Санджар с формулировкой «за исследование механизмов репарации ДНК».",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-19T21:10:58.832375Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Стокгольм",
+            "entity_type": "CITY",
+            "description": "Город, в котором были объявлены лауреаты Нобелевской премии по химии."
+          },
+          {
+            "entity_name": "Нобелевская премия по химии",
+            "entity_type": "AWARD",
+            "description": "Международная научная награда, в данном тексте — по химии, присуждаемая за выдающиеся достижения в области химии."
+          },
+          {
+            "entity_name": "107-я Нобелевская премия по химии",
+            "entity_type": "AWARD",
+            "description": "107-я по счёту Нобелевская премия по химии, о которой говорится в тексте."
+          },
+          {
+            "entity_name": "Томас Линдал",
+            "entity_type": "PERSON",
+            "description": "Учёный (химик/биохимик), получивший 107-ю Нобелевскую премию по химии за исследование механизмов репарации ДНК."
+          },
+          {
+            "entity_name": "Пол Модрич",
+            "entity_type": "PERSON",
+            "description": "Учёный (химик/биохимик), получивший 107-ю Нобелевскую премию по химии за исследование механизмов репарации ДНК."
+          },
+          {
+            "entity_name": "Азиз Санджар",
+            "entity_type": "PERSON",
+            "description": "Учёный (химик/биохимик), получивший 107-ю Нобелевскую премию по химии за исследование механизмов репарации ДНК."
+          },
+          {
+            "entity_name": "Исследование механизмов репарации ДНК",
+            "entity_type": "WORK_OF_ART",
+            "description": "Исследование механизмов репарации ДНК, за которое присуждена 107-я Нобелевская премия по химии."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "107-я Нобелевская премия по химии",
+            "target_entity": "Нобелевская премия по химии",
+            "relation_type": "PART_OF",
+            "description": "107-я Нобелевская премия по химии является одной из Нобелевских премий по химии.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Томас Линдал",
+            "target_entity": "107-я Нобелевская премия по химии",
+            "relation_type": "AWARDED_WITH",
+            "description": "107-я Нобелевская премия по химии присуждена Томасу Линдалу.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Пол Модрич",
+            "target_entity": "107-я Нобелевская премия по химии",
+            "relation_type": "AWARDED_WITH",
+            "description": "107-я Нобелевская премия по химии присуждена Полу Модричу.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Азиз Санджар",
+            "target_entity": "107-я Нобелевская премия по химии",
+            "relation_type": "AWARDED_WITH",
+            "description": "107-я Нобелевская премия по химии присуждена Азизу Санджару.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "107-я Нобелевская премия по химии",
+            "target_entity": "Стокгольм",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "Объявление лауреатов 107-й Нобелевской премии по химии состоялось в Стокгольме.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "107-я Нобелевская премия по химии",
+            "target_entity": "Исследование механизмов репарации ДНК",
+            "relation_type": "AWARDED_FOR",
+            "description": "Награда присуждена за исследование механизмов репарации ДНК.",
+            "relationship_strength": 5
+          }
+        ]
+      },
+      "quality_rating": 9,
+      "id": "6f88251d-2a7d-4039-a217-79fe8a260981"
+    },
+    {
+      "input_text": "Группа энтузиастов из Швеции запустила в космос пончик. Видео полета опубликовано на YouTube. Братья Александр и Бенджамин Йонссон отправили пончик на высоту 32 км. На этой высоте оболочка импровизированного стратостата взорвалась и пончик перешел в свободное падение, в конце которого приводнился. Братья связались с береговой охраной и попытались спасти кондитерское изделие, но было слишком поздно, пончик бесповоротно размок и не выдержал подъема на борт.Запуск был согласован с властями и произведен в районе норвежского города Ашим.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-19T21:10:58.832375Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Группа энтузиастов",
+            "entity_type": "ORGANIZATION",
+            "description": "Группа неуказанных поименно людей-энтузиастов, осуществивших запуск пончика в космос"
+          },
+          {
+            "entity_name": "Швеция",
+            "entity_type": "COUNTRY",
+            "description": "Европейская страна, откуда была группа энтузиастов, запустившая пончик"
+          },
+          {
+            "entity_name": "Youtube",
+            "entity_type": "ORGANIZATION",
+            "description": "Платформа для публикации и просмотра видео, на которую было выложено видео полета пончика"
+          },
+          {
+            "entity_name": "Александр Йонссон",
+            "entity_type": "PERSON",
+            "description": "Один из братьев Йонссон, участвовавших в запуске пончика на высоту 32 км"
+          },
+          {
+            "entity_name": "Бенджамин Йонссон",
+            "entity_type": "PERSON",
+            "description": "Один из братьев Йонссон, участвовавших в запуске пончика на высоту 32 км"
+          },
+          {
+            "entity_name": "Братья Йонссон",
+            "entity_type": "FAMILY",
+            "description": "Братья по фамилии Йонссон, Александр и Бенджамин, совместно запустившие пончик в стратосферу и пытавшиеся его спасти"
+          },
+          {
+            "entity_name": "Пончик",
+            "entity_type": "PRODUCT",
+            "description": "Кондитерское изделие, которое было запущено в космос, затем перешло в свободное падение, приводнилось, размокло и не выдержало подъёма на борт"
+          },
+          {
+            "entity_name": "Импровизированный стратостат",
+            "entity_type": "PRODUCT",
+            "description": "Импровизированный стратостат, оболочка которого взорвалась на высоте около 32 км, использовался для запуска пончика"
+          },
+          {
+            "entity_name": "32 км",
+            "entity_type": "NUMBER",
+            "description": "Высота, на которую был отправлен пончик братьями Йонссон (32 километра над Землей)"
+          },
+          {
+            "entity_name": "Эта высота",
+            "entity_type": "NUMBER",
+            "description": "Высота, на которой оболочка стратостата взорвалась и пончик перешел в свободное падение"
+          },
+          {
+            "entity_name": "Береговая охрана",
+            "entity_type": "ORGANIZATION",
+            "description": "Морская или прибрежная служба, с которой братья связались, чтобы попытаться спасти пончик после приводнения"
+          },
+          {
+            "entity_name": "Запуск пончика",
+            "entity_type": "EVENT",
+            "description": "Процесс запуска пончика в космос, согласованный с властями и осуществленный в районе города Ашим"
+          },
+          {
+            "entity_name": "Ашим",
+            "entity_type": "CITY",
+            "description": "Норвежский город Ашим, в районе которого был произведен запуск пончика"
+          },
+          {
+            "entity_name": "Норвегия",
+            "entity_type": "COUNTRY",
+            "description": "Скандинавская страна, частью которой является город Ашим, упомянутая как место района запуска"
+          },
+          {
+            "entity_name": "Власти",
+            "entity_type": "ORGANIZATION",
+            "description": "Неназванные власти, с которыми был согласован запуск пончика"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Братья Йонссон",
+            "target_entity": "Группа энтузиастов",
+            "relation_type": "MEMBER_OF",
+            "description": "Группа энтузиастов состоит из людей, среди которых упоминаются братья Йонссон как инициаторы запуска",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Братья Йонссон",
+            "target_entity": "Швеция",
+            "relation_type": "ORIGINS_FROM",
+            "description": "Братья Йонссон являются гражданами или выходцами из Швеции, откуда была группа энтузиастов",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Группа энтузиастов",
+            "target_entity": "Швеция",
+            "relation_type": "ORIGINS_FROM",
+            "description": "Группа энтузиастов происходит из Швеции",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Запуск пончика",
+            "target_entity": "Youtube",
+            "relation_type": "PUBLISHED_ON",
+            "description": "Видео полета пончика было опубликовано на платформе YouTube",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Братья Йонссон",
+            "target_entity": "Пончик",
+            "relation_type": "AGENT",
+            "description": "Братья Йонссон отправили пончик на высоту 32 км",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Братья Йонссон",
+            "target_entity": "Запуск пончика",
+            "relation_type": "AGENT",
+            "description": "Братья Йонссон были инициаторами и организаторами запуска пончика",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Пончик",
+            "target_entity": "Запуск пончика",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Запуск пончика заключался в отправке пончика на высоту 32 км",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Импровизированный стратостат",
+            "target_entity": "Запуск пончика",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Импровизированный стратостат использовался для запуска пончика",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Пончик",
+            "target_entity": "32 км",
+            "relation_type": "LOCATED_AT",
+            "description": "Высота 32 км является высотой, на которую был отправлен пончик",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Эта высота",
+            "target_entity": "32 км",
+            "relation_type": "ALTERNATIVE_NAME",
+            "description": "Высота, на которой произошел взрыв оболочки стратостата, соответствует заявленной высоте 32 км",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Пончик",
+            "target_entity": "Запуск пончика",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Пончик был запущен и затем приводнился в ходе события «Запуск пончика»",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Береговая охрана",
+            "target_entity": "Запуск пончика",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Береговая охрана участвовала в попытке спасения пончика по просьбе братьев",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Братья Йонссон",
+            "target_entity": "Береговая охрана",
+            "relation_type": "CONTACTED",
+            "description": "Братья Йонссон связались с береговой охраной",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Запуск пончика",
+            "target_entity": "Ашим",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "Запуск пончика был осуществлен в районе города Ашим",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Ашим",
+            "target_entity": "Норвегия",
+            "relation_type": "LOCATED_IN",
+            "description": "Город Ашим расположен в Норвегии",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Александр Йонссон",
+            "target_entity": "Братья Йонссон",
+            "relation_type": "MEMBER_OF",
+            "description": "Александр Йонссон и Бенджамин Йонссон являются братьями и входят в семейную группу «Братья Йонссон»",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Александр Йонссон",
+            "target_entity": "Бенджамин Йонссон",
+            "relation_type": "SIBLING",
+            "description": "Александр и Бенджамин являются братьями друг другу",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Бенджамин Йонссон",
+            "target_entity": "Братья Йонссон",
+            "relation_type": "MEMBER_OF",
+            "description": "Бенджамин Йонссон является членом семейной группы «Братья Йонссон»",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Запуск пончика",
+            "target_entity": "Власти",
+            "relation_type": "APPROVED_BY",
+            "description": "Запуск пончика был согласован с властями",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Группа энтузиастов",
+            "target_entity": "Власти",
+            "relation_type": "CONTACTED",
+            "description": "Организаторы запуска (группа энтузиастов) согласовали запуск с властями",
+            "relationship_strength": 3
+          }
+        ]
+      },
+      "quality_rating": 9,
+      "id": "42c91070-26e2-4da8-991f-1752f0f8c85f"
+    },
+    {
+      "input_text": "Американская компания Ford начала снежные испытания перспективного беспилотного автомобиля Fusion Hybrid. Они проводятся в фальшивом городе Mcity, расположенном на территории Мичиганского университета. Ориентирование автономных машин производится при помощи их собственных лидаров и систем чтения трехмерных карт местности в высоком разрешении.Зима со снегопадами и скользкими дорогами является самым неблагоприятным для беспилотных автомобилей временем года: осадки резко снижают обзор камер и сенсоров, а непредсказуемость состояния дорожного покрытия снижает эффективность автономной системы управления. Для испытаний Ford использует заранее подготовленные трехмерные карты местности.Испытания автомобиля Fusion Hybrid на полигоне Mcity проводятся с ноября 2015 года. Полигон позволяет отрабатывать различные опасные сценарии, типичные для обычных городских улиц. Например, в Mcity можно проверить реакцию беспилотного автомобиля на внезапное перебегание человеком дороги на красный свет.Василий Сычёв",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-19T21:10:58.832375Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Ford",
+            "entity_type": "ORGANIZATION",
+            "description": "Американская автомобильная компания, начавшая снежные испытания беспилотного автомобиля Fusion Hybrid"
+          },
+          {
+            "entity_name": "Fusion Hybrid",
+            "entity_type": "PRODUCT",
+            "description": "Перспективный беспилотный автомобиль компании Ford, проходящий снежные испытания"
+          },
+          {
+            "entity_name": "Mcity",
+            "entity_type": "FACILITY",
+            "description": "Фальшивый испытательный город (полигон) для автономных и беспилотных автомобилей"
+          },
+          {
+            "entity_name": "Мичиганский университет",
+            "entity_type": "ORGANIZATION",
+            "description": "Университет, на территории которого расположен испытательный полигон Mcity"
+          },
+          {
+            "entity_name": "Снегопад",
+            "entity_type": "EVENT",
+            "description": "Снегопады, ухудшающие условия движения и работу сенсоров беспилотного автомобиля"
+          },
+          {
+            "entity_name": "Скользкая дорога",
+            "entity_type": "LOCATION",
+            "description": "Скользкие дороги, неблагоприятные условия эксплуатации беспилотных автомобилей зимой"
+          },
+          {
+            "entity_name": "Ноябрь 2015 год",
+            "entity_type": "DATE",
+            "description": "Ноябрь 2015 года, время начала испытаний автомобиля Fusion Hybrid на полигоне Mcity"
+          },
+          {
+            "entity_name": "Зима",
+            "entity_type": "TIME",
+            "description": "Зима, сезон года, являющийся неблагоприятным временем для беспилотных автомобилей"
+          },
+          {
+            "entity_name": "Василий Сычёв",
+            "entity_type": "PERSON",
+            "description": "Автор или упомянутый человек в конце текста"
+          },
+          {
+            "entity_name": "Лидар",
+            "entity_type": "PRODUCT",
+            "description": "Лидары, сенсоры, используемые автономными машинами для ориентации"
+          },
+          {
+            "entity_name": "Камера",
+            "entity_type": "PRODUCT",
+            "description": "Камеры, сенсоры, используемые беспилотным автомобилем"
+          },
+          {
+            "entity_name": "Трехмерная карта местности",
+            "entity_type": "PRODUCT",
+            "description": "Трехмерные карты местности в высоком разрешении, используемые системами автономного вождения"
+          },
+          {
+            "entity_name": "Автономная система управления",
+            "entity_type": "PRODUCT",
+            "description": "Автономная система управления, управляющая беспилотным автомобилем"
+          },
+          {
+            "entity_name": "Полигон",
+            "entity_type": "FACILITY",
+            "description": "Полигон для испытаний автономных автомобилей (Mcity), описанный в тексте"
+          },
+          {
+            "entity_name": "Человек",
+            "entity_type": "PERSON",
+            "description": "Человек, внезапно перебегающий дорогу на красный свет, как сценарий испытаний"
+          },
+          {
+            "entity_name": "Красный свет",
+            "entity_type": "EVENT",
+            "description": "Красный свет светофора, нарушение которого моделируется в сценарии испытаний"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Ford",
+            "target_entity": "Fusion Hybrid",
+            "relation_type": "PRODUCES",
+            "description": "Компания Ford разрабатывает и использует беспилотный автомобиль Fusion Hybrid",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Fusion Hybrid",
+            "target_entity": "Mcity",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "Испытания Fusion Hybrid проводятся на полигоне Mcity",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Mcity",
+            "target_entity": "Мичиганский университет",
+            "relation_type": "LOCATED_IN",
+            "description": "Полигон Mcity находится на территории Мичиганского университета",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Ford",
+            "target_entity": "Mcity",
+            "relation_type": "ORGANIZES",
+            "description": "Ford проводит испытания Fusion Hybrid на полигоне Mcity",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Fusion Hybrid",
+            "target_entity": "Ноябрь 2015 год",
+            "relation_type": "START_TIME",
+            "description": "Испытания Fusion Hybrid на полигоне Mcity начались в ноябре 2015 года",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Зима",
+            "target_entity": "Снегопад",
+            "relation_type": "ASSOCIATED_WITH",
+            "description": "Зима со снегопадами является неблагоприятным временем для беспилотных автомобилей",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Зима",
+            "target_entity": "Скользкая дорога",
+            "relation_type": "ASSOCIATED_WITH",
+            "description": "Зима со скользкими дорогами является неблагоприятным временем для беспилотных автомобилей",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Снегопад",
+            "target_entity": "Камера",
+            "relation_type": "AFFECTS",
+            "description": "Снегопад снижает обзор камер и сенсоров беспилотного автомобиля",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Снегопад",
+            "target_entity": "Лидар",
+            "relation_type": "AFFECTS",
+            "description": "Снегопад ухудшает работу лидаров беспилотного автомобиля",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Скользкая дорога",
+            "target_entity": "Автономная система управления",
+            "relation_type": "AFFECTS",
+            "description": "Скользкая дорога снижает эффективность автономной системы управления",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Fusion Hybrid",
+            "target_entity": "Лидар",
+            "relation_type": "USES",
+            "description": "Fusion Hybrid использует лидары для ориентации",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Fusion Hybrid",
+            "target_entity": "Камера",
+            "relation_type": "USES",
+            "description": "Fusion Hybrid использует камеры для ориентации",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Fusion Hybrid",
+            "target_entity": "Трехмерная карта местности",
+            "relation_type": "USES",
+            "description": "Fusion Hybrid использует трехмерные карты местности для автономного управления",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Ford",
+            "target_entity": "Трехмерная карта местности",
+            "relation_type": "USES",
+            "description": "Ford использует заранее подготовленные трехмерные карты местности для испытаний",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Автономная система управления",
+            "target_entity": "Fusion Hybrid",
+            "relation_type": "PART_OF",
+            "description": "Автономная система управления относится к Fusion Hybrid как система управления автомобилем",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Полигон",
+            "target_entity": "Mcity",
+            "relation_type": "SAME_AS",
+            "description": "Полигон является испытательным объектом Mcity",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Mcity",
+            "target_entity": "Человек",
+            "relation_type": "TESTS",
+            "description": "В Mcity проверяют реакцию беспилотного автомобиля на внезапное перебегание дороги человеком",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Человек",
+            "target_entity": "Красный свет",
+            "relation_type": "ASSOCIATED_WITH",
+            "description": "Сценарий перебегания дороги человеком нарушает правила, проходя на красный свет",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Fusion Hybrid",
+            "target_entity": "Полигон",
+            "relation_type": "TESTED_IN",
+            "description": "Fusion Hybrid классифицируется как беспилотный автомобиль, участвующий в испытаниях в Mcity",
+            "relationship_strength": 5
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "39c4d1f6-5129-4a1b-a3c2-68a5c67cbd69"
+    },
+    {
+      "input_text": "Компания Magic Leap запатентовала внешний вид шлема дополненной реальности. Как отмечает портал QZ, возможно, именно так будет выглядеть прототип AR-гарнитуры, которую выпустит Magic Leap.\nВ патенте описывается большой визор, за которым установлены очки. Передняя часть при помощи крепления на затылке и ремней удерживается на голове пользователя. Поскольку патент дизайнерский и описывает только внешний вид устройства, то о технических характеристиках предполагаемого VR/AR-шлема Magic Leap по-прежнему ничего не известно.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-19T21:10:58.832375Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Magic Leap",
+            "entity_type": "ORGANIZATION",
+            "description": "Компания, занимающаяся разработкой устройств дополненной и смешанной реальности, запатентовавшая внешний вид шлема дополненной реальности и VR/AR-гарнитуры"
+          },
+          {
+            "entity_name": "QZ",
+            "entity_type": "ORGANIZATION",
+            "description": "Интернет-портал (медиаресурс), который отмечает возможный внешний вид прототипа AR-гарнитуры Magic Leap"
+          },
+          {
+            "entity_name": "Патент",
+            "entity_type": "LAW",
+            "description": "Дизайнерский патент на внешний вид шлема дополненной реальности Magic Leap, описывающий форму, визор, крепления и общий дизайн устройства"
+          },
+          {
+            "entity_name": "Шлем дополненной реальности",
+            "entity_type": "PRODUCT",
+            "description": "Шлем дополненной реальности Magic Leap, внешний вид которого описан в дизайнерском патенте"
+          },
+          {
+            "entity_name": "AR-гарнитура",
+            "entity_type": "PRODUCT",
+            "description": "Прототип AR-гарнитуры, который, как предполагается, будет выпущен компанией Magic Leap и чей внешний вид, вероятно, соответствует запатентованному дизайну"
+          },
+          {
+            "entity_name": "VR/AR-шлем",
+            "entity_type": "PRODUCT",
+            "description": "Предполагаемый VR/AR-шлем Magic Leap, устройство смешанной реальности, технические характеристики которого не раскрыты"
+          },
+          {
+            "entity_name": "Визор",
+            "entity_type": "PRODUCT",
+            "description": "Большой визор, являющийся частью дизайна шлема дополненной реальности Magic Leap, описанного в патенте"
+          },
+          {
+            "entity_name": "Очки",
+            "entity_type": "PRODUCT",
+            "description": "Очки, установленные за визором внутри шлема дополненной реальности Magic Leap, описанные в патенте"
+          },
+          {
+            "entity_name": "Крепление на затылке",
+            "entity_type": "PRODUCT",
+            "description": "Крепление на затылке, элемент конструкции шлема дополненной реальности, удерживающий переднюю часть устройства на голове пользователя"
+          },
+          {
+            "entity_name": "Ремни",
+            "entity_type": "PRODUCT",
+            "description": "Ремни, элементы крепежа шлема дополненной реальности, удерживающие устройство на голове пользователя"
+          },
+          {
+            "entity_name": "Голова пользователя",
+            "entity_type": "LOCATION",
+            "description": "Голова пользователя, на которой фиксируется шлем дополненной реальности Magic Leap с помощью крепления и ремней"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Magic Leap",
+            "target_entity": "Патент",
+            "relation_type": "OWNER_OF",
+            "description": "Компания Magic Leap является владельцем и заявителем дизайнерского патента на внешний вид шлема дополненной реальности",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Патент",
+            "target_entity": "Шлем дополненной реальности",
+            "relation_type": "DESCRIBES",
+            "description": "Патент описывает внешний вид шлема дополненной реальности Magic Leap",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "QZ",
+            "target_entity": "AR-гарнитура",
+            "relation_type": "AGENT",
+            "description": "Портал QZ сообщает и комментирует возможный внешний вид прототипа AR-гарнитуры Magic Leap, ссылаясь на патент",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Magic Leap",
+            "target_entity": "AR-гарнитура",
+            "relation_type": "PRODUCES",
+            "description": "Компания Magic Leap выступает разработчиком/производителем, которая должна выпустить AR-гарнитуру",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Патент",
+            "target_entity": "VR/AR-шлем",
+            "relation_type": "DESCRIBES",
+            "description": "В патенте описывается предполагаемый VR/AR-шлем Magic Leap как устройство с данным дизайном",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Шлем дополненной реальности",
+            "target_entity": "VR/AR-шлем",
+            "relation_type": "ALTERNATIVE_NAME",
+            "description": "Шлем дополненной реальности рассматривается как разновидность или форма VR/AR-шлема в тексте",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Визор",
+            "target_entity": "Шлем дополненной реальности",
+            "relation_type": "PART_OF",
+            "description": "В патенте описывается большой визор как часть дизайна шлема",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Очки",
+            "target_entity": "Шлем дополненной реальности",
+            "relation_type": "PART_OF",
+            "description": "В патенте указано, что за визором установлены очки внутри шлема",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Шлем дополненной реальности",
+            "target_entity": "Крепление на затылке",
+            "relation_type": "USES",
+            "description": "Передняя часть устройства с визором удерживается на голове пользователя с помощью крепления на затылке",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Шлем дополненной реальности",
+            "target_entity": "Ремни",
+            "relation_type": "USES",
+            "description": "Шлем дополненной реальности фиксируется ремнями, которые помогают удерживать устройство на голове",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Шлем дополненной реальности",
+            "target_entity": "Голова пользователя",
+            "relation_type": "LOCATED_ON",
+            "description": "Шлем дополненной реальности предназначен для ношения на голове пользователя",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "ba5cf0f5-e9fc-435b-be81-807528eaaf6a"
     }
   ]
 }

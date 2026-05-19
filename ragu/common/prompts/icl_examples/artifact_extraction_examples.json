@@ -1,2011 +1,971 @@
 {
-    "version": "1.0",
-    "languages": [
-        "english",
-        "russian"
-    ],
-    "total_examples": 18,
-    "generated_by": {
-        "generator_model": "t-tech/T-pro-it-2.0",
-        "judge_model": "qwen/qwen3.6-max-preview"
+  "version": "1.0",
+  "languages": [
+    "english",
+    "russian"
+  ],
+  "total_examples": 9,
+  "generated_by": {
+    "generator_model": "openai/gpt-5.1",
+    "judge_model": "google/gemini-2.5-pro"
+  },
+  "generated_at": "2026-05-19T21:07:56.900149Z",
+  "examples": [
+    {
+      "input_text": "Speaking to the publication, she said she connected with Kelce in July, after he confessed on his podcast that he tried and failed to give her a friendship bracelet with his phone number on it during one of her Eras Tour shows.\nNow, Swift has shared that she has nothing to hide in her new relationship with Kelce.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:44:18.660293Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Kelce",
+            "entity_type": "PERSON",
+            "description": "Kelce, the person Swift connected with in July and with whom she is now in a relationship"
+          },
+          {
+            "entity_name": "Swift",
+            "entity_type": "PERSON",
+            "description": "Swift, the person speaking about her relationship with Kelce"
+          },
+          {
+            "entity_name": "Eras Tour",
+            "entity_type": "EVENT",
+            "description": "The Eras Tour, the concert tour during which Kelce tried to give Swift a friendship bracelet with his phone number"
+          },
+          {
+            "entity_name": "July",
+            "entity_type": "DATE",
+            "description": "July, the month when Swift connected with Kelce after his podcast confession"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Swift",
+            "target_entity": "Kelce",
+            "relation_type": "KNOWS",
+            "description": "Swift is in a romantic relationship with Kelce",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Swift",
+            "target_entity": "Eras Tour",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Swift performed shows as part of the Eras Tour",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Kelce",
+            "target_entity": "Eras Tour",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Kelce attempted to give Swift a friendship bracelet with his phone number during one of her Eras Tour shows",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Swift",
+            "target_entity": "July",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Swift connected with Kelce in July",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Kelce",
+            "target_entity": "July",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Kelce connected with Swift in July",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "10fe25e2-3b8b-4f70-9ea0-9909cef4b635"
     },
-    "generated_at": "2026-05-08T10:49:07.670819Z",
-    "examples": [
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Эмма Джонсон",
-                        "entity_type": "PERSON",
-                        "description": "Инженер-программист в ТехНова Солюшнс, посетивший Глобальный саммит по ИИ."
-                    },
-                    {
-                        "entity_name": "ТехНова Солюшнс",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Компания, где работает Эмма Джонсон, заинтересованная во внедрении SmartCore."
-                    },
-                    {
-                        "entity_name": "Глобальный саммит по ИИ",
-                        "entity_type": "EVENT",
-                        "description": "Мероприятие, проходившее в Сан-Франциско, демонстрирующее достижения в области ИИ и машинного обучения."
-                    },
-                    {
-                        "entity_name": "Сан-Франциско",
-                        "entity_type": "LOCATION",
-                        "description": "Место, где проходил Глобальный саммит по ИИ."
-                    },
-                    {
-                        "entity_name": "Международный альянс по ИИ",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Организатор Глобального саммита по ИИ."
-                    },
-                    {
-                        "entity_name": "SmartCore",
-                        "entity_type": "PRODUCT",
-                        "description": "Помощник на основе ИИ, разработанный ИнновейтИкс Лабс для автоматизации поддержки клиентов."
-                    },
-                    {
-                        "entity_name": "ИнновейтИкс Лабс",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Разработчик SmartCore."
-                    },
-                    {
-                        "entity_name": "Zendesk",
-                        "entity_type": "PRODUCT",
-                        "description": "Платформа, с которой может интегрироваться SmartCore."
-                    },
-                    {
-                        "entity_name": "Salesforce",
-                        "entity_type": "PRODUCT",
-                        "description": "Платформа, с которой может интегрироваться SmartCore."
-                    },
-                    {
-                        "entity_name": "Доктор Радж Патель",
-                        "entity_type": "PERSON",
-                        "description": "Известный исследователь ИИ из Кембриджского университета, выступивший с программной речью."
-                    },
-                    {
-                        "entity_name": "Кембриджский университет",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Учреждение, к которому принадлежит доктор Радж Патель."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Эмма Джонсон",
-                        "target_entity": "ТехНова Солюшнс",
-                        "relation_type": "WORKPLACE",
-                        "description": "Эмма Джонсон работает инженером-программистом в ТехНова Солюшнс.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Эмма Джонсон",
-                        "target_entity": "Глобальный саммит по ИИ",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Эмма Джонсон посетила Глобальный саммит по ИИ.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Глобальный саммит по ИИ",
-                        "target_entity": "Сан-Франциско",
-                        "relation_type": "LOCATED_IN",
-                        "description": "Глобальный саммит по ИИ проходил в Сан-Франциско.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Глобальный саммит по ИИ",
-                        "target_entity": "Международный альянс по ИИ",
-                        "relation_type": "KNOWS",
-                        "description": "Международный альянс по ИИ организовал Глобальный саммит по ИИ.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "SmartCore",
-                        "target_entity": "ИнновейтИкс Лабс",
-                        "relation_type": "PRODUCES",
-                        "description": "SmartCore был разработан ИнновейтИкс Лабс.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "SmartCore",
-                        "target_entity": "Zendesk",
-                        "relation_type": "AGENT",
-                        "description": "SmartCore может интегрироваться с Zendesk.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "SmartCore",
-                        "target_entity": "Salesforce",
-                        "relation_type": "AGENT",
-                        "description": "SmartCore может интегрироваться с Salesforce.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Доктор Радж Патель",
-                        "target_entity": "Кембриджский университет",
-                        "relation_type": "MEMBER_OF",
-                        "description": "Доктор Радж Патель принадлежит к Кембриджскому университету.",
-                        "relationship_strength": 5
-                    }
-                ]
-            },
-            "id": "e4fd7e5b-f538-4c5a-9ea9-c18cc152daef-ru",
-            "input_text": "Эмма Джонсон, инженер-программист в ТехНова Солюшнс, недавно посетила Глобальный саммит по ИИ в Сан-Франциско. Мероприятие, организованное Международным альянсом по ИИ, продемонстрировало передовые достижения в области искусственного интеллекта и машинного обучения. Во время саммита Эмма получила возможность протестировать нового помощника на основе ИИ, SmartCore, разработанного ИнновейтИкс Лабс.\n\nSmartCore предназначен для помощи компаниям в автоматизации поддержки клиентов путем анализа запросов пользователей и предоставления точных ответов в реальном времени. Эмму особенно впечатлила его способность бесшовно интегрироваться с существующими платформами, такими как Zendesk и Salesforce. Она отметила, что этот продукт может значительно сократить время ответа для служб поддержки клиентов.\n\nНа саммите Эмма также встретила доктора Раджа Пателя, известного исследователя ИИ из Кембриджского университета. Доктор Патель выступил с программной речью об этических аспектах ИИ в здравоохранении, подчеркнув важность прозрачности и справедливости в разработке алгоритмов. Его идеи вызвали оживленную дискуссию среди участников о будущем регулирования ИИ.\n\nК концу мероприятия ТехНова Солюшнс выразила заинтересованность в сотрудничестве с ИнновейтИкс Лабс для внедрения SmartCore в свои операции. Эмма считает, что это партнерство может повысить эффективность компании и укрепить ее позиции на конкурентном технологическом рынке.",
-            "metadata": {
-                "domain": "technology",
-                "difficulty": "easy",
-                "language": "russian",
-                "generated_at": "2026-05-07T13:35:15.436544Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Эмма",
-                        "entity_type": "PERSON",
-                        "description": "Инженер-программист в ТекВейв Солюшнс, посетивший Глобальный саммит по ИИ."
-                    },
-                    {
-                        "entity_name": "ТекВейв Солюшнс",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Компания, где работает Эмма, изучающая инструменты аналитики на основе ИИ."
-                    },
-                    {
-                        "entity_name": "Глобальный саммит по ИИ",
-                        "entity_type": "EVENT",
-                        "description": "Мероприятие, демонстрирующее достижения в области машинного обучения и робототехники."
-                    },
-                    {
-                        "entity_name": "Сан-Франциско",
-                        "entity_type": "LOCATION",
-                        "description": "Место, где проходил Глобальный саммит по ИИ."
-                    },
-                    {
-                        "entity_name": "Альянс искусственного интеллекта",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Организатор Глобального саммита по ИИ."
-                    },
-                    {
-                        "entity_name": "NeuralBot",
-                        "entity_type": "PRODUCT",
-                        "description": "Продукт, разработанный Инновейт Роботикс для автоматизации задач обслуживания клиентов."
-                    },
-                    {
-                        "entity_name": "Инновейт Роботикс",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Разработчик NeuralBot и других технологий ИИ."
-                    },
-                    {
-                        "entity_name": "Доктор Радж Патель",
-                        "entity_type": "PERSON",
-                        "description": "Ведущий исследователь в Инновейт Роботикс, выступивший на саммите."
-                    },
-                    {
-                        "entity_name": "Azure",
-                        "entity_type": "PRODUCT",
-                        "description": "Облачная платформа, используемая NeuralBot для обработки данных."
-                    },
-                    {
-                        "entity_name": "Кремниевая долина",
-                        "entity_type": "LOCATION",
-                        "description": "Место расположения штаб-квартиры Инновейт Роботикс."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Эмма",
-                        "target_entity": "ТекВейв Солюшнс",
-                        "relation_type": "WORKPLACE",
-                        "description": "Эмма работает инженером-программистом в ТекВейв Солюшнс.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Эмма",
-                        "target_entity": "Глобальный саммит по ИИ",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Эмма посетила Глобальный саммит по ИИ.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Глобальный саммит по ИИ",
-                        "target_entity": "Альянс искусственного интеллекта",
-                        "relation_type": "KNOWS",
-                        "description": "Альянс искусственного интеллекта организовал Глобальный саммит по ИИ.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "NeuralBot",
-                        "target_entity": "Инновейт Роботикс",
-                        "relation_type": "PRODUCES",
-                        "description": "NeuralBot разработан Инновейт Роботикс.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Доктор Радж Патель",
-                        "target_entity": "Инновейт Роботикс",
-                        "relation_type": "WORKPLACE",
-                        "description": "Доктор Радж Патель является ведущим исследователем в Инновейт Роботикс.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "NeuralBot",
-                        "target_entity": "Azure",
-                        "relation_type": "AGENT",
-                        "description": "NeuralBot интегрируется с Azure для обработки данных.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Эмма",
-                        "target_entity": "Доктор Радж Патель",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Эмма обсудила возможности сотрудничества с доктором Раджем Пателем.",
-                        "relationship_strength": 3
-                    },
-                    {
-                        "source_entity": "Эмма",
-                        "target_entity": "Кремниевая долина",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Эмма посетила Кремниевую долину, чтобы осмотреть штаб-квартиру Инновейт Роботикс.",
-                        "relationship_strength": 3
-                    }
-                ]
-            },
-            "id": "dc1b4337-e8b3-4dbe-b928-2f18dddab184-ru",
-            "input_text": "Эмма, инженер-программист в ТекВейв Солюшнс, недавно посетила Глобальный саммит по ИИ в Сан-Франциско. Мероприятие, организованное Альянсом искусственного интеллекта, продемонстрировало передовые достижения в области машинного обучения и робототехники. Во время саммита Эмма получила возможность протестировать последнюю версию NeuralBot, продукта, разработанного Инновейт Роботикс. NeuralBot предназначен для помощи компаниям в автоматизации задач обслуживания клиентов с помощью обработки естественного языка.\n\nЭмму особенно впечатлила презентация доктора Раджа Пателя, ведущего исследователя в Инновейт Роботикс. Он объяснил, как NeuralBot интегрируется с облачными платформами, такими как Azure, для эффективной обработки больших объемов данных. Позже Эмма обсудила с доктором Пателем потенциальные возможности сотрудничества между ТекВейв Солюшнс и Инновейт Роботикс, поскольку ее компания ищет способы улучшить свои собственные инструменты аналитики на основе ИИ.\n\nПосле саммита Эмма посетила Кремниевую долину, чтобы осмотреть штаб-квартиру Инновейт Роботикс. В здании были современные лаборатории, где инженеры тестировали новые прототипы автономных дронов для доставки. Вдохновленная визитом, Эмма вернулась в ТекВейв Солюшнс с новыми идеями по внедрению ИИ в их предстоящие проекты.",
-            "metadata": {
-                "domain": "technology",
-                "difficulty": "easy",
-                "language": "russian",
-                "generated_at": "2026-05-07T13:36:10.437829Z"
-            },
-            "quality_rating": 9
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Илон Маск",
-                        "entity_type": "PERSON",
-                        "description": "Илон Маск, генеральный директор Tesla и SpaceX, объявил о новаторском партнерстве."
-                    },
-                    {
-                        "entity_name": "Tesla",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Tesla — компания под руководством Илона Маска, принимающая мероприятие по объявлению."
-                    },
-                    {
-                        "entity_name": "SpaceX",
-                        "entity_type": "ORGANIZATION",
-                        "description": "SpaceX — компания под руководством Илона Маска, занимающаяся космическими исследованиями."
-                    },
-                    {
-                        "entity_name": "Neuralink",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Neuralink — компания, сотрудничающая с MIT над проектом NeuroConnect."
-                    },
-                    {
-                        "entity_name": "Массачусетский технологический институт",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Массачусетский технологический институт (MIT) сотрудничает с Neuralink над проектом NeuroConnect."
-                    },
-                    {
-                        "entity_name": "NeuroConnect",
-                        "entity_type": "EVENT",
-                        "description": "NeuroConnect — проект, направленный на разработку передовой технологии интерфейса мозг-компьютер."
-                    },
-                    {
-                        "entity_name": "Media Lab",
-                        "entity_type": "FACILITY",
-                        "description": "Media Lab — лаборатория в MIT, где будет базироваться проект NeuroConnect."
-                    },
-                    {
-                        "entity_name": "Министерство обороны США",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Министерство обороны США, как ожидается, предоставит финансирование для проекта NeuroConnect."
-                    },
-                    {
-                        "entity_name": "Доктор Сара Лин",
-                        "entity_type": "PERSON",
-                        "description": "Доктор Сара Лин — ведущий исследователь в MIT, участвующий в проекте NeuroConnect."
-                    },
-                    {
-                        "entity_name": "Выставка потребительской электроники",
-                        "entity_type": "EVENT",
-                        "description": "Выставка потребительской электроники (CES) — ежегодное мероприятие, на котором будет представлен прототип NeuroConnect."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Илон Маск",
-                        "target_entity": "Neuralink",
-                        "relation_type": "ORGANIZES",
-                        "description": "Илон Маск связан с Neuralink как его лидер.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Neuralink",
-                        "target_entity": "Массачусетский технологический институт",
-                        "relation_type": "KNOWS",
-                        "description": "Neuralink и MIT сотрудничают над проектом NeuroConnect.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "NeuroConnect",
-                        "target_entity": "Media Lab",
-                        "relation_type": "LOCATED_IN",
-                        "description": "Проект NeuroConnect будет базироваться в Media Lab MIT.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "NeuroConnect",
-                        "target_entity": "Министерство обороны США",
-                        "relation_type": "INCOME",
-                        "description": "Министерство обороны США, как ожидается, профинансирует проект NeuroConnect.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Доктор Сара Лин",
-                        "target_entity": "Массачусетский технологический институт",
-                        "relation_type": "MEMBER_OF",
-                        "description": "Доктор Сара Лин — ведущий исследователь в MIT.",
-                        "relationship_strength": 5
-                    }
-                ]
-            },
-            "id": "f65471fd-d77a-4f82-b73f-99146acc4290-ru",
-            "input_text": "В 2023 году Илон Маск, генеральный директор Tesla и SpaceX, объявил о новаторском партнерстве между Neuralink и Массачусетским технологическим институтом (MIT). Сотрудничество направлено на разработку передовой технологии интерфейса мозг-компьютер (BCI), способной улучшить когнитивные способности человека. Проект под названием «NeuroConnect» будет базироваться в Media Lab MIT в Кембридже, штат Массачусетс, и, как ожидается, получит финансирование от Министерства обороны США.\n\nИнициатива NeuroConnect объединит передовые нейроимплантируемые устройства Neuralink с опытом MIT в области искусственного интеллекта и робототехники. По словам доктора Сары Лин, ведущего исследователя MIT, проект может произвести революцию в таких областях, как здравоохранение, образование и даже космические исследования. Например, астронавты миссий SpaceX могли бы использовать технологию для мониторинга активности мозга и улучшения принятия решений во время критических операций.\n\nВо время мероприятия по объявлению, состоявшегося в штаб-квартире Tesla в Пало-Альто, Калифорния, Маск подчеркнул этические соображения, связанные с разработкой BCI. Он заявил, что партнерство будет приоритизировать конфиденциальность данных и обеспечивать соблюдение международных норм, включая Общий регламент по защите данных (GDPR) Европейского Союза.\n\nПервый прототип NeuroConnect, как ожидается, будет представлен на ежегодной Выставке потребительской электроники (CES) в Лас-Вегасе в следующем году. Эксперты отрасли считают, что в случае успеха проект может сделать Neuralink и MIT лидерами на быстрорастущем рынке BCI, который, по прогнозам, достигнет 5 миллиардов долларов к 2030 году.",
-            "metadata": {
-                "domain": "technology",
-                "difficulty": "medium",
-                "language": "russian",
-                "generated_at": "2026-05-07T13:38:15.920227Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Эмили Картер",
-                        "entity_type": "PERSON",
-                        "description": "Доктор Эмили Картер — педиатр в больнице Грин-Вэлли, представившая данные о вакцине ImmunoShield."
-                    },
-                    {
-                        "entity_name": "Больница Грин-Вэлли",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Больница Грин-Вэлли — место работы доктора Эмили Картер."
-                    },
-                    {
-                        "entity_name": "Национальная конференция по здравоохранению",
-                        "entity_type": "EVENT",
-                        "description": "Национальная конференция по здравоохранению — мероприятие в Чикаго, где доктор Эмили Картер представила свои данные."
-                    },
-                    {
-                        "entity_name": "Чикаго",
-                        "entity_type": "LOCATION",
-                        "description": "Чикаго — город, где проходила Национальная конференция по здравоохранению."
-                    },
-                    {
-                        "entity_name": "ImmunoShield",
-                        "entity_type": "PRODUCT",
-                        "description": "ImmunoShield — вакцина, разработанная MedTech Pharmaceuticals для профилактики респираторных инфекций у детей."
-                    },
-                    {
-                        "entity_name": "MedTech Pharmaceuticals",
-                        "entity_type": "ORGANIZATION",
-                        "description": "MedTech Pharmaceuticals — разработчик вакцины ImmunoShield."
-                    },
-                    {
-                        "entity_name": "Стэнфордский университет",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Стэнфордский университет — учреждение, чьи исследователи сотрудничали с доктором Эмили Картер в исследовании вакцины."
-                    },
-                    {
-                        "entity_name": "Всемирная организация здравоохранения",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Всемирная организация здравоохранения заинтересована в рассмотрении исследования ImmunoShield для глобального внедрения."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Эмили Картер",
-                        "target_entity": "Больница Грин-Вэлли",
-                        "relation_type": "WORKPLACE",
-                        "description": "Доктор Эмили Картер работает в больнице Грин-Вэлли.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Эмили Картер",
-                        "target_entity": "Национальная конференция по здравоохранению",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Доктор Эмили Картер посетила и выступила на Национальной конференции по здравоохранению.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Национальная конференция по здравоохранению",
-                        "target_entity": "Чикаго",
-                        "relation_type": "LOCATED_IN",
-                        "description": "Национальная конференция по здравоохранению проходила в Чикаго.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Эмили Картер",
-                        "target_entity": "ImmunoShield",
-                        "relation_type": "AGENT",
-                        "description": "Доктор Эмили Картер проводила исследование вакцины ImmunoShield.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "ImmunoShield",
-                        "target_entity": "MedTech Pharmaceuticals",
-                        "relation_type": "PRODUCES",
-                        "description": "ImmunoShield была разработана MedTech Pharmaceuticals.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Эмили Картер",
-                        "target_entity": "Стэнфордский университет",
-                        "relation_type": "KNOWS",
-                        "description": "Доктор Эмили Картер сотрудничала с исследователями из Стэнфордского университета.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Всемирная организация здравоохранения",
-                        "target_entity": "ImmunoShield",
-                        "relation_type": "KNOWS",
-                        "description": "Всемирная организация здравоохранения заинтересована в вакцине ImmunoShield.",
-                        "relationship_strength": 3
-                    }
-                ]
-            },
-            "id": "8f2eff2c-90dc-49f8-81e1-5ea3b76e9b66-ru",
-            "input_text": "Доктор Эмили Картер, педиатр в больнице Грин-Вэлли, недавно посетила Национальную конференцию по здравоохранению в Чикаго. Во время мероприятия она представила свои данные об эффективности новой вакцины ImmunoShield, разработанной MedTech Pharmaceuticals. Вакцина показала многообещающие результаты в профилактике респираторных инфекций у детей младше пяти лет.\n\nДоктор Картер сотрудничала с исследователями из Стэнфордского университета для проведения годичного исследования с участием 1200 участников из трех штатов: Иллинойс, Висконсин и Мичиган. Исследование показало 90% снижение госпитализаций по поводу респираторных заболеваний среди вакцинированных детей по сравнению с непривитыми.\n\nВсемирная организация здравоохранения (ВОЗ) выразила заинтересованность в рассмотрении исследования для возможного глобального внедрения ImmunoShield в регионах с высоким уровнем детских респираторных заболеваний. Доктор Картер подчеркнула важность партнерства между больницами, университетами и фармацевтическими компаниями для продвижения медицинских исследований и улучшения результатов общественного здравоохранения.",
-            "metadata": {
-                "domain": "medicine",
-                "difficulty": "easy",
-                "language": "russian",
-                "generated_at": "2026-05-07T13:41:16.110051Z"
-            },
-            "quality_rating": 9
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Эмили Картер",
-                        "entity_type": "PERSON",
-                        "description": "Доктор Эмили Картер — известный кардиолог в больнице Святой Марии в Бостоне, представившая новаторское исследование CardioPro."
-                    },
-                    {
-                        "entity_name": "Больница Святой Марии",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Больница Святой Марии — медицинское учреждение в Бостоне, где практикует доктор Эмили Картер."
-                    },
-                    {
-                        "entity_name": "Конференция Американской кардиологической ассоциации",
-                        "entity_type": "EVENT",
-                        "description": "Конференция Американской кардиологической ассоциации — мероприятие в Чикаго, где доктор Эмили Картер представила свое исследование."
-                    },
-                    {
-                        "entity_name": "CardioPro",
-                        "entity_type": "PRODUCT",
-                        "description": "CardioPro — новый препарат, разработанный MedTech Pharmaceuticals, направленный на снижение риска сердечных приступов у пациентов с высоким риском."
-                    },
-                    {
-                        "entity_name": "MedTech Pharmaceuticals",
-                        "entity_type": "ORGANIZATION",
-                        "description": "MedTech Pharmaceuticals — компания, разработавшая препарат CardioPro."
-                    },
-                    {
-                        "entity_name": "Национальный институт здравоохранения",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Национальный институт здравоохранения (NIH) сотрудничал с исследовательской группой доктора Эмили Картер для обеспечения строгих научных стандартов."
-                    },
-                    {
-                        "entity_name": "Монитор HeartTrack",
-                        "entity_type": "PRODUCT",
-                        "description": "Монитор HeartTrack — носимое устройство для отслеживания показателей здоровья сердца в реальном времени."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Эмили Картер",
-                        "target_entity": "Больница Святой Марии",
-                        "relation_type": "WORKPLACE",
-                        "description": "Доктор Эмили Картер работает кардиологом в больнице Святой Марии.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Эмили Картер",
-                        "target_entity": "CardioPro",
-                        "relation_type": "AGENT",
-                        "description": "Доктор Эмили Картер проводила исследование эффективности CardioPro.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "CardioPro",
-                        "target_entity": "MedTech Pharmaceuticals",
-                        "relation_type": "PRODUCES",
-                        "description": "CardioPro был разработан MedTech Pharmaceuticals.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Эмили Картер",
-                        "target_entity": "Национальный институт здравоохранения",
-                        "relation_type": "KNOWS",
-                        "description": "Исследовательская группа доктора Эмили Картер сотрудничала с Национальным институтом здравоохранения.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Эмили Картер",
-                        "target_entity": "Монитор HeartTrack",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Доктор Эмили Картер обсуждала роль монитора HeartTrack в кардиологическом здоровье.",
-                        "relationship_strength": 3
-                    }
-                ]
-            },
-            "id": "e1e03483-de8b-4f6b-89e4-8dcdccb01e1c-ru",
-            "input_text": "Доктор Эмили Картер, известный кардиолог из больницы Святой Марии в Бостоне, недавно представила новаторское исследование на Конференции Американской кардиологической ассоциации, проходившей в Чикаго. Ее исследование было сосредоточено на эффективности CardioPro, нового препарата, разработанного MedTech Pharmaceuticals, в снижении риска сердечных приступов у пациентов с высоким риском.\n\nВо время мероприятия доктор Картер представила данные клинического исследования с участием 1200 участников по всей территории Соединенных Штатов. Исследование показало, что пациенты, принимавшие CardioPro, испытали 35% снижение сердечно-сосудистых событий по сравнению с теми, кто получал стандартное лечение. Исследовательская группа тесно сотрудничала с Национальным институтом здравоохранения (NIH), чтобы обеспечить соблюдение строгих научных стандартов.\n\nДоктор Картер подчеркнула важность ранней диагностики и профилактической помощи, особенно для людей с семейной историей сердечных заболеваний. Она также обсудила роль носимых устройств, таких как монитор HeartTrack, в отслеживании показателей здоровья сердца в реальном времени. По ее словам, интеграция таких технологий с лекарствами, подобными CardioPro, может произвести революцию в уходе за пациентами.\n\nРезультаты вызвали интерес у поставщиков медицинских услуг и политиков, ведутся обсуждения о включении CardioPro в национальные клинические рекомендации. MedTech Pharmaceuticals объявила о планах расширить производство и сделать препарат доступным во всем мире к следующему году. Тем временем больница Святой Марии готовится запустить новую программу кардиологического оздоровления, вдохновленную исследованием доктора Картер.",
-            "metadata": {
-                "domain": "medicine",
-                "difficulty": "medium",
-                "language": "russian",
-                "generated_at": "2026-05-07T13:42:06.443368Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Эмма Джонсон",
-                        "entity_type": "PERSON",
-                        "description": "Финансовый советник в Гринфилд Инвестментс, посетивший Глобальный финансовый саммит."
-                    },
-                    {
-                        "entity_name": "Гринфилд Инвестментс",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Финансовое учреждение, участвующее в различных инициативах по поддержке малого бизнеса и предпринимателей."
-                    },
-                    {
-                        "entity_name": "Глобальный финансовый саммит",
-                        "entity_type": "EVENT",
-                        "description": "Мероприятие в Нью-Йорке, посвященное финансовым темам, которое посетила Эмма Джонсон."
-                    },
-                    {
-                        "entity_name": "Федеральная резервная система",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Государственное учреждение, представители которого обсуждали влияние роста процентных ставок на малый бизнес."
-                    },
-                    {
-                        "entity_name": "БрайтФьючер Банк",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Финансовое учреждение, партнерствующее с Гринфилд Инвестментс для запуска программы кредитования малого бизнеса."
-                    },
-                    {
-                        "entity_name": "Фонд МаниВайз",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Некоммерческая организация, сотрудничающая с Гринфилд Инвестментс для проведения семинаров по финансовой грамотности."
-                    },
-                    {
-                        "entity_name": "ТекГроу Инк.",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Организация, стремящаяся поддерживать инициативы для малого бизнеса и экономического роста."
-                    },
-                    {
-                        "entity_name": "УрбанСтарт Венчурс",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Организация, стремящаяся поддерживать инициативы для малого бизнеса и экономического роста."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Эмма Джонсон",
-                        "target_entity": "Гринфилд Инвестментс",
-                        "relation_type": "WORKPLACE",
-                        "description": "Эмма Джонсон — финансовый советник в Гринфилд Инвестментс.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Гринфилд Инвестментс",
-                        "target_entity": "БрайтФьючер Банк",
-                        "relation_type": "KNOWS",
-                        "description": "Гринфилд Инвестментс заключил партнерство с БрайтФьючер Банк для запуска программы кредитования малого бизнеса.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Гринфилд Инвестментс",
-                        "target_entity": "Фонд МаниВайз",
-                        "relation_type": "KNOWS",
-                        "description": "Гринфилд Инвестментс сотрудничает с Фондом МаниВайз для проведения семинаров по финансовой грамотности.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Эмма Джонсон",
-                        "target_entity": "Глобальный финансовый саммит",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Эмма Джонсон посетила Глобальный финансовый саммит.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Эмма Джонсон",
-                        "target_entity": "Федеральная резервная система",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Эмма Джонсон обсуждала влияние роста процентных ставок на малый бизнес с представителями Федеральной резервной системы.",
-                        "relationship_strength": 3
-                    },
-                    {
-                        "source_entity": "Эмма Джонсон",
-                        "target_entity": "ТекГроу Инк.",
-                        "relation_type": "KNOWS",
-                        "description": "Эмма Джонсон получила обязательства от ТекГроу Инк. поддерживать инициативы для малого бизнеса.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Эмма Джонсон",
-                        "target_entity": "УрбанСтарт Венчурс",
-                        "relation_type": "KNOWS",
-                        "description": "Эмма Джонсон получила обязательства от УрбанСтарт Венчурс поддерживать инициативы для малого бизнеса.",
-                        "relationship_strength": 4
-                    }
-                ]
-            },
-            "id": "728d4a7f-74d9-473d-873b-8167ce4fddc4-ru",
-            "input_text": "Эмма Джонсон, финансовый советник в Гринфилд Инвестментс, недавно посетила Глобальный финансовый саммит в Нью-Йорке. Во время мероприятия она обсуждала влияние роста процентных ставок на малый бизнес с представителями Федеральной резервной системы. Эмма подчеркнула, что многие стартапы, особенно в технологическом секторе, изо всех сил пытаются получить доступные кредиты из-за ужесточения кредитной политики.\n\nНа саммите Гринфилд Инвестментс также объявил о новом партнерстве с БрайтФьючер Банк для запуска программы кредитования малого бизнеса. Эта инициатива направлена на предоставление низкопроцентных кредитов предпринимателям в городских районах, таких как Сан-Франциско и Чикаго. Ожидается, что программа начнет работу к марту 2024 года.\n\nВ своей программной речи Эмма подчеркнула важность программ финансовой грамотности для молодых предпринимателей. Она упомянула, что Гринфилд Инвестментс сотрудничает с некоммерческой организацией Фонд МаниВайз, чтобы предлагать бесплатные семинары по всей территории Соединенных Штатов. Эти семинары будут посвящены составлению бюджета, инвестиционным стратегиям и управлению долгами.\n\nК концу саммита Эмма получила обязательства от нескольких организаций, включая ТекГроу Инк. и УрбанСтарт Венчурс, поддерживать эти инициативы. Ожидается, что сотрудничество принесет пользу сотням малых предприятий и будет способствовать экономическому росту в ключевых мегаполисах.",
-            "metadata": {
-                "domain": "finance",
-                "difficulty": "easy",
-                "language": "russian",
-                "generated_at": "2026-05-07T13:44:01.890850Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Элиза Хартман",
-                        "entity_type": "PERSON",
-                        "description": "Выдающийся исследователь в Институте астрофизики имени Макса Планка, опубликовавшая новаторскую статью об атмосферах экзопланет."
-                    },
-                    {
-                        "entity_name": "Институт астрофизики имени Макса Планка",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Институт, где доктор Элиза Хартман проводит свои исследования."
-                    },
-                    {
-                        "entity_name": "Космический телескоп Джеймса Уэбба",
-                        "entity_type": "PRODUCT",
-                        "description": "Космический телескоп, использованный для обнаружения атмосфер экзопланет в исследовании."
-                    },
-                    {
-                        "entity_name": "TRAPPIST-1",
-                        "entity_type": "LOCATION",
-                        "description": "Звездная система, расположенная примерно в 40 световых годах от нас в созвездии Водолея."
-                    },
-                    {
-                        "entity_name": "TRAPPIST-1e",
-                        "entity_type": "LOCATION",
-                        "description": "Экзопланета размером с Землю в зоне обитаемости системы TRAPPIST-1."
-                    },
-                    {
-                        "entity_name": "TRAPPIST-1f",
-                        "entity_type": "LOCATION",
-                        "description": "Экзопланета размером с Землю в зоне обитаемости системы TRAPPIST-1."
-                    },
-                    {
-                        "entity_name": "Европейское космическое агентство",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Организация, организовавшая Симпозиум по атмосферам экзопланет для обсуждения результатов Хартман."
-                    },
-                    {
-                        "entity_name": "Симпозиум по атмосферам экзопланет",
-                        "entity_type": "EVENT",
-                        "description": "Мероприятие, организованное для обсуждения последствий результатов Хартман."
-                    },
-                    {
-                        "entity_name": "NASA",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Космическое агентство, предложившее совместные миссии для исследования системы TRAPPIST-1."
-                    },
-                    {
-                        "entity_name": "Европейская южная обсерватория",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Организация, предложившая совместные миссии для исследования системы TRAPPIST-1."
-                    },
-                    {
-                        "entity_name": "Раджеш Патель",
-                        "entity_type": "PERSON",
-                        "description": "Исследователь из Индийского института науки, сотрудничавший с Хартман для разработки новой вычислительной платформы."
-                    },
-                    {
-                        "entity_name": "Индийский институт науки",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Институт, где доктор Раджеш Патель проводит свои исследования."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Элиза Хартман",
-                        "target_entity": "Институт астрофизики имени Макса Планка",
-                        "relation_type": "MEMBER_OF",
-                        "description": "Доктор Элиза Хартман является исследователем в Институте астрофизики имени Макса Планка.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Элиза Хартман",
-                        "target_entity": "Космический телескоп Джеймса Уэбба",
-                        "relation_type": "AGENT",
-                        "description": "Доктор Элиза Хартман использовала космический телескоп Джеймса Уэбба для своего исследования.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "TRAPPIST-1",
-                        "target_entity": "TRAPPIST-1e",
-                        "relation_type": "MEMBER_OF",
-                        "description": "TRAPPIST-1e — планета в системе TRAPPIST-1.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "TRAPPIST-1",
-                        "target_entity": "TRAPPIST-1f",
-                        "relation_type": "MEMBER_OF",
-                        "description": "TRAPPIST-1f — планета в системе TRAPPIST-1.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Элиза Хартман",
-                        "target_entity": "Раджеш Патель",
-                        "relation_type": "KNOWS",
-                        "description": "Доктор Элиза Хартман сотрудничала с доктором Раджешем Пателем для разработки вычислительной платформы.",
-                        "relationship_strength": 4
-                    }
-                ]
-            },
-            "id": "dd9cbe78-7e87-4712-a2dc-98c431a02dff-ru",
-            "input_text": "В 2021 году доктор Элиза Хартман, выдающийся исследователь в Институте астрофизики имени Макса Планка, опубликовала новаторскую статью об обнаружении атмосфер экзопланет с использованием космического телескопа Джеймса Уэбба (JWST). Исследование было сосредоточено на системе TRAPPIST-1, расположенной примерно в 40 световых годах от нас в созвездии Водолея. Команда Хартман использовала передовые спектроскопические методы для анализа химического состава атмосфер TRAPPIST-1e и TRAPPIST-1f, двух экзопланет размером с Землю в зоне обитаемости системы.\n\nИсследование выявило следы водяного пара и метана, что указывает на потенциальные биосигнатуры. Это открытие вызвало значительный интерес в Европейском космическом агентстве (ESA), которое впоследствии организовало Симпозиум по атмосферам экзопланет в Женеве, Швейцария, для обсуждения последствий результатов Хартман. Во время мероприятия представители NASA и Европейской южной обсерватории (ESO) предложили совместные миссии для дальнейшего исследования системы TRAPPIST-1.\n\nПримечательно, что исследование также выявило ограничения существующих моделей в прогнозировании атмосферной динамики под влиянием звезд типа M-карлик, таких как TRAPPIST-1. Чтобы решить эту проблему, Хартман объединилась с доктором Раджешем Пателем из Индийского института науки (IISc) для разработки новой вычислительной платформы, использующей алгоритмы машинного обучения для уточнения атмосферных симуляций. Эти междисциплинарные усилия подчеркивают растущую важность международного сотрудничества в продвижении нашего понимания науки об экзопланетах.",
-            "metadata": {
-                "domain": "science",
-                "difficulty": "hard",
-                "language": "russian",
-                "generated_at": "2026-05-07T13:49:12.690898Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Сара Джонсон",
-                        "entity_type": "PERSON",
-                        "description": "Генеральный директор GreenTech Solutions, объявившая о стратегическом партнерстве с EcoEnergy Corp."
-                    },
-                    {
-                        "entity_name": "GreenTech Solutions",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Ведущий инноватор в области технологий возобновляемой энергии, специализирующийся на проектировании и производстве зарядных станций на солнечной энергии."
-                    },
-                    {
-                        "entity_name": "EcoEnergy Corp",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Организация, известная своей обширной дистрибьюторской сетью, отвечающая за логистику и установку в рамках партнерства."
-                    },
-                    {
-                        "entity_name": "Глобальный саммит по устойчивому развитию",
-                        "entity_type": "EVENT",
-                        "description": "Мероприятие, проходившее в Берлине, где было объявлено о партнерстве."
-                    },
-                    {
-                        "entity_name": "SunCharge Pro",
-                        "entity_type": "PRODUCT",
-                        "description": "Новая линейка зарядных станций на солнечной энергии, разработанная в рамках партнерства."
-                    },
-                    {
-                        "entity_name": "Берлин",
-                        "entity_type": "LOCATION",
-                        "description": "Город, где проходил Глобальный саммит по устойчивому развитию и который был отмечен как образцовый город зеленых инноваций."
-                    },
-                    {
-                        "entity_name": "Европейская комиссия",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Организация, чьи представители пообещали поддержку проектам, соответствующим целям Зеленого курса ЕС."
-                    },
-                    {
-                        "entity_name": "Выставка возобновляемой энергии",
-                        "entity_type": "EVENT",
-                        "description": "Мероприятие в Лондоне, где запланирована презентация первого прототипа SunCharge Pro."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Сара Джонсон",
-                        "target_entity": "GreenTech Solutions",
-                        "relation_type": "ORGANIZES",
-                        "description": "Сара Джонсон является генеральным директором GreenTech Solutions.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "GreenTech Solutions",
-                        "target_entity": "EcoEnergy Corp",
-                        "relation_type": "KNOWS",
-                        "description": "GreenTech Solutions и EcoEnergy Corp заключили стратегическое партнерство для разработки зарядных станций на солнечной энергии.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Глобальный саммит по устойчивому развитию",
-                        "target_entity": "Берлин",
-                        "relation_type": "LOCATED_IN",
-                        "description": "Глобальный саммит по устойчивому развитию проходил в Берлине.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "SunCharge Pro",
-                        "target_entity": "GreenTech Solutions",
-                        "relation_type": "PRODUCES",
-                        "description": "GreenTech Solutions отвечает за проектирование и производство SunCharge Pro.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "SunCharge Pro",
-                        "target_entity": "EcoEnergy Corp",
-                        "relation_type": "AGENT",
-                        "description": "EcoEnergy Corp отвечает за логистику и установку SunCharge Pro.",
-                        "relationship_strength": 5
-                    }
-                ]
-            },
-            "id": "f06b1bff-4c8c-495c-acbf-d377af508702-ru",
-            "input_text": "На прошлой неделе Сара Джонсон, генеральный директор GreenTech Solutions, объявила о стратегическом партнерстве с EcoEnergy Corp во время Глобального саммита по устойчивому развитию, проходившего в Берлине. Сотрудничество направлено на разработку новой линейки зарядных станций на солнечной энергии под брендом SunCharge Pro, которые будут запущены в крупных городских центрах Европы, включая Париж, Лондон и Амстердам.\n\nGreenTech Solutions, ведущий инноватор в области технологий возобновляемой энергии, сосредоточится на проектировании и производстве продукта, в то время как EcoEnergy Corp, известная своей обширной дистрибьюторской сетью, возьмет на себя логистику и установку. Ожидается, что партнерство ускорит внедрение решений в области чистой энергии в мегаполисах, удовлетворяя растущий спрос на устойчивую инфраструктуру.\n\nВо время своей программной речи на саммите Сара подчеркнула важность инициатив частного сектора в борьбе с изменением климата и выделила Берлин как образцовый город зеленых инноваций. Объявление было встречено с энтузиазмом лидерами отрасли и политиками, включая представителей Европейской комиссии, которые пообещали поддержку проектам, соответствующим целям Зеленого курса ЕС.\n\nПервый прототип SunCharge Pro запланирован к презентации на Выставке возобновляемой энергии в Лондоне в следующем марте. Обе компании ожидают, что продукт значительно сократит выбросы углерода, связанные с традиционными зарядными станциями, внося вклад в их общее видение углеродно-нейтрального будущего.",
-            "metadata": {
-                "domain": "business",
-                "difficulty": "medium",
-                "language": "russian",
-                "generated_at": "2026-05-07T13:50:55.786234Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "OpenAI",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Ведущая технологическая компания, представившая улучшенную версию своей модели GPT-4, подчеркивая улучшенные возможности рассуждения для корпоративных приложений."
-                    },
-                    {
-                        "entity_name": "Google DeepMind",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Ведущая технологическая компания, продемонстрировавшая свою систему ИИ Gemini, которая интегрирует мультимодальную обработку для более эффективной работы с текстом, изображениями и аудио."
-                    },
-                    {
-                        "entity_name": "Anthropic",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Восходящий конкурент, представивший Claude 3, рекламируя его превосходные протоколы безопасности и способность вести нюансированные диалоги, а также объявивший о стратегическом партнерстве с Microsoft для развертывания Claude 3 на Azure."
-                    },
-                    {
-                        "entity_name": "Microsoft",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Технологическая компания, заключившая партнерство с Anthropic для развертывания Claude 3 на Azure, расширяя его доступность для бизнеса."
-                    },
-                    {
-                        "entity_name": "Сэм Альтман",
-                        "entity_type": "PERSON",
-                        "description": "Генеральный директор OpenAI, который руководил компанией при представлении улучшенной версии модели GPT-4."
-                    },
-                    {
-                        "entity_name": "Демис Хассабис",
-                        "entity_type": "PERSON",
-                        "description": "Руководитель Google DeepMind, продемонстрировавший систему ИИ Gemini."
-                    },
-                    {
-                        "entity_name": "GPT-4",
-                        "entity_type": "PRODUCT",
-                        "description": "Улучшенная модель ИИ, разработанная OpenAI, подчеркивающая улучшенные возможности рассуждения для корпоративных приложений."
-                    },
-                    {
-                        "entity_name": "Gemini AI",
-                        "entity_type": "PRODUCT",
-                        "description": "Система ИИ, разработанная Google DeepMind, которая интегрирует мультимодальную обработку для более эффективной работы с текстом, изображениями и аудио."
-                    },
-                    {
-                        "entity_name": "Claude 3",
-                        "entity_type": "PRODUCT",
-                        "description": "Модель ИИ, разработанная Anthropic, рекламирующая превосходные протоколы безопасности и способность вести нюансированные диалоги."
-                    },
-                    {
-                        "entity_name": "Azure",
-                        "entity_type": "PRODUCT",
-                        "description": "Облачный вычислительный сервис, разработанный Microsoft, используемый Anthropic для развертывания Claude 3 с целью доступности для бизнеса."
-                    },
-                    {
-                        "entity_name": "Закон ЕС об ИИ",
-                        "entity_type": "LAW",
-                        "description": "Нормативная база, налагающая строгие руководящие принципы на высокорисковые системы ИИ, вызывающая дебаты о ее влиянии на инновации и проблемах соблюдения требований для технологических компаний."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "OpenAI",
-                        "target_entity": "Сэм Альтман",
-                        "relation_type": "ORGANIZES",
-                        "description": "OpenAI возглавляется Сэмом Альтманом в качестве генерального директора.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Google DeepMind",
-                        "target_entity": "Демис Хассабис",
-                        "relation_type": "ORGANIZES",
-                        "description": "Google DeepMind возглавляется Демисом Хассабисом.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Anthropic",
-                        "target_entity": "Microsoft",
-                        "relation_type": "KNOWS",
-                        "description": "Anthropic имеет стратегическое партнерство с Microsoft для развертывания Claude 3 на Azure.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "OpenAI",
-                        "target_entity": "GPT-4",
-                        "relation_type": "PRODUCES",
-                        "description": "OpenAI разработала модель GPT-4.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Google DeepMind",
-                        "target_entity": "Gemini AI",
-                        "relation_type": "PRODUCES",
-                        "description": "Google DeepMind разработал систему ИИ Gemini.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Anthropic",
-                        "target_entity": "Claude 3",
-                        "relation_type": "PRODUCES",
-                        "description": "Anthropic разработала модель ИИ Claude 3.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Microsoft",
-                        "target_entity": "Azure",
-                        "relation_type": "PRODUCES",
-                        "description": "Microsoft разработала облачный вычислительный сервис Azure.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Anthropic",
-                        "target_entity": "Закон ЕС об ИИ",
-                        "relation_type": "HAS_CAUSE",
-                        "description": "Anthropic подвержена влиянию Закона ЕС об ИИ, поскольку соблюдение требований может замедлить инновации для таких стартапов, как Anthropic.",
-                        "relationship_strength": 3
-                    },
-                    {
-                        "source_entity": "OpenAI",
-                        "target_entity": "Закон ЕС об ИИ",
-                        "relation_type": "HAS_CAUSE",
-                        "description": "OpenAI подвержена влиянию Закона ЕС об ИИ, но имеет ресурсы для навигации в его рамках.",
-                        "relationship_strength": 2
-                    },
-                    {
-                        "source_entity": "Google DeepMind",
-                        "target_entity": "Закон ЕС об ИИ",
-                        "relation_type": "HAS_CAUSE",
-                        "description": "Google DeepMind подвержена влиянию Закона ЕС об ИИ, но имеет ресурсы для навигации в его рамках.",
-                        "relationship_strength": 2
-                    }
-                ]
-            },
-            "id": "a52662aa-98df-4256-b51e-ba918340f144-ru",
-            "input_text": "**Достижения в области ИИ: OpenAI, Google DeepMind и Anthropic соревнуются на Шанхайской конференции**\n\nВсемирная конференция по искусственному интеллекту 2024 года в Шанхае собрала ведущие технологические компании для демонстрации прорывов в области искусственного интеллекта. OpenAI под руководством генерального директора Сэма Альтмана представила улучшенную версию своей модели GPT-4, подчеркивая улучшенные возможности рассуждения для корпоративных приложений. Между тем Google DeepMind под руководством Демиса Хассабиса продемонстрировала свою систему ИИ Gemini, которая интегрирует мультимодальную обработку для более эффективной работы с текстом, изображениями и аудио.\n\nAnthropic, восходящий конкурент, представил Claude 3, рекламируя его превосходные протоколы безопасности и способность вести нюансированные диалоги. Компания также объявила о стратегическом партнерстве с Microsoft для развертывания Claude 3 на Azure, расширяя его доступность для бизнеса.\n\nРегуляторные обсуждения доминировали на полях конференции, участники обсуждали последствия Закона ЕС об ИИ, который налагает строгие руководящие принципы на высокорисковые системы ИИ. Эксперты предупредили, что соблюдение требований может замедлить инновации, особенно для таких стартапов, как Anthropic, в то время как гиганты вроде OpenAI и Google DeepMind имеют ресурсы для навигации в новой структуре.\n\nКонференция подчеркнула быструю эволюцию ИИ, когда компании соревнуются в балансировании производительности, безопасности и этических соображений. По мере обострения конкуренции сотрудничество, такое как сделка Anthropic с Azure, подчеркивает растущую взаимозависимость технологических фирм в формировании будущего ИИ.",
-            "metadata": {
-                "domain": "technology",
-                "difficulty": "medium",
-                "language": "russian",
-                "generated_at": "2026-05-07T15:27:05.806852Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Emma Johnson",
-                        "entity_type": "PERSON",
-                        "description": "A software engineer at TechNova Solutions who attended the Global AI Summit."
-                    },
-                    {
-                        "entity_name": "TechNova Solutions",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A company where Emma Johnson works, interested in implementing SmartCore."
-                    },
-                    {
-                        "entity_name": "Global AI Summit",
-                        "entity_type": "EVENT",
-                        "description": "An event held in San Francisco showcasing advancements in AI and machine learning."
-                    },
-                    {
-                        "entity_name": "San Francisco",
-                        "entity_type": "LOCATION",
-                        "description": "The location where the Global AI Summit took place."
-                    },
-                    {
-                        "entity_name": "International AI Alliance",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The organizer of the Global AI Summit."
-                    },
-                    {
-                        "entity_name": "SmartCore",
-                        "entity_type": "PRODUCT",
-                        "description": "An AI-powered assistant developed by InnovateX Labs for automating customer support."
-                    },
-                    {
-                        "entity_name": "InnovateX Labs",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The developer of SmartCore."
-                    },
-                    {
-                        "entity_name": "Zendesk",
-                        "entity_type": "PRODUCT",
-                        "description": "A platform that SmartCore can integrate with."
-                    },
-                    {
-                        "entity_name": "Salesforce",
-                        "entity_type": "PRODUCT",
-                        "description": "A platform that SmartCore can integrate with."
-                    },
-                    {
-                        "entity_name": "Dr. Raj Patel",
-                        "entity_type": "PERSON",
-                        "description": "A renowned AI researcher from the University of Cambridge who delivered a keynote speech."
-                    },
-                    {
-                        "entity_name": "University of Cambridge",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The institution where Dr. Raj Patel is affiliated."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Emma Johnson",
-                        "target_entity": "TechNova Solutions",
-                        "relation_type": "WORKPLACE",
-                        "description": "Emma Johnson works as a software engineer at TechNova Solutions.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Emma Johnson",
-                        "target_entity": "Global AI Summit",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Emma Johnson attended the Global AI Summit.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Global AI Summit",
-                        "target_entity": "San Francisco",
-                        "relation_type": "LOCATED_IN",
-                        "description": "The Global AI Summit took place in San Francisco.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Global AI Summit",
-                        "target_entity": "International AI Alliance",
-                        "relation_type": "KNOWS",
-                        "description": "The International AI Alliance organized the Global AI Summit.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "SmartCore",
-                        "target_entity": "InnovateX Labs",
-                        "relation_type": "PRODUCES",
-                        "description": "SmartCore was developed by InnovateX Labs.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "SmartCore",
-                        "target_entity": "Zendesk",
-                        "relation_type": "AGENT",
-                        "description": "SmartCore can integrate with Zendesk.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "SmartCore",
-                        "target_entity": "Salesforce",
-                        "relation_type": "AGENT",
-                        "description": "SmartCore can integrate with Salesforce.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Dr. Raj Patel",
-                        "target_entity": "University of Cambridge",
-                        "relation_type": "MEMBER_OF",
-                        "description": "Dr. Raj Patel is affiliated with the University of Cambridge.",
-                        "relationship_strength": 5
-                    }
-                ]
-            },
-            "id": "e4fd7e5b-f538-4c5a-9ea9-c18cc152daef",
-            "input_text": "Emma Johnson, a software engineer at TechNova Solutions, recently attended the Global AI Summit in San Francisco. The event, organized by the International AI Alliance, showcased cutting-edge advancements in artificial intelligence and machine learning. During the summit, Emma had the opportunity to test the new AI-powered assistant, SmartCore, developed by InnovateX Labs.\n\nSmartCore is designed to help businesses automate customer support by analyzing user queries and providing accurate responses in real-time. Emma was particularly impressed by its ability to integrate seamlessly with existing platforms like Zendesk and Salesforce. She noted that this product could significantly reduce response times for customer service teams.\n\nAt the summit, Emma also met Dr. Raj Patel, a renowned AI researcher from the University of Cambridge. Dr. Patel delivered a keynote speech on the ethical implications of AI in healthcare, emphasizing the importance of transparency and fairness in algorithm design. His insights sparked a lively discussion among attendees about the future of AI regulation.\n\nBy the end of the event, TechNova Solutions expressed interest in collaborating with InnovateX Labs to implement SmartCore in their operations. Emma believes this partnership could enhance the company's efficiency and strengthen its position in the competitive tech market.",
-            "metadata": {
-                "domain": "technology",
-                "difficulty": "easy",
-                "language": "english",
-                "generated_at": "2026-05-07T13:35:15.436544Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Emma",
-                        "entity_type": "PERSON",
-                        "description": "A software engineer at TechWave Solutions who attended the Global AI Summit."
-                    },
-                    {
-                        "entity_name": "TechWave Solutions",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The company where Emma works, exploring AI-driven analytics tools."
-                    },
-                    {
-                        "entity_name": "Global AI Summit",
-                        "entity_type": "EVENT",
-                        "description": "An event showcasing advancements in machine learning and robotics."
-                    },
-                    {
-                        "entity_name": "San Francisco",
-                        "entity_type": "LOCATION",
-                        "description": "The location where the Global AI Summit was held."
-                    },
-                    {
-                        "entity_name": "Artificial Intelligence Alliance",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The organizer of the Global AI Summit."
-                    },
-                    {
-                        "entity_name": "NeuralBot",
-                        "entity_type": "PRODUCT",
-                        "description": "A product developed by Innovate Robotics for automating customer service tasks."
-                    },
-                    {
-                        "entity_name": "Innovate Robotics",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The developer of NeuralBot and other AI technologies."
-                    },
-                    {
-                        "entity_name": "Dr. Raj Patel",
-                        "entity_type": "PERSON",
-                        "description": "The lead researcher at Innovate Robotics who presented at the summit."
-                    },
-                    {
-                        "entity_name": "Azure",
-                        "entity_type": "PRODUCT",
-                        "description": "A cloud platform used by NeuralBot for data processing."
-                    },
-                    {
-                        "entity_name": "Silicon Valley",
-                        "entity_type": "LOCATION",
-                        "description": "The location of Innovate Robotics' headquarters."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Emma",
-                        "target_entity": "TechWave Solutions",
-                        "relation_type": "WORKPLACE",
-                        "description": "Emma is employed as a software engineer at TechWave Solutions.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Emma",
-                        "target_entity": "Global AI Summit",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Emma attended the Global AI Summit.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Global AI Summit",
-                        "target_entity": "Artificial Intelligence Alliance",
-                        "relation_type": "KNOWS",
-                        "description": "The Artificial Intelligence Alliance organized the Global AI Summit.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "NeuralBot",
-                        "target_entity": "Innovate Robotics",
-                        "relation_type": "PRODUCES",
-                        "description": "NeuralBot is developed by Innovate Robotics.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Dr. Raj Patel",
-                        "target_entity": "Innovate Robotics",
-                        "relation_type": "WORKPLACE",
-                        "description": "Dr. Raj Patel is the lead researcher at Innovate Robotics.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "NeuralBot",
-                        "target_entity": "Azure",
-                        "relation_type": "AGENT",
-                        "description": "NeuralBot integrates with Azure for data processing.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Emma",
-                        "target_entity": "Dr. Raj Patel",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Emma discussed collaboration opportunities with Dr. Raj Patel.",
-                        "relationship_strength": 3
-                    },
-                    {
-                        "source_entity": "Emma",
-                        "target_entity": "Silicon Valley",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Emma visited Silicon Valley to tour Innovate Robotics' headquarters.",
-                        "relationship_strength": 3
-                    }
-                ]
-            },
-            "id": "dc1b4337-e8b3-4dbe-b928-2f18dddab184",
-            "input_text": "Emma, a software engineer at TechWave Solutions, recently attended the Global AI Summit in San Francisco. The event, organized by the Artificial Intelligence Alliance, showcased cutting-edge advancements in machine learning and robotics. During the summit, Emma had the opportunity to test the latest version of NeuralBot, a product developed by Innovate Robotics. NeuralBot is designed to assist businesses in automating customer service tasks through natural language processing.\n\nEmma was particularly impressed by a presentation given by Dr. Raj Patel, the lead researcher at Innovate Robotics. He explained how NeuralBot integrates with cloud platforms like Azure to process large volumes of data efficiently. Emma later discussed potential collaboration opportunities between TechWave Solutions and Innovate Robotics with Dr. Patel, as her company is exploring ways to enhance their own AI-driven analytics tools.\n\nAfter the summit, Emma visited Silicon Valley to tour the headquarters of Innovate Robotics. The facility featured advanced labs where engineers were testing new prototypes for autonomous delivery drones. Inspired by the visit, Emma returned to TechWave Solutions with fresh ideas for incorporating AI into their upcoming projects.",
-            "metadata": {
-                "domain": "technology",
-                "difficulty": "easy",
-                "language": "english",
-                "generated_at": "2026-05-07T13:36:10.437829Z"
-            },
-            "quality_rating": 9
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Elon Musk",
-                        "entity_type": "PERSON",
-                        "description": "Elon Musk, the CEO of Tesla and SpaceX, announced a groundbreaking partnership."
-                    },
-                    {
-                        "entity_name": "Tesla",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Tesla is a company led by Elon Musk, hosting the announcement event."
-                    },
-                    {
-                        "entity_name": "SpaceX",
-                        "entity_type": "ORGANIZATION",
-                        "description": "SpaceX is a company led by Elon Musk, involved in space exploration."
-                    },
-                    {
-                        "entity_name": "Neuralink",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Neuralink is a company collaborating with MIT on the NeuroConnect project."
-                    },
-                    {
-                        "entity_name": "Massachusetts Institute of Technology",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The Massachusetts Institute of Technology (MIT) is collaborating with Neuralink on the NeuroConnect project."
-                    },
-                    {
-                        "entity_name": "NeuroConnect",
-                        "entity_type": "EVENT",
-                        "description": "NeuroConnect is a project aiming to develop advanced brain-computer interface technology."
-                    },
-                    {
-                        "entity_name": "Media Lab",
-                        "entity_type": "FACILITY",
-                        "description": "Media Lab is a facility at MIT where the NeuroConnect project will be based."
-                    },
-                    {
-                        "entity_name": "U.S. Department of Defense",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The U.S. Department of Defense is expected to provide funding for the NeuroConnect project."
-                    },
-                    {
-                        "entity_name": "Dr. Sarah Lin",
-                        "entity_type": "PERSON",
-                        "description": "Dr. Sarah Lin is a leading researcher at MIT involved in the NeuroConnect project."
-                    },
-                    {
-                        "entity_name": "Consumer Electronics Show",
-                        "entity_type": "EVENT",
-                        "description": "The Consumer Electronics Show (CES) is an annual event where the NeuroConnect prototype will be unveiled."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Elon Musk",
-                        "target_entity": "Neuralink",
-                        "relation_type": "ORGANIZES",
-                        "description": "Elon Musk is associated with Neuralink as its leader.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Neuralink",
-                        "target_entity": "Massachusetts Institute of Technology",
-                        "relation_type": "KNOWS",
-                        "description": "Neuralink and MIT are collaborating on the NeuroConnect project.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "NeuroConnect",
-                        "target_entity": "Media Lab",
-                        "relation_type": "LOCATED_IN",
-                        "description": "The NeuroConnect project will be based at MIT's Media Lab.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "NeuroConnect",
-                        "target_entity": "U.S. Department of Defense",
-                        "relation_type": "INCOME",
-                        "description": "The U.S. Department of Defense is expected to fund the NeuroConnect project.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Dr. Sarah Lin",
-                        "target_entity": "Massachusetts Institute of Technology",
-                        "relation_type": "MEMBER_OF",
-                        "description": "Dr. Sarah Lin is a leading researcher at MIT.",
-                        "relationship_strength": 5
-                    }
-                ]
-            },
-            "id": "f65471fd-d77a-4f82-b73f-99146acc4290",
-            "input_text": "In 2023, Elon Musk, the CEO of Tesla and SpaceX, announced a groundbreaking partnership between Neuralink and the Massachusetts Institute of Technology (MIT). The collaboration aims to develop advanced brain-computer interface (BCI) technology capable of enhancing human cognitive abilities. The project, named \"NeuroConnect,\" will be based at MIT's Media Lab in Cambridge, Massachusetts, and is expected to receive funding from the U.S. Department of Defense.\n\nThe NeuroConnect initiative will integrate Neuralink's cutting-edge neural implant devices with MIT's expertise in artificial intelligence and robotics. According to Dr. Sarah Lin, a leading researcher at MIT, the project could revolutionize fields such as healthcare, education, and even space exploration. For instance, astronauts on SpaceX missions could use the technology to monitor brain activity and improve decision-making during critical operations.\n\nDuring the announcement event held at Tesla's headquarters in Palo Alto, California, Musk emphasized the ethical considerations surrounding BCI development. He stated that the partnership would prioritize data privacy and ensure compliance with international regulations, including the European Union's General Data Protection Regulation (GDPR).\n\nThe first prototype of NeuroConnect is expected to be unveiled at the annual Consumer Electronics Show (CES) in Las Vegas next year. Industry experts believe that if successful, the project could position Neuralink and MIT as leaders in the rapidly growing BCI market, which is projected to reach $5 billion by 2030.",
-            "metadata": {
-                "domain": "technology",
-                "difficulty": "medium",
-                "language": "english",
-                "generated_at": "2026-05-07T13:38:15.920227Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Emily Carter",
-                        "entity_type": "PERSON",
-                        "description": "Dr. Emily Carter is a pediatrician at Green Valley Hospital who presented findings on the vaccine ImmunoShield."
-                    },
-                    {
-                        "entity_name": "Green Valley Hospital",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Green Valley Hospital is the workplace of Dr. Emily Carter."
-                    },
-                    {
-                        "entity_name": "National Health Conference",
-                        "entity_type": "EVENT",
-                        "description": "The National Health Conference is an event held in Chicago where Dr. Emily Carter presented her findings."
-                    },
-                    {
-                        "entity_name": "Chicago",
-                        "entity_type": "LOCATION",
-                        "description": "Chicago is the city where the National Health Conference took place."
-                    },
-                    {
-                        "entity_name": "ImmunoShield",
-                        "entity_type": "PRODUCT",
-                        "description": "ImmunoShield is a vaccine developed by MedTech Pharmaceuticals to prevent respiratory infections in children."
-                    },
-                    {
-                        "entity_name": "MedTech Pharmaceuticals",
-                        "entity_type": "ORGANIZATION",
-                        "description": "MedTech Pharmaceuticals is the developer of the vaccine ImmunoShield."
-                    },
-                    {
-                        "entity_name": "Stanford University",
-                        "entity_type": "ORGANIZATION",
-                        "description": "Stanford University is the institution whose researchers collaborated with Dr. Emily Carter on the vaccine study."
-                    },
-                    {
-                        "entity_name": "World Health Organization",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The World Health Organization is interested in reviewing the study on ImmunoShield for global implementation."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Emily Carter",
-                        "target_entity": "Green Valley Hospital",
-                        "relation_type": "WORKPLACE",
-                        "description": "Dr. Emily Carter works at Green Valley Hospital.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Emily Carter",
-                        "target_entity": "National Health Conference",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Dr. Emily Carter attended and presented at the National Health Conference.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "National Health Conference",
-                        "target_entity": "Chicago",
-                        "relation_type": "LOCATED_IN",
-                        "description": "The National Health Conference was held in Chicago.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Emily Carter",
-                        "target_entity": "ImmunoShield",
-                        "relation_type": "AGENT",
-                        "description": "Dr. Emily Carter conducted research on the vaccine ImmunoShield.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "ImmunoShield",
-                        "target_entity": "MedTech Pharmaceuticals",
-                        "relation_type": "PRODUCES",
-                        "description": "ImmunoShield was developed by MedTech Pharmaceuticals.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Emily Carter",
-                        "target_entity": "Stanford University",
-                        "relation_type": "KNOWS",
-                        "description": "Dr. Emily Carter collaborated with researchers from Stanford University.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "World Health Organization",
-                        "target_entity": "ImmunoShield",
-                        "relation_type": "KNOWS",
-                        "description": "The World Health Organization is interested in the vaccine ImmunoShield.",
-                        "relationship_strength": 3
-                    }
-                ]
-            },
-            "id": "8f2eff2c-90dc-49f8-81e1-5ea3b76e9b66",
-            "input_text": "Dr. Emily Carter, a pediatrician at Green Valley Hospital, recently attended the National Health Conference in Chicago. During the event, she presented her findings on the effectiveness of the new vaccine, ImmunoShield, developed by MedTech Pharmaceuticals. The vaccine has shown promising results in preventing respiratory infections among children under five years old. \n\nDr. Carter collaborated with researchers from Stanford University to conduct a year-long study involving 1,200 participants across three states: Illinois, Wisconsin, and Michigan. The study revealed a 90% reduction in hospital admissions for respiratory illnesses among vaccinated children compared to those who were unvaccinated. \n\nThe World Health Organization (WHO) has expressed interest in reviewing the study to consider global implementation of ImmunoShield in regions with high rates of childhood respiratory diseases. Dr. Carter emphasized the importance of partnerships between hospitals, universities, and pharmaceutical companies to advance medical research and improve public health outcomes.",
-            "metadata": {
-                "domain": "medicine",
-                "difficulty": "easy",
-                "language": "english",
-                "generated_at": "2026-05-07T13:41:16.110051Z"
-            },
-            "quality_rating": 9
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Emily Carter",
-                        "entity_type": "PERSON",
-                        "description": "Dr. Emily Carter is a renowned cardiologist at St. Mary’s Hospital in Boston who presented groundbreaking research on CardioPro."
-                    },
-                    {
-                        "entity_name": "St. Mary’s Hospital",
-                        "entity_type": "ORGANIZATION",
-                        "description": "St. Mary’s Hospital is a medical institution located in Boston where Dr. Emily Carter practices."
-                    },
-                    {
-                        "entity_name": "American Heart Association Conference",
-                        "entity_type": "EVENT",
-                        "description": "The American Heart Association Conference is an event held in Chicago where Dr. Emily Carter presented her research."
-                    },
-                    {
-                        "entity_name": "CardioPro",
-                        "entity_type": "PRODUCT",
-                        "description": "CardioPro is a new medication developed by MedTech Pharmaceuticals aimed at reducing the risk of heart attacks among high-risk patients."
-                    },
-                    {
-                        "entity_name": "MedTech Pharmaceuticals",
-                        "entity_type": "ORGANIZATION",
-                        "description": "MedTech Pharmaceuticals is the company that developed the medication CardioPro."
-                    },
-                    {
-                        "entity_name": "National Institute of Health",
-                        "entity_type": "ORGANIZATION",
-                        "description": "The National Institute of Health (NIH) collaborated with Dr. Emily Carter's research team to ensure rigorous scientific standards."
-                    },
-                    {
-                        "entity_name": "HeartTrack Monitor",
-                        "entity_type": "PRODUCT",
-                        "description": "The HeartTrack Monitor is a wearable device used for tracking real-time cardiac health metrics."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Emily Carter",
-                        "target_entity": "St. Mary’s Hospital",
-                        "relation_type": "WORKPLACE",
-                        "description": "Dr. Emily Carter works as a cardiologist at St. Mary’s Hospital.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Emily Carter",
-                        "target_entity": "CardioPro",
-                        "relation_type": "AGENT",
-                        "description": "Dr. Emily Carter conducted research on the efficacy of CardioPro.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "CardioPro",
-                        "target_entity": "MedTech Pharmaceuticals",
-                        "relation_type": "PRODUCES",
-                        "description": "CardioPro was developed by MedTech Pharmaceuticals.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Emily Carter",
-                        "target_entity": "National Institute of Health",
-                        "relation_type": "KNOWS",
-                        "description": "Dr. Emily Carter's research team collaborated with the National Institute of Health.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Emily Carter",
-                        "target_entity": "HeartTrack Monitor",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Dr. Emily Carter discussed the role of the HeartTrack Monitor in cardiac health.",
-                        "relationship_strength": 3
-                    }
-                ]
-            },
-            "id": "e1e03483-de8b-4f6b-89e4-8dcdccb01e1c",
-            "input_text": "Dr. Emily Carter, a renowned cardiologist at St. Mary’s Hospital in Boston, recently presented groundbreaking research at the American Heart Association Conference held in Chicago. Her study focused on the efficacy of CardioPro, a new medication developed by MedTech Pharmaceuticals, in reducing the risk of heart attacks among high-risk patients. \n\nDuring the event, Dr. Carter highlighted data from a clinical trial involving 1,200 participants across the United States. The trial demonstrated that patients who took CardioPro experienced a 35% reduction in cardiovascular events compared to those on standard treatments. The research team collaborated closely with the National Institute of Health (NIH) to ensure the study adhered to rigorous scientific standards.\n\nDr. Carter emphasized the importance of early diagnosis and preventive care, particularly for individuals with a family history of heart disease. She also discussed the role of wearable devices, such as the HeartTrack Monitor, in tracking real-time cardiac health metrics. According to her, integrating such technologies with medications like CardioPro could revolutionize patient care.\n\nThe findings have sparked interest among healthcare providers and policymakers, with discussions underway about incorporating CardioPro into national treatment guidelines. MedTech Pharmaceuticals announced plans to expand production and make the drug available globally by next year. Meanwhile, St. Mary’s Hospital is preparing to launch a new cardiac wellness program inspired by Dr. Carter’s research.",
-            "metadata": {
-                "domain": "medicine",
-                "difficulty": "medium",
-                "language": "english",
-                "generated_at": "2026-05-07T13:42:06.443368Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Emma Johnson",
-                        "entity_type": "PERSON",
-                        "description": "A financial advisor at Greenfield Investments who attended the Global Finance Summit."
-                    },
-                    {
-                        "entity_name": "Greenfield Investments",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A financial institution involved in various initiatives to support small businesses and entrepreneurs."
-                    },
-                    {
-                        "entity_name": "Global Finance Summit",
-                        "entity_type": "EVENT",
-                        "description": "An event held in New York City discussing financial topics, attended by Emma Johnson."
-                    },
-                    {
-                        "entity_name": "Federal Reserve",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A governmental institution with representatives discussing the impact of rising interest rates on small businesses."
-                    },
-                    {
-                        "entity_name": "BrightFuture Bank",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A financial institution partnering with Greenfield Investments to launch a small business loan program."
-                    },
-                    {
-                        "entity_name": "MoneyWise Foundation",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A nonprofit organization collaborating with Greenfield Investments to offer financial literacy workshops."
-                    },
-                    {
-                        "entity_name": "TechGrow Inc.",
-                        "entity_type": "ORGANIZATION",
-                        "description": "An organization committed to supporting initiatives for small businesses and economic growth."
-                    },
-                    {
-                        "entity_name": "UrbanStart Ventures",
-                        "entity_type": "ORGANIZATION",
-                        "description": "An organization committed to supporting initiatives for small businesses and economic growth."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Emma Johnson",
-                        "target_entity": "Greenfield Investments",
-                        "relation_type": "WORKPLACE",
-                        "description": "Emma Johnson is a financial advisor at Greenfield Investments.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Greenfield Investments",
-                        "target_entity": "BrightFuture Bank",
-                        "relation_type": "KNOWS",
-                        "description": "Greenfield Investments partnered with BrightFuture Bank to launch a small business loan program.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Greenfield Investments",
-                        "target_entity": "MoneyWise Foundation",
-                        "relation_type": "KNOWS",
-                        "description": "Greenfield Investments is collaborating with MoneyWise Foundation to offer financial literacy workshops.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Emma Johnson",
-                        "target_entity": "Global Finance Summit",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Emma Johnson attended the Global Finance Summit.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Emma Johnson",
-                        "target_entity": "Federal Reserve",
-                        "relation_type": "PARTICIPANT_IN",
-                        "description": "Emma Johnson discussed the impact of rising interest rates on small businesses with representatives from the Federal Reserve.",
-                        "relationship_strength": 3
-                    },
-                    {
-                        "source_entity": "Emma Johnson",
-                        "target_entity": "TechGrow Inc.",
-                        "relation_type": "KNOWS",
-                        "description": "Emma Johnson secured commitments from TechGrow Inc. to support initiatives for small businesses.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "Emma Johnson",
-                        "target_entity": "UrbanStart Ventures",
-                        "relation_type": "KNOWS",
-                        "description": "Emma Johnson secured commitments from UrbanStart Ventures to support initiatives for small businesses.",
-                        "relationship_strength": 4
-                    }
-                ]
-            },
-            "id": "728d4a7f-74d9-473d-873b-8167ce4fddc4",
-            "input_text": "Emma Johnson, a financial advisor at Greenfield Investments, recently attended the Global Finance Summit in New York City. During the event, she discussed the impact of rising interest rates on small businesses with representatives from the Federal Reserve. Emma emphasized that many startups, particularly in the tech sector, are struggling to secure affordable loans due to tighter lending policies.\n\nAt the summit, Greenfield Investments also announced a new partnership with BrightFuture Bank to launch a small business loan program. This initiative aims to provide low-interest loans to entrepreneurs in urban areas like San Francisco and Chicago. The program is expected to roll out by March 2024.\n\nIn her keynote speech, Emma highlighted the importance of financial literacy programs for young entrepreneurs. She mentioned that Greenfield Investments is collaborating with the nonprofit organization MoneyWise Foundation to offer free workshops across the United States. These workshops will focus on budgeting, investment strategies, and debt management.\n\nBy the end of the summit, Emma had secured commitments from several organizations, including TechGrow Inc. and UrbanStart Ventures, to support these initiatives. The collaboration is expected to benefit hundreds of small businesses and foster economic growth in key metropolitan regions.",
-            "metadata": {
-                "domain": "finance",
-                "difficulty": "easy",
-                "language": "english",
-                "generated_at": "2026-05-07T13:44:01.890850Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Eliza Hartman",
-                        "entity_type": "PERSON",
-                        "description": "A prominent researcher at the Max Planck Institute for Astrophysics who published a groundbreaking paper on exoplanetary atmospheres."
-                    },
-                    {
-                        "entity_name": "Max Planck Institute for Astrophysics",
-                        "entity_type": "ORGANIZATION",
-                        "description": "An institute where Dr. Eliza Hartman conducts her research."
-                    },
-                    {
-                        "entity_name": "James Webb Space Telescope",
-                        "entity_type": "PRODUCT",
-                        "description": "A space telescope used to detect exoplanetary atmospheres in the study."
-                    },
-                    {
-                        "entity_name": "TRAPPIST-1",
-                        "entity_type": "LOCATION",
-                        "description": "A star system located approximately 40 light-years away in the Aquarius constellation."
-                    },
-                    {
-                        "entity_name": "TRAPPIST-1e",
-                        "entity_type": "LOCATION",
-                        "description": "An Earth-sized exoplanet in the TRAPPIST-1 system's habitable zone."
-                    },
-                    {
-                        "entity_name": "TRAPPIST-1f",
-                        "entity_type": "LOCATION",
-                        "description": "An Earth-sized exoplanet in the TRAPPIST-1 system's habitable zone."
-                    },
-                    {
-                        "entity_name": "European Space Agency",
-                        "entity_type": "ORGANIZATION",
-                        "description": "An organization that organized the Exoplanetary Atmosphere Symposium to discuss Hartman’s findings."
-                    },
-                    {
-                        "entity_name": "Exoplanetary Atmosphere Symposium",
-                        "entity_type": "EVENT",
-                        "description": "An event organized to discuss the implications of Hartman’s findings."
-                    },
-                    {
-                        "entity_name": "NASA",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A space agency that proposed collaborative missions to investigate the TRAPPIST-1 system."
-                    },
-                    {
-                        "entity_name": "European Southern Observatory",
-                        "entity_type": "ORGANIZATION",
-                        "description": "An organization that proposed collaborative missions to investigate the TRAPPIST-1 system."
-                    },
-                    {
-                        "entity_name": "Rajesh Patel",
-                        "entity_type": "PERSON",
-                        "description": "A researcher from the Indian Institute of Science who partnered with Hartman to develop a new computational framework."
-                    },
-                    {
-                        "entity_name": "Indian Institute of Science",
-                        "entity_type": "ORGANIZATION",
-                        "description": "An institute where Dr. Rajesh Patel conducts his research."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Eliza Hartman",
-                        "target_entity": "Max Planck Institute for Astrophysics",
-                        "relation_type": "MEMBER_OF",
-                        "description": "Dr. Eliza Hartman is a researcher at the Max Planck Institute for Astrophysics.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Eliza Hartman",
-                        "target_entity": "James Webb Space Telescope",
-                        "relation_type": "AGENT",
-                        "description": "Dr. Eliza Hartman used the James Webb Space Telescope for her research.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "TRAPPIST-1",
-                        "target_entity": "TRAPPIST-1e",
-                        "relation_type": "MEMBER_OF",
-                        "description": "TRAPPIST-1e is a planet within the TRAPPIST-1 system.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "TRAPPIST-1",
-                        "target_entity": "TRAPPIST-1f",
-                        "relation_type": "MEMBER_OF",
-                        "description": "TRAPPIST-1f is a planet within the TRAPPIST-1 system.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Eliza Hartman",
-                        "target_entity": "Rajesh Patel",
-                        "relation_type": "KNOWS",
-                        "description": "Dr. Eliza Hartman collaborated with Dr. Rajesh Patel to develop a computational framework.",
-                        "relationship_strength": 4
-                    }
-                ]
-            },
-            "id": "dd9cbe78-7e87-4712-a2dc-98c431a02dff",
-            "input_text": "In 2021, Dr. Eliza Hartman, a prominent researcher at the Max Planck Institute for Astrophysics, published a groundbreaking paper on the detection of exoplanetary atmospheres using the James Webb Space Telescope (JWST). The study focused on the TRAPPIST-1 system, located approximately 40 light-years away in the Aquarius constellation. Hartman’s team employed advanced spectroscopic techniques to analyze the chemical composition of the atmospheres of TRAPPIST-1e and TRAPPIST-1f, two Earth-sized exoplanets within the system's habitable zone.\n\nThe research revealed traces of water vapor and methane, suggesting potential biosignatures. This discovery sparked significant interest at the European Space Agency (ESA), which subsequently organized the Exoplanetary Atmosphere Symposium in Geneva, Switzerland, to discuss the implications of Hartman’s findings. During the event, representatives from NASA and the European Southern Observatory (ESO) proposed collaborative missions to further investigate the TRAPPIST-1 system.\n\nNotably, the study also highlighted the limitations of current models in predicting atmospheric dynamics under the influence of M-dwarf stars, such as TRAPPIST-1. To address this, Hartman partnered with Dr. Rajesh Patel from the Indian Institute of Science (IISc) to develop a new computational framework, leveraging machine learning algorithms to refine atmospheric simulations. This interdisciplinary effort underscores the growing importance of international collaboration in advancing our understanding of exoplanetary science.",
-            "metadata": {
-                "domain": "science",
-                "difficulty": "hard",
-                "language": "english",
-                "generated_at": "2026-05-07T13:49:12.690898Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "Sarah Johnson",
-                        "entity_type": "PERSON",
-                        "description": "The CEO of GreenTech Solutions, who announced a strategic partnership with EcoEnergy Corp."
-                    },
-                    {
-                        "entity_name": "GreenTech Solutions",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A leading innovator in renewable energy technologies, focusing on the design and manufacturing of solar-powered charging stations."
-                    },
-                    {
-                        "entity_name": "EcoEnergy Corp",
-                        "entity_type": "ORGANIZATION",
-                        "description": "An organization known for its extensive distribution network, handling logistics and installation for the partnership."
-                    },
-                    {
-                        "entity_name": "Global Sustainability Summit",
-                        "entity_type": "EVENT",
-                        "description": "An event held in Berlin where the partnership was announced."
-                    },
-                    {
-                        "entity_name": "SunCharge Pro",
-                        "entity_type": "PRODUCT",
-                        "description": "A new line of solar-powered charging stations developed through the partnership."
-                    },
-                    {
-                        "entity_name": "Berlin",
-                        "entity_type": "LOCATION",
-                        "description": "The city where the Global Sustainability Summit was held and highlighted as a model city for green innovation."
-                    },
-                    {
-                        "entity_name": "European Commission",
-                        "entity_type": "ORGANIZATION",
-                        "description": "An organization whose representatives pledged support for projects aligning with the EU's Green Deal objectives."
-                    },
-                    {
-                        "entity_name": "Renewable Energy Expo",
-                        "entity_type": "EVENT",
-                        "description": "An event in London where the first prototype of SunCharge Pro is scheduled for unveiling."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "Sarah Johnson",
-                        "target_entity": "GreenTech Solutions",
-                        "relation_type": "ORGANIZES",
-                        "description": "Sarah Johnson is the CEO of GreenTech Solutions.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "GreenTech Solutions",
-                        "target_entity": "EcoEnergy Corp",
-                        "relation_type": "KNOWS",
-                        "description": "GreenTech Solutions and EcoEnergy Corp formed a strategic partnership to develop solar-powered charging stations.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Global Sustainability Summit",
-                        "target_entity": "Berlin",
-                        "relation_type": "LOCATED_IN",
-                        "description": "The Global Sustainability Summit was held in Berlin.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "SunCharge Pro",
-                        "target_entity": "GreenTech Solutions",
-                        "relation_type": "PRODUCES",
-                        "description": "GreenTech Solutions is responsible for the design and manufacturing of SunCharge Pro.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "SunCharge Pro",
-                        "target_entity": "EcoEnergy Corp",
-                        "relation_type": "AGENT",
-                        "description": "EcoEnergy Corp is responsible for the logistics and installation of SunCharge Pro.",
-                        "relationship_strength": 5
-                    }
-                ]
-            },
-            "id": "f06b1bff-4c8c-495c-acbf-d377af508702",
-            "input_text": "Last week, Sarah Johnson, the CEO of GreenTech Solutions, announced a strategic partnership with EcoEnergy Corp during the Global Sustainability Summit held in Berlin. The collaboration aims to develop a new line of solar-powered charging stations, branded as SunCharge Pro, which will be launched across major urban centers in Europe, including Paris, London, and Amsterdam. \n\nGreenTech Solutions, a leading innovator in renewable energy technologies, will focus on the design and manufacturing of the product, while EcoEnergy Corp, known for its extensive distribution network, will handle logistics and installation. The partnership is expected to accelerate the adoption of clean energy solutions in metropolitan areas, addressing the growing demand for sustainable infrastructure.\n\nDuring her keynote speech at the summit, Sarah emphasized the importance of private-sector initiatives in combating climate change and highlighted Berlin as a model city for green innovation. The announcement was met with enthusiasm from industry leaders and policymakers, including representatives from the European Commission, who pledged support for projects that align with the EU's Green Deal objectives.\n\nThe first prototype of SunCharge Pro is scheduled for unveiling at the Renewable Energy Expo in London next March. Both companies anticipate that the product will significantly reduce carbon emissions associated with traditional charging stations, contributing to their shared vision of a carbon-neutral future.",
-            "metadata": {
-                "domain": "business",
-                "difficulty": "medium",
-                "language": "english",
-                "generated_at": "2026-05-07T13:50:55.786234Z"
-            },
-            "quality_rating": 8
-        },
-        {
-            "output": {
-                "entities": [
-                    {
-                        "entity_name": "OpenAI",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A leading tech firm that unveiled an enhanced version of its GPT-4 model, emphasizing improved reasoning capabilities for enterprise applications."
-                    },
-                    {
-                        "entity_name": "Google DeepMind",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A leading tech firm that demonstrated its Gemini AI system, which integrates multimodal processing to handle text, images, and audio with greater efficiency."
-                    },
-                    {
-                        "entity_name": "Anthropic",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A rising competitor that introduced Claude 3, touting its superior safety protocols and ability to engage in nuanced conversations, and announced a strategic partnership with Microsoft to deploy Claude 3 on Azure."
-                    },
-                    {
-                        "entity_name": "Microsoft",
-                        "entity_type": "ORGANIZATION",
-                        "description": "A tech firm that partnered with Anthropic to deploy Claude 3 on Azure, expanding its accessibility for businesses."
-                    },
-                    {
-                        "entity_name": "Sam Altman",
-                        "entity_type": "PERSON",
-                        "description": "The CEO of OpenAI, who led the company in unveiling an enhanced version of its GPT-4 model."
-                    },
-                    {
-                        "entity_name": "Demis Hassabis",
-                        "entity_type": "PERSON",
-                        "description": "The leader of Google DeepMind, who demonstrated the Gemini AI system."
-                    },
-                    {
-                        "entity_name": "GPT-4",
-                        "entity_type": "PRODUCT",
-                        "description": "An enhanced AI model developed by OpenAI, emphasizing improved reasoning capabilities for enterprise applications."
-                    },
-                    {
-                        "entity_name": "Gemini AI",
-                        "entity_type": "PRODUCT",
-                        "description": "An AI system developed by Google DeepMind that integrates multimodal processing to handle text, images, and audio with greater efficiency."
-                    },
-                    {
-                        "entity_name": "Claude 3",
-                        "entity_type": "PRODUCT",
-                        "description": "An AI model developed by Anthropic, touting superior safety protocols and the ability to engage in nuanced conversations."
-                    },
-                    {
-                        "entity_name": "Azure",
-                        "entity_type": "PRODUCT",
-                        "description": "A cloud computing service developed by Microsoft, used by Anthropic to deploy Claude 3 for business accessibility."
-                    },
-                    {
-                        "entity_name": "EU AI Act",
-                        "entity_type": "LAW",
-                        "description": "A regulatory framework that imposes strict guidelines on high-risk AI systems, sparking debates about its impact on innovation and compliance challenges for tech firms."
-                    }
-                ],
-                "relations": [
-                    {
-                        "source_entity": "OpenAI",
-                        "target_entity": "Sam Altman",
-                        "relation_type": "ORGANIZES",
-                        "description": "OpenAI is led by Sam Altman as CEO.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Google DeepMind",
-                        "target_entity": "Demis Hassabis",
-                        "relation_type": "ORGANIZES",
-                        "description": "Google DeepMind is led by Demis Hassabis.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Anthropic",
-                        "target_entity": "Microsoft",
-                        "relation_type": "KNOWS",
-                        "description": "Anthropic has a strategic partnership with Microsoft to deploy Claude 3 on Azure.",
-                        "relationship_strength": 4
-                    },
-                    {
-                        "source_entity": "OpenAI",
-                        "target_entity": "GPT-4",
-                        "relation_type": "PRODUCES",
-                        "description": "OpenAI developed the GPT-4 model.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Google DeepMind",
-                        "target_entity": "Gemini AI",
-                        "relation_type": "PRODUCES",
-                        "description": "Google DeepMind developed the Gemini AI system.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Anthropic",
-                        "target_entity": "Claude 3",
-                        "relation_type": "PRODUCES",
-                        "description": "Anthropic developed the Claude 3 AI model.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Microsoft",
-                        "target_entity": "Azure",
-                        "relation_type": "PRODUCES",
-                        "description": "Microsoft developed the Azure cloud computing service.",
-                        "relationship_strength": 5
-                    },
-                    {
-                        "source_entity": "Anthropic",
-                        "target_entity": "EU AI Act",
-                        "relation_type": "HAS_CAUSE",
-                        "description": "Anthropic is affected by the EU AI Act, as compliance could slow innovation for startups like Anthropic.",
-                        "relationship_strength": 3
-                    },
-                    {
-                        "source_entity": "OpenAI",
-                        "target_entity": "EU AI Act",
-                        "relation_type": "HAS_CAUSE",
-                        "description": "OpenAI is affected by the EU AI Act, but has resources to navigate its framework.",
-                        "relationship_strength": 2
-                    },
-                    {
-                        "source_entity": "Google DeepMind",
-                        "target_entity": "EU AI Act",
-                        "relation_type": "HAS_CAUSE",
-                        "description": "Google DeepMind is affected by the EU AI Act, but has resources to navigate its framework.",
-                        "relationship_strength": 2
-                    }
-                ]
-            },
-            "id": "a52662aa-98df-4256-b51e-ba918340f144",
-            "input_text": "**Advancements in AI: OpenAI, Google DeepMind, and Anthropic Compete at Shanghai Conference**  \n\nThe 2024 World Artificial Intelligence Conference in Shanghai brought together leading tech firms to showcase breakthroughs in artificial intelligence. OpenAI, led by CEO Sam Altman, unveiled an enhanced version of its GPT-4 model, emphasizing improved reasoning capabilities for enterprise applications. Meanwhile, Google DeepMind, under the leadership of Demis Hassabis, demonstrated its Gemini AI system, which integrates multimodal processing to handle text, images, and audio with greater efficiency.  \n\nAnthropic, a rising competitor, introduced Claude 3, touting its superior safety protocols and ability to engage in nuanced conversations. The company also announced a strategic partnership with Microsoft to deploy Claude 3 on Azure, expanding its accessibility for businesses.  \n\nRegulatory discussions dominated the sidelines, with attendees debating the implications of the EU AI Act, which imposes strict guidelines on high-risk AI systems. Experts warned that compliance could slow innovation, particularly for startups like Anthropic, while giants like OpenAI and Google DeepMind have the resources to navigate the new framework.  \n\nThe conference underscored the rapid evolution of AI, with companies racing to balance performance, safety, and ethical considerations. As competition intensifies, collaborations—such as Anthropic’s Azure deal—highlight the growing interdependence of tech firms in shaping the future of AI.  \n\n(Word count: 220)",
-            "metadata": {
-                "domain": "technology",
-                "difficulty": "medium",
-                "language": "english",
-                "generated_at": "2026-05-07T15:27:05.806852Z"
-            },
-            "quality_rating": 8
-        }
-    ]
+    {
+      "input_text": "Monday’s trial hearing revealed plenty of juicy tidbits, including the $26.3 billion Google spent making itself the default search engine across platforms in 2021, how Google tried to take it further and have Chrome preinstalled on iPhones and more.\nThe company did accomplish that goal, but in doing so, it inadvertently and profoundly changed how the internet looked.\nThe case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:44:18.660293Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "2021",
+            "entity_type": "DATE",
+            "description": "The calendar year 2021, when Google spent $26.3 billion to be the default search engine across platforms"
+          },
+          {
+            "entity_name": "26.3 Billion",
+            "entity_type": "MONEY",
+            "description": "The amount of 26.3 billion US dollars that Google spent in 2021 to make itself the default search engine across platforms"
+          },
+          {
+            "entity_name": "Google",
+            "entity_type": "ORGANIZATION",
+            "description": "Google LLC, a large technology company that spent money to be the default search engine, sought to have Chrome preinstalled on iPhones, and is accused of siphoning off news publishers’ content, readers, and ad revenue through anticompetitive means"
+          },
+          {
+            "entity_name": "Chrome",
+            "entity_type": "PRODUCT",
+            "description": "Chrome web browser, a product developed by Google that the company tried to have preinstalled on iPhones"
+          },
+          {
+            "entity_name": "Iphone",
+            "entity_type": "PRODUCT",
+            "description": "iPhone smartphones, Apple’s mobile devices on which Google tried to have its Chrome browser preinstalled"
+          },
+          {
+            "entity_name": "Arkansas",
+            "entity_type": "STATE_OR_PROVINCE",
+            "description": "Arkansas, a U.S. state where the publisher Helena World Chronicle is based"
+          },
+          {
+            "entity_name": "Helena World Chronicle",
+            "entity_type": "ORGANIZATION",
+            "description": "Helena World Chronicle, a news publisher based in Arkansas that filed the case against Google"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Google",
+            "target_entity": "26.3 Billion",
+            "relation_type": "EXPENDITURE",
+            "description": "Google spent 26.3 billion US dollars in 2021 to make itself the default search engine across platforms",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "26.3 Billion",
+            "target_entity": "2021",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Google’s expenditure of 26.3 billion US dollars occurred in the year 2021",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Chrome",
+            "relation_type": "PRODUCES",
+            "description": "Chrome is a product developed and owned by Google",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Chrome",
+            "target_entity": "Iphone",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Google attempted to have its Chrome browser preinstalled on iPhones",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Arkansas",
+            "relation_type": "LOCATED_IN",
+            "description": "The publisher Helena World Chronicle is based in the state of Arkansas",
+            "relationship_strength": 5
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "f6fab5b1-ac3b-4ff2-87b3-04f6bfac64ab"
+    },
+    {
+      "input_text": "Microsoft also has a stripped-down Elite Series 2 “Core” version for $129.99, which is the same controller in white-and-black, red-and-black, or blue-and-black finishes without the rear paddles, accessory charging case, or extra stick toppers and D-pad.\nWhile these models are still quite new, versions that actual humans buy have begun receiving discounts.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:44:18.660293Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Microsoft",
+            "entity_type": "ORGANIZATION",
+            "description": "Technology company mentioned as the maker of the controller"
+          },
+          {
+            "entity_name": "Elite Series 2 Core",
+            "entity_type": "PRODUCT",
+            "description": "Variant of the Xbox Elite Series 2 controller described as a stripped-down Core version"
+          },
+          {
+            "entity_name": "$129.99",
+            "entity_type": "MONEY",
+            "description": "Price of the Elite Series 2 Core controller"
+          },
+          {
+            "entity_name": "White-and-black",
+            "entity_type": "PRODUCT",
+            "description": "Color scheme option for the Elite Series 2 Core controller"
+          },
+          {
+            "entity_name": "Red-and-black",
+            "entity_type": "PRODUCT",
+            "description": "Color scheme option for the Elite Series 2 Core controller"
+          },
+          {
+            "entity_name": "Blue-and-black",
+            "entity_type": "PRODUCT",
+            "description": "Color scheme option for the Elite Series 2 Core controller"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Microsoft",
+            "target_entity": "Elite Series 2 Core",
+            "relation_type": "PRODUCES",
+            "description": "Microsoft is the company that makes/offers the Elite Series 2 Core controller",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "$129.99",
+            "target_entity": "Elite Series 2 Core",
+            "relation_type": "PRICE_OF",
+            "description": "The price of the Elite Series 2 Core controller is $129.99",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "White-and-black",
+            "target_entity": "Elite Series 2 Core",
+            "relation_type": "PART_OF",
+            "description": "White-and-black is one of the available finishes for the Elite Series 2 Core controller",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Red-and-black",
+            "target_entity": "Elite Series 2 Core",
+            "relation_type": "PART_OF",
+            "description": "Red-and-black is one of the available finishes for the Elite Series 2 Core controller",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Blue-and-black",
+            "target_entity": "Elite Series 2 Core",
+            "relation_type": "PART_OF",
+            "description": "Blue-and-black is one of the available finishes for the Elite Series 2 Core controller",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "ab03fe96-d488-48a8-bee0-30ea1c51cdf2"
+    },
+    {
+      "input_text": "Monday’s trial hearing revealed plenty of juicy tidbits, including the $26.3 billion Google spent making itself the default search engine across platforms in 2021, how Google tried to take it further and have Chrome preinstalled on iPhones and more.\nFor all the other benefits they get from Android, Google could solve this problem today if they wanted to.\nThis whole line of argument is called “market definition.” If the court decides the relevant market is phones and app stores, not specifically Android ones, then Google’s on the road to victory.\nThe case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:44:18.660293Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Google",
+            "entity_type": "ORGANIZATION",
+            "description": "Technology company that spent $26.3 billion to be the default search engine and is the defendant in the antitrust case described"
+          },
+          {
+            "entity_name": "26.3 Billion",
+            "entity_type": "MONEY",
+            "description": "Amount of money (26.3 billion US dollars) Google spent in 2021 to become the default search engine across platforms"
+          },
+          {
+            "entity_name": "2021",
+            "entity_type": "DATE",
+            "description": "Year in which Google spent $26.3 billion to make itself the default search engine"
+          },
+          {
+            "entity_name": "Chrome",
+            "entity_type": "PRODUCT",
+            "description": "Web browser developed by Google, which Google tried to have preinstalled on iPhones"
+          },
+          {
+            "entity_name": "Iphone",
+            "entity_type": "PRODUCT",
+            "description": "Smartphones produced by Apple; the devices on which Google tried to have Chrome preinstalled"
+          },
+          {
+            "entity_name": "Android",
+            "entity_type": "PRODUCT",
+            "description": "Mobile operating system developed by Google that provides benefits to Google and is part of the market definition discussion"
+          },
+          {
+            "entity_name": "Market Definition",
+            "entity_type": "LAW",
+            "description": "Legal concept discussed in the trial referring to the definition of the relevant economic market for the case"
+          },
+          {
+            "entity_name": "Court",
+            "entity_type": "ORGANIZATION",
+            "description": "Judicial institution (the court) that will decide what the relevant market is for the case"
+          },
+          {
+            "entity_name": "Arkansas",
+            "entity_type": "STATE_OR_PROVINCE",
+            "description": "US state where the publisher Helena World Chronicle is based"
+          },
+          {
+            "entity_name": "Helena World Chronicle",
+            "entity_type": "ORGANIZATION",
+            "description": "Publisher based in Arkansas that filed the case against Google, claiming anticompetitive conduct toward news publishers"
+          },
+          {
+            "entity_name": "News Publishers",
+            "entity_type": "ORGANIZATION",
+            "description": "News publishers whose content, readers, and ad revenue are allegedly siphoned off by Google"
+          },
+          {
+            "entity_name": "Readers",
+            "entity_type": "NUMBER",
+            "description": "Readers of news publishers, allegedly taken by Google’s behavior"
+          },
+          {
+            "entity_name": "Ad Revenue",
+            "entity_type": "MONEY",
+            "description": "Advertising revenue that news publishers allegedly lose due to Google’s anticompetitive conduct"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Google",
+            "target_entity": "26.3 Billion",
+            "relation_type": "EXPENDITURE",
+            "description": "Google spent $26.3 billion to make itself the default search engine across platforms",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "26.3 Billion",
+            "target_entity": "2021",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The expenditure of $26.3 billion occurred in 2021",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Chrome",
+            "relation_type": "OWNER_OF",
+            "description": "Chrome is a product developed and owned by Google",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Chrome",
+            "target_entity": "Iphone",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Google tried to have Chrome preinstalled on iPhones",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Android",
+            "relation_type": "OWNER_OF",
+            "description": "Google’s benefits come from its control over the Android ecosystem",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Court",
+            "target_entity": "Market Definition",
+            "relation_type": "AGENT",
+            "description": "The court will decide the relevant market definition",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Google",
+            "relation_type": "AGENT",
+            "description": "Helena World Chronicle filed the case against Google",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Arkansas",
+            "relation_type": "LOCATED_IN",
+            "description": "Helena World Chronicle is based in Arkansas",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "News Publishers",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Google allegedly siphons off content from news publishers",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Readers",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Google allegedly siphons off readers from news publishers",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Ad Revenue",
+            "relation_type": "INCOME",
+            "description": "Google allegedly siphons off ad revenue from news publishers",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "b8f3dc77-5dc2-40e9-979a-87568de1edf9"
+    },
+    {
+      "input_text": "The ride-hail company claims that the rate of sexual assault reported on the app decreased 38% between its first and second reports.\nHundreds of women have filed lawsuits against Uber claiming the company hasn’t done enough to prevent instances of sexual assault by drivers.\nThe survivors in the joined lawsuit also allege that Uber’s “fast and shallow background checks” are substandard and designed to make it as easy as possible for drivers to sign up quickly.\nIn the third quarter, Uber generated $394 million in operating income and $219 million worth of net income.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:44:18.660293Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Sexual assault",
+            "entity_type": "CRIME",
+            "description": "A type of violent crime involving forced or coerced sexual activity, mentioned as being reported on the ride-hail app and as the basis of lawsuits"
+          },
+          {
+            "entity_name": "Uber",
+            "entity_type": "ORGANIZATION",
+            "description": "The ride-hail company that operates an app-based transportation platform, subject to multiple lawsuits by survivors alleging inadequate safety and background checks; it generated operating and net income in the third quarter"
+          },
+          {
+            "entity_name": "Driver",
+            "entity_type": "PERSON",
+            "description": "Drivers working for Uber’s ride-hail platform who are alleged in lawsuits to have committed instances of sexual assault"
+          },
+          {
+            "entity_name": "Woman",
+            "entity_type": "PERSON",
+            "description": "Women who have allegedly experienced sexual assault by Uber drivers and who have filed or joined lawsuits against Uber"
+          },
+          {
+            "entity_name": "Joined lawsuit",
+            "entity_type": "EVENT",
+            "description": "A group legal action combining multiple survivors’ claims against Uber regarding sexual assault and background checks"
+          },
+          {
+            "entity_name": "Lawsuit",
+            "entity_type": "EVENT",
+            "description": "A legal action filed by hundreds of women against Uber, alleging failure to prevent sexual assaults by drivers"
+          },
+          {
+            "entity_name": "Background check",
+            "entity_type": "EVENT",
+            "description": "A generic description of organizational background checks that survivors allege are fast, shallow, and substandard in Uber’s hiring process for drivers"
+          },
+          {
+            "entity_name": "Third quarter",
+            "entity_type": "DATE",
+            "description": "The third quarter of a fiscal year in which Uber reported operating income of $394 million and net income of $219 million"
+          },
+          {
+            "entity_name": "394 million",
+            "entity_type": "MONEY",
+            "description": "An amount of 394 million monetary units, specified as Uber’s operating income in the third quarter"
+          },
+          {
+            "entity_name": "219 million",
+            "entity_type": "MONEY",
+            "description": "An amount of 219 million monetary units, specified as Uber’s net income in the third quarter"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Woman",
+            "target_entity": "Lawsuit",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Hundreds of women have filed lawsuits against Uber",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "Lawsuit",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Uber is the defendant/target organization in the lawsuits filed by hundreds of women",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Lawsuit",
+            "target_entity": "Sexual assault",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "The lawsuits filed by women concern alleged instances of sexual assault by drivers",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Joined lawsuit",
+            "target_entity": "Lawsuit",
+            "relation_type": "PART_OF",
+            "description": "The joined lawsuit is made up of survivors who allege misconduct by Uber",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Woman",
+            "target_entity": "Joined lawsuit",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Survivors in the joined lawsuit are women",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Joined lawsuit",
+            "target_entity": "Background check",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "The joined lawsuit alleges that Uber’s fast and shallow background checks are substandard",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Driver",
+            "target_entity": "Sexual assault",
+            "relation_type": "AGENT",
+            "description": "The lawsuits allege that Uber failed to prevent instances of sexual assault by its drivers",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "Sexual assault",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "The lawsuits allege Uber is responsible for not doing enough to prevent sexual assault",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "Background check",
+            "relation_type": "AGENT",
+            "description": "The background checks in question are procedures used by Uber for onboarding drivers",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Driver",
+            "target_entity": "Uber",
+            "relation_type": "WORKS_AS",
+            "description": "Drivers who allegedly committed sexual assault are associated with Uber’s platform",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "394 million",
+            "relation_type": "INCOME",
+            "description": "In the third quarter, Uber generated operating income of $394 million",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Uber",
+            "target_entity": "219 million",
+            "relation_type": "INCOME",
+            "description": "In the third quarter, Uber generated net income of $219 million",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Third quarter",
+            "target_entity": "394 million",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The operating and net income figures are specifically reported for the third quarter",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Third quarter",
+            "target_entity": "219 million",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The operating and net income figures are specifically reported for the third quarter",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 9,
+      "id": "b1a25a3b-15ee-4631-abda-e57897e4a0f1"
+    },
+    {
+      "input_text": "\"And if the Braves let this be the story of their series, that's on them.\nBut while Nocturne could have easily settled and coasted on classic Castlevania vibes, the new show steps its game up considerably by using the franchise’s iconic lore to challenge your understanding of what it truly means to fight for freedom, equality, and fraternity.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:58:19.375180Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Braves",
+            "entity_type": "ORGANIZATION",
+            "description": "Professional baseball team referred to as 'the Braves' in the context of a series (likely a playoff or game series)."
+          },
+          {
+            "entity_name": "Nocturne",
+            "entity_type": "WORK_OF_ART",
+            "description": "Television series titled 'Nocturne', described as a new show in the Castlevania franchise."
+          },
+          {
+            "entity_name": "Castlevania",
+            "entity_type": "WORK_OF_ART",
+            "description": "Video game / media franchise whose iconic lore is used by the show 'Nocturne'; known as a long‑running action-adventure game series."
+          },
+          {
+            "entity_name": "Freedom",
+            "entity_type": "IDEOLOGY",
+            "description": "Abstract political and social concept of being free from oppression, mentioned as one of the ideals the show explores."
+          },
+          {
+            "entity_name": "Equality",
+            "entity_type": "IDEOLOGY",
+            "description": "Abstract political and social concept of equal treatment and rights, mentioned as one of the ideals the show explores."
+          },
+          {
+            "entity_name": "Fraternity",
+            "entity_type": "IDEOLOGY",
+            "description": "Abstract social and political ideal of brotherhood and solidarity, mentioned as one of the ideals the show explores."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Nocturne",
+            "target_entity": "Castlevania",
+            "relation_type": "PART_OF",
+            "description": "The show 'Nocturne' is part of and based on the larger Castlevania franchise, using its iconic lore.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Nocturne",
+            "target_entity": "Freedom",
+            "relation_type": "IDEOLOGY_OF",
+            "description": "'Nocturne' uses the lore of the Castlevania franchise to explore and challenge understandings of freedom as a political and social ideal.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Nocturne",
+            "target_entity": "Equality",
+            "relation_type": "IDEOLOGY_OF",
+            "description": "'Nocturne' uses the lore of the Castlevania franchise to explore and challenge understandings of equality as a political and social ideal.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Nocturne",
+            "target_entity": "Fraternity",
+            "relation_type": "IDEOLOGY_OF",
+            "description": "'Nocturne' uses the lore of the Castlevania franchise to explore and challenge understandings of fraternity as a political and social ideal.",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "7e5a40fa-da68-48a7-82ea-da99b18a203b"
+    },
+    {
+      "input_text": "She admits that she may have misinterpreted the evidence, but maintains that Google manipulates Search to maximise ad revenue.\nThis whole line of argument is called “market definition.” If the court decides the relevant market is phones and app stores, not specifically Android ones, then Google’s on the road to victory.\nGoogle unveils new hardware: This week was Google’s annual hardware event, where the search and consumer tech giant showed off what it’s been working on.\nThe case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-19T20:58:19.375180Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Google",
+            "entity_type": "ORGANIZATION",
+            "description": "Large multinational technology company specializing in Internet-related services and products, including its Search engine and hardware"
+          },
+          {
+            "entity_name": "Search",
+            "entity_type": "PRODUCT",
+            "description": "Online search engine product operated by Google"
+          },
+          {
+            "entity_name": "Ad revenue",
+            "entity_type": "MONEY",
+            "description": "Advertising income generated from displaying ads, mentioned as something Google seeks to maximize via Search manipulation"
+          },
+          {
+            "entity_name": "Phone",
+            "entity_type": "PRODUCT",
+            "description": "Market and ecosystem for mobile phones as a product category"
+          },
+          {
+            "entity_name": "App store",
+            "entity_type": "PRODUCT",
+            "description": "Digital distribution platforms for mobile and other applications, discussed as a relevant market category"
+          },
+          {
+            "entity_name": "Android",
+            "entity_type": "PRODUCT",
+            "description": "Mobile operating system platform developed by Google, referenced as a specific subset of phones and app stores"
+          },
+          {
+            "entity_name": "Google annual hardware event",
+            "entity_type": "EVENT",
+            "description": "Annual hardware-focused product launch event organized by Google"
+          },
+          {
+            "entity_name": "Hardware",
+            "entity_type": "PRODUCT",
+            "description": "New physical technology devices (hardware) that Google presents at its annual hardware event"
+          },
+          {
+            "entity_name": "Arkansas",
+            "entity_type": "STATE_OR_PROVINCE",
+            "description": "US state where the publisher Helena World Chronicle is based"
+          },
+          {
+            "entity_name": "Helena World Chronicle",
+            "entity_type": "ORGANIZATION",
+            "description": "Publisher based in Arkansas that filed the legal case against Google, alleging anticompetitive behavior"
+          },
+          {
+            "entity_name": "News publisher",
+            "entity_type": "ORGANIZATION",
+            "description": "News organizations whose content, readers, and ad revenue are allegedly siphoned off by Google"
+          },
+          {
+            "entity_name": "Reader",
+            "entity_type": "PERSON",
+            "description": "Readers or audience of news publishers’ content, allegedly diverted by Google"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Google",
+            "target_entity": "Search",
+            "relation_type": "OWNER_OF",
+            "description": "Google operates and manipulates its Search product to maximize advertising revenue",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Search",
+            "target_entity": "Ad revenue",
+            "relation_type": "PRODUCES",
+            "description": "Google uses its Search product to increase ad revenue",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Android",
+            "target_entity": "Phone",
+            "relation_type": "PART_OF",
+            "description": "Android phones and app stores are described as a subset within the broader phones and app stores market",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Android",
+            "target_entity": "App store",
+            "relation_type": "PART_OF",
+            "description": "Android phones and app stores are described as a subset within the broader phones and app stores market",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Google annual hardware event",
+            "relation_type": "ORGANIZES",
+            "description": "Google organizes and hosts an annual hardware event where it showcases new products",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Hardware",
+            "target_entity": "Google annual hardware event",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "Google’s annual hardware event is used as a venue to introduce new hardware products",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "Arkansas",
+            "relation_type": "LOCATED_IN",
+            "description": "Helena World Chronicle is located in and based out of the state of Arkansas",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Helena World Chronicle",
+            "target_entity": "News publisher",
+            "relation_type": "MEMBER_OF",
+            "description": "Helena World Chronicle, as a news publisher, is part of the broader category of news publishers bringing the case against Google",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "News publisher",
+            "target_entity": "Reader",
+            "relation_type": "PARENT_OF",
+            "description": "News publishers have readers as their audiences, whose attention is allegedly siphoned off by Google",
+            "relationship_strength": 2
+          }
+        ]
+      },
+      "quality_rating": 9,
+      "id": "dd6c2f20-0736-49c6-a94f-2c518d314071"
+    },
+    {
+      "input_text": "Исследователи из Google при помощи нейросети научили алгоритм определять наиболее подходящий кадр для создания миниатюры ролика на Youtube. Об этом сообщается в блоге разработчиков.Алгоритм при загрузке видеофайла из каждой секунды ролика берет один кадр, после чего их сравнивает и определяет несколько подходящих, следуя общим закономерностям: основной объект съемки должен располагаться в центре кадра и быть в фокусе. После этого система выбирает наилучший кадр, корректирует цвет изображения и генерирует миниатюры нескольких размеров.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-19T21:06:19.035233Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Google",
+            "entity_type": "ORGANIZATION",
+            "description": "Компания-разработчик интернет-сервисов и технологий, чьи исследователи описаны в тексте"
+          },
+          {
+            "entity_name": "Нейросеть",
+            "entity_type": "PRODUCT",
+            "description": "Нейронная сеть, используемая исследователями для обучения алгоритма выбора кадров"
+          },
+          {
+            "entity_name": "Алгоритм",
+            "entity_type": "PRODUCT",
+            "description": "Алгоритм, обученный нейросетью для определения наиболее подходящего кадра для миниатюры"
+          },
+          {
+            "entity_name": "Блог разработчик",
+            "entity_type": "WORK_OF_ART",
+            "description": "Блог разработчиков Google, в котором сообщается о работе алгоритма"
+          },
+          {
+            "entity_name": "Youtube",
+            "entity_type": "ORGANIZATION",
+            "description": "Видеохостинг, для роликов которого создаются миниатюры"
+          },
+          {
+            "entity_name": "Миниатюра",
+            "entity_type": "PRODUCT",
+            "description": "Миниатюра ролик"
+          },
+          {
+            "entity_name": "Видеофайл",
+            "entity_type": "PRODUCT",
+            "description": "Видео файл, который загружается и обрабатывается алгоритмом"
+          },
+          {
+            "entity_name": "Система",
+            "entity_type": "PRODUCT",
+            "description": "Система, которая выбирает лучший кадр, корректирует цвет и генерирует миниатюры нескольких размеров"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Google",
+            "target_entity": "Нейросеть",
+            "relation_type": "OWNER_OF",
+            "description": "Исследователи компании Google используют нейросеть для обучения алгоритма",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Алгоритм",
+            "relation_type": "OWNER_OF",
+            "description": "Алгоритм, обученный нейросетью Google, используется для создания миниатюр роликов",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Google",
+            "target_entity": "Блог разработчик",
+            "relation_type": "OWNER_OF",
+            "description": "Сообщение о создании алгоритма и его работе опубликовано в блоге разработчиков Google",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Алгоритм",
+            "target_entity": "Миниатюра",
+            "relation_type": "PRODUCES",
+            "description": "Алгоритм определяет подходящий кадр для создания миниатюры",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Алгоритм",
+            "target_entity": "Youtube",
+            "relation_type": "PART_OF",
+            "description": "Алгоритм используется для обработки видеороликов, размещаемых на Youtube",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Система",
+            "target_entity": "Миниатюра",
+            "relation_type": "PRODUCES",
+            "description": "Система на основе работы алгоритма выбирает лучший кадр и генерирует миниатюры",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Система",
+            "target_entity": "Видеофайл",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Система работает с загружаемыми видеофайлами, обрабатывая каждый кадр",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "21849609-5d54-4119-a6d7-386d4c75ee14"
+    },
+    {
+      "input_text": "Компания Magic Leap запатентовала внешний вид шлема дополненной реальности. Как отмечает портал QZ, возможно, именно так будет выглядеть прототип AR-гарнитуры, которую выпустит Magic Leap.\nВ патенте описывается большой визор, за которым установлены очки. Передняя часть при помощи крепления на затылке и ремней удерживается на голове пользователя. Поскольку патент дизайнерский и описывает только внешний вид устройства, то о технических характеристиках предполагаемого VR/AR-шлема Magic Leap по-прежнему ничего не известно.",
+      "metadata": {
+        "domain": "general",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-19T21:06:19.035233Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Magic Leap",
+            "entity_type": "ORGANIZATION",
+            "description": "Компания, занимающаяся разработкой устройств дополненной и виртуальной реальности, запатентовала внешний вид шлема/гарнитуры"
+          },
+          {
+            "entity_name": "QZ",
+            "entity_type": "ORGANIZATION",
+            "description": "Новостной портал (QZ), упоминающий информацию о патенте компании Magic Leap"
+          },
+          {
+            "entity_name": "Шлем дополненной реальности",
+            "entity_type": "PRODUCT",
+            "description": "Шлем дополненной реальности, внешний вид которого запатентовала компания Magic Leap"
+          },
+          {
+            "entity_name": "AR-гарнитура",
+            "entity_type": "PRODUCT",
+            "description": "Прототип AR-гарнитуры, который, возможно, будет выпускать Magic Leap"
+          },
+          {
+            "entity_name": "VR/AR-шлем",
+            "entity_type": "PRODUCT",
+            "description": "VR/AR-шлем, предполагаемое устройство Magic Leap, о технических характеристиках которого пока ничего не известно"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Magic Leap",
+            "target_entity": "Шлем дополненной реальности",
+            "relation_type": "OWNER_OF",
+            "description": "Компания Magic Leap запатентовала внешний вид шлема дополненной реальности",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Magic Leap",
+            "target_entity": "AR-гарнитура",
+            "relation_type": "PRODUCES",
+            "description": "Компания Magic Leap рассматривается как производитель AR-гарнитуры",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "VR/AR-шлем",
+            "target_entity": "AR-гарнитура",
+            "relation_type": "ALTERNATIVE_NAME",
+            "description": "VR/AR-шлем рассматривается как разновидность или вариант AR-гарнитуры",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "QZ",
+            "target_entity": "Magic Leap",
+            "relation_type": "AGENT",
+            "description": "Портал QZ сообщает информацию о патенте и предполагаемом устройстве Magic Leap",
+            "relationship_strength": 3
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "87b042d4-7b50-4d03-bcb5-92c257444409"
+    }
+  ]
 }
