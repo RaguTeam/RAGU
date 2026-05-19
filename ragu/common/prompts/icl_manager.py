@@ -169,7 +169,7 @@ class InContextLearningManager:
         self.examples = []
 
         for ex_data in examples_data:
-            example_language = ex_data.get("language", "english")
+            example_language = ex_data.get("metadata", {}).get("language", "english")
             if example_language != self.language:
                 continue
 

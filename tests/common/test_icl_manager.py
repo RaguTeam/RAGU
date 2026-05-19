@@ -92,8 +92,7 @@ def example_file(tmp_path):
                     {"source_entity": "Steve Jobs", "target_entity": "Apple", "relation_type": "FOUNDED_BY"},
                 ],
             },
-            "metadata": {"domain": "technology"},
-            "language": "english",
+            "metadata": {"domain": "technology", "language": "english"},
             "quality_rating": 9,
         },
         {
@@ -106,8 +105,7 @@ def example_file(tmp_path):
                 ],
                 "relations": [],
             },
-            "metadata": {"domain": "science"},
-            "language": "english",
+            "metadata": {"domain": "science", "language": "english"},
             "quality_rating": 8,
         },
         {
@@ -119,8 +117,7 @@ def example_file(tmp_path):
                 ],
                 "relations": [],
             },
-            "metadata": {"domain": "geography"},
-            "language": "russian",
+            "metadata": {"domain": "geography", "language": "russian"},
             "quality_rating": 9,
         },
     ]
