@@ -313,6 +313,89 @@ BuilderArguments(
 
 ---
 
+#### Client and Rate Limiting Configuration
+
+`CachedAsyncOpenAI` is the network-level client shared by `LLMOpenAI` and `EmbedderOpenAI`. It controls rate limiting, retries, caching, and timeouts.
+
+**Shared client (simpler, works for most cases):**
+
+```python
+client = CachedAsyncOpenAI(
+    base_url="https://api.openai.com/v1",
+    api_key="sk-...",
+    rate_max_simultaneous=10,
+    rate_max_per_minute=100,
+    cache="./llm_cache",
+)
+
+llm = LLMOpenAI(client=client, model_name="gpt-4o-mini")
+embedder = EmbedderOpenAI(client=client, model_name="text-embedding-3-large", dim=3072)
+```
+
+**Separate clients (recommended for large corpora or different providers):**
+
+When processing large corpora (thousands of entities and relations), LLM calls (slow, seconds per request) and embedding calls (fast but numerous) compete for the same connection pool and rate limiter. Using separate clients isolates their resources:
+
+```python
+llm_client = CachedAsyncOpenAI(
+    base_url="https://api.openai.com/v1",
+    api_key="sk-...",
+    rate_max_simultaneous=5,
+    rate_max_per_minute=60,
+    retry_times_sec=(4, 8, 16),
+    cache="./llm_cache",
+)
+
+embed_client = CachedAsyncOpenAI(
+    base_url="https://api.openai.com/v1",  # can be a different provider
+    api_key="sk-...",
+    rate_max_simultaneous=20,
+    rate_max_per_minute=500,
+    embed_timeout=60.0,
+    cache="./embed_cache",
+)
+
+llm = LLMOpenAI(client=llm_client, model_name="gpt-4o-mini")
+embedder = EmbedderOpenAI(
+    client=embed_client,
+    model_name="text-embedding-3-large",
+    dim=3072,
+    batch_size=500,
+    max_concurrent_batches=5,
+)
+```
+
+**When a shared client is sufficient:**
+- Small to medium documents (up to ~1000 entities/relations)
+- Generous API provider rate limits
+- Both LLM and embedder use the same endpoint
+
+**When separate clients are recommended:**
+- Large corpora (thousands of entities and relations)
+- Strict API rate limits (low RPM)
+- LLM and embedder on different providers or endpoints
+- You need independent scaling of LLM vs. embedding throughput
+
+**Key parameters:**
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `rate_max_simultaneous` | Max concurrent in-flight requests | None (unlimited) |
+| `rate_max_per_minute` | Max requests per minute | None (unlimited) |
+| `rate_min_delay` | Min seconds between request starts | None |
+| `retry_times_sec` | Retry wait schedule on transient errors | `(2, 4, 8)` |
+| `embed_timeout` | Per-request timeout for embedding calls (seconds) | `60.0` |
+| `cache` | Cache directory path | None |
+
+`EmbedderOpenAI` also accepts:
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `batch_size` | Max texts per single API call | `500` |
+| `max_concurrent_batches` | Max concurrent batch API calls | `5` |
+
+---
+
 #### In-Context Learning (Few-Shot Examples)
 
 RAGU extractors can use few-shot examples to improve extraction quality. When enabled, the extractor selects the most relevant examples by semantic similarity and includes them in the LLM prompt.

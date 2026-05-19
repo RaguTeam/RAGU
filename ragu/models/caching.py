@@ -156,6 +156,73 @@ class ResponseCachingMixin:
         """
         raise NotImplementedError
 
+    async def _cached_embed_texts(
+        self,
+        model_name: str,
+        texts: list[str],
+        **kwargs: Any,
+    ) -> list[list[float] | FLOATS]:
+        """Batch-aware caching wrapper for _uncached_embed_texts.
+
+        Checks the cache individually for each text, sends only cache
+        misses to the API, then stores and returns the full result list
+        in the original order.
+        """
+        if self.cache is None:
+            return await self._uncached_embed_texts(
+                model_name=model_name, texts=texts, **kwargs
+            )
+
+        results: list[list[float] | FLOATS | None] = [None] * len(texts)
+        miss_indices: list[int] = []
+        for i, text in enumerate(texts):
+            args: dict[str, Any] = {
+                'cache_prefix': self.cache_prefix,
+                'model_name': model_name,
+                'method': 'embed_text',
+                'text': text,
+                'kwargs': kwargs,
+            }
+            key = json.dumps(args, sort_keys=True)
+            if value := self.cache.get(key, None):
+                _, cached = value
+                results[i] = cached
+            else:
+                miss_indices.append(i)
+
+        if miss_indices:
+            miss_texts = [texts[i] for i in miss_indices]
+            embeddings = await self._uncached_embed_texts(
+                model_name=model_name, texts=miss_texts, **kwargs
+            )
+            for idx, embedding in zip(miss_indices, embeddings):
+                results[idx] = embedding
+                args = {
+                    'cache_prefix': self.cache_prefix,
+                    'model_name': model_name,
+                    'method': 'embed_text',
+                    'text': texts[idx],
+                    'kwargs': kwargs,
+                }
+                key = json.dumps(args, sort_keys=True)
+                self.cache[key] = args, embedding
+
+        return results  # type: ignore[return-value]
+
+    async def _uncached_embed_texts(
+        self,
+        model_name: str,
+        texts: list[str],
+        **kwargs: Any,
+    ) -> list[list[float] | FLOATS]:
+        """
+        Abstract batch embedding method.
+
+        Subclasses must implement this to send multiple texts in a single
+        API call.  kwargs are included for cache-key consistency.
+        """
+        raise NotImplementedError
+
     async def _cached_score(
         self,
         model_name: str,

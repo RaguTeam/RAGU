@@ -251,6 +251,8 @@ from ragu.triplet import ArtifactsExtractorLLM, TwoStageArtifactsExtractorLLM
 client = CachedAsyncOpenAI(
     base_url="https://api.openai.com/v1",
     api_key="dummy-api-token",
+    rate_max_simultaneous=10,
+    rate_max_per_minute=100,
 )
 llm = LLMOpenAI(
     client=client,
@@ -473,10 +475,31 @@ from ragu.models.llm import LLMOpenAI
 from ragu.models.openai import CachedAsyncOpenAI
 from ragu.triplet import TwoStageArtifactsExtractorLLM
 
+# Shared client — подходит для небольших и средних корпусов
 client = CachedAsyncOpenAI(
     base_url="https://api.openai.com/v1",
     api_key="dummy-api-token",
+    rate_max_simultaneous=10,
+    rate_max_per_minute=100,
 )
+
+# Для больших корпусов (тысячи сущностей) рекомендуется использовать
+# раздельные клиенты для LLM и эмбеддера:
+#
+# llm_client = CachedAsyncOpenAI(
+#     base_url="https://api.openai.com/v1",
+#     api_key="dummy-api-token",
+#     rate_max_simultaneous=5,
+#     rate_max_per_minute=60,
+# )
+# embed_client = CachedAsyncOpenAI(
+#     base_url="https://api.openai.com/v1",
+#     api_key="dummy-api-token",
+#     rate_max_simultaneous=20,
+#     rate_max_per_minute=500,
+#     embed_timeout=60.0,
+# )
+
 llm = LLMOpenAI(client=client, model_name="gpt-4o-mini")
 embedder = EmbedderOpenAI(
     client=client,

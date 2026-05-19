@@ -215,3 +215,126 @@ async def test_caching(delay_rate_server: OpenAIMockServer) -> None:
     ])
     elapsed = time.monotonic() - t0
     assert elapsed <= 0.1, f'Expected <0.1 s, got {elapsed:.2f} s'
+
+
+# ---------------------------------------------------------------------------
+# 8. embed_texts: batch embedding against mock server
+# ---------------------------------------------------------------------------
+
+async def test_embed_texts_returns_correct_count(server: OpenAIMockServer) -> None:
+    client = CachedAsyncOpenAI(base_url=server.base_url, api_key='mock')
+    result = await client.embed_texts(model_name='mock', texts=['a', 'b', 'c'])
+    assert isinstance(result, list)
+    assert len(result) == 3
+    for emb in result:
+        assert isinstance(emb, list)
+
+
+async def test_embed_texts_single_text(server: OpenAIMockServer) -> None:
+    client = CachedAsyncOpenAI(base_url=server.base_url, api_key='mock')
+    result = await client.embed_texts(model_name='mock', texts=['hello'])
+    assert isinstance(result, list)
+    assert len(result) == 1
+
+
+async def test_embed_texts_order_preserved(server: OpenAIMockServer) -> None:
+    client = CachedAsyncOpenAI(base_url=server.base_url, api_key='mock')
+    texts = [f'text-{i}' for i in range(5)]
+    result = await client.embed_texts(model_name='mock', texts=texts)
+    assert len(result) == 5
+
+
+async def test_embed_texts_all_cache_hit(server: OpenAIMockServer) -> None:
+    cache: dict[str, object] = {}
+    client = CachedAsyncOpenAI(
+        base_url=server.base_url, api_key='mock', cache=cache,
+    )
+    await client.embed_texts(model_name='mock', texts=['x', 'y'])
+    t0 = time.monotonic()
+    result = await client.embed_texts(model_name='mock', texts=['x', 'y'])
+    elapsed = time.monotonic() - t0
+    assert len(result) == 2
+    assert elapsed < 0.1, f'Cache hit should be instant, got {elapsed:.2f} s'
+
+
+async def test_embed_texts_partial_cache_hit(server: OpenAIMockServer) -> None:
+    cache: dict[str, object] = {}
+    client = CachedAsyncOpenAI(
+        base_url=server.base_url, api_key='mock', cache=cache,
+    )
+    await client.embed_text(model_name='mock', text='cached')
+    texts = ['cached', 'new1', 'new2']
+    result = await client.embed_texts(model_name='mock', texts=texts)
+    assert len(result) == 3
+
+
+async def test_embed_texts_cache_cross_compatible_with_embed_text(
+    server: OpenAIMockServer,
+) -> None:
+    cache: dict[str, object] = {}
+    client = CachedAsyncOpenAI(
+        base_url=server.base_url, api_key='mock', cache=cache,
+    )
+    single_result = await client.embed_text(model_name='mock', text='hello')
+    batch_result = await client.embed_texts(model_name='mock', texts=['hello'])
+    assert batch_result[0] == single_result
+
+
+async def test_embed_texts_cache_stores_for_future_embed_text(
+    server: OpenAIMockServer,
+) -> None:
+    cache: dict[str, object] = {}
+    client = CachedAsyncOpenAI(
+        base_url=server.base_url, api_key='mock', cache=cache,
+    )
+    await client.embed_texts(model_name='mock', texts=['hello'])
+    t0 = time.monotonic()
+    single_result = await client.embed_text(model_name='mock', text='hello')
+    elapsed = time.monotonic() - t0
+    assert isinstance(single_result, list)
+    assert elapsed < 0.1, f'Should be a cache hit, got {elapsed:.2f} s'
+
+
+async def test_embed_texts_no_cache(server: OpenAIMockServer) -> None:
+    client = CachedAsyncOpenAI(base_url=server.base_url, api_key='mock')
+    result1 = await client.embed_texts(model_name='mock', texts=['a', 'b'])
+    result2 = await client.embed_texts(model_name='mock', texts=['a', 'b'])
+    assert len(result1) == len(result2) == 2
+
+
+# ---------------------------------------------------------------------------
+# 9. End-to-end: EmbedderOpenAI.batch_embed_text through mock server
+# ---------------------------------------------------------------------------
+
+async def test_batch_embed_text_end_to_end(server: OpenAIMockServer) -> None:
+    from ragu.models.embedder import EmbedderOpenAI
+
+    client = CachedAsyncOpenAI(base_url=server.base_url, api_key='mock')
+    embedder = EmbedderOpenAI(
+        client=client, model_name='mock', dim=1, batch_size=2,
+    )
+    texts = ['t1', 't2', 't3', 't4', 't5']
+    result = await embedder.batch_embed_text(texts)
+    assert len(result) == 5
+    for emb in result:
+        assert isinstance(emb, list)
+
+
+async def test_batch_embed_text_end_to_end_with_cache(
+    server: OpenAIMockServer,
+) -> None:
+    from ragu.models.embedder import EmbedderOpenAI
+
+    cache: dict[str, object] = {}
+    client = CachedAsyncOpenAI(
+        base_url=server.base_url, api_key='mock', cache=cache,
+    )
+    embedder = EmbedderOpenAI(
+        client=client, model_name='mock', dim=1, batch_size=10,
+    )
+    result1 = await embedder.batch_embed_text(['a', 'b', 'c'])
+    t0 = time.monotonic()
+    result2 = await embedder.batch_embed_text(['a', 'b', 'c'])
+    elapsed = time.monotonic() - t0
+    assert result1 == result2
+    assert elapsed < 0.2, f'Second call should hit cache, got {elapsed:.2f} s'

@@ -302,10 +302,21 @@ class OpenAIMockServer(http.server.ThreadingHTTPServer):
         }
 
     def _handle_embeddings(self, body: dict[str, Any]) -> dict[str, Any]:
-        """Return a CreateEmbeddingResponse dict containing a single all-zero embedding vector."""
+        """Return a CreateEmbeddingResponse dict.
+
+        Supports both single-text (``input="text"``) and batch
+        (``input=["t1", "t2", ...]``) requests.  Each input item
+        produces one all-zero embedding vector in the response ``data``
+        list, preserving the original order.
+        """
+        raw_input = body.get('input', '')
+        n = len(raw_input) if isinstance(raw_input, list) else 1
         return {
             'object': 'list',
-            'data': [{'object': 'embedding', 'embedding': [0.0], 'index': 0}],
+            'data': [
+                {'object': 'embedding', 'embedding': [0.0], 'index': i}
+                for i in range(n)
+            ],
             'model': cast(str, body.get('model', 'mock')),
             'usage': {'prompt_tokens': 0, 'total_tokens': 0},
         }

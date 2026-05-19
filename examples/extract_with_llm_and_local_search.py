@@ -32,10 +32,12 @@ async def main():
     llm_model_name = os.getenv("LLM_MODEL_NAME")
     embedder_model_name = os.getenv("EMBEDDER_MODEL_NAME")
 
-    # Set up shared OpenAI client
+    # Set up shared OpenAI client with rate limiting
     client = CachedAsyncOpenAI(
         base_url=base_url,
         api_key=api_key,
+        rate_max_simultaneous=10,
+        rate_max_per_minute=100,
     )
 
     llm = LLMOpenAI(

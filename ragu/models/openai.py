@@ -98,6 +98,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         cache: MutableMapping[str, Any] | str | Path | None = None,
         cache_prefix: str = 'openai',
         debug_errors_storage: MutableMapping[str, Any] | str | Path | None = None,
+        embed_timeout: float | None = 60.0,
     ):
         """
         Initializes backend client.
@@ -122,8 +123,12 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         :param cache_prefix: Prefix included in cache keys.
         :param debug_errors_storage: Optional mapping/path to store failing call
             arguments for debugging.
+        :param embed_timeout: Per-request timeout in seconds for embedding API
+            calls.  Defaults to ``60.0``.  Set to ``None`` to use the client
+            default (typically 600 s).
         """
         self.max_completion_tokens = max_completion_tokens
+        self.embed_timeout = embed_timeout
         self.client = client or AsyncOpenAI(
             base_url=base_url,
             api_key=api_key,
@@ -136,6 +141,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         # storing original unwrapped medthods to be able to call them for debugging
         self._uncached_raw_chat_completion = self._uncached_chat_completion
         self._uncached_raw_embed_text = self._uncached_embed_text
+        self._uncached_raw_embed_texts = self._uncached_embed_texts
         self._uncached_raw_score = self._uncached_score
 
         # saving errors to debug
@@ -152,6 +158,8 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
                 self._uncached_chat_completion, self.debug_errors_storage)
             self._uncached_embed_text = save_args_on_exception(
                 self._uncached_embed_text, self.debug_errors_storage)
+            self._uncached_embed_texts = save_args_on_exception(
+                self._uncached_embed_texts, self.debug_errors_storage)
             self._uncached_score = save_args_on_exception(
                 self._uncached_score, self.debug_errors_storage)
 
@@ -173,6 +181,8 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
                 self._uncached_chat_completion, *contexts)
             self._uncached_embed_text = attach_async_contexts(
                 self._uncached_embed_text, *contexts)
+            self._uncached_embed_texts = attach_async_contexts(
+                self._uncached_embed_texts, *contexts)
             self._uncached_score = attach_async_contexts(
                 self._uncached_score, *contexts)
 
@@ -189,6 +199,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             )
             self._uncached_chat_completion = retrying_decorator(self._uncached_chat_completion)
             self._uncached_embed_text = retrying_decorator(self._uncached_embed_text)
+            self._uncached_embed_texts = retrying_decorator(self._uncached_embed_texts)
             self._uncached_score = retrying_decorator(self._uncached_score)
     
     async def chat_completion(
@@ -232,6 +243,30 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         return await self._cached_embed_text(
             model_name=model_name,
             text=text,
+            **kwargs,
+        )
+    
+    async def embed_texts(
+        self,
+        model_name: str,
+        texts: list[str],
+        **kwargs: Any,
+    ) -> list[list[float] | FLOATS]:
+        """
+        Returns batch text embeddings with caching.
+
+        Sends multiple texts in a single API call (when cache misses
+        occur) for significantly better throughput than calling
+        :meth:`embed_text` per text.
+
+        :param model_name: Provider embedding model name.
+        :param texts: Input texts to embed.
+        :param kwargs: Extra backend-specific options.
+        :returns: List of vector embeddings in the same order as input.
+        """
+        return await self._cached_embed_texts(
+            model_name=model_name,
+            texts=texts,
             **kwargs,
         )
     
@@ -362,10 +397,43 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         debug_text = text[:20].replace("\n", "\\n")
         logger.debug(f'Sending embed_text API request with text {debug_text}...')
         assert not kwargs, f'Guard triggered: add this to supported kwargs: {kwargs}'
+        timeout_kwarg: dict[str, Any] = (
+            {'timeout': self.embed_timeout} if self.embed_timeout is not None else {}
+        )
         response = await self.client.embeddings.create(
-            model=model_name, input=text,
+            model=model_name, input=text, **timeout_kwarg,
         )
         return response.data[0].embedding
+
+    @override
+    async def _uncached_embed_texts(
+        self,
+        model_name: str,
+        texts: list[str],
+        **kwargs: Any,
+    ) -> list[list[float] | FLOATS]:
+        """
+        Performs uncached batch embedding call.
+
+        Sends all texts in a single ``embeddings.create`` request.  The
+        OpenAI-compatible API accepts ``input`` as a list of strings.
+
+        :param model_name: Provider embedding model name.
+        :param texts: Input texts to embed.
+        :param kwargs: Supported backend options.
+        :returns: List of vector embeddings in input order.
+        """
+        logger.debug(
+            f'Sending embed_texts API request with {len(texts)} texts...'
+        )
+        assert not kwargs, f'Guard triggered: add this to supported kwargs: {kwargs}'
+        timeout_kwarg: dict[str, Any] = (
+            {'timeout': self.embed_timeout} if self.embed_timeout is not None else {}
+        )
+        response = await self.client.embeddings.create(
+            model=model_name, input=texts, **timeout_kwarg,
+        )
+        return [item.embedding for item in response.data]
 
     @override
     async def _uncached_score(
