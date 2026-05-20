@@ -197,8 +197,8 @@ class TestInContextLearningManagerSelection:
             embedder=constant_embedder, example_file=example_file, config=icl_config,
         )
         await manager.initialize()
-        results = await manager.select_examples("Tech company founded in California")
-        assert len(results) == 2
+        results = await manager.batch_select_examples(["Tech company founded in California"])
+        assert len(results[0]) == 2
 
     @pytest.mark.asyncio
     async def test_select_examples_respects_num_examples_override(self, constant_embedder, icl_config, example_file):
@@ -206,8 +206,8 @@ class TestInContextLearningManagerSelection:
             embedder=constant_embedder, example_file=example_file, config=icl_config,
         )
         await manager.initialize()
-        results = await manager.select_examples("Tech company founded in California", num_examples=1)
-        assert len(results) == 1
+        results = await manager.batch_select_examples(["Tech company founded in California"], num_examples=1)
+        assert len(results[0]) == 1
 
     @pytest.mark.asyncio
     async def test_select_examples_returns_dicts(self, constant_embedder, icl_config, example_file):
@@ -215,8 +215,8 @@ class TestInContextLearningManagerSelection:
             embedder=constant_embedder, example_file=example_file, config=icl_config,
         )
         await manager.initialize()
-        results = await manager.select_examples("Tech company founded in California", num_examples=1)
-        ex = results[0]
+        results = await manager.batch_select_examples(["Tech company founded in California"], num_examples=1)
+        ex = results[0][0]
         assert "input_text" in ex
         assert "output" in ex
         assert "id" in ex
@@ -229,16 +229,16 @@ class TestInContextLearningManagerSelection:
             embedder=constant_embedder, example_file=empty_file, config=icl_config,
         )
         await manager.initialize()
-        results = await manager.select_examples("some query")
-        assert results == []
+        results = await manager.batch_select_examples(["some query"])
+        assert results == [[]]
 
     @pytest.mark.asyncio
     async def test_select_examples_empty_without_initialize(self, constant_embedder, icl_config, example_file):
         manager = InContextLearningManager(
             embedder=constant_embedder, example_file=example_file, config=icl_config,
         )
-        results = await manager.select_examples("some query")
-        assert results == []
+        results = await manager.batch_select_examples(["some query"])
+        assert results == [[]]
 
     @pytest.mark.asyncio
     async def test_select_examples_threshold_filtering(self, embedder, icl_config, example_file):
@@ -250,8 +250,8 @@ class TestInContextLearningManagerSelection:
             embedder=embedder, example_file=example_file, config=high_threshold_config,
         )
         await manager.initialize()
-        results = await manager.select_examples("something completely unrelated xyzzy")
-        assert results == []
+        results = await manager.batch_select_examples(["something completely unrelated xyzzy"])
+        assert results == [[]]
 
 
 class TestCosineSimilarity:

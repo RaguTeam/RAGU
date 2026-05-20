@@ -99,9 +99,9 @@ class InContextLearningManager:
         language="english"
     )
 
-    # Select relevant examples for a query
-    examples = await manager.select_examples(
-        query_text="Tim Cook announced Apple Vision Pro...",
+    # Select relevant examples for multiple queries (batch)
+    examples_per_query = await manager.batch_select_examples(
+        query_texts=["Tim Cook announced Apple Vision Pro...", "Another text..."],
         num_examples=2
     )
     ```
@@ -140,10 +140,13 @@ class InContextLearningManager:
         Load examples and compute embeddings.
 
         This should be called after initialization to load examples
-        and compute embeddings for all example texts.
+        and compute embeddings for all example texts.  Subsequent
+        calls are no-ops — examples and embeddings are reused.
 
         For 20-50 examples, this typically takes < 1 second.
         """
+        if self._embeddings_computed:
+            return
         await self._load_examples()
         await self._compute_embeddings()
         self._embeddings_computed = True
@@ -229,77 +232,89 @@ class InContextLearningManager:
             return 0.0
         return float(np.dot(a, b) / (norm_a * norm_b))
 
-    async def select_examples(
+    async def batch_select_examples(
         self,
-        query_text: str,
+        query_texts: List[str],
         num_examples: int | None = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> List[List[Dict[str, Any]]]:
         """
-        Select most relevant examples for a given query.
+        Select most relevant examples for a batch of queries.
 
-        Process:
-        1. Compute query embedding
-        2. Compute cosine similarity with example embeddings
-        3. Return top-k examples by similarity
+        Computes all query embeddings in a single batch API call, then
+        selects top-k examples per query using cosine similarity.
 
-        :param query_text: Input text for which to select examples.
-        :param num_examples: Number of examples to return (uses config default if None).
-        :return: List of example dictionaries with input_text and output.
+        :param query_texts: Input texts for which to select examples.
+        :param num_examples: Number of examples to return per query
+            (uses config default if None).
+        :return: Per-query lists of example dictionaries.
         """
         if not self.examples:
-            return []
+            return [[] for _ in query_texts]
 
         if not self._embeddings_computed:
             logger.warning(
                 "Embeddings not computed. Call initialize() first."
             )
-            return []
+            return [[] for _ in query_texts]
 
         if num_examples is None:
             num_examples = self.config.num_examples
 
-        query_embedding = np.array(
-            await self.embedder.embed_text(query_text),
-            dtype=np.float32,
+        query_embeddings = await self.embedder.batch_embed_text(
+            texts=query_texts,
         )
+        query_embeddings_np = [
+            np.array(emb, dtype=np.float32) for emb in query_embeddings
+        ]
 
-        similarities: List[float] = []
-        for example in self.examples:
-            emb = self._embeddings.get(example.id)
-            if emb is None:
-                similarities.append(0.0)
+        example_embeddings = np.stack([
+            self._embeddings.get(ex.id, np.zeros(query_embeddings_np[0].shape, dtype=np.float32))
+            for ex in self.examples
+        ])
+
+        example_norms = np.linalg.norm(example_embeddings, axis=1)
+        valid_mask = example_norms > 0.0
+        example_norms_safe = np.where(valid_mask, example_norms, 1.0)
+
+        results: List[List[Dict[str, Any]]] = []
+        for i, query_emb in enumerate(query_embeddings_np):
+            query_norm = float(np.linalg.norm(query_emb))
+            if query_norm == 0.0:
+                results.append([])
                 continue
-            similarities.append(self._cosine_similarity(query_embedding, emb))
 
-        similarities_array = np.array(similarities)
-        indices = np.where(
-            similarities_array >= self.config.similarity_threshold
-        )[0]
+            similarities = np.dot(example_embeddings, query_emb) / (example_norms_safe * query_norm)
+            similarities[~valid_mask] = 0.0
 
-        if len(indices) == 0:
+            indices = np.where(similarities >= self.config.similarity_threshold)[0]
+
+            if len(indices) == 0:
+                logger.debug(
+                    f"No examples passed similarity threshold "
+                    f"({self.config.similarity_threshold}) for query {i}"
+                )
+                results.append([])
+                continue
+
+            top_indices = indices[np.argsort(similarities[indices])[-num_examples:]][::-1]
+
+            selected = []
+            for idx in top_indices:
+                example = self.examples[idx]
+                selected.append({
+                    "id": example.id,
+                    "input_text": example.input_text,
+                    "output": example.output,
+                    "metadata": example.metadata,
+                    "language": example.language,
+                    "quality_rating": example.quality_rating,
+                })
+
             logger.debug(
-                f"No examples passed similarity threshold "
-                f"({self.config.similarity_threshold})"
+                f"Selected {len(selected)} examples for query {i} "
+                f"(similarities: {[similarities[j] for j in top_indices]})"
             )
-            return []
 
-        top_indices = indices[np.argsort(similarities_array[indices])[-num_examples:]][::-1]
+            results.append(selected)
 
-        selected_examples = []
-        for idx in top_indices:
-            example = self.examples[idx]
-            selected_examples.append({
-                "id": example.id,
-                "input_text": example.input_text,
-                "output": example.output,
-                "metadata": example.metadata,
-                "language": example.language,
-                "quality_rating": example.quality_rating,
-            })
-
-        logger.debug(
-            f"Selected {len(selected_examples)} examples for query "
-            f"(similarities: {[similarities[i] for i in top_indices]})"
-        )
-
-        return selected_examples
+        return results

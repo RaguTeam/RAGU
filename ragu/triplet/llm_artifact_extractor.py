@@ -87,12 +87,10 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
             await self.icl_manager.initialize()
-            for chunk_text in context:
-                examples = await self.icl_manager.select_examples(
-                    query_text=chunk_text,
-                    num_examples=self.icl_manager.config.num_examples
-                )
-                examples_list.append(examples)
+            examples_list = await self.icl_manager.batch_select_examples(
+                query_texts=context,
+                num_examples=self.icl_manager.config.num_examples
+            )
         else:
             examples_list = [None] * len(context)
 
@@ -137,12 +135,10 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         """
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
-            for chunk_text in context:
-                examples = await self.icl_manager.select_examples(
-                    query_text=chunk_text,
-                    num_examples=self.icl_manager.config.num_examples
-                )
-                examples_list.append(examples)
+            examples_list = await self.icl_manager.batch_select_examples(
+                query_texts=context,
+                num_examples=self.icl_manager.config.num_examples
+            )
         else:
             examples_list = [None] * len(context)
 
