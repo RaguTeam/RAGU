@@ -38,16 +38,17 @@ class GlobalSearchRetrieve(SearchEngineRetrieve[GlobalSearchResult]):
     """
     result: GlobalSearchResult
 
+    _TO_TEXT_TEMPLATE = Template(dedent("""
+        {%- for insight in result.insights %}
+        {{ loop.index }}. Insight: {{ insight.response }}, rating: {{ insight.rating }}
+        {%- endfor %}
+    """))
+
     def to_text(self) -> str:
         """
         Render selected community insights for final answer synthesis.
         """
-        template = Template(dedent("""
-            {%- for insight in result.insights %}
-            {{ loop.index }}. Insight: {{ insight.response }}, rating: {{ insight.rating }}
-            {%- endfor %}
-        """))
-        return template.render(result=self.result)
+        return self._TO_TEXT_TEMPLATE.render(result=self.result)
 
 
 class GlobalSearchEngine(BaseEngine):

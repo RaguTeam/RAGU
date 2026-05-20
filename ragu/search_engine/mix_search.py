@@ -35,17 +35,18 @@ class MixSearchRetrieve(SearchEngineRetrieve[MixSearchResult]):
     """
     result: MixSearchResult
 
+    _TO_TEXT_TEMPLATE = Template(dedent("""
+        {%- for retrieve in result.results %}
+        **Engine {{ loop.index }} Context**
+        {{ retrieve }}
+        {% endfor %}
+    """))
+
     def to_text(self) -> str:
         """
         Render each child engine result as a separate context section.
         """
-        template = Template(dedent("""
-            {%- for retrieve in result.results %}
-            **Engine {{ loop.index }} Context**
-            {{ retrieve }}
-            {% endfor %}
-        """))
-        return template.render(result=self.result)
+        return self._TO_TEXT_TEMPLATE.render(result=self.result)
 
 
 class MixSearchEngine(BaseEngine):

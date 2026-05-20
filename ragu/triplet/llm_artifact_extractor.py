@@ -231,20 +231,15 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                 current_chunk_entities.append(entity)
 
             entities_result.extend(current_chunk_entities)
+            entity_by_name = {e.entity_name: e for e in current_chunk_entities}
 
             for relation in artifacts.relations:
                 subject_name = relation.source_entity
                 object_name = relation.target_entity
                 if not (subject_name and object_name):
                     continue
-                subject_entity = next(
-                    (e for e in current_chunk_entities if e.entity_name == subject_name),
-                    None,
-                )
-                object_entity = next(
-                    (e for e in current_chunk_entities if e.entity_name == object_name),
-                    None,
-                )
+                subject_entity = entity_by_name.get(subject_name)
+                object_entity = entity_by_name.get(object_name)
 
                 if subject_entity and object_entity:
                     relation = Relation(

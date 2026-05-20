@@ -408,7 +408,6 @@ icl_config = ICLConfig(
     num_examples=2,             # Number of examples per extraction call (1-3 recommended)
     language="english",         # Filter examples by language ("english" or "russian")
     similarity_threshold=0.3,   # Minimum cosine similarity for example selection
-    cache_embeddings=True,      # Cache example embeddings in memory
 )
 
 artifact_extractor = TwoStageArtifactsExtractorLLM(

@@ -144,8 +144,10 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                     type(e).__name__, e,
                 )
 
+        entities_payload = self._models_to_payload(entity_results)
+
         try:
-            relation_results = await self._extract_relations(context, entity_results)
+            relation_results = await self._extract_relations(context, entities_payload)
         except Exception as e:
             logger.warning(
                 "Relation extraction failed for {} chunks: {}: {}",
@@ -157,7 +159,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             try:
                 relation_results = await self._validate_relations(
                     context=context,
-                    entities=entity_results,
+                    entities_payload=entities_payload,
                     relations=relation_results,
                 )
             except Exception as e:
@@ -301,13 +303,13 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
     async def _extract_relations(
         self,
         context: List[str],
-        entities: List[EntitiesExtractionModel],
+        entities_payload: List[List[dict[str, Any]]],
     ) -> List[RelationsExtractionModel]:
         """
         Run stage-2 relation extraction constrained by extracted entities.
 
         :param context: Chunk texts.
-        :param entities: Per-chunk validated entities.
+        :param entities_payload: Per-chunk entity payloads for prompt rendering.
         :return: Per-chunk extracted relations.
         """
 
@@ -329,7 +331,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             examples_list=examples_list,
             few_shot_formatter=instruction.few_shot_formatter,
             context=context,
-            entities=self._models_to_payload(entities),
+            entities=entities_payload,
             language=self.language,
             relation_types=self.relation_types,
         )
@@ -349,14 +351,14 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
     async def _validate_relations(
         self,
         context: List[str],
-        entities: List[EntitiesExtractionModel],
+        entities_payload: List[List[dict[str, Any]]],
         relations: List[RelationsExtractionModel],
     ) -> List[RelationsExtractionModel]:
         """
         Run stage-2 validation for relation outputs.
 
         :param context: Chunk texts.
-        :param entities: Per-chunk entity sets.
+        :param entities_payload: Per-chunk entity payloads for prompt rendering.
         :param relations: Per-chunk relation sets.
         :return: Validated relations per chunk.
         """
@@ -379,7 +381,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             examples_list=examples_list,
             few_shot_formatter=instruction.few_shot_formatter,
             context=context,
-            entities=self._models_to_payload(entities),
+            entities=entities_payload,
             relations=self._models_to_payload(relations),
             language=self.language,
             relation_types=self.relation_types,

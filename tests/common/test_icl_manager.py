@@ -71,7 +71,6 @@ def icl_config():
         enabled=True,
         num_examples=2,
         similarity_threshold=0.1,
-        cache_embeddings=True,
         language="english",
     )
 
@@ -244,7 +243,7 @@ class TestInContextLearningManagerSelection:
     async def test_select_examples_threshold_filtering(self, embedder, icl_config, example_file):
         high_threshold_config = ICLConfig(
             enabled=True, num_examples=2,
-            similarity_threshold=0.99, cache_embeddings=True,
+            similarity_threshold=0.99,
         )
         manager = InContextLearningManager(
             embedder=embedder, example_file=example_file, config=high_threshold_config,
@@ -252,53 +251,6 @@ class TestInContextLearningManagerSelection:
         await manager.initialize()
         results = await manager.batch_select_examples(["something completely unrelated xyzzy"])
         assert results == [[]]
-
-
-class TestCosineSimilarity:
-    def test_identical_vectors(self):
-        v = np.array([1.0, 2.0, 3.0])
-        assert InContextLearningManager._cosine_similarity(v, v) == pytest.approx(1.0)
-
-    def test_orthogonal_vectors(self):
-        a = np.array([1.0, 0.0])
-        b = np.array([0.0, 1.0])
-        assert InContextLearningManager._cosine_similarity(a, b) == pytest.approx(0.0)
-
-    def test_opposite_vectors(self):
-        a = np.array([1.0, 0.0])
-        b = np.array([-1.0, 0.0])
-        assert InContextLearningManager._cosine_similarity(a, b) == pytest.approx(-1.0)
-
-    def test_zero_vector(self):
-        a = np.array([0.0, 0.0])
-        b = np.array([1.0, 0.0])
-        assert InContextLearningManager._cosine_similarity(a, b) == 0.0
-
-    def test_known_similarity(self):
-        a = np.array([1.0, 2.0, 3.0])
-        b = np.array([4.0, 5.0, 6.0])
-        expected = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-        assert InContextLearningManager._cosine_similarity(a, b) == pytest.approx(expected)
-
-
-class TestEmbeddingCaching:
-    @pytest.mark.asyncio
-    async def test_embeddings_stored_when_cache_enabled(self, embedder, example_file):
-        config = ICLConfig(cache_embeddings=True, similarity_threshold=0.0)
-        manager = InContextLearningManager(
-            embedder=embedder, example_file=example_file, config=config,
-        )
-        await manager.initialize()
-        assert len(manager._embeddings) == len(manager.examples)
-
-    @pytest.mark.asyncio
-    async def test_embeddings_not_stored_when_cache_disabled(self, embedder, example_file):
-        config = ICLConfig(cache_embeddings=False, similarity_threshold=0.0)
-        manager = InContextLearningManager(
-            embedder=embedder, example_file=example_file, config=config,
-        )
-        await manager.initialize()
-        assert len(manager._embeddings) == 0
 
 
 class TestResolveExamplePath:

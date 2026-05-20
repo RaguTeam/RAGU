@@ -59,38 +59,39 @@ class LocalSearchRetrieve(SearchEngineRetrieve[LocalSearchResult]):
     """
     result: LocalSearchResult
 
+    _TO_TEXT_TEMPLATE = Template(dedent("""
+        **Entities**
+        Entity, entity type, entity description
+        {%- for e in result.entities %}
+        {{ e.entity_name }}, {{ e.entity_type }}, {{ e.description }}
+        {%- endfor %}
+
+        **Relations**
+        Subject, relation type, object, relation description, rank
+        {%- for r in result.relations %}
+        {{ r.subject_name }}, {{ r.relation_type }}, {{ r.object_name }} - {{ r.description }}, {{ r.rank }}
+        {%- endfor %}
+
+        {%- if result.summaries %}
+        **Summary**
+        {%- for s in result.summaries %}
+        {{ s.summary }}
+        {%- endfor %}
+        {% endif %}
+
+        {%- if result.chunks %}
+        **Chunks**
+        {%- for c in result.chunks %}
+        {{ c.content }}
+        {%- endfor %}
+        {% endif %}
+    """))
+
     def to_text(self) -> str:
         """
         Render entities, relations, optional summaries, and optional chunks.
         """
-        template = Template(dedent("""
-            **Entities**
-            Entity, entity type, entity description
-            {%- for e in result.entities %}
-            {{ e.entity_name }}, {{ e.entity_type }}, {{ e.description }}
-            {%- endfor %}
-
-            **Relations**
-            Subject, relation type, object, relation description, rank
-            {%- for r in result.relations %}
-            {{ r.subject_name }}, {{ r.relation_type }}, {{ r.object_name }} - {{ r.description }}, {{ r.rank }}
-            {%- endfor %}
-
-            {%- if result.summaries %}
-            **Summary**
-            {%- for s in result.summaries %}
-            {{ s.summary }}
-            {%- endfor %}
-            {% endif %}
-
-            {%- if result.chunks %}
-            **Chunks**
-            {%- for c in result.chunks %}
-            {{ c.content }}
-            {%- endfor %}
-            {% endif %}
-        """))
-        return template.render(result=self.result)
+        return self._TO_TEXT_TEMPLATE.render(result=self.result)
 
 
 class LocalSearchEngine(BaseEngine):

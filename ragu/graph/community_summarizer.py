@@ -99,16 +99,17 @@ class CommunitySummarizer(RaguGenerativeModule):
         if not report:
             return ""
 
-        template = Template(dedent(
-            """
-            Report title: {{ report.title }}
-            Report summary: {{ report.summary }}
-            
-            {% for finding in report.findings %}
-            Finding summary: {{ finding.summary }}
-            Finding explanation: {{ finding.explanation }}
-            {% endfor %}
-            """)
-        )
+        return _COMMUNITY_REPORT_TEMPLATE.render(report=report)
 
-        return template.render(report=report)
+
+_COMMUNITY_REPORT_TEMPLATE = Template(dedent(
+    """
+    Report title: {{ report.title }}
+    Report summary: {{ report.summary }}
+    
+    {% for finding in report.findings %}
+    Finding summary: {{ finding.summary }}
+    Finding explanation: {{ finding.explanation }}
+    {% endfor %}
+    """)
+)

@@ -175,6 +175,7 @@ class ResponseCachingMixin:
 
         results: list[list[float] | FLOATS | None] = [None] * len(texts)
         miss_indices: list[int] = []
+        miss_keys: list[str] = []
         for i, text in enumerate(texts):
             args: dict[str, Any] = {
                 'cache_prefix': self.cache_prefix,
@@ -189,22 +190,15 @@ class ResponseCachingMixin:
                 results[i] = cached
             else:
                 miss_indices.append(i)
+                miss_keys.append(key)
 
         if miss_indices:
             miss_texts = [texts[i] for i in miss_indices]
             embeddings = await self._uncached_embed_texts(
                 model_name=model_name, texts=miss_texts, **kwargs
             )
-            for idx, embedding in zip(miss_indices, embeddings):
+            for idx, key, embedding in zip(miss_indices, miss_keys, embeddings):
                 results[idx] = embedding
-                args = {
-                    'cache_prefix': self.cache_prefix,
-                    'model_name': model_name,
-                    'method': 'embed_text',
-                    'text': texts[idx],
-                    'kwargs': kwargs,
-                }
-                key = json.dumps(args, sort_keys=True)
                 self.cache[key] = args, embedding
 
         return results  # type: ignore[return-value]

@@ -422,25 +422,22 @@ async def synthesize_corpus(
                 f"difficulty '{difficulty}'"
             )
 
-            domain_successes = 0
+            conversations = [
+                [{"role": "user", "content": _build_synthesis_prompt(domain, difficulty, language)}]
+                for _ in range(num_texts)
+            ]
 
-            for i in range(num_texts):
-                synthesis_prompt = _build_synthesis_prompt(
-                    domain=domain,
-                    difficulty=difficulty,
-                    language=language,
+            domain_successes = 0
+            try:
+                texts = await generator_llm.batch_chat_completion(
+                    conversations=conversations,
+                    output_schema=str,
+                    desc=f"Generating {domain}/{difficulty}",
+                    temperature=generator_llm.kwargs.get("temperature", 0.2),
                 )
 
-                try:
-                    text = await generator_llm.chat_completion(
-                        conversation=[
-                            {"role": "user", "content": synthesis_prompt}
-                        ],
-                        output_schema=str,
-                        temperature=generator_llm.kwargs.get("temperature", 0.2),
-                    )
-
-                    text_clean = text.strip()
+                for text in texts:
+                    text_clean = text.strip() if text else ""
                     if len(text_clean) < min_text_length:
                         logger.info(
                             f"  Text too short ({len(text_clean)} chars, "
@@ -458,10 +455,10 @@ async def synthesize_corpus(
                     count += 1
                     domain_successes += 1
 
-                except Exception as e:
-                    logger.warning(
-                        f"Failed to generate text for {domain}/{difficulty}: {e}"
-                    )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to generate texts for {domain}/{difficulty}: {e}"
+                )
 
             logger.info(
                 f"Generated {domain_successes}/{num_texts} texts for "

@@ -25,6 +25,13 @@ from openai.types.chat import (
 
 Role = Literal["system", "user", "assistant"]
 
+_JINJA_ENV = Environment(
+    undefined=StrictUndefined,
+    autoescape=False,
+    trim_blocks=True,
+    lstrip_blocks=True,
+)
+
 
 @dataclass(frozen=True, slots=True)
 class BaseMessage:
@@ -170,13 +177,6 @@ def render(template_conversation: Union[BaseMessage, ChatMessages], **params: An
             row[k] = v[i] if _is_batch_value(v) else v
         return row
 
-    env = Environment(
-        undefined=StrictUndefined,
-        autoescape=False,
-        trim_blocks=True,
-        lstrip_blocks=True,
-    )
-
     if isinstance(template_conversation, BaseMessage):
         template_cm = ChatMessages.from_messages([template_conversation])
     else:
@@ -196,7 +196,7 @@ def render(template_conversation: Union[BaseMessage, ChatMessages], **params: An
 
         rendered_msgs: List[BaseMessage] = []
         for m in template_cm.messages:
-            tmpl = env.from_string(m.content)
+            tmpl = _JINJA_ENV.from_string(m.content)
             new_content = tmpl.render(**ctx)
 
             msg_type = type(m)

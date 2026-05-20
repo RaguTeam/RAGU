@@ -17,6 +17,7 @@ InContextLearningManager - Manages example loading, embedding, and selection.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 from dataclasses import dataclass
@@ -85,6 +86,7 @@ class InContextLearningManager:
     - Semantic selection by cosine similarity
     - Multi-language support
     - Portable examples for any embedder
+    - Query embedding caching to avoid redundant API calls
 
     Example usage:
     ```python
@@ -132,8 +134,11 @@ class InContextLearningManager:
         self.config = config
         self.language = language
         self.examples: List[Example] = []
-        self._embeddings: Dict[str, np.ndarray] = {}
         self._embeddings_computed = False
+        self._example_matrix: np.ndarray | None = None
+        self._example_norms: np.ndarray | None = None
+        self._cached_query_key: int | None = None
+        self._cached_query_matrix: np.ndarray | None = None
 
     async def initialize(self) -> None:
         """
@@ -165,10 +170,11 @@ class InContextLearningManager:
             logger.warning(f"Example file not found: {self.example_file}")
             return
 
-        with open(self.example_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        def _read_sync() -> list[dict]:
+            with open(self.example_file, "r", encoding="utf-8") as f:
+                return json.load(f).get("examples", [])
 
-        examples_data = data.get("examples", [])
+        examples_data = await asyncio.to_thread(_read_sync)
         self.examples = []
 
         for ex_data in examples_data:
@@ -195,8 +201,8 @@ class InContextLearningManager:
         """
         Compute embeddings for all example texts.
 
-        Embeddings are stored in a separate dict keyed by example id,
-        keeping Example objects immutable and free of derived data.
+        Embeddings are stored as a precomputed matrix for fast
+        vectorized similarity search.
         """
         if not self.examples:
             return
@@ -209,28 +215,29 @@ class InContextLearningManager:
             desc="Computing example embeddings",
         )
 
-        if self.config.cache_embeddings:
-            for example, emb in zip(self.examples, embeddings):
-                self._embeddings[example.id] = np.array(emb, dtype=np.float32)
-        else:
-            self._embeddings.clear()
+        self._example_matrix = np.array(embeddings, dtype=np.float32)
+        self._example_norms = np.linalg.norm(self._example_matrix, axis=1)
 
         logger.debug("Computed embeddings for all examples")
 
-    @staticmethod
-    def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+    async def _get_query_matrix(self, query_texts: List[str]) -> np.ndarray:
         """
-        Compute cosine similarity between two vectors.
+        Get query embeddings matrix, using cached result if texts unchanged.
 
-        :param a: First vector.
-        :param b: Second vector.
-        :return: Cosine similarity in [-1, 1], or 0.0 for zero-norm vectors.
+        :param query_texts: Input texts to embed.
+        :return: Query embeddings as (Q, D) matrix.
         """
-        norm_a = float(np.linalg.norm(a))
-        norm_b = float(np.linalg.norm(b))
-        if norm_a == 0.0 or norm_b == 0.0:
-            return 0.0
-        return float(np.dot(a, b) / (norm_a * norm_b))
+        query_key = hash(tuple(query_texts))
+        if self._cached_query_key == query_key and self._cached_query_matrix is not None:
+            return self._cached_query_matrix
+
+        query_embeddings = await self.embedder.batch_embed_text(
+            texts=query_texts,
+        )
+        matrix = np.array(query_embeddings, dtype=np.float32)
+        self._cached_query_key = query_key
+        self._cached_query_matrix = matrix
+        return matrix
 
     async def batch_select_examples(
         self,
@@ -243,12 +250,16 @@ class InContextLearningManager:
         Computes all query embeddings in a single batch API call, then
         selects top-k examples per query using cosine similarity.
 
+        Query embeddings are cached: if the same ``query_texts`` list is
+        passed on a subsequent call (e.g. extraction then validation),
+        the embeddings are reused without an additional API call.
+
         :param query_texts: Input texts for which to select examples.
         :param num_examples: Number of examples to return per query
             (uses config default if None).
         :return: Per-query lists of example dictionaries.
         """
-        if not self.examples:
+        if not self.examples or self._example_matrix is None:
             return [[] for _ in query_texts]
 
         if not self._embeddings_computed:
@@ -260,32 +271,26 @@ class InContextLearningManager:
         if num_examples is None:
             num_examples = self.config.num_examples
 
-        query_embeddings = await self.embedder.batch_embed_text(
-            texts=query_texts,
+        query_matrix = await self._get_query_matrix(query_texts)
+        ex_matrix = self._example_matrix
+        ex_norms = self._example_norms
+
+        query_norms = np.linalg.norm(query_matrix, axis=1)
+        valid_examples = ex_norms > 0.0
+        ex_norms_safe = np.where(valid_examples, ex_norms, 1.0)
+
+        sim_matrix = (query_matrix @ ex_matrix.T) / (
+            query_norms[:, np.newaxis] * ex_norms_safe[np.newaxis, :]
         )
-        query_embeddings_np = [
-            np.array(emb, dtype=np.float32) for emb in query_embeddings
-        ]
-
-        example_embeddings = np.stack([
-            self._embeddings.get(ex.id, np.zeros(query_embeddings_np[0].shape, dtype=np.float32))
-            for ex in self.examples
-        ])
-
-        example_norms = np.linalg.norm(example_embeddings, axis=1)
-        valid_mask = example_norms > 0.0
-        example_norms_safe = np.where(valid_mask, example_norms, 1.0)
+        sim_matrix[:, ~valid_examples] = 0.0
 
         results: List[List[Dict[str, Any]]] = []
-        for i, query_emb in enumerate(query_embeddings_np):
-            query_norm = float(np.linalg.norm(query_emb))
-            if query_norm == 0.0:
+        for i in range(len(query_texts)):
+            if query_norms[i] == 0.0:
                 results.append([])
                 continue
 
-            similarities = np.dot(example_embeddings, query_emb) / (example_norms_safe * query_norm)
-            similarities[~valid_mask] = 0.0
-
+            similarities = sim_matrix[i]
             indices = np.where(similarities >= self.config.similarity_threshold)[0]
 
             if len(indices) == 0:
@@ -312,7 +317,7 @@ class InContextLearningManager:
 
             logger.debug(
                 f"Selected {len(selected)} examples for query {i} "
-                f"(similarities: {[similarities[j] for j in top_indices]})"
+                f"(similarities: {[float(similarities[j]) for j in top_indices]})"
             )
 
             results.append(selected)

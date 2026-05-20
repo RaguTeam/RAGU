@@ -80,6 +80,7 @@ class LLM(ABC):
             for conversation in conversations
         ]
 
+        task_to_idx = {id(t): i for i, t in enumerate(tasks)}
         results: list[T] = [None] * len(tasks)  # type: ignore[assignment]
         pending: set[asyncio.Future[Any]] = set(tasks)
         pbar = tqdm(total=len(tasks), desc=desc)
@@ -87,7 +88,7 @@ class LLM(ABC):
         while pending:
             done, pending = await asyncio.wait(pending, return_when=asyncio.FIRST_COMPLETED)
             for task in done:
-                idx = tasks.index(task)
+                idx = task_to_idx[id(task)]
                 try:
                     results[idx] = task.result()
                 except Exception as e:
