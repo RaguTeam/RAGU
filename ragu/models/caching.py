@@ -59,6 +59,14 @@ class ResponseCachingMixin:
         **kwargs: Any,
     ) -> T:
         """Caching wrapper for _uncached_chat_completion"""
+        if self.cache is None:
+            return await self._uncached_chat_completion(
+                model_name=model_name,
+                conversation=conversation,
+                output_schema=output_schema,
+                **kwargs,
+            )
+
         is_str = issubclass(output_schema, str)
         args: dict[str, Any] = {
             'cache_prefix': self.cache_prefix,
@@ -70,15 +78,12 @@ class ResponseCachingMixin:
         }
         key = json.dumps(args, sort_keys=True)
 
-        if self.cache is not None and (value := self.cache.get(key, None)):
+        if value := self.cache.get(key, None):
             logger.debug(f'Cache hit for {model_name}!')
             cached: str | dict[str, Any]
             _args, cached = value
             result = cached if is_str else output_schema.model_validate(cached)
             return cast(T, result)
-
-        # if self.cache is not None:
-        #     logger.debug(f'Cache miss for {model_name}!')
 
         response = await self._uncached_chat_completion(
             model_name=model_name,
@@ -89,8 +94,7 @@ class ResponseCachingMixin:
 
         cached = response if is_str else response.model_dump() # type: ignore
 
-        if self.cache is not None:
-            self.cache[key] = args, cached
+        self.cache[key] = args, cached
 
         return response
 
@@ -114,6 +118,13 @@ class ResponseCachingMixin:
         **kwargs: Any,
     ) -> list[float] | FLOATS:
         """Caching wrapper for _uncached_embed_text"""
+        if self.cache is None:
+            return await self._uncached_embed_text(
+                model_name=model_name,
+                text=text,
+                **kwargs,
+            )
+
         args: dict[str, Any] = {
             'cache_prefix': self.cache_prefix,
             'model_name': model_name,
@@ -123,14 +134,11 @@ class ResponseCachingMixin:
         }
         key = json.dumps(args, sort_keys=True)
 
-        if self.cache is not None and (value := self.cache.get(key, None)):
+        if value := self.cache.get(key, None):
             logger.debug(f'Cache hit for {model_name}!')
             cached: list[float] | FLOATS
             _args, cached = value
             return cached
-
-        # if self.cache is not None:
-        #     logger.debug(f'Cache miss for {model_name}!')
 
         response = await self._uncached_embed_text(
             model_name=model_name,
@@ -138,8 +146,7 @@ class ResponseCachingMixin:
             **kwargs,
         )
 
-        if self.cache is not None:
-            self.cache[key] = args, response
+        self.cache[key] = args, response
 
         return response
 
