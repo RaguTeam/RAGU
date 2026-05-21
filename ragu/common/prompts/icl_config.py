@@ -28,6 +28,10 @@ class ICLConfig:
         are used.  Pass an absolute or relative path to use custom examples.
     :param selection_strategy: Strategy for selecting relevant examples.
     :param similarity_threshold: Minimum cosine similarity for example inclusion.
+    :param low_match_warning_threshold: Fraction of queries that received no
+        examples at which a WARNING is logged (0.3 = warn when 30%+ queries
+        are unmatched).  Set to ``0.0`` to disable the warning or ``1.0``
+        to warn only when every query is unmatched.
     """
 
     enabled: bool = True
@@ -35,3 +39,4 @@ class ICLConfig:
     examples_base_path: str | None = None
     selection_strategy: Literal["semantic", "hybrid"] = "semantic"
     similarity_threshold: float = 0.3
+    low_match_warning_threshold: float = 0.3

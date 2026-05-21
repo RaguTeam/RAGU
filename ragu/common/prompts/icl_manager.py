@@ -362,4 +362,15 @@ class InContextLearningManager:
 
             results.append(selected)
 
+        total = len(results)
+        empty_count = sum(1 for r in results if not r)
+        if total > 0 and self.config.low_match_warning_threshold > 0.0 and empty_count / total >= self.config.low_match_warning_threshold:
+            logger.warning(
+                f"ICL low match rate for task='{task}': "
+                f"{empty_count}/{total} queries ({empty_count / total:.0%}) "
+                f"received no examples (similarity_threshold={self.config.similarity_threshold}, "
+                f"available_examples={len(candidate_indices)}). "
+                f"Consider lowering similarity_threshold or adding more examples."
+            )
+
         return results

@@ -7,6 +7,7 @@ from ragu.models.embedder import Embedder
 from ragu.common.prompts.icl_config import ICLConfig
 from ragu.common.prompts.icl_manager import Example, InContextLearningManager, resolve_example_path
 from ragu.common.global_parameters import Settings
+from ragu.common.logger import logger
 
 
 class DeterministicEmbedder(Embedder):
@@ -356,6 +357,97 @@ class TestInContextLearningManagerSelection:
             ["Tech company"], num_examples=10,
         )
         assert len(results[0]) == 3
+
+
+class TestInContextLearningManagerLowMatchWarning:
+    @pytest.mark.asyncio
+    async def test_low_match_warning_logged(self, embedder, example_files):
+        config = ICLConfig(
+            enabled=True,
+            num_examples=2,
+            similarity_threshold=0.99,
+            low_match_warning_threshold=0.99,
+        )
+        manager = InContextLearningManager(
+            embedder=embedder, example_files=example_files, config=config,
+        )
+        await manager.initialize()
+        captured = []
+        handler_id = logger.add(captured.append, level="WARNING", format="{message}")
+        try:
+            await manager.batch_select_examples(
+                ["query one", "query two", "query three"],
+                task="entity_extraction",
+            )
+        finally:
+            logger.remove(handler_id)
+        assert any("ICL low match rate" in msg for msg in captured)
+        assert any("task='entity_extraction'" in msg for msg in captured)
+
+    @pytest.mark.asyncio
+    async def test_no_warning_when_match_rate_ok(self, constant_embedder, icl_config, example_files):
+        manager = InContextLearningManager(
+            embedder=constant_embedder, example_files=example_files, config=icl_config,
+        )
+        await manager.initialize()
+        captured = []
+        handler_id = logger.add(captured.append, level="WARNING", format="{message}")
+        try:
+            await manager.batch_select_examples(
+                ["Tech company founded in California"],
+                task="entity_extraction",
+            )
+        finally:
+            logger.remove(handler_id)
+        assert not any("ICL low match rate" in msg for msg in captured)
+
+    @pytest.mark.asyncio
+    async def test_warning_includes_diagnostic_info(self, embedder, example_files):
+        config = ICLConfig(
+            enabled=True,
+            similarity_threshold=0.99,
+            low_match_warning_threshold=0.01,
+        )
+        manager = InContextLearningManager(
+            embedder=embedder, example_files=example_files, config=config,
+        )
+        await manager.initialize()
+        captured = []
+        handler_id = logger.add(captured.append, level="WARNING", format="{message}")
+        try:
+            await manager.batch_select_examples(
+                ["query one"], task="entity_extraction",
+            )
+        finally:
+            logger.remove(handler_id)
+        warning_msgs = [msg for msg in captured if "ICL low match rate" in msg]
+        assert len(warning_msgs) == 1
+        msg = warning_msgs[0]
+        assert "similarity_threshold=0.99" in msg
+        assert "available_examples=" in msg
+        assert "Consider lowering" in msg
+        assert "task='entity_extraction'" in msg
+
+    @pytest.mark.asyncio
+    async def test_warning_suppressed_when_threshold_zero(self, embedder, example_files):
+        config = ICLConfig(
+            enabled=True,
+            similarity_threshold=0.99,
+            low_match_warning_threshold=0.0,
+        )
+        manager = InContextLearningManager(
+            embedder=embedder, example_files=example_files, config=config,
+        )
+        await manager.initialize()
+        captured = []
+        handler_id = logger.add(captured.append, level="WARNING", format="{message}")
+        try:
+            await manager.batch_select_examples(
+                ["query one"], task="entity_extraction",
+            )
+        finally:
+            logger.remove(handler_id)
+        assert not any("ICL low match rate" in msg for msg in captured)
 
 
 class TestResolveExamplePath:
