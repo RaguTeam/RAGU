@@ -107,7 +107,6 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                     ),
                 },
                 config=icl_config,
-                language=icl_config.language,
             )
 
     @override

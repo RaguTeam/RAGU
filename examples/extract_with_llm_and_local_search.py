@@ -55,7 +55,6 @@ async def main():
     icl_config = ICLConfig(
         enabled=True,
         num_examples=2,
-        language="russian",
     )
 
     # Set up artifact extractor with ICL
@@ -63,7 +62,7 @@ async def main():
         llm=llm,
         embedder=embedder,
         icl_config=icl_config,
-        do_validation=False,
+        do_validation=True,
     )
 
     # Configure graph builder

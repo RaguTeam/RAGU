@@ -77,7 +77,6 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                     ),
                 },
                 config=icl_config,
-                language=icl_config.language,
             )
 
     async def _extract_artifacts(

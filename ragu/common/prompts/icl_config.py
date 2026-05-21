@@ -28,7 +28,6 @@ class ICLConfig:
         are used.  Pass an absolute or relative path to use custom examples.
     :param selection_strategy: Strategy for selecting relevant examples.
     :param similarity_threshold: Minimum cosine similarity for example inclusion.
-    :param language: Target language for example selection.
     """
 
     enabled: bool = True
@@ -36,4 +35,3 @@ class ICLConfig:
     examples_base_path: str | None = None
     selection_strategy: Literal["semantic", "hybrid"] = "semantic"
     similarity_threshold: float = 0.3
-    language: str = "english"

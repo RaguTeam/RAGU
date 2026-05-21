@@ -27,6 +27,7 @@ from uuid import uuid4
 
 import numpy as np
 
+from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
 from ragu.models.embedder import Embedder
 from ragu.common.prompts.icl_config import ICLConfig
@@ -97,7 +98,7 @@ class InContextLearningManager:
     from ragu.common.prompts.icl_manager import resolve_example_path
 
     embedder = EmbedderOpenAI(client=client, model_name="text-embedding-3-small", dim=1536)
-    config = ICLConfig(num_examples=2, language="english")
+    config = ICLConfig(num_examples=2)
     manager = InContextLearningManager(
         embedder=embedder,
         example_files={
@@ -105,7 +106,6 @@ class InContextLearningManager:
             "relation_extraction": resolve_example_path(None, "relation_extraction_examples.json"),
         },
         config=config,
-        language="english"
     )
 
     # Select relevant entity examples for multiple queries (batch)
@@ -120,6 +120,7 @@ class InContextLearningManager:
     :param example_files: Mapping from task name to path of JSON file with examples.
     :param config: ICL configuration.
     :param language: Target language for example selection.
+        Defaults to ``Settings.language`` when ``None``.
     """
 
     def __init__(
@@ -127,7 +128,7 @@ class InContextLearningManager:
         embedder: Embedder,
         example_files: Dict[str, str],
         config: ICLConfig,
-        language: str = "english",
+        language: str | None = None,
     ):
         """
         Initialize ICL manager.
@@ -136,11 +137,12 @@ class InContextLearningManager:
         :param example_files: Mapping from task name to JSON file path with examples.
         :param config: ICL configuration.
         :param language: Target language for example selection.
+            Defaults to ``Settings.language`` when ``None``.
         """
         self.embedder = embedder
         self.example_files = example_files
         self.config = config
-        self.language = language
+        self.language = language if language else Settings.language
         self.examples: List[Example] = []
         self._task_indices: Dict[str, List[int]] = {}
         self._embeddings_computed = False

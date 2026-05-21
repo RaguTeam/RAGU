@@ -6,6 +6,7 @@ import pytest
 from ragu.models.embedder import Embedder
 from ragu.common.prompts.icl_config import ICLConfig
 from ragu.common.prompts.icl_manager import Example, InContextLearningManager, resolve_example_path
+from ragu.common.global_parameters import Settings
 
 
 class DeterministicEmbedder(Embedder):
@@ -71,7 +72,6 @@ def icl_config():
         enabled=True,
         num_examples=2,
         similarity_threshold=0.1,
-        language="english",
     )
 
 
@@ -180,7 +180,6 @@ class TestInContextLearningManagerInit:
             embedder=embedder,
             example_files=example_files,
             config=icl_config,
-            language="english",
         )
         await manager.initialize()
         assert len(manager.examples) == 3
@@ -188,12 +187,12 @@ class TestInContextLearningManagerInit:
         assert manager._embeddings_computed
 
     @pytest.mark.asyncio
-    async def test_initialize_filters_by_language(self, embedder, icl_config, example_files):
+    async def test_initialize_filters_by_language(self, embedder, icl_config, example_files, monkeypatch):
+        monkeypatch.setattr(Settings, "language", "russian")
         manager = InContextLearningManager(
             embedder=embedder,
             example_files=example_files,
             config=icl_config,
-            language="russian",
         )
         await manager.initialize()
         assert len(manager.examples) == 1
@@ -210,12 +209,12 @@ class TestInContextLearningManagerInit:
         assert len(manager.examples) == 0
 
     @pytest.mark.asyncio
-    async def test_initialize_no_matching_language(self, embedder, icl_config, example_files):
+    async def test_initialize_no_matching_language(self, embedder, icl_config, example_files, monkeypatch):
+        monkeypatch.setattr(Settings, "language", "french")
         manager = InContextLearningManager(
             embedder=embedder,
             example_files=example_files,
             config=icl_config,
-            language="french",
         )
         await manager.initialize()
         assert len(manager.examples) == 0
@@ -226,7 +225,6 @@ class TestInContextLearningManagerInit:
             embedder=embedder,
             example_files=example_files,
             config=icl_config,
-            language="english",
         )
         await manager.initialize()
         assert "entity_extraction" in manager._task_indices
@@ -240,7 +238,6 @@ class TestInContextLearningManagerInit:
             embedder=embedder,
             example_files=example_files,
             config=icl_config,
-            language="english",
         )
         await manager.initialize()
         entity_examples = [ex for ex in manager.examples if ex.task == "entity_extraction"]
@@ -386,7 +383,7 @@ class TestResolveExamplePath:
 class TestBuiltinExamples:
     @pytest.mark.asyncio
     async def test_load_builtin_artifact_examples(self, embedder):
-        config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
+        config = ICLConfig(enabled=True, similarity_threshold=0.0)
         path = resolve_example_path(None, "artifact_extraction_examples.json")
         manager = InContextLearningManager(
             embedder=embedder, example_files={"artifact_extraction": path}, config=config,
@@ -396,7 +393,7 @@ class TestBuiltinExamples:
 
     @pytest.mark.asyncio
     async def test_load_builtin_entity_examples(self, embedder):
-        config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
+        config = ICLConfig(enabled=True, similarity_threshold=0.0)
         path = resolve_example_path(None, "entity_extraction_examples.json")
         manager = InContextLearningManager(
             embedder=embedder, example_files={"entity_extraction": path}, config=config,
@@ -406,7 +403,7 @@ class TestBuiltinExamples:
 
     @pytest.mark.asyncio
     async def test_load_builtin_relation_examples(self, embedder):
-        config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
+        config = ICLConfig(enabled=True, similarity_threshold=0.0)
         path = resolve_example_path(None, "relation_extraction_examples.json")
         manager = InContextLearningManager(
             embedder=embedder, example_files={"relation_extraction": path}, config=config,
@@ -416,7 +413,7 @@ class TestBuiltinExamples:
 
     @pytest.mark.asyncio
     async def test_load_multiple_builtin_examples(self, embedder):
-        config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
+        config = ICLConfig(enabled=True, similarity_threshold=0.0)
         manager = InContextLearningManager(
             embedder=embedder,
             example_files={
