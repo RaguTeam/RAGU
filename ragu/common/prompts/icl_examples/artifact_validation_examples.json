@@ -4,12 +4,12 @@
     "english",
     "russian"
   ],
-  "total_examples": 21,
+  "total_examples": 27,
   "generated_by": {
     "generator_model": "openai/gpt-5.1",
     "judge_model": "google/gemini-2.5-pro"
   },
-  "generated_at": "2026-05-19T22:14:06.045017Z",
+  "generated_at": "2026-05-21T15:23:04.753156Z",
   "examples": [
     {
       "input_text": "The highly anticipated criminal trial for Sam Bankman-Fried, former CEO of bankrupt crypto exchange FTX, started Tuesday to determine whether he’s guilty of seven counts of fraud and conspiracy.\nSBF, as he’s known, has pleaded not-guilty to some seven charges of fraud and conspiracy.\nThe second week of the trial’s standout testimony came from Alameda Research’s former CEO Caroline Ellison, who claimed she took $14 billion from customers to repay debts to lenders, using them as a line of credit under the instruction of SBF.\nThe prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head.",
@@ -5241,6 +5241,2568 @@
       },
       "quality_rating": 10,
       "id": "11c04edf-bea7-4d4c-bab0-69fed0111a59"
+    },
+    {
+      "input_text": "Universal Declaration of Human Rights\nThe Universal Declaration of Human Rights (UDHR) is a milestone document in the history of human rights. Drafted by representatives with different legal and cultural backgrounds from all regions of the world, the Declaration was proclaimed by the United Nations General Assembly in Paris on 10 December 1948 (General Assembly resolution 217 A) as a common standard of achievements for all peoples and all nations. It sets out, for the first time, fundamental human rights to be universally protected and it has been translated into over 500 languages. The UDHR is widely recognized as having inspired, and paved the way for, the adoption of more than seventy human rights treaties, applied today on a permanent basis at global and regional levels (all containing references to it in their preambles). \n\nPreamble\nWhereas recognition of the inherent dignity and of the equal and inalienable rights of all members of the human family is the foundation of freedom, justice and peace in the world,\n\nWhereas disregard and contempt for human rights have resulted in barbarous acts which have outraged the conscience of mankind, and the advent of a world in which human beings shall enjoy freedom of speech and belief and freedom from fear and want has been proclaimed as the highest aspiration of the common people,\n\nWhereas it is essential, if man is not to be compelled to have recourse, as a last resort, to rebellion against tyranny and oppression, that human rights should be protected by the rule of law,\n\nWhereas it is essential to promote the development of friendly relations between nations,\n\nWhereas the peoples of the United Nations have in the Charter reaffirmed their faith in fundamental human rights, in the dignity and worth of the human person and in the equal rights of men and women and have determined to promote social progress and better standards of life in larger freedom,\n\nWhereas Member States have pledged themselves to achieve, in co-operation with the United Nations, the promotion of universal respect for and observance of human rights and fundamental freedoms,\n\nWhereas a common understanding of these rights and freedoms is of the greatest importance for the full realization of this pledge,\n\nNow, therefore,\n\nThe General Assembly,\n\nProclaims this Universal Declaration of Human Rights as a common standard of achievement for all peoples and all nations, to the end that every individual and every organ of society, keeping this Declaration constantly in mind, shall strive by teaching and education to promote respect for these rights and freedoms and by progressive measures, national and international, to secure their universal and effective recognition and observance, both among the peoples of Member States themselves and among the peoples of territories under their jurisdiction. \n\nArticle 1\nAll human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood.\n\nArticle 2\nEveryone is entitled to all the rights and freedoms set forth in this Declaration, without distinction of any kind, such as race, colour, sex, language, religion, political or other opinion, national or social origin, property, birth or other status. Furthermore, no distinction shall be made on the basis of the political, jurisdictional or international status of the country or territory to which a person belongs, whether it be independent, trust, non-self-governing or under any other limitation of sovereignty.\n\nArticle 3\nEveryone has the right to life, liberty and security of person.\n\nArticle 4\nNo one shall be held in slavery or servitude; slavery and the slave trade shall be prohibited in all their forms.\n\nArticle 5\nNo one shall be subjected to torture or to cruel, inhuman or degrading treatment or punishment.\n\nArticle 6\nEveryone has the right to recognition everywhere as a person before the law.\n\nArticle 7\nAll are equal before the law and are entitled without any discrimination to equal protection of the law. All are entitled to equal protection against any discrimination in violation of this Declaration and against any incitement to such discrimination.\n\nArticle 8\nEveryone has the right to an effective remedy by the competent national tribunals for acts violating the fundamental rights granted him by the constitution or by law.\n\nArticle 9\nNo one shall be subjected to arbitrary arrest, detention or exile.\n\nArticle 10\nEveryone is entitled in full equality to a fair and public hearing by an independent and impartial tribunal, in the determination of his rights and obligations and of any criminal charge against him.\n\nArticle 11\nEveryone charged with a penal offence has the right to be presumed innocent until proved guilty according to law in a public trial at which he has had all the guarantees necessary for his defence.\nNo one shall be held guilty of any penal offence on account of any act or omission which did not constitute a penal offence, under national or international law, at the time when it was committed. Nor shall a heavier penalty be imposed than the one that was applicable at the time the penal offence was committed.\nArticle 12\nNo one shall be subjected to arbitrary interference with his privacy, family, home or correspondence, nor to attacks upon his honour and reputation. Everyone has the right to the protection of the law against such interference or attacks.\n\nArticle 13\nEveryone has the right to freedom of movement and residence within the borders of each state.\nEveryone has the right to leave any country, including his own, and to return to his country.\nArticle 14\nEveryone has the right to seek and to enjoy in other countries asylum from persecution.\nThis right may not be invoked in the case of prosecutions genuinely arising from non-political crimes or from acts contrary to the purposes and principles of the United Nations.\nArticle 15\nEveryone has the right to a nationality.\nNo one shall be arbitrarily deprived of his nationality nor denied the right to change his nationality.\nArticle 16\nMen and women of full age, without any limitation due to race, nationality or religion, have the right to marry and to found a family. They are entitled to equal rights as to marriage, during marriage and at its dissolution.\nMarriage shall be entered into only with the free and full consent of the intending spouses.\nThe family is the natural and fundamental group unit of society and is entitled to protection by society and the State.\nArticle 17\nEveryone has the right to own property alone as well as in association with others.\nNo one shall be arbitrarily deprived of his property.\nArticle 18\nEveryone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance.\n\nArticle 19\nEveryone has the right to freedom of opinion and expression; this right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers.\n\nArticle 20\nEveryone has the right to freedom of peaceful assembly and association.\nNo one may be compelled to belong to an association.\nArticle 21\nEveryone has the right to take part in the government of his country, directly or through freely chosen representatives.\nEveryone has the right of equal access to public service in his country.\nThe will of the people shall be the basis of the authority of government; this will shall be expressed in periodic and genuine elections which shall be by universal and equal suffrage and shall be held by secret vote or by equivalent free voting procedures.\nArticle 22\nEveryone, as a member of society, has the right to social security and is entitled to realization, through national effort and international co-operation and in accordance with the organization and resources of each State, of the economic, social and cultural rights indispensable for his dignity and the free development of his personality.\n\nArticle 23\nEveryone has the right to work, to free choice of employment, to just and favourable conditions of work and to protection against unemployment.\nEveryone, without any discrimination, has the right to equal pay for equal work.\nEveryone who works has the right to just and favourable remuneration ensuring for himself and his family an existence worthy of human dignity, and supplemented, if necessary, by other means of social protection.\nEveryone has the right to form and to join trade unions for the protection of his interests.\nArticle 24\nEveryone has the right to rest and leisure, including reasonable limitation of working hours and periodic holidays with pay.\n\nArticle 25\nEveryone has the right to a standard of living adequate for the health and well-being of himself and of his family, including food, clothing, housing and medical care and necessary social services, and the right to security in the event of unemployment, sickness, disability, widowhood, old age or other lack of livelihood in circumstances beyond his control.\nMotherhood and childhood are entitled to special care and assistance. All children, whether born in or out of wedlock, shall enjoy the same social protection.\nArticle 26\nEveryone has the right to education. Education shall be free, at least in the elementary and fundamental stages. Elementary education shall be compulsory. Technical and professional education shall be made generally available and higher education shall be equally accessible to all on the basis of merit.\nEducation shall be directed to the full development of the human personality and to the strengthening of respect for human rights and fundamental freedoms. It shall promote understanding, tolerance and friendship among all nations, racial or religious groups, and shall further the activities of the United Nations for the maintenance of peace.\nParents have a prior right to choose the kind of education that shall be given to their children.\nArticle 27\nEveryone has the right freely to participate in the cultural life of the community, to enjoy the arts and to share in scientific advancement and its benefits.\nEveryone has the right to the protection of the moral and material interests resulting from any scientific, literary or artistic production of which he is the author.\nArticle 28\nEveryone is entitled to a social and international order in which the rights and freedoms set forth in this Declaration can be fully realized.\n\nArticle 29\nEveryone has duties to the community in which alone the free and full development of his personality is possible.\nIn the exercise of his rights and freedoms, everyone shall be subject only to such limitations as are determined by law solely for the purpose of securing due recognition and respect for the rights and freedoms of others and of meeting the just requirements of morality, public order and the general welfare in a democratic society.\nThese rights and freedoms may in no case be exercised contrary to the purposes and principles of the United Nations.\nArticle 30\nNothing in this Declaration may be interpreted as implying for any State, group or person any right to engage in any activity or to perform any act aimed at the destruction of any of the rights and freedoms set forth herein.",
+      "metadata": {
+        "domain": "human_rights_en",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T14:27:46.386872Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Universal Declaration Of Human Rights",
+            "entity_type": "LAW",
+            "description": "Foundational international document adopted in 1948 setting out fundamental human rights to be universally protected"
+          },
+          {
+            "entity_name": "UDHR",
+            "entity_type": "LAW",
+            "description": "Abbreviation commonly used for the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "General Assembly",
+            "entity_type": "ORGANIZATION",
+            "description": "Main deliberative body of the United Nations which proclaimed the Universal Declaration of Human Rights in 1948"
+          },
+          {
+            "entity_name": "United Nations",
+            "entity_type": "ORGANIZATION",
+            "description": "International organization whose General Assembly adopted and proclaimed the Universal Declaration of Human Rights and whose Charter is referenced in the preamble"
+          },
+          {
+            "entity_name": "Charter",
+            "entity_type": "LAW",
+            "description": "Charter constituting the United Nations, referenced as reaffirming faith in fundamental human rights"
+          },
+          {
+            "entity_name": "Paris",
+            "entity_type": "CITY",
+            "description": "City where the United Nations General Assembly proclaimed the Universal Declaration of Human Rights on 10 December 1948"
+          },
+          {
+            "entity_name": "10 December 1948",
+            "entity_type": "DATE",
+            "description": "Date on which the Universal Declaration of Human Rights was proclaimed by the United Nations General Assembly"
+          },
+          {
+            "entity_name": "General Assembly Resolution 217 A",
+            "entity_type": "LAW",
+            "description": "Resolution of the United Nations General Assembly through which the Universal Declaration of Human Rights was proclaimed"
+          },
+          {
+            "entity_name": "Peoples",
+            "entity_type": "FAMILY",
+            "description": "Collective term used in the text for all peoples and all nations for whom the Declaration is a common standard of achievement"
+          },
+          {
+            "entity_name": "Nations",
+            "entity_type": "COUNTRY",
+            "description": "Collective term referring to countries or nation-states mentioned as subjects of the Declaration"
+          },
+          {
+            "entity_name": "People",
+            "entity_type": "FAMILY",
+            "description": "Collective term used to refer to the members or populations of countries"
+          },
+          {
+            "entity_name": "Member States",
+            "entity_type": "ORGANIZATION",
+            "description": "Member countries of the United Nations that have pledged to promote and observe human rights and fundamental freedoms"
+          },
+          {
+            "entity_name": "State",
+            "entity_type": "STATE_OR_PROVINCE",
+            "description": "Political entity referred to as providing organization and resources for realizing economic, social and cultural rights and as being protected by the family"
+          },
+          {
+            "entity_name": "Law",
+            "entity_type": "LAW",
+            "description": "Legal or governmental framework mentioned as protecting human rights and providing recognition of persons"
+          },
+          {
+            "entity_name": "Constitution",
+            "entity_type": "LAW",
+            "description": "Legal instrument mentioned as granting fundamental rights and being enforceable by national tribunals"
+          },
+          {
+            "entity_name": "Countries",
+            "entity_type": "COUNTRY",
+            "description": "Collective term for countries referred to in the context of asylum from persecution"
+          },
+          {
+            "entity_name": "Territories",
+            "entity_type": "LOCATION",
+            "description": "Territorial entities mentioned in relation to political, jurisdictional or international status and under the jurisdiction of Member States"
+          },
+          {
+            "entity_name": "Marriage",
+            "entity_type": "EVENT",
+            "description": "Form of legal relationship recognized in Article 16, entered into with the free and full consent of intending spouses"
+          },
+          {
+            "entity_name": "Family",
+            "entity_type": "FAMILY",
+            "description": "Basic social unit described as the natural and fundamental group unit of society entitled to protection by society and the State"
+          },
+          {
+            "entity_name": "Trade Unions",
+            "entity_type": "ORGANIZATION",
+            "description": "Collective term for workers’ organizations formed to protect members’ interests, which everyone has the right to form and join"
+          },
+          {
+            "entity_name": "Religion",
+            "entity_type": "RELIGION",
+            "description": "Religious systems or faiths mentioned as categories protected from discrimination and as aspects of freedom of thought, conscience and religion"
+          },
+          {
+            "entity_name": "Language",
+            "entity_type": "LANGUAGE",
+            "description": "System of communication by speech mentioned as one of the bases on which discrimination is prohibited"
+          },
+          {
+            "entity_name": "Race",
+            "entity_type": "IDEOLOGY",
+            "description": "Racial or ethnic grouping used as a prohibited ground of distinction in the enjoyment of rights"
+          },
+          {
+            "entity_name": "Political Opinion",
+            "entity_type": "IDEOLOGY",
+            "description": "Political belief or affiliation cited as a protected characteristic against discrimination and as a basis of certain prosecutions"
+          },
+          {
+            "entity_name": "Nationality",
+            "entity_type": "NATIONALITY",
+            "description": "National origin or affiliation mentioned as a protected characteristic in relation to rights and marriage"
+          },
+          {
+            "entity_name": "Penal Offence",
+            "entity_type": "CRIME",
+            "description": "Legal or moral concept involving crimes and punishments referenced in Articles 4, 5 and 11"
+          },
+          {
+            "entity_name": "Slavery",
+            "entity_type": "CRIME",
+            "description": "Practice of owning and exploiting people that is absolutely prohibited in all its forms"
+          },
+          {
+            "entity_name": "Servitude",
+            "entity_type": "CRIME",
+            "description": "Form of coerced labor mentioned alongside slavery as prohibited"
+          },
+          {
+            "entity_name": "Slave Trade",
+            "entity_type": "CRIME",
+            "description": "Practice of trading enslaved people, prohibited in all its forms"
+          },
+          {
+            "entity_name": "Persecution",
+            "entity_type": "CRIME",
+            "description": "Act of persecution mentioned as a ground for seeking asylum in other countries"
+          },
+          {
+            "entity_name": "Acts Contrary To The Purposes And Principles Of The United Nations",
+            "entity_type": "CRIME",
+            "description": "Acts contrary to the purposes and principles of the United Nations, mentioned as a basis for limiting the right to asylum and the exercise of rights"
+          },
+          {
+            "entity_name": "Community",
+            "entity_type": "ORGANIZATION",
+            "description": "Organized human community within which individuals have duties and rights and which provides the context for the development of personality"
+          },
+          {
+            "entity_name": "Groups",
+            "entity_type": "ORGANIZATION",
+            "description": "Collective units such as racial or religious groups mentioned as subjects of education promoting understanding, tolerance and friendship"
+          },
+          {
+            "entity_name": "Elections",
+            "entity_type": "EVENT",
+            "description": "Periodically held events by universal and equal suffrage, with secret vote or equivalent procedures, expressing the will of the people as the basis of government authority"
+          },
+          {
+            "entity_name": "Democratic Society",
+            "entity_type": "ORGANIZATION",
+            "description": "Type of society referenced in connection with the just requirements of morality, public order and general welfare"
+          },
+          {
+            "entity_name": "Human Family",
+            "entity_type": "FAMILY",
+            "description": "Human family as a collective, whose inherent dignity and equal and inalienable rights are the foundation of freedom, justice and peace"
+          },
+          {
+            "entity_name": "Human Rights Treaties",
+            "entity_type": "LAW",
+            "description": "Set of more than seventy international human rights treaties inspired by and referencing the UDHR"
+          },
+          {
+            "entity_name": "Global Level",
+            "entity_type": "LOCATION",
+            "description": "Global level at which many human rights treaties inspired by the UDHR are applied"
+          },
+          {
+            "entity_name": "Regional Level",
+            "entity_type": "LOCATION",
+            "description": "Regional level at which many human rights treaties inspired by the UDHR are applied"
+          },
+          {
+            "entity_name": "Human Rights",
+            "entity_type": "LAW",
+            "description": "Human rights as a general concept referred to throughout the Declaration"
+          },
+          {
+            "entity_name": "Fundamental Rights",
+            "entity_type": "LAW",
+            "description": "Fundamental rights referenced as being granted by the constitution or by law and protected by national tribunals"
+          },
+          {
+            "entity_name": "National Tribunals",
+            "entity_type": "ORGANIZATION",
+            "description": "National tribunals or courts that provide remedies for violations of fundamental rights"
+          },
+          {
+            "entity_name": "Tribunal",
+            "entity_type": "ORGANIZATION",
+            "description": "Independent and impartial judicial body referenced in Article 10 for fair and public hearings"
+          },
+          {
+            "entity_name": "Criminal Charge",
+            "entity_type": "CRIME",
+            "description": "Criminal charge brought against a person and determined by an independent and impartial tribunal"
+          },
+          {
+            "entity_name": "Torture",
+            "entity_type": "CRIME",
+            "description": "Torture or cruel, inhuman or degrading treatment or punishment prohibited under Article 5"
+          },
+          {
+            "entity_name": "Arbitrary Arrest, Detention Or Exile",
+            "entity_type": "CRIME",
+            "description": "Arbitrary arrest, detention or exile prohibited under Article 9"
+          },
+          {
+            "entity_name": "Arbitrary Interference",
+            "entity_type": "CRIME",
+            "description": "Arbitrary interference with privacy, family, home or correspondence, or attacks upon honour and reputation"
+          },
+          {
+            "entity_name": "Freedom Of Movement",
+            "entity_type": "LAW",
+            "description": "Freedom of movement and residence within the borders of each state and to leave and return to one’s country"
+          },
+          {
+            "entity_name": "Asylum",
+            "entity_type": "LAW",
+            "description": "Right to seek and enjoy asylum from persecution in other countries"
+          },
+          {
+            "entity_name": "Freedom Of Thought, Conscience And Religion",
+            "entity_type": "LAW",
+            "description": "Freedom of thought, conscience and religion referenced in Article 18"
+          },
+          {
+            "entity_name": "Freedom Of Opinion And Expression",
+            "entity_type": "LAW",
+            "description": "Freedom of opinion and expression referenced in Article 19"
+          },
+          {
+            "entity_name": "Freedom Of Peaceful Assembly And Association",
+            "entity_type": "LAW",
+            "description": "Freedom of peaceful assembly and association referenced in Article 20"
+          },
+          {
+            "entity_name": "Freedom Of Speech And Belief",
+            "entity_type": "LAW",
+            "description": "Freedom of speech and belief referred to in the preamble as part of the highest aspiration of the common people"
+          },
+          {
+            "entity_name": "Freedom From Fear And Want",
+            "entity_type": "LAW",
+            "description": "Freedom from fear and want referred to in the preamble as part of the highest aspiration of the common people"
+          },
+          {
+            "entity_name": "Rule Of Law",
+            "entity_type": "LAW",
+            "description": "Rule of law as the principle that human rights should be protected by law to prevent rebellion against tyranny and oppression"
+          },
+          {
+            "entity_name": "Tyranny",
+            "entity_type": "CRIME",
+            "description": "Tyranny referenced in the preamble as a condition against which rebellion may occur if rights are not protected by law"
+          },
+          {
+            "entity_name": "Oppression",
+            "entity_type": "CRIME",
+            "description": "Oppression referenced in the preamble as a condition against which rebellion may occur if rights are not protected by law"
+          },
+          {
+            "entity_name": "Right To Work",
+            "entity_type": "LAW",
+            "description": "Right to work, including free choice of employment and just and favourable conditions of work"
+          },
+          {
+            "entity_name": "Right To Rest And Leisure",
+            "entity_type": "LAW",
+            "description": "Right to rest and leisure, including reasonable limitation of working hours and periodic holidays with pay"
+          },
+          {
+            "entity_name": "Right To Education",
+            "entity_type": "LAW",
+            "description": "Right to education detailed in Article 26, including free elementary education and accessibility of higher education on the basis of merit"
+          },
+          {
+            "entity_name": "Right To Social Security",
+            "entity_type": "LAW",
+            "description": "Right to social security and realization of economic, social and cultural rights indispensable for dignity and personality development"
+          },
+          {
+            "entity_name": "Social Security",
+            "entity_type": "LAW",
+            "description": "Social security systems or arrangements referenced in Article 22"
+          },
+          {
+            "entity_name": "Economic, Social And Cultural Rights",
+            "entity_type": "LAW",
+            "description": "Economic, social and cultural rights indispensable for dignity and free development of personality"
+          },
+          {
+            "entity_name": "Standard Of Living",
+            "entity_type": "LAW",
+            "description": "Standard of living adequate for health and well-being, including food, clothing, housing, medical care and social services"
+          },
+          {
+            "entity_name": "Social Protection",
+            "entity_type": "LAW",
+            "description": "Social protection ensuring existence worthy of human dignity, including means supplementing remuneration and protecting children and families"
+          },
+          {
+            "entity_name": "Cultural Life",
+            "entity_type": "EVENT",
+            "description": "Cultural life of the community in which everyone has the right to participate"
+          },
+          {
+            "entity_name": "Arts",
+            "entity_type": "WORK_OF_ART",
+            "description": "Arts as objects of enjoyment and participation in cultural life"
+          },
+          {
+            "entity_name": "Scientific Advancement",
+            "entity_type": "WORK_OF_ART",
+            "description": "Scientific advancement and its benefits, which everyone has the right to share in"
+          },
+          {
+            "entity_name": "Scientific, Literary Or Artistic Production",
+            "entity_type": "WORK_OF_ART",
+            "description": "Scientific, literary or artistic production whose moral and material interests are protected"
+          },
+          {
+            "entity_name": "Social And International Order",
+            "entity_type": "LAW",
+            "description": "Social and international order in which the rights and freedoms of the Declaration can be fully realized"
+          },
+          {
+            "entity_name": "Purposes And Principles Of The United Nations",
+            "entity_type": "LAW",
+            "description": "Purposes and principles of the United Nations referenced as limits on asylum and exercise of rights"
+          },
+          {
+            "entity_name": "Parents",
+            "entity_type": "FAMILY",
+            "description": "Parents, who have a prior right to choose the kind of education given to their children"
+          },
+          {
+            "entity_name": "Children",
+            "entity_type": "FAMILY",
+            "description": "Children, who are entitled to equal social protection regardless of birth status"
+          },
+          {
+            "entity_name": "Motherhood",
+            "entity_type": "FAMILY",
+            "description": "Motherhood, entitled to special care and assistance under Article 25"
+          },
+          {
+            "entity_name": "Childhood",
+            "entity_type": "FAMILY",
+            "description": "Childhood, entitled to special care and assistance under Article 25"
+          },
+          {
+            "entity_name": "Men And Women Of Full Age",
+            "entity_type": "FAMILY",
+            "description": "Men and women of full age having the right to marry and to found a family"
+          },
+          {
+            "entity_name": "Association",
+            "entity_type": "ORGANIZATION",
+            "description": "Association, as used in the context of freedom of peaceful assembly and association and the right not to be compelled to belong"
+          },
+          {
+            "entity_name": "Government",
+            "entity_type": "ORGANIZATION",
+            "description": "Government of a country, whose authority is based on the will of the people expressed in elections"
+          },
+          {
+            "entity_name": "Public Service",
+            "entity_type": "ORGANIZATION",
+            "description": "Public service in a country to which everyone has equal access"
+          },
+          {
+            "entity_name": "Organs Of Society",
+            "entity_type": "ORGANIZATION",
+            "description": "Organ of society, such as institutions or groups, that should strive to promote respect for rights and freedoms"
+          },
+          {
+            "entity_name": "World",
+            "entity_type": "LOCATION",
+            "description": "World as referenced in the preamble in relation to freedom, justice and peace"
+          },
+          {
+            "entity_name": "Country",
+            "entity_type": "COUNTRY",
+            "description": "Country as a political unit to which people belong and within whose borders freedom of movement and residence apply"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "UDHR",
+            "relation_type": "ABBREVIATION",
+            "description": "UDHR is the commonly used abbreviation for the Universal Declaration of Human Rights",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "General Assembly",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "ORGANIZES",
+            "description": "The United Nations General Assembly proclaimed the Universal Declaration of Human Rights",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "Paris",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "The Universal Declaration of Human Rights was proclaimed in Paris",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "10 December 1948",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The Universal Declaration of Human Rights was proclaimed on 10 December 1948",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "General Assembly Resolution 217 A",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DATE_OF_CREATION",
+            "description": "General Assembly Resolution 217 A is the specific resolution through which the Universal Declaration of Human Rights was adopted",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "General Assembly",
+            "target_entity": "United Nations",
+            "relation_type": "PART_OF",
+            "description": "The General Assembly functions as a principal organ within the United Nations",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Member States",
+            "target_entity": "United Nations",
+            "relation_type": "MEMBER_OF",
+            "description": "Member States belong to and cooperate within the framework of the United Nations",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Charter",
+            "target_entity": "United Nations",
+            "relation_type": "LAW_OF",
+            "description": "The Charter establishes and governs the United Nations and its purposes and principles",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Family",
+            "target_entity": "State",
+            "relation_type": "PROTECTED_BY",
+            "description": "The family is recognized as a natural and fundamental group unit within society and the State",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Trade Unions",
+            "target_entity": "Community",
+            "relation_type": "PART_OF",
+            "description": "Trade unions are formed within the context of the community and society to protect workers’ interests",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Elections",
+            "target_entity": "Democratic Society",
+            "relation_type": "SUBEVENT_OF",
+            "description": "Elections are held within a democratic society as a means of expressing the will of the people",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Nations",
+            "target_entity": "Peoples",
+            "relation_type": "COMPOSED_OF",
+            "description": "Nations are composed of peoples, and the Declaration is a common standard for both",
+            "relationship_strength": 2
+          },
+          {
+            "source_entity": "Member States",
+            "target_entity": "Territories",
+            "relation_type": "JURISDICTION_OVER",
+            "description": "Territories are under the jurisdiction of Member States as referenced in the Declaration",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Human Family",
+            "target_entity": "World",
+            "relation_type": "FOUNDATION_OF",
+            "description": "The human family is described as the foundation of freedom, justice and peace in the world",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "Human Rights Treaties",
+            "relation_type": "INSPIRES",
+            "description": "The UDHR inspired the adoption of more than seventy human rights treaties",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Human Rights Treaties",
+            "target_entity": "Global Level",
+            "relation_type": "APPLIED_AT",
+            "description": "The human rights treaties are applied at the global level",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Human Rights Treaties",
+            "target_entity": "Regional Level",
+            "relation_type": "APPLIED_AT",
+            "description": "The human rights treaties are applied at the regional level",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "Human Rights",
+            "relation_type": "DEFINES",
+            "description": "The UDHR sets out fundamental human rights",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "National Tribunals",
+            "target_entity": "Fundamental Rights",
+            "relation_type": "ENFORCES",
+            "description": "National tribunals provide effective remedies for acts violating fundamental rights granted by the constitution or by law",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Fundamental Rights",
+            "target_entity": "Constitution",
+            "relation_type": "GRANTED_BY",
+            "description": "Fundamental rights are granted by the constitution",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Fundamental Rights",
+            "target_entity": "Law",
+            "relation_type": "GRANTED_BY",
+            "description": "Fundamental rights are granted by law",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Penal Offence",
+            "target_entity": "Tribunal",
+            "relation_type": "SUBJECT_TO",
+            "description": "Everyone charged with a penal offence has the right to a fair and public hearing by an independent and impartial tribunal",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Slavery",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PROHIBITED_BY",
+            "description": "Slavery and slave trade are prohibited in all their forms by the UDHR",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Servitude",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PROHIBITED_BY",
+            "description": "Servitude is prohibited in all its forms by the UDHR",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Slave Trade",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PROHIBITED_BY",
+            "description": "Slave trade is prohibited in all its forms by the UDHR",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Torture",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PROHIBITED_BY",
+            "description": "Torture and cruel, inhuman or degrading treatment or punishment are prohibited by the UDHR",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Arbitrary Arrest, Detention Or Exile",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PROHIBITED_BY",
+            "description": "Arbitrary arrest, detention or exile is prohibited by the UDHR",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Arbitrary Interference",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PROHIBITED_BY",
+            "description": "Arbitrary interference with privacy, family, home or correspondence is prohibited by the UDHR",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Asylum",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DEFINED_BY",
+            "description": "The right to seek and enjoy asylum from persecution is guaranteed by the UDHR",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Freedom Of Movement",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DEFINED_BY",
+            "description": "The right to freedom of movement is guaranteed by the UDHR",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Freedom Of Thought, Conscience And Religion",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DEFINED_BY",
+            "description": "Freedom of thought, conscience and religion is guaranteed by the UDHR",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Freedom Of Opinion And Expression",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DEFINED_BY",
+            "description": "Freedom of opinion and expression is guaranteed by the UDHR",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Freedom Of Peaceful Assembly And Association",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DEFINED_BY",
+            "description": "Freedom of peaceful assembly and association is guaranteed by the UDHR",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Right To Work",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DEFINED_BY",
+            "description": "Right to work is recognized and protected by the UDHR",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Right To Rest And Leisure",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DEFINED_BY",
+            "description": "Right to rest and leisure is recognized and protected by the UDHR",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Right To Education",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DEFINED_BY",
+            "description": "Right to education is recognized and protected by the UDHR",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Right To Social Security",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DEFINED_BY",
+            "description": "Right to social security is recognized and protected by the UDHR",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Economic, Social And Cultural Rights",
+            "target_entity": "Member States",
+            "relation_type": "REALIZED_THROUGH",
+            "description": "Economic, social and cultural rights are to be realized through national effort and international cooperation",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Social Security",
+            "target_entity": "Economic, Social And Cultural Rights",
+            "relation_type": "SUPPORTS",
+            "description": "Social security contributes to realizing economic, social and cultural rights",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Social Protection",
+            "target_entity": "Right To Work",
+            "relation_type": "SUPPLEMENTS",
+            "description": "Social protection supplements remuneration to ensure existence worthy of human dignity",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Right To Education",
+            "target_entity": "Groups",
+            "relation_type": "PROMOTES",
+            "description": "Education promotes understanding, tolerance and friendship among all nations, racial or religious groups",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Parents",
+            "target_entity": "Children",
+            "relation_type": "RESPONSIBLE_FOR",
+            "description": "Parents have a prior right to choose the kind of education for their children",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Motherhood",
+            "target_entity": "Social Protection",
+            "relation_type": "PROTECTED_BY",
+            "description": "Motherhood and childhood are entitled to special care and assistance",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Childhood",
+            "target_entity": "Social Protection",
+            "relation_type": "PROTECTED_BY",
+            "description": "Motherhood and childhood are entitled to special care and assistance",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Men And Women Of Full Age",
+            "target_entity": "Marriage",
+            "relation_type": "ENTITLED_TO",
+            "description": "Men and women of full age have the right to marry and to found a family",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Men And Women Of Full Age",
+            "target_entity": "Family",
+            "relation_type": "ENTITLED_TO",
+            "description": "Men and women of full age have the right to found a family",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Organs Of Society",
+            "target_entity": "Human Rights",
+            "relation_type": "PROMOTES",
+            "description": "Organs of society should strive by teaching and education to promote respect for rights and freedoms",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Government",
+            "target_entity": "People",
+            "relation_type": "BASED_ON",
+            "description": "The will of the people shall be the basis of the authority of government",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Public Service",
+            "target_entity": "People",
+            "relation_type": "SERVES",
+            "description": "Public service is equally accessible to everyone in their country",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Purposes And Principles Of The United Nations",
+            "target_entity": "Asylum",
+            "relation_type": "LIMITS",
+            "description": "Purposes and principles of the United Nations limit the exercise of rights and the invocation of asylum",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Purposes And Principles Of The United Nations",
+            "target_entity": "Human Rights",
+            "relation_type": "LIMITS",
+            "description": "Purposes and principles of the United Nations limit the exercise of rights and freedoms in no case to be contrary to them",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Acts Contrary To The Purposes And Principles Of The United Nations",
+            "target_entity": "Asylum",
+            "relation_type": "RESTRICTS",
+            "description": "Acts contrary to the purposes and principles of the United Nations restrict the right to asylum",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Rule Of Law",
+            "target_entity": "Tyranny",
+            "relation_type": "OPPOSED_BY",
+            "description": "Tyranny and oppression are conditions against which rebellion may occur if human rights are not protected by the rule of law",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Rule Of Law",
+            "target_entity": "Oppression",
+            "relation_type": "OPPOSED_BY",
+            "description": "Tyranny and oppression are conditions against which rebellion may occur if human rights are not protected by the rule of law",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Social And International Order",
+            "target_entity": "Human Rights",
+            "relation_type": "FRAMEWORK_FOR",
+            "description": "Social and international order is the framework in which the rights and freedoms set forth in the Declaration can be fully realized",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Cultural Life",
+            "target_entity": "Arts",
+            "relation_type": "ENCOMPASSES",
+            "description": "Cultural life of the community, the arts and scientific advancement are areas in which everyone has participation rights",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Cultural Life",
+            "target_entity": "Scientific Advancement",
+            "relation_type": "ENCOMPASSES",
+            "description": "Cultural life of the community, the arts and scientific advancement are areas in which everyone has participation rights",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "Scientific, Literary Or Artistic Production",
+            "relation_type": "PROTECTS",
+            "description": "Scientific, literary or artistic production creates moral and material interests that must be protected",
+            "relationship_strength": 3
+          }
+        ]
+      },
+      "quality_rating": 9,
+      "id": "95b971e5-64a9-4465-b868-aa2f5e27601d"
+    },
+    {
+      "input_text": "Universal Declaration of Human Rights\nThe Universal Declaration of Human Rights (UDHR) is a milestone document in the history of human rights. Drafted by representatives with different legal and cultural backgrounds from all regions of the world, the Declaration was proclaimed by the United Nations General Assembly in Paris on 10 December 1948 (General Assembly resolution 217 A) as a common standard of achievements for all peoples and all nations. It sets out, for the first time, fundamental human rights to be universally protected and it has been translated into over 500 languages. The UDHR is widely recognized as having inspired, and paved the way for, the adoption of more than seventy human rights treaties, applied today on a permanent basis at global and regional levels (all containing references to it in their preambles). \n\nArticle 2\nEveryone is entitled to all the rights and freedoms set forth in this Declaration, without distinction of any kind, such as race, colour, sex, language, religion, political or other opinion, national or social origin, property, birth or other status. Furthermore, no distinction shall be made on the basis of the political, jurisdictional or international status of the country or territory to which a person belongs, whether it be independent, trust, non-self-governing or under any other limitation of sovereignty.\n\nArticle 3\nEveryone has the right to life, liberty and security of person.\n\nArticle 4\nNo one shall be held in slavery or servitude; slavery and the slave trade shall be prohibited in all their forms.\n\nArticle 5\nNo one shall be subjected to torture or to cruel, inhuman or degrading treatment or punishment.",
+      "metadata": {
+        "domain": "human_rights_en_article02_05",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T14:40:26.616030Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Universal Declaration Of Human Rights",
+            "entity_type": "LAW",
+            "description": "Foundational international document adopted in 1948 that sets out fundamental human rights to be universally protected"
+          },
+          {
+            "entity_name": "UDHR",
+            "entity_type": "LAW",
+            "description": "Abbreviation for the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "United Nations General Assembly",
+            "entity_type": "ORGANIZATION",
+            "description": "Principal deliberative organ of the United Nations that proclaimed the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Paris",
+            "entity_type": "CITY",
+            "description": "Capital city of France, location where the Universal Declaration of Human Rights was proclaimed by the United Nations General Assembly"
+          },
+          {
+            "entity_name": "10 December 1948",
+            "entity_type": "DATE",
+            "description": "Calendar date (10 December 1948) on which the Universal Declaration of Human Rights was proclaimed by the United Nations General Assembly in Paris"
+          },
+          {
+            "entity_name": "General Assembly Resolution 217 A",
+            "entity_type": "LAW",
+            "description": "Resolution number 217 A of the United Nations General Assembly, by which the Universal Declaration of Human Rights was proclaimed"
+          },
+          {
+            "entity_name": "Human Rights Treaties",
+            "entity_type": "LAW",
+            "description": "Over seventy international human rights treaties that were inspired by and followed the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Article 2",
+            "entity_type": "LAW",
+            "description": "Article 2 of the Universal Declaration of Human Rights, stating that everyone is entitled to all rights and freedoms without distinction"
+          },
+          {
+            "entity_name": "Article 3",
+            "entity_type": "LAW",
+            "description": "Article 3 of the Universal Declaration of Human Rights, affirming the right to life, liberty and security of person"
+          },
+          {
+            "entity_name": "Article 4",
+            "entity_type": "LAW",
+            "description": "Article 4 of the Universal Declaration of Human Rights, prohibiting slavery, servitude and the slave trade in all their forms"
+          },
+          {
+            "entity_name": "Article 5",
+            "entity_type": "LAW",
+            "description": "Article 5 of the Universal Declaration of Human Rights, prohibiting torture and cruel, inhuman or degrading treatment or punishment"
+          },
+          {
+            "entity_name": "Right To Life Liberty And Security Of Person",
+            "entity_type": "LAW",
+            "description": "Right to life, liberty and security of person as set out in Article 3 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Prohibition Of Slavery And Servitude",
+            "entity_type": "LAW",
+            "description": "Prohibition of slavery, servitude and slave trade in all their forms as set out in Article 4 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Prohibition Of Torture And Cruel Inhuman Or Degrading Treatment Or Punishment",
+            "entity_type": "LAW",
+            "description": "Prohibition of torture and cruel, inhuman or degrading treatment or punishment as set out in Article 5 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Languages",
+            "entity_type": "LANGUAGE",
+            "description": "Languages into which the Universal Declaration of Human Rights has been translated (over 500)"
+          },
+          {
+            "entity_name": "Religion",
+            "entity_type": "RELIGION",
+            "description": "Religion as one of the prohibited grounds of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Human Rights",
+            "entity_type": "LAW",
+            "description": "Human rights as a concept of fundamental rights inherent to all human beings"
+          },
+          {
+            "entity_name": "Race",
+            "entity_type": "IDEOLOGY",
+            "description": "Race as a prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Colour",
+            "entity_type": "IDEOLOGY",
+            "description": "Colour as a prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Sex",
+            "entity_type": "IDEOLOGY",
+            "description": "Sex as a prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Language (Ground Of Distinction)",
+            "entity_type": "LANGUAGE",
+            "description": "Language as a prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Political Or Other Opinion",
+            "entity_type": "IDEOLOGY",
+            "description": "Political or other opinion as a prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "National Origin",
+            "entity_type": "NATIONALITY",
+            "description": "National origin as a prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Social Origin",
+            "entity_type": "IDEOLOGY",
+            "description": "Social origin as a prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Property",
+            "entity_type": "MONEY",
+            "description": "Property as a prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Birth",
+            "entity_type": "EVENT",
+            "description": "Birth as a prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Other Status",
+            "entity_type": "IDEOLOGY",
+            "description": "Other status as a residual prohibited ground of distinction in Article 2 of the Universal Declaration of Human Rights"
+          },
+          {
+            "entity_name": "Country",
+            "entity_type": "COUNTRY",
+            "description": "Country as the political unit referenced in Article 2 regarding the status of the country or territory to which a person belongs"
+          },
+          {
+            "entity_name": "Territory",
+            "entity_type": "LOCATION",
+            "description": "Territory as a geographical or political area referenced in Article 2 regarding the status of the country or territory to which a person belongs"
+          },
+          {
+            "entity_name": "Independent Status",
+            "entity_type": "IDEOLOGY",
+            "description": "Independent status as one possible political status of a country or territory mentioned in Article 2"
+          },
+          {
+            "entity_name": "Trust Status",
+            "entity_type": "IDEOLOGY",
+            "description": "Trust territory status as one possible political status of a country or territory mentioned in Article 2"
+          },
+          {
+            "entity_name": "Non-Self-Governing Status",
+            "entity_type": "IDEOLOGY",
+            "description": "Non-self-governing status as one possible political status of a country or territory mentioned in Article 2"
+          },
+          {
+            "entity_name": "Limitation Of Sovereignty",
+            "entity_type": "IDEOLOGY",
+            "description": "Limitation of sovereignty as a condition mentioned in Article 2 concerning the political, jurisdictional or international status of a country or territory"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "UDHR",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "ABBREVIATION",
+            "description": "UDHR is the commonly used abbreviation for the Universal Declaration of Human Rights",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "United Nations General Assembly",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "AGENT",
+            "description": "The United Nations General Assembly proclaimed the Universal Declaration of Human Rights",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "Paris",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "The Universal Declaration of Human Rights was proclaimed in Paris",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "10 December 1948",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The Universal Declaration of Human Rights was proclaimed on 10 December 1948",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "General Assembly Resolution 217 A",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "DATE_OF_CREATION",
+            "description": "The Universal Declaration of Human Rights was proclaimed by General Assembly Resolution 217 A",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "Human Rights Treaties",
+            "relation_type": "INSPIRES",
+            "description": "The Universal Declaration of Human Rights inspired the adoption of numerous human rights treaties",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Article 2",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Article 2 is a part of the Universal Declaration of Human Rights",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Article 3",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Article 3 is a part of the Universal Declaration of Human Rights",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Article 4",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Article 4 is a part of the Universal Declaration of Human Rights",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Article 5",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Article 5 is a part of the Universal Declaration of Human Rights",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Article 3",
+            "target_entity": "Right To Life Liberty And Security Of Person",
+            "relation_type": "DEFINES",
+            "description": "Article 3 sets out the right to life, liberty and security of person",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Article 4",
+            "target_entity": "Prohibition Of Slavery And Servitude",
+            "relation_type": "DEFINES",
+            "description": "Article 4 sets out the prohibition of slavery and servitude",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Article 5",
+            "target_entity": "Prohibition Of Torture And Cruel Inhuman Or Degrading Treatment Or Punishment",
+            "relation_type": "DEFINES",
+            "description": "Article 5 sets out the prohibition of torture and cruel, inhuman or degrading treatment or punishment",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "Human Rights",
+            "relation_type": "FOUNDATIONAL_FOR",
+            "description": "The Universal Declaration of Human Rights is a foundational document in the history of human rights",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "Languages",
+            "relation_type": "TRANSLATED_INTO",
+            "description": "The Universal Declaration of Human Rights has been translated into over 500 languages",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Religion",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Religion is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Race",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Race is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Colour",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Colour is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Sex",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Sex is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Language (Ground Of Distinction)",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Language is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Political Or Other Opinion",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Political or other opinion is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "National Origin",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "National origin is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Social Origin",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Social origin is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Property",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Property is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Birth",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Birth is listed as a prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Other Status",
+            "target_entity": "Article 2",
+            "relation_type": "PROHIBITED_GROUND",
+            "description": "Other status is listed as a residual prohibited ground for discrimination in Article 2",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Country",
+            "target_entity": "Article 2",
+            "relation_type": "REFERENCED_IN",
+            "description": "Country or territory is referenced in Article 2 when specifying that no distinction shall be made based on their status",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Territory",
+            "target_entity": "Article 2",
+            "relation_type": "REFERENCED_IN",
+            "description": "Territory is referenced in Article 2 when specifying that no distinction shall be made based on its status",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Independent Status",
+            "target_entity": "Article 2",
+            "relation_type": "STATUS_MENTIONED_IN",
+            "description": "Independent status is one possible status of a country or territory mentioned in Article 2",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Trust Status",
+            "target_entity": "Article 2",
+            "relation_type": "STATUS_MENTIONED_IN",
+            "description": "Trust status is one possible status of a country or territory mentioned in Article 2",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Non-Self-Governing Status",
+            "target_entity": "Article 2",
+            "relation_type": "STATUS_MENTIONED_IN",
+            "description": "Non-self-governing status is one possible status of a country or territory mentioned in Article 2",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Limitation Of Sovereignty",
+            "target_entity": "Article 2",
+            "relation_type": "STATUS_MENTIONED_IN",
+            "description": "Limitation of sovereignty is a condition mentioned in Article 2 concerning the status of a country or territory",
+            "relationship_strength": 3
+          }
+        ]
+      },
+      "quality_rating": 9,
+      "id": "11695d77-7de7-43ee-8883-7deb3da39732"
+    },
+    {
+      "input_text": "Всеобщая декларация прав человека\nВсеобщая декларация прав человека является основополагающим документом исторической важности.  Текст Декларации явился результатом тесного взаимодействия специалистов в области права, представлявших все регионы планеты.  Декларация была принята резолюцией 217 А Генеральной Ассамблеи Организации Объединенных Наций в Париже 10 декабря 1948 года в качестве документа, принципам, изложенным в котором, обязаны следовать все народы и страны.  Впервые в истории человечества был принят документ, провозгласивший необходимость защиты основных прав человека. Декларация переведена на 500 языков.\n\nСтатья 2\nКаждый человек должен обладать всеми правами и всеми свободами, провозглашенными настоящей Декларацией, без какого бы то ни было различия, как-то в отношении расы, цвета кожи, пола, языка, религии, политических или иных убеждений, национального или социального происхождения, имущественного, сословного или иного положения.\n\nКроме того, не должно проводиться никакого различия на основе политического, правового или международного статуса страны или территории, к которой человек принадлежит, независимо от того, является ли эта территория независимой, подопечной, несамоуправляющейся или как-либо иначе ограниченной в своем суверенитете.\n\nСтатья 3\nКаждый человек имеет право на жизнь, на свободу и на личную неприкосновенность.\n\nСтатья 4\nНикто не должен содержаться в рабстве или в подневольном состоянии; рабство и работорговля запрещаются во всех их видах.\n\nСтатья 5\nНикто не должен подвергаться пыткам или жестоким, бесчеловечным или унижающим его достоинство обращению и наказанию.",
+      "metadata": {
+        "domain": "human_rights_ru_article02_05",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-21T14:49:29.757138Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Всеобщая декларация прав человека",
+            "entity_type": "LAW",
+            "description": "Международный нормативно-правовой документ ООН, провозглашающий основные права и свободы человека; принят Генеральной Ассамблеей ООН 10 декабря 1948 года резолюцией 217 А в Париже и переведён более чем на 500 языков"
+          },
+          {
+            "entity_name": "Резолюция 217 А",
+            "entity_type": "LAW",
+            "description": "Резолюция Генеральной Ассамблеи ООН, которой была принята Всеобщая декларация прав человека"
+          },
+          {
+            "entity_name": "Генеральная ассамблея",
+            "entity_type": "ORGANIZATION",
+            "description": "Главный совещательный орган Организации Объединённых Наций, принявший резолюцию 217 А и Всеобщую декларацию прав человека"
+          },
+          {
+            "entity_name": "Организация объединенных наций",
+            "entity_type": "ORGANIZATION",
+            "description": "Международная организация, в рамках которой была принята Всеобщая декларация прав человека"
+          },
+          {
+            "entity_name": "Париж",
+            "entity_type": "CITY",
+            "description": "Столица Франции, город, в котором 10 декабря 1948 года была принята Всеобщая декларация прав человека"
+          },
+          {
+            "entity_name": "Франция",
+            "entity_type": "COUNTRY",
+            "description": "Европейское государство, на территории которого находится город Париж, где была принята Всеобщая декларация прав человека"
+          },
+          {
+            "entity_name": "10 декабря 1948 год",
+            "entity_type": "DATE",
+            "description": "Дата принятия Всеобщей декларации прав человека Генеральной Ассамблеей ООН"
+          },
+          {
+            "entity_name": "Статья 2",
+            "entity_type": "LAW",
+            "description": "Часть Всеобщей декларации прав человека, устанавливающая право каждого человека пользоваться всеми правами и свободами без какой-либо дискриминации и запрещающая различия по статусу страны или территории"
+          },
+          {
+            "entity_name": "Статья 3",
+            "entity_type": "LAW",
+            "description": "Часть Всеобщей декларации прав человека, закрепляющая право каждого человека на жизнь, свободу и личную неприкосновенность"
+          },
+          {
+            "entity_name": "Статья 4",
+            "entity_type": "LAW",
+            "description": "Часть Всеобщей декларации прав человека, запрещающая рабство и подневольное состояние во всех их видах"
+          },
+          {
+            "entity_name": "Статья 5",
+            "entity_type": "LAW",
+            "description": "Часть Всеобщей декларации прав человека, запрещающая пытки, жестокое, бесчеловечное или унижающее достоинство обращение и наказание"
+          },
+          {
+            "entity_name": "Человек",
+            "entity_type": "PERSON",
+            "description": "Любой человек как носитель прав и свобод, провозглашённых Всеобщей декларацией прав человека"
+          },
+          {
+            "entity_name": "Раса",
+            "entity_type": "IDEOLOGY",
+            "description": "Категория, по которой не допускается дискриминация согласно статье 2 Всеобщей декларации прав человека"
+          },
+          {
+            "entity_name": "Цвет кожи",
+            "entity_type": "IDEOLOGY",
+            "description": "Оттенок кожи, используемый как одна из дискриминационных категорий, запрещённых статьёй 2 Декларации"
+          },
+          {
+            "entity_name": "Пол",
+            "entity_type": "IDEOLOGY",
+            "description": "Биологическая и социальная характеристика (мужской, женский и др.), по которой запрещено делать различия в правах и свободах"
+          },
+          {
+            "entity_name": "Язык",
+            "entity_type": "LANGUAGE",
+            "description": "Средство общения людей, по которому не допускается дискриминация в правах и свободах"
+          },
+          {
+            "entity_name": "Религия",
+            "entity_type": "RELIGION",
+            "description": "Вера или религиозные убеждения человека, по признаку которых запрещено различие в правах"
+          },
+          {
+            "entity_name": "Политические убеждения",
+            "entity_type": "IDEOLOGY",
+            "description": "Политические убеждения, взгляды и мнения, по которым не должно быть дискриминации"
+          },
+          {
+            "entity_name": "Иные убеждения",
+            "entity_type": "IDEOLOGY",
+            "description": "Иные (неполитические) убеждения человека, например философские или мировоззренческие, по которым также запрещено различие в правах"
+          },
+          {
+            "entity_name": "Национальное происхождение",
+            "entity_type": "NATIONALITY",
+            "description": "Национальное происхождение человека, по которому запрещено деление в правах"
+          },
+          {
+            "entity_name": "Социальное происхождение",
+            "entity_type": "IDEOLOGY",
+            "description": "Социальное происхождение человека, по которому запрещено различие в правах и свободах"
+          },
+          {
+            "entity_name": "Имущественное положение",
+            "entity_type": "IDEOLOGY",
+            "description": "Имущественное положение человека, которое не может служить основанием для ограничения прав"
+          },
+          {
+            "entity_name": "Сословное положение",
+            "entity_type": "IDEOLOGY",
+            "description": "Сословное положение человека (принадлежность к сословию), не допускаемое в качестве критерия для ограничения прав"
+          },
+          {
+            "entity_name": "Иное положение",
+            "entity_type": "IDEOLOGY",
+            "description": "Любое иное положение человека в обществе, которое не должно быть основанием для дискриминации"
+          },
+          {
+            "entity_name": "Политический статус",
+            "entity_type": "IDEOLOGY",
+            "description": "Политический статус страны или территории, не допускаемый как основание для различий в правах"
+          },
+          {
+            "entity_name": "Правовой статус",
+            "entity_type": "IDEOLOGY",
+            "description": "Правовой статус страны или территории, который не должен влиять на права человека"
+          },
+          {
+            "entity_name": "Международный статус",
+            "entity_type": "IDEOLOGY",
+            "description": "Международный статус страны или территории, по которому запрещено различие в правах людей"
+          },
+          {
+            "entity_name": "Страна",
+            "entity_type": "COUNTRY",
+            "description": "Страна или территория, к которой принадлежит человек, в отношении которой не допускается дискриминация в правах"
+          },
+          {
+            "entity_name": "Территория",
+            "entity_type": "LOCATION",
+            "description": "Территориальное образование, к которому принадлежит человек, для которого запрещены различия по статусу при реализации прав"
+          },
+          {
+            "entity_name": "Независимая территория",
+            "entity_type": "LOCATION",
+            "description": "Независимая территория, один из возможных статусов стран и территорий, не влияющий на права человека"
+          },
+          {
+            "entity_name": "Подопечная территория",
+            "entity_type": "LOCATION",
+            "description": "Подопечная территория, один из статусов, не являющийся основанием для ограничения прав"
+          },
+          {
+            "entity_name": "Несамоуправляющаяся территория",
+            "entity_type": "LOCATION",
+            "description": "Несамоуправляющаяся территория, статус, не допускаемый в качестве критерия для различия в правах"
+          },
+          {
+            "entity_name": "Рабство",
+            "entity_type": "CRIME",
+            "description": "Рабство, состояние полного подчинения человека другому человеку, прямо запрещённое статьёй 4 Декларации"
+          },
+          {
+            "entity_name": "Подневольное состояние",
+            "entity_type": "CRIME",
+            "description": "Подневольное состояние, форма лишения свободы и зависимости, запрещённая статьёй 4 Декларации"
+          },
+          {
+            "entity_name": "Работорговля",
+            "entity_type": "CRIME",
+            "description": "Работорговля, купля-продажа людей как товаров, запрещённая статьёй 4 Декларации"
+          },
+          {
+            "entity_name": "Пытки",
+            "entity_type": "CRIME",
+            "description": "Пытки, умышленное причинение сильной физической или психической боли, запрещённые статьёй 5 Декларации"
+          },
+          {
+            "entity_name": "Жестокое обращение",
+            "entity_type": "CRIME",
+            "description": "Жестокое обращение, форма обращения, причиняющая страдания, запрещённая статьёй 5 Декларации"
+          },
+          {
+            "entity_name": "Бесчеловечное обращение",
+            "entity_type": "CRIME",
+            "description": "Бесчеловечное обращение, обращение, противоречащее человеческому достоинству, запрещённое статьёй 5 Декларации"
+          },
+          {
+            "entity_name": "Унижающее достоинство обращение",
+            "entity_type": "CRIME",
+            "description": "Унижающее достоинство обращение, форма обращения, оскорбляющая человеческое достоинство, запрещённая статьёй 5 Декларации"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Резолюция 217 А",
+            "target_entity": "Всеобщая декларация прав человека",
+            "relation_type": "BASIS_FOR",
+            "description": "Резолюция 217 А — это резолюция, которой была принята Всеобщая декларация прав человека",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Всеобщая декларация прав человека",
+            "target_entity": "Генеральная ассамблея",
+            "relation_type": "ADOPTED_BY",
+            "description": "Всеобщая декларация прав человека принята Генеральной ассамблеей",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Генеральная ассамблея",
+            "target_entity": "Организация объединенных наций",
+            "relation_type": "PART_OF",
+            "description": "Генеральная ассамблея является органом Организации объединенных наций",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Всеобщая декларация прав человека",
+            "target_entity": "Париж",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "Всеобщая декларация прав человека была принята в городе Париж",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Париж",
+            "target_entity": "Франция",
+            "relation_type": "LOCATED_IN",
+            "description": "Город Париж расположен во Франции",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Всеобщая декларация прав человека",
+            "target_entity": "10 декабря 1948 год",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Принятие Всеобщей декларации прав человека произошло 10 декабря 1948 года",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Всеобщая декларация прав человека",
+            "relation_type": "PART_OF",
+            "description": "Статья 2 является частью Всеобщей декларации прав человека",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 3",
+            "target_entity": "Всеобщая декларация прав человека",
+            "relation_type": "PART_OF",
+            "description": "Статья 3 является частью Всеобщей декларации прав человека",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 4",
+            "target_entity": "Всеобщая декларация прав человека",
+            "relation_type": "PART_OF",
+            "description": "Статья 4 является частью Всеобщей декларации прав человека",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 5",
+            "target_entity": "Всеобщая декларация прав человека",
+            "relation_type": "PART_OF",
+            "description": "Статья 5 является частью Всеобщей декларации прав человека",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Человек",
+            "relation_type": "PROCLAIMS",
+            "description": "Статья 2 провозглашает запрет дискриминации по различным признакам в пользовании правами Декларации",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 3",
+            "target_entity": "Человек",
+            "relation_type": "PROTECTS_RIGHTS_OF",
+            "description": "Статья 3 закрепляет право каждого человека на жизнь, свободу и личную неприкосновенность",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 4",
+            "target_entity": "Рабство",
+            "relation_type": "PROHIBITS",
+            "description": "Статья 4 запрещает рабство как явление",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 4",
+            "target_entity": "Подневольное состояние",
+            "relation_type": "PROHIBITS",
+            "description": "Статья 4 запрещает подневольное состояние",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 4",
+            "target_entity": "Работорговля",
+            "relation_type": "PROHIBITS",
+            "description": "Статья 4 запрещает работорговлю во всех её видах",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 5",
+            "target_entity": "Пытки",
+            "relation_type": "PROHIBITS",
+            "description": "Статья 5 запрещает пытки",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 5",
+            "target_entity": "Жестокое обращение",
+            "relation_type": "PROHIBITS",
+            "description": "Статья 5 запрещает жестокое обращение",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 5",
+            "target_entity": "Бесчеловечное обращение",
+            "relation_type": "PROHIBITS",
+            "description": "Статья 5 запрещает бесчеловечное обращение",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 5",
+            "target_entity": "Унижающее достоинство обращение",
+            "relation_type": "PROHIBITS",
+            "description": "Статья 5 запрещает унижающее достоинство обращение",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Раса",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по признаку расы",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Цвет кожи",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по признаку цвета кожи",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Пол",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по признаку пола",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Язык",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по признаку языка",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Религия",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по признаку религии",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Политические убеждения",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по признаку политических убеждений",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Иные убеждения",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по признаку иных убеждений",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Национальное происхождение",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по признаку национального происхождения",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Социальное происхождение",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по признаку социального происхождения",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Имущественное положение",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по имущественному положению",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Сословное положение",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по сословному положению",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Иное положение",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает дискриминацию по иному положению человека",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Политический статус",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает различия в правах по политическому статусу страны или территории",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Правовой статус",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает различия в правах по правовому статусу страны или территории",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Международный статус",
+            "relation_type": "FORBIDS_DISCRIMINATION_BY",
+            "description": "Статья 2 запрещает различия в правах по международному статусу страны или территории",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Страна",
+            "relation_type": "APPLIES_TO",
+            "description": "Статья 2 указывает, что политический, правовой или международный статус страны или территории, к которой принадлежит человек, не должен влиять на его права",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Территория",
+            "relation_type": "APPLIES_TO",
+            "description": "Статья 2 указывает, что политический, правовой или международный статус территории, к которой принадлежит человек, не должен влиять на его права",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Независимая территория",
+            "relation_type": "APPLIES_TO_STATUS",
+            "description": "Статья 2 подчёркивает, что права человека сохраняются, даже если территория является независимой",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Подопечная территория",
+            "relation_type": "APPLIES_TO_STATUS",
+            "description": "Статья 2 подчёркивает, что права человека сохраняются, даже если территория является подопечной",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Статья 2",
+            "target_entity": "Несамоуправляющаяся территория",
+            "relation_type": "APPLIES_TO_STATUS",
+            "description": "Статья 2 подчёркивает, что права человека сохраняются, даже если территория является несамоуправляющейся",
+            "relationship_strength": 3
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "5282955e-7d65-44bb-8a61-176bc7fb08f5"
+    },
+    {
+      "input_text": "The Australian and New Zealand Stock Exchanges\n(‘ASX’ and ‘NZSX’) have, since 1989 and 1992\nrespectively, incorporated the Code into their\nlisting rules. Under these listing rules, a Public\nReport must be prepared in accordance with the\nCode if it includes a statement on exploration\nresults, Mineral Resources or Ore Reserves. The\nincorporation of the Code imposes certain specific\nrequirements on mining or exploration companies\nreporting to the ASX and NZSX. The guidelines in\nthis section of the Code which paraphrase these\nrequirements should not be used as a replacement\nfor the relevant listing rules, and it is strongly\nrecommended that users of the Code familiarise\nthemselves with those listing rules which relate to\nPublic Reporting of exploration results, Mineral\nResources and Ore Reserves.\nASX listing rules require the Competent Person(s),\non whose work the Public Report of Mineral\nResources or Ore Reserves is based, to be named\nin the report. The report or attached statement must\nsay that the person consents to the inclusion in the\nreport of the matters based on their information in\nthe form and context in which it appears, and must\ninclude the name of the person’s firm or employer.\nRefer also to Clause 8 of the Code.",
+      "metadata": {
+        "domain": "minerals_en",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T15:01:21.148301Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Australian Stock Exchange",
+            "entity_type": "ORGANIZATION",
+            "description": "The stock exchange based in Australia that, since 1989, has incorporated the Code into its listing rules and imposes specific reporting requirements on mining or exploration companies"
+          },
+          {
+            "entity_name": "New Zealand Stock Exchange",
+            "entity_type": "ORGANIZATION",
+            "description": "The stock exchange based in New Zealand that, since 1992, has incorporated the Code into its listing rules and imposes specific reporting requirements on mining or exploration companies"
+          },
+          {
+            "entity_name": "ASX Listing Rules",
+            "entity_type": "LAW",
+            "description": "The listing rules of the Australian Stock Exchange, which require Public Reports on Mineral Resources or Ore Reserves to be prepared in accordance with the Code and to name the Competent Person(s) and include their consent and employer"
+          },
+          {
+            "entity_name": "NZSX Listing Rules",
+            "entity_type": "LAW",
+            "description": "The listing rules of the New Zealand Stock Exchange, into which the Code has been incorporated, governing reporting obligations for mining or exploration companies"
+          },
+          {
+            "entity_name": "Code",
+            "entity_type": "LAW",
+            "description": "A codified set of standards and requirements governing Public Reporting of exploration results, Mineral Resources and Ore Reserves, incorporated into the ASX and NZSX listing rules"
+          },
+          {
+            "entity_name": "Public Report",
+            "entity_type": "WORK_OF_ART",
+            "description": "A formal report that must be prepared in accordance with the Code and the ASX/NZSX listing rules when including statements on exploration results, Mineral Resources or Ore Reserves"
+          },
+          {
+            "entity_name": "Public Reporting",
+            "entity_type": "WORK_OF_ART",
+            "description": "Formal reporting of exploration results, Mineral Resources and Ore Reserves in compliance with the Code and listing rules"
+          },
+          {
+            "entity_name": "Exploration Results",
+            "entity_type": "WORK_OF_ART",
+            "description": "Statements on exploration outcomes that, if included in a Public Report, trigger the requirement to comply with the Code and listing rules"
+          },
+          {
+            "entity_name": "Mineral Resource",
+            "entity_type": "WORK_OF_ART",
+            "description": "Classifications of mineral deposits used for reporting purposes under the Code and listing rules"
+          },
+          {
+            "entity_name": "Ore Reserve",
+            "entity_type": "WORK_OF_ART",
+            "description": "Classifications of economically mineable parts of a Mineral Resource, used for reporting purposes under the Code and listing rules"
+          },
+          {
+            "entity_name": "Mining Company",
+            "entity_type": "ORGANIZATION",
+            "description": "Companies engaged in mining or mineral exploration activities that are subject to the ASX and NZSX reporting requirements when they report to these stock exchanges"
+          },
+          {
+            "entity_name": "Exploration Company",
+            "entity_type": "ORGANIZATION",
+            "description": "Companies engaged primarily in exploration activities that are subject to ASX and NZSX reporting requirements when they report to these stock exchanges"
+          },
+          {
+            "entity_name": "Competent Person",
+            "entity_type": "PERSON",
+            "description": "A person who is responsible for the work on which a Public Report of Mineral Resources or Ore Reserves is based, and whose name, consent, and employer must be included in the report under ASX listing rules"
+          },
+          {
+            "entity_name": "Clause 8",
+            "entity_type": "LAW",
+            "description": "Clause 8 of the Code, which is specifically referred to for additional relevant provisions"
+          },
+          {
+            "entity_name": "Firm Or Employer",
+            "entity_type": "ORGANIZATION",
+            "description": "The firm or employer of the Competent Person, whose name must be included in the Public Report or attached statement under ASX listing rules"
+          },
+          {
+            "entity_name": "1989",
+            "entity_type": "DATE",
+            "description": "The year 1989, when the Australian Stock Exchange incorporated the Code into its listing rules"
+          },
+          {
+            "entity_name": "1992",
+            "entity_type": "DATE",
+            "description": "The year 1992, when the New Zealand Stock Exchange incorporated the Code into its listing rules"
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Code",
+            "target_entity": "ASX Listing Rules",
+            "relation_type": "PART_OF",
+            "description": "The Code has been incorporated into the listing rules of the Australian Stock Exchange",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Code",
+            "target_entity": "NZSX Listing Rules",
+            "relation_type": "PART_OF",
+            "description": "The Code has been incorporated into the listing rules of the New Zealand Stock Exchange",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Australian Stock Exchange",
+            "target_entity": "ASX Listing Rules",
+            "relation_type": "OWNER_OF",
+            "description": "The Australian Stock Exchange is associated with and governed by its ASX Listing Rules",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "New Zealand Stock Exchange",
+            "target_entity": "NZSX Listing Rules",
+            "relation_type": "OWNER_OF",
+            "description": "The New Zealand Stock Exchange is associated with and governed by its NZSX Listing Rules",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Mining Company",
+            "target_entity": "ASX Listing Rules",
+            "relation_type": "SUBORDINATE_OF",
+            "description": "Mining companies must comply with the ASX Listing Rules when reporting to the Australian Stock Exchange",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Exploration Company",
+            "target_entity": "ASX Listing Rules",
+            "relation_type": "SUBORDINATE_OF",
+            "description": "Exploration companies must comply with the ASX Listing Rules when reporting to the Australian Stock Exchange",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Mining Company",
+            "target_entity": "NZSX Listing Rules",
+            "relation_type": "SUBORDINATE_OF",
+            "description": "Mining companies must comply with the NZSX Listing Rules when reporting to the New Zealand Stock Exchange",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Exploration Company",
+            "target_entity": "NZSX Listing Rules",
+            "relation_type": "SUBORDINATE_OF",
+            "description": "Exploration companies must comply with the NZSX Listing Rules when reporting to the New Zealand Stock Exchange",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Public Report",
+            "target_entity": "Code",
+            "relation_type": "PART_OF",
+            "description": "Public Reports must be prepared in accordance with the Code",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Public Report",
+            "target_entity": "Public Reporting",
+            "relation_type": "PART_OF",
+            "description": "Public Reports are a form of Public Reporting",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Exploration Results",
+            "target_entity": "Public Report",
+            "relation_type": "PART_OF",
+            "description": "Public Reports may contain statements on Exploration Results",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Mineral Resource",
+            "target_entity": "Public Report",
+            "relation_type": "PART_OF",
+            "description": "Public Reports may contain statements on Mineral Resources",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Ore Reserve",
+            "target_entity": "Public Report",
+            "relation_type": "PART_OF",
+            "description": "Public Reports may contain statements on Ore Reserves",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Public Report",
+            "relation_type": "AGENT",
+            "description": "The Competent Person is responsible for the work on which a Public Report of Mineral Resources or Ore Reserves is based and must be named in the report",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "ASX Listing Rules",
+            "target_entity": "Public Report",
+            "relation_type": "PENALIZED_AS",
+            "description": "The ASX Listing Rules require that a Public Report based on a Competent Person’s work must name that person and include their consent",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Clause 8",
+            "target_entity": "Code",
+            "relation_type": "PART_OF",
+            "description": "Clause 8 is a specific provision within the Code",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "ASX Listing Rules",
+            "target_entity": "Mining Company",
+            "relation_type": "REGULATES",
+            "description": "The ASX Listing Rules impose specific reporting requirements on mining companies reporting to the Australian Stock Exchange",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "ASX Listing Rules",
+            "target_entity": "Exploration Company",
+            "relation_type": "REGULATES",
+            "description": "The ASX Listing Rules impose specific reporting requirements on exploration companies reporting to the Australian Stock Exchange",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "NZSX Listing Rules",
+            "target_entity": "Mining Company",
+            "relation_type": "REGULATES",
+            "description": "The NZSX Listing Rules impose specific reporting requirements on mining companies reporting to the New Zealand Stock Exchange",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "NZSX Listing Rules",
+            "target_entity": "Exploration Company",
+            "relation_type": "REGULATES",
+            "description": "The NZSX Listing Rules impose specific reporting requirements on exploration companies reporting to the New Zealand Stock Exchange",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Public Reporting",
+            "target_entity": "Code",
+            "relation_type": "BASED_ON",
+            "description": "Public Reporting of exploration results, Mineral Resources and Ore Reserves is conducted in accordance with the Code",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Exploration Results",
+            "target_entity": "Public Reporting",
+            "relation_type": "PART_OF",
+            "description": "Public Reporting includes reporting of exploration results",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Mineral Resource",
+            "target_entity": "Public Reporting",
+            "relation_type": "PART_OF",
+            "description": "Public Reporting includes reporting of Mineral Resources",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Ore Reserve",
+            "target_entity": "Public Reporting",
+            "relation_type": "PART_OF",
+            "description": "Public Reporting includes reporting of Ore Reserves",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Public Report",
+            "relation_type": "CONSENTS_TO",
+            "description": "The Competent Person must give consent to the inclusion of matters based on their information in the Public Report",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Firm Or Employer",
+            "target_entity": "Public Report",
+            "relation_type": "ASSOCIATED_WITH",
+            "description": "The firm or employer of the Competent Person must be named in the Public Report or attached statement",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Firm Or Employer",
+            "relation_type": "EMPLOYED_BY",
+            "description": "The Competent Person is employed by or associated with a firm or employer, whose name must be disclosed in the report",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Australian Stock Exchange",
+            "target_entity": "1989",
+            "relation_type": "OCCURRED_ON",
+            "description": "The Australian Stock Exchange incorporated the Code into its listing rules in 1989",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "New Zealand Stock Exchange",
+            "target_entity": "1992",
+            "relation_type": "OCCURRED_ON",
+            "description": "The New Zealand Stock Exchange incorporated the Code into its listing rules in 1992",
+            "relationship_strength": 5
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "da0c027c-6526-4d13-9499-e0bef354a1a7"
+    },
+    {
+      "input_text": "В целом за шесть лет работы (2001-2006 гг.) содержание золота в добываемых рудах месторождения Грасберг уменьшилось на 14,3%, тогда как содержание меди снизилось только на 8%. В результате прирост запасов золота на месторождении оказался ниже того, на что рассчитывала компания, и даже не компенсировал погашения его запасов при добыче (табл.1). Так, в 2005 г. суммарный прирост запасов руды по всем рудным телам составил 53,4 млн т, но подтверждённые запасы (proven+probable reserves) золота снизились при этом на 89 т. По сравнению с 2001 г. подтверждённые запасы меди выросли, хотя и незначительно, всего на 62 тыс.т; заметно – на 21,7%, или более чем на 2 тыс.т –увеличились запасы серебра, в то время как запасы золота сократились на 6,7%, или на 66 т {Ссылка:43464,21,|World Gold|2006|Т.9|Вып.1|Кн.|}{Ссылка:40785,,|Freeport McMoran Copper & Gold Inc. 10-K Annual Report 2004|2005|Т.|Вып.|Кн.|}{Ссылка:49623,,|Freeport McMoRan Copper & Gold Inc. 2005 Annual Report|2006|Т.|Вып.|Кн.|}{Ссылка:52870,,|Freeport-McMoRan Copper &Gold Inc. News Release. Freeport-McMoRan Copper & Gold Inc. Report Fourth-Quarter and Twelve-Month 2006 Results|2007|Т.|Вып.|Кн.|}[3; 6; 9; 12, с.21].\n\n \n\nТаблица 1\n\nДинамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001-2006 гг.\n\nЗапасы руды, млн т\tСодержания в рудах\tЗапасы металлов\nCu, %\tAu, г/т\tAg, г/т\tCu, млн т\tAu, тонн\tAg, тонн\n2001\t2583,9\t1,13\t1,05\t3,72\t29,198\t2713\t9612\n2002\t2484,5\t1,12\t1,02\t3,73\t27,826\t2534\t9267\n2003\t2695,9\t1,08\t0,98\t3,72\t29,116\t2642\t10029\n2004\t2769,1\t1,09\t0,97\t3,84\t30,18\t2686\t10633\n2005\t2822,5\t1,07\t0,92\t4,02\t30,2\t2597\t11346\n2006\t2813,0\t1,04\t0,9\t4,16\t29,26\t2531\t11702\n2006/2001,%\t108,9\t92,0\t85,7\t111,8\t100,2\t93,3\t121,7",
+      "metadata": {
+        "domain": "minerals",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-21T15:10:05.174041Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Период 2001–2006",
+            "entity_type": "DATE",
+            "description": "Период шесть лет, в течение которого анализировались показатели добычи и запасов (2001–2006 годы)."
+          },
+          {
+            "entity_name": "Год 2001",
+            "entity_type": "DATE",
+            "description": "Год, в котором рассматриваются изменения запасов и содержаний металлов."
+          },
+          {
+            "entity_name": "Год 2002",
+            "entity_type": "DATE",
+            "description": "Год, в котором рассматриваются изменения запасов и содержаний металлов."
+          },
+          {
+            "entity_name": "Год 2003",
+            "entity_type": "DATE",
+            "description": "Год, в котором рассматриваются изменения запасов и содержаний металлов."
+          },
+          {
+            "entity_name": "Год 2004",
+            "entity_type": "DATE",
+            "description": "Год, в котором рассматриваются изменения запасов и содержаний металлов."
+          },
+          {
+            "entity_name": "Год 2005",
+            "entity_type": "DATE",
+            "description": "Год, в котором рассматриваются изменения запасов и содержаний металлов."
+          },
+          {
+            "entity_name": "Год 2006",
+            "entity_type": "DATE",
+            "description": "Год, в котором рассматриваются изменения запасов и содержаний металлов и динамика по отношению к 2001 году."
+          },
+          {
+            "entity_name": "Грасберг",
+            "entity_type": "FACILITY",
+            "description": "Месторождение и рудник, на котором добываются золото, медь и серебро; анализируются его запасы и содержания металлов."
+          },
+          {
+            "entity_name": "Freeport-McMoRan Copper & Gold Inc.",
+            "entity_type": "ORGANIZATION",
+            "description": "Компания Freeport-McMoRan Copper & Gold Inc., оператор месторождения Грасберг и источник отчётных данных (годовые отчёты и пресс-релизы)."
+          },
+          {
+            "entity_name": "Шесть лет работы",
+            "entity_type": "DATE",
+            "description": "Период шестилетней работы, в течение которого анализировались изменения содержания и запасов металлов (2001–2006 годы)."
+          },
+          {
+            "entity_name": "Золото",
+            "entity_type": "PRODUCT",
+            "description": "Металл золото, содержание и запасы которого в рудах месторождения Грасберг анализируются; фиксируется снижение содержания и запасов."
+          },
+          {
+            "entity_name": "Медь",
+            "entity_type": "PRODUCT",
+            "description": "Металл медь, содержание и запасы которого в рудах месторождения Грасберг анализируются; фиксируется небольшое увеличение подтверждённых запасов."
+          },
+          {
+            "entity_name": "Серебро",
+            "entity_type": "PRODUCT",
+            "description": "Металл серебро, запасы которого на месторождении Грасберг заметно выросли по сравнению с 2001 годом."
+          },
+          {
+            "entity_name": "Запасы руды",
+            "entity_type": "NUMBER",
+            "description": "Суммарные запасы руды (рудная масса), выраженные в миллионах тонн, по месторождению Грасберг."
+          },
+          {
+            "entity_name": "Подтверждённые запасы золота",
+            "entity_type": "NUMBER",
+            "description": "Подтверждённые запасы (proven + probable reserves) золота на месторождении Грасберг, которые за анализируемый период сократились."
+          },
+          {
+            "entity_name": "Подтверждённые запасы меди",
+            "entity_type": "NUMBER",
+            "description": "Подтверждённые запасы меди на месторождении Грасберг, которые по сравнению с 2001 годом немного выросли (на 62 тыс. т)."
+          },
+          {
+            "entity_name": "Подтверждённые запасы серебра",
+            "entity_type": "NUMBER",
+            "description": "Подтверждённые запасы серебра на месторождении Грасберг, которые увеличились на 21,7% по сравнению с 2001 годом."
+          },
+          {
+            "entity_name": "World Gold",
+            "entity_type": "WORK_OF_ART",
+            "description": "Научное или отраслевое издание World Gold, откуда частично заимствованы данные или ссылки."
+          },
+          {
+            "entity_name": "Freeport-McMoRan Copper & Gold Inc. 10-K Annual Report 2004",
+            "entity_type": "WORK_OF_ART",
+            "description": "Годовой отчёт компании Freeport-McMoRan Copper & Gold Inc. за 2004 год (10-K Annual Report 2004)."
+          },
+          {
+            "entity_name": "Freeport-McMoRan Copper & Gold Inc. 2005 Annual Report",
+            "entity_type": "WORK_OF_ART",
+            "description": "Годовой отчёт компании Freeport-McMoRan Copper & Gold Inc. за 2005 год (2005 Annual Report)."
+          },
+          {
+            "entity_name": "Freeport-McMoRan Copper & Gold Inc. News Release 2006 Results",
+            "entity_type": "WORK_OF_ART",
+            "description": "Пресс-релиз Freeport-McMoRan Copper & Gold Inc. с отчётом о результатах IV квартала и 12 месяцев 2006 года."
+          },
+          {
+            "entity_name": "Таблица 1",
+            "entity_type": "WORK_OF_ART",
+            "description": "Табличный материал, в котором приведена динамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001–2006 гг."
+          },
+          {
+            "entity_name": "14,3% снижение содержания золота",
+            "entity_type": "PERCENT",
+            "description": "Показатель снижения содержания золота в добываемых рудах за период 2001–2006 гг., равный 14,3%."
+          },
+          {
+            "entity_name": "8% снижение содержания меди",
+            "entity_type": "PERCENT",
+            "description": "Показатель снижения содержания меди в добываемых рудах за период 2001–2006 гг., равный 8%."
+          },
+          {
+            "entity_name": "53,4 млн т прироста запасов руды",
+            "entity_type": "NUMBER",
+            "description": "Показатель прироста запасов руды по всем рудным телам в 2005 году, равный 53,4 млн т."
+          },
+          {
+            "entity_name": "89 т снижения запасов золота",
+            "entity_type": "NUMBER",
+            "description": "Показатель снижения подтверждённых запасов золота в 2005 году, равный 89 т."
+          },
+          {
+            "entity_name": "62 тыс. т прироста запасов меди",
+            "entity_type": "NUMBER",
+            "description": "Показатель увеличения подтверждённых запасов меди по сравнению с 2001 годом, равный 62 тыс. т."
+          },
+          {
+            "entity_name": "21,7% прироста запасов серебра",
+            "entity_type": "PERCENT",
+            "description": "Показатель увеличения запасов серебра по сравнению с 2001 годом, выраженный в процентах, равный 21,7%."
+          },
+          {
+            "entity_name": "Более чем 2 тыс. т прироста запасов серебра",
+            "entity_type": "NUMBER",
+            "description": "Показатель увеличения запасов серебра по сравнению с 2001 годом, более чем на 2 тыс. т."
+          },
+          {
+            "entity_name": "6,7% сокращения запасов золота",
+            "entity_type": "PERCENT",
+            "description": "Показатель сокращения запасов золота по сравнению с 2001 годом, равный 6,7%."
+          },
+          {
+            "entity_name": "66 т сокращения запасов золота",
+            "entity_type": "NUMBER",
+            "description": "Показатель сокращения запасов золота по сравнению с 2001 годом, равный 66 т."
+          },
+          {
+            "entity_name": "2006/2001,%",
+            "entity_type": "PERCENT",
+            "description": "Отношение показателей 2006 года к 2001 году, выраженное в процентах, по различным параметрам (запасы руды, содержания и запасы металлов)."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Грасберг",
+            "target_entity": "Период 2001–2006",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Рудник Грасберг анализируется в период 2001–2006 годов по содержанию и запасам металлов.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Грасберг",
+            "target_entity": "Шесть лет работы",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Рудник Грасберг анализируется в течение шестилетнего периода работы.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Freeport-McMoRan Copper & Gold Inc.",
+            "target_entity": "Грасберг",
+            "relation_type": "OWNER_OF",
+            "description": "Месторождение Грасберг является объектом разработки и отчётности компании Freeport-McMoRan Copper & Gold Inc.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Грасберг",
+            "target_entity": "Золото",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Золото является металлом, содержащимся и добываемым на месторождении Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Грасберг",
+            "target_entity": "Медь",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Медь является металлом, содержащимся и добываемым на месторождении Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Грасберг",
+            "target_entity": "Серебро",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Серебро является металлом, содержащимся и добываемым на месторождении Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Подтверждённые запасы золота",
+            "target_entity": "Грасберг",
+            "relation_type": "PART_OF",
+            "description": "Подтверждённые запасы золота относятся к месторождению Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Подтверждённые запасы меди",
+            "target_entity": "Грасберг",
+            "relation_type": "PART_OF",
+            "description": "Подтверждённые запасы меди относятся к месторождению Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Подтверждённые запасы серебра",
+            "target_entity": "Грасберг",
+            "relation_type": "PART_OF",
+            "description": "Подтверждённые запасы серебра относятся к месторождению Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Запасы руды",
+            "target_entity": "Грасберг",
+            "relation_type": "PART_OF",
+            "description": "Запасы руды являются характеристикой месторождения Грасберг по совокупной массе добываемой руды.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "World Gold",
+            "target_entity": "Грасберг",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "World Gold является источником данных или анализа по золоту, включающим сведения о Грасберге.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Freeport-McMoRan Copper & Gold Inc. 10-K Annual Report 2004",
+            "target_entity": "Грасберг",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Годовой отчёт 10-K 2004 компании Freeport-McMoRan содержит данные по месторождению Грасберг.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Freeport-McMoRan Copper & Gold Inc. 2005 Annual Report",
+            "target_entity": "Грасберг",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Годовой отчёт 2005 компании Freeport-McMoRan содержит данные по месторождению Грасберг.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Freeport-McMoRan Copper & Gold Inc. News Release 2006 Results",
+            "target_entity": "Грасберг",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Пресс-релиз о результатах 2006 года компании Freeport-McMoRan содержит данные по месторождению Грасберг.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Таблица 1",
+            "target_entity": "Грасберг",
+            "relation_type": "INANIMATE_INVOLVED",
+            "description": "Таблица 1 содержит данные о динамике запасов рудника Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Freeport-McMoRan Copper & Gold Inc.",
+            "target_entity": "Freeport-McMoRan Copper & Gold Inc. 10-K Annual Report 2004",
+            "relation_type": "PRODUCES",
+            "description": "Годовой отчёт 10-K 2004 создан компанией Freeport-McMoRan Copper & Gold Inc.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Freeport-McMoRan Copper & Gold Inc.",
+            "target_entity": "Freeport-McMoRan Copper & Gold Inc. 2005 Annual Report",
+            "relation_type": "PRODUCES",
+            "description": "Годовой отчёт 2005 создан компанией Freeport-McMoRan Copper & Gold Inc.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Freeport-McMoRan Copper & Gold Inc.",
+            "target_entity": "Freeport-McMoRan Copper & Gold Inc. News Release 2006 Results",
+            "relation_type": "PRODUCES",
+            "description": "Пресс-релиз о результатах 2006 года создан компанией Freeport-McMoRan Copper & Gold Inc.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "14,3% снижение содержания золота",
+            "target_entity": "Грасберг",
+            "relation_type": "ATTRIBUTE_OF",
+            "description": "Снижение содержания золота в добываемых рудах за период 2001–2006 гг. относится к месторождению Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "8% снижение содержания меди",
+            "target_entity": "Грасберг",
+            "relation_type": "ATTRIBUTE_OF",
+            "description": "Снижение содержания меди в добываемых рудах за период 2001–2006 гг. относится к месторождению Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "14,3% снижение содержания золота",
+            "target_entity": "Золото",
+            "relation_type": "ATTRIBUTE_OF",
+            "description": "Снижение содержания золота связано с металлом золото.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "8% снижение содержания меди",
+            "target_entity": "Медь",
+            "relation_type": "ATTRIBUTE_OF",
+            "description": "Снижение содержания меди связано с металлом медь.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "53,4 млн т прироста запасов руды",
+            "target_entity": "Год 2005",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Прирост запасов руды в 2005 году относится к месторождению Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "53,4 млн т прироста запасов руды",
+            "target_entity": "Запасы руды",
+            "relation_type": "PART_OF",
+            "description": "Прирост запасов руды в 2005 году является частью общих запасов руды месторождения Грасберг.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "89 т снижения запасов золота",
+            "target_entity": "Год 2005",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Снижение подтверждённых запасов золота на 89 т зафиксировано в 2005 году.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "89 т снижения запасов золота",
+            "target_entity": "Подтверждённые запасы золота",
+            "relation_type": "PART_OF",
+            "description": "Снижение подтверждённых запасов золота на 89 т относится к запасам золота месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "62 тыс. т прироста запасов меди",
+            "target_entity": "Подтверждённые запасы меди",
+            "relation_type": "PART_OF",
+            "description": "Прирост подтверждённых запасов меди на 62 тыс. т относится к запасам меди месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "21,7% прироста запасов серебра",
+            "target_entity": "Подтверждённые запасы серебра",
+            "relation_type": "PART_OF",
+            "description": "Прирост запасов серебра на 21,7% относится к запасам серебра месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Более чем 2 тыс. т прироста запасов серебра",
+            "target_entity": "Подтверждённые запасы серебра",
+            "relation_type": "PART_OF",
+            "description": "Прирост запасов серебра более чем на 2 тыс. т относится к запасам серебра месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "6,7% сокращения запасов золота",
+            "target_entity": "Подтверждённые запасы золота",
+            "relation_type": "PART_OF",
+            "description": "Сокращение запасов золота на 6,7% относится к подтверждённым запасам золота месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "66 т сокращения запасов золота",
+            "target_entity": "Подтверждённые запасы золота",
+            "relation_type": "PART_OF",
+            "description": "Сокращение запасов золота на 66 т относится к подтверждённым запасам золота месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "2006/2001,%",
+            "target_entity": "Грасберг",
+            "relation_type": "ATTRIBUTE_OF",
+            "description": "Отношение показателей 2006 года к 2001 году в процентах относится к данным по руднику Грасберг.",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 7,
+      "id": "cecb39b7-faa5-4cc3-a995-790f6fd7eb19"
+    },
+    {
+      "input_text": "19 A ‘Mineral Resource’ is a concentration or occurrence of material of\neconomic interest in or on the Earth’s crust in such form, quality and quantity\nthat there are reasonable prospects for eventual economic extraction. The\nlocation, quantity, grade, continuity and other geological characteristics of a\nMineral Resource are known, estimated or interpreted from specific geological\nevidence, sampling and knowledge. Mineral Resources are subdivided, in\norder of increasing geological confidence into Inferred, Indicated and\nMeasured categories.\n\nPortions of a mineral deposit that do not have reasonable prospects for eventual\neconomic extraction must not be included in a Mineral Resource.\n\nThe term ‘Mineral Resource’ covers mineralisation, including dumps and tailings,\nwhich has been identified and estimated through exploration and sampling and within\nwhich Mineral Reserves may be defined by the consideration and application of\nModifying Factors.\n\nThe term ‘reasonable prospects for eventual economic extraction’ implies a\njudgement (albeit preliminary) by the Competent Person in respect of the technical\nand economic factors likely to influence the prospect of economic extraction,\nincluding the approximate mining parameters. In other words, a Mineral Resource is\nnot an inventory of all mineralisation drilled or sampled, regardless of cut-off grade,\nlikely mining dimensions, location or continuity. It is a realistic inventory of\nmineralisation which, under assumed and justifiable technical and economic\nconditions, might, in whole or in part, become economically extractable.",
+      "metadata": {
+        "domain": "minerals_en_2",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T15:22:09.004798Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Mineral Resource",
+            "entity_type": "TITLE",
+            "description": "A defined term referring to a concentration or occurrence of material of economic interest in or on the Earth’s crust with reasonable prospects for eventual economic extraction, whose characteristics are known, estimated, or interpreted from geological evidence, sampling, and knowledge; subdivided into Inferred, Indicated, and Measured categories."
+          },
+          {
+            "entity_name": "Inferred",
+            "entity_type": "TITLE",
+            "description": "One of the categories of Mineral Resources, representing a portion of a Mineral Resource estimated with the lowest level of geological confidence, based on limited geological evidence and sampling."
+          },
+          {
+            "entity_name": "Indicated",
+            "entity_type": "TITLE",
+            "description": "One of the categories of Mineral Resources, representing a portion of a Mineral Resource estimated with a moderate level of geological confidence, based on more detailed and reliable exploration, sampling, and testing than an Inferred category."
+          },
+          {
+            "entity_name": "Measured",
+            "entity_type": "TITLE",
+            "description": "One of the categories of Mineral Resources, representing a portion of a Mineral Resource estimated with the highest level of geological confidence, based on detailed and reliable exploration, sampling, and testing."
+          },
+          {
+            "entity_name": "Mineralisation",
+            "entity_type": "TITLE",
+            "description": "Mineral occurrence or accumulation in the Earth’s crust, including dumps and tailings, that has been identified and estimated through exploration and sampling and within which Mineral Reserves may later be defined."
+          },
+          {
+            "entity_name": "Mineral Reserve",
+            "entity_type": "TITLE",
+            "description": "Defined term (in mining and mineral reporting) referring to the economically mineable part of a Mineral Resource, which may be defined within mineralisation after considering and applying Modifying Factors."
+          },
+          {
+            "entity_name": "Modifying Factor",
+            "entity_type": "TITLE",
+            "description": "A collective term for technical, economic, legal, environmental, social, and governmental factors that are considered and applied to a Mineral Resource to determine whether part of it can be converted into a Mineral Reserve."
+          },
+          {
+            "entity_name": "Competent Person",
+            "entity_type": "PROFESSION",
+            "description": "An individual whose professional qualifications and experience enable them to make preliminary judgments about the technical and economic factors influencing the reasonable prospects for eventual economic extraction of a Mineral Resource."
+          },
+          {
+            "entity_name": "Reasonable Prospects For Eventual Economic Extraction",
+            "entity_type": "TITLE",
+            "description": "Defined term referring to the standard requiring that there be reasonable prospects for eventual economic extraction for a mineral occurrence to be classified as a Mineral Resource; this is assessed by a Competent Person using technical and economic factors."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Inferred",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Inferred is defined as the lowest-confidence category within the hierarchy of Mineral Resource classifications.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Indicated",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Indicated is defined as a mid-level confidence category within the hierarchy of Mineral Resource classifications.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Measured",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Measured is defined as the highest-confidence category within the hierarchy of Mineral Resource classifications.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Mineralisation",
+            "target_entity": "Mineral Resource",
+            "relation_type": "OVERLAPS_WITH",
+            "description": "Mineralisation is the broader mineral occurrence that, when defined with reasonable prospects for eventual economic extraction, is termed a Mineral Resource.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Mineral Reserve",
+            "target_entity": "Mineral Resource",
+            "relation_type": "DERIVES_FROM",
+            "description": "Modifying Factors are applied to Mineral Resources in order to define Mineral Reserves within mineralisation.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Modifying Factor",
+            "target_entity": "Mineral Resource",
+            "relation_type": "APPLIED_TO",
+            "description": "Modifying Factors are the set of considerations applied when converting Mineral Resources into Mineral Reserves.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Mineral Resource",
+            "relation_type": "ASSESSES",
+            "description": "A Competent Person makes the preliminary judgment as to whether a mineral occurrence meets the criterion of reasonable prospects for eventual economic extraction and can therefore be classified as a Mineral Resource.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Reasonable Prospects For Eventual Economic Extraction",
+            "relation_type": "ASSESSES",
+            "description": "A Competent Person exercises judgement in applying the criterion of reasonable prospects for eventual economic extraction.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Reasonable Prospects For Eventual Economic Extraction",
+            "target_entity": "Mineral Resource",
+            "relation_type": "CRITERION_FOR",
+            "description": "Reasonable prospects for eventual economic extraction is the key criterion that must be satisfied for mineralisation to be classified as a Mineral Resource.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Mineral Reserve",
+            "target_entity": "Mineralisation",
+            "relation_type": "PART_OF",
+            "description": "Mineral Reserves are defined within mineralisation once Modifying Factors are considered and applied.",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "08023e2f-f148-4a2e-9124-c0cad312b1c6"
     }
   ]
 }

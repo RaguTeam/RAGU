@@ -709,8 +709,9 @@ async def _generate_relation_extraction(
         relation_types=relation_types,
     )
     entity_models = await extractor._extract_entities(context)
+    entities_payload = extractor._models_to_payload(entity_models)
     relation_models = await extractor._extract_relations(
-        context, entity_models
+        context, entities_payload
     )
 
     examples = []
@@ -753,11 +754,12 @@ async def _generate_relation_validation(
         relation_types=relation_types,
     )
     entity_models = await extractor._extract_entities(context)
+    entities_payload = extractor._models_to_payload(entity_models)
     relation_models = await extractor._extract_relations(
-        context, entity_models
+        context, entities_payload
     )
     validated = await extractor._validate_relations(
-        context, entity_models, relation_models
+        context, entities_payload, relation_models
     )
 
     examples = []

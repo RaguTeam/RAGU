@@ -31,7 +31,7 @@ judge_model:
   api_key: "${JUDGE_API_KEY}"
   model_name: "${JUDGE_MODEL_NAME}"  # e.g., "qwen3.6-max-preview"
   temperature: 0.0  # Deterministic for judgment
-  min_quality_rating: 8  # 1-10 scale, keep >= 8
+  min_quality_rating: 7  # 1-10 scale, keep >= 8
 
 # Custom input texts (optional)
 # When set, texts are loaded from this path instead of being synthesized.

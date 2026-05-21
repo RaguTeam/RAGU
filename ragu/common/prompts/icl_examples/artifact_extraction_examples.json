@@ -4,12 +4,12 @@
     "english",
     "russian"
   ],
-  "total_examples": 9,
+  "total_examples": 12,
   "generated_by": {
     "generator_model": "openai/gpt-5.1",
     "judge_model": "google/gemini-2.5-pro"
   },
-  "generated_at": "2026-05-19T21:07:56.900149Z",
+  "generated_at": "2026-05-21T15:20:33.150841Z",
   "examples": [
     {
       "input_text": "Speaking to the publication, she said she connected with Kelce in July, after he confessed on his podcast that he tried and failed to give her a friendship bracelet with his phone number on it during one of her Eras Tour shows.\nNow, Swift has shared that she has nothing to hide in her new relationship with Kelce.",
@@ -966,6 +966,614 @@
       },
       "quality_rating": 10,
       "id": "87b042d4-7b50-4d03-bcb5-92c257444409"
+    },
+    {
+      "input_text": "Universal Declaration of Human Rights\nThe Universal Declaration of Human Rights (UDHR) is a milestone document in the history of human rights. Drafted by representatives with different legal and cultural backgrounds from all regions of the world, the Declaration was proclaimed by the United Nations General Assembly in Paris on 10 December 1948 (General Assembly resolution 217 A) as a common standard of achievements for all peoples and all nations. It sets out, for the first time, fundamental human rights to be universally protected and it has been translated into over 500 languages. The UDHR is widely recognized as having inspired, and paved the way for, the adoption of more than seventy human rights treaties, applied today on a permanent basis at global and regional levels (all containing references to it in their preambles). \n\nArticle 2\nEveryone is entitled to all the rights and freedoms set forth in this Declaration, without distinction of any kind, such as race, colour, sex, language, religion, political or other opinion, national or social origin, property, birth or other status. Furthermore, no distinction shall be made on the basis of the political, jurisdictional or international status of the country or territory to which a person belongs, whether it be independent, trust, non-self-governing or under any other limitation of sovereignty.\n\nArticle 3\nEveryone has the right to life, liberty and security of person.\n\nArticle 4\nNo one shall be held in slavery or servitude; slavery and the slave trade shall be prohibited in all their forms.\n\nArticle 5\nNo one shall be subjected to torture or to cruel, inhuman or degrading treatment or punishment.",
+      "metadata": {
+        "domain": "human_rights_en_article02_05",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T14:38:22.471305Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Universal Declaration Of Human Rights",
+            "entity_type": "WORK_OF_ART",
+            "description": "Foundational international human rights document adopted by the United Nations General Assembly in 1948, setting out fundamental human rights to be universally protected."
+          },
+          {
+            "entity_name": "UDHR",
+            "entity_type": "WORK_OF_ART",
+            "description": "Abbreviation for the Universal Declaration of Human Rights, used as an alternative name for the document."
+          },
+          {
+            "entity_name": "United Nations General Assembly",
+            "entity_type": "ORGANIZATION",
+            "description": "Principal deliberative body of the United Nations which proclaimed the Universal Declaration of Human Rights in 1948."
+          },
+          {
+            "entity_name": "Paris",
+            "entity_type": "CITY",
+            "description": "Capital city of France where the United Nations General Assembly proclaimed the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "10 December 1948",
+            "entity_type": "DATE",
+            "description": "Specific calendar date, 10 December 1948, when the United Nations General Assembly proclaimed the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "General Assembly Resolution 217 A",
+            "entity_type": "LAW",
+            "description": "Resolution number 217 A of the United Nations General Assembly, which proclaimed the Universal Declaration of Human Rights as a common standard of achievement."
+          },
+          {
+            "entity_name": "Human Rights",
+            "entity_type": "LAW",
+            "description": "Legal entitlements and freedoms that every person possesses, recognized as fundamental and universal in the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Peoples",
+            "entity_type": "FAMILY",
+            "description": "Legal or customary recognition of groupings of people as peoples, referenced as beneficiaries of the common standard of achievements set by the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Nations",
+            "entity_type": "COUNTRY",
+            "description": "States or nations referenced as beneficiaries of the common standard of achievements set by the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Language",
+            "entity_type": "LANGUAGE",
+            "description": "System of communication through speech or writing referenced in Article 2 as a possible ground of distinction that is prohibited."
+          },
+          {
+            "entity_name": "Religion",
+            "entity_type": "RELIGION",
+            "description": "Organized set of beliefs and practices related to the sacred, referenced in Article 2 as a possible ground of distinction that is prohibited."
+          },
+          {
+            "entity_name": "Country",
+            "entity_type": "COUNTRY",
+            "description": "Area of the world under the jurisdiction of a ruler or state, referenced in Article 2 as a basis of a country's or territory's status."
+          },
+          {
+            "entity_name": "Territory",
+            "entity_type": "LOCATION",
+            "description": "Geographical area under the jurisdiction of a state or authority, referenced in Article 2 regarding a person's belonging and status."
+          },
+          {
+            "entity_name": "Trust",
+            "entity_type": "LAW",
+            "description": "Condition of being under a trust or trusteeship system, referenced as a possible international status of a country or territory."
+          },
+          {
+            "entity_name": "Non-self-governing",
+            "entity_type": "LAW",
+            "description": "Status of a territory that is not self-governing, referenced as a possible political or international status in Article 2."
+          },
+          {
+            "entity_name": "Slavery",
+            "entity_type": "CRIME",
+            "description": "Practice or system in which people are owned by others and forced to work, explicitly prohibited in Article 4."
+          },
+          {
+            "entity_name": "Servitude",
+            "entity_type": "CRIME",
+            "description": "Condition of being forced to work for or obey someone, explicitly prohibited in Article 4."
+          },
+          {
+            "entity_name": "Slave Trade",
+            "entity_type": "CRIME",
+            "description": "Commerce in enslaved persons, explicitly prohibited in Article 4 in all its forms."
+          },
+          {
+            "entity_name": "Torture",
+            "entity_type": "CRIME",
+            "description": "Act of inflicting severe pain or suffering on someone, prohibited in Article 5."
+          },
+          {
+            "entity_name": "Cruel, Inhuman Or Degrading Treatment Or Punishment",
+            "entity_type": "CRIME",
+            "description": "Cruel, inhuman or degrading treatment or punishment, broadly prohibited in Article 5."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "UDHR",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "ABBREVIATION",
+            "description": "UDHR is the standard abbreviation for the Universal Declaration of Human Rights.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "United Nations General Assembly",
+            "relation_type": "FOUNDED_BY",
+            "description": "The Universal Declaration of Human Rights was proclaimed by the United Nations General Assembly.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "Paris",
+            "relation_type": "TAKES_PLACE_IN",
+            "description": "The Universal Declaration of Human Rights was proclaimed in Paris.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "10 December 1948",
+            "relation_type": "DATE_OF_CREATION",
+            "description": "The Universal Declaration of Human Rights was proclaimed on 10 December 1948.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Universal Declaration Of Human Rights",
+            "target_entity": "General Assembly Resolution 217 A",
+            "relation_type": "PART_OF",
+            "description": "The Universal Declaration of Human Rights was proclaimed through General Assembly resolution 217 A.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Human Rights",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Human rights are the subject matter codified and protected by the Universal Declaration of Human Rights.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Peoples",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The Universal Declaration of Human Rights serves as a common standard of achievements for all peoples.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Nations",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The Universal Declaration of Human Rights serves as a common standard of achievements for all nations.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Language",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Language is explicitly listed in Article 2 of the Universal Declaration of Human Rights as a prohibited ground of distinction.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Religion",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Religion is explicitly listed in Article 2 of the Universal Declaration of Human Rights as a prohibited ground of distinction.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Country",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Countries are referenced in Article 2 of the Universal Declaration of Human Rights as units whose political or international status cannot be a basis for discrimination.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Territory",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Territories are referenced in Article 2 of the Universal Declaration of Human Rights as units whose political or international status cannot be a basis for discrimination.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Trust",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Trust status is mentioned in Article 2 of the Universal Declaration of Human Rights as a possible international status of a country or territory.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Non-self-governing",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Non-self-governing status is mentioned in Article 2 of the Universal Declaration of Human Rights as a possible international status of a country or territory.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Slavery",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Slavery is explicitly prohibited by Article 4 of the Universal Declaration of Human Rights.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Servitude",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Servitude is explicitly prohibited by Article 4 of the Universal Declaration of Human Rights.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Slave Trade",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "The slave trade is explicitly prohibited by Article 4 of the Universal Declaration of Human Rights in all its forms.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Torture",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Torture is explicitly prohibited by Article 5 of the Universal Declaration of Human Rights.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Cruel, Inhuman Or Degrading Treatment Or Punishment",
+            "target_entity": "Universal Declaration Of Human Rights",
+            "relation_type": "PART_OF",
+            "description": "Cruel, inhuman or degrading treatment or punishment is explicitly prohibited by Article 5 of the Universal Declaration of Human Rights.",
+            "relationship_strength": 5
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "b8efcc5e-19bc-4948-ba52-11eff2e91cf4"
+    },
+    {
+      "input_text": "The Australian and New Zealand Stock Exchanges\n(‘ASX’ and ‘NZSX’) have, since 1989 and 1992\nrespectively, incorporated the Code into their\nlisting rules. Under these listing rules, a Public\nReport must be prepared in accordance with the\nCode if it includes a statement on exploration\nresults, Mineral Resources or Ore Reserves. The\nincorporation of the Code imposes certain specific\nrequirements on mining or exploration companies\nreporting to the ASX and NZSX. The guidelines in\nthis section of the Code which paraphrase these\nrequirements should not be used as a replacement\nfor the relevant listing rules, and it is strongly\nrecommended that users of the Code familiarise\nthemselves with those listing rules which relate to\nPublic Reporting of exploration results, Mineral\nResources and Ore Reserves.\nASX listing rules require the Competent Person(s),\non whose work the Public Report of Mineral\nResources or Ore Reserves is based, to be named\nin the report. The report or attached statement must\nsay that the person consents to the inclusion in the\nreport of the matters based on their information in\nthe form and context in which it appears, and must\ninclude the name of the person’s firm or employer.\nRefer also to Clause 8 of the Code.",
+      "metadata": {
+        "domain": "minerals_en",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T14:59:05.133090Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Australian Stock Exchange",
+            "entity_type": "ORGANIZATION",
+            "description": "The stock exchange serving Australia, referred to by the abbreviation ASX, which has incorporated the Code into its listing rules since 1989 and imposes specific reporting requirements on mining or exploration companies."
+          },
+          {
+            "entity_name": "New Zealand Stock Exchange",
+            "entity_type": "ORGANIZATION",
+            "description": "The stock exchange serving New Zealand, referred to by the abbreviation NZSX, which has incorporated the Code into its listing rules since 1992 and imposes specific reporting requirements on mining or exploration companies."
+          },
+          {
+            "entity_name": "ASX",
+            "entity_type": "ORGANIZATION",
+            "description": "The Australian Stock Exchange, referred to by the abbreviation ASX in the text."
+          },
+          {
+            "entity_name": "NZSX",
+            "entity_type": "ORGANIZATION",
+            "description": "The New Zealand Stock Exchange, referred to by the abbreviation NZSX in the text."
+          },
+          {
+            "entity_name": "Code",
+            "entity_type": "LAW",
+            "description": "A set of rules or standards (commonly the JORC Code in the mining context) that has been incorporated into the listing rules of ASX and NZSX and governs public reporting of exploration results, Mineral Resources and Ore Reserves."
+          },
+          {
+            "entity_name": "Listing rule",
+            "entity_type": "LAW",
+            "description": "Formal rules set by a stock exchange (here ASX and NZSX) that listed entities must follow, including requirements for public reporting of exploration results, Mineral Resources and Ore Reserves."
+          },
+          {
+            "entity_name": "Public report",
+            "entity_type": "WORK_OF_ART",
+            "description": "Reports prepared for the public and/or market under the listing rules, which must comply with the Code when they contain statements on exploration results, Mineral Resources or Ore Reserves."
+          },
+          {
+            "entity_name": "Mining company",
+            "entity_type": "ORGANIZATION",
+            "description": "Companies engaged in mining or exploration activities that are subject to specific reporting requirements under the Code and the listing rules of ASX and NZSX."
+          },
+          {
+            "entity_name": "Competent person",
+            "entity_type": "PERSON",
+            "description": "A person (or persons) whose professional work forms the basis of the Public Report of Mineral Resources or Ore Reserves and who must be named in the report and give consent to the inclusion of their information."
+          },
+          {
+            "entity_name": "Firm",
+            "entity_type": "ORGANIZATION",
+            "description": "The professional firm or employer that employs the Competent Person, whose name must be included in the Public Report under ASX listing rules."
+          },
+          {
+            "entity_name": "Clause 8",
+            "entity_type": "LAW",
+            "description": "Clause 8 within the Code, specifically referenced as containing relevant further provisions related to the discussed reporting and consent requirements."
+          },
+          {
+            "entity_name": "1989",
+            "entity_type": "DATE",
+            "description": "The year 1989, from which the Australian Stock Exchange incorporated the Code into its listing rules."
+          },
+          {
+            "entity_name": "1992",
+            "entity_type": "DATE",
+            "description": "The year 1992, from which the New Zealand Stock Exchange incorporated the Code into its listing rules."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "ASX",
+            "target_entity": "Australian Stock Exchange",
+            "relation_type": "ABBREVIATION",
+            "description": "ASX uses the abbreviated designation 'ASX' as an alternative name for the Australian Stock Exchange.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "NZSX",
+            "target_entity": "New Zealand Stock Exchange",
+            "relation_type": "ABBREVIATION",
+            "description": "NZSX uses the abbreviated designation 'NZSX' as an alternative name for the New Zealand Stock Exchange.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Code",
+            "target_entity": "Australian Stock Exchange",
+            "relation_type": "PART_OF",
+            "description": "The Code has been incorporated into the listing rules of the Australian Stock Exchange since 1989.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Code",
+            "target_entity": "New Zealand Stock Exchange",
+            "relation_type": "PART_OF",
+            "description": "The Code has been incorporated into the listing rules of the New Zealand Stock Exchange since 1992.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Code",
+            "target_entity": "Public report",
+            "relation_type": "ORGANIZES",
+            "description": "The Code sets out requirements for the preparation and content of Public Reports that include exploration results, Mineral Resources or Ore Reserves.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Listing rule",
+            "target_entity": "Australian Stock Exchange",
+            "relation_type": "PART_OF",
+            "description": "Listing rules are the formal rules issued by the Australian Stock Exchange.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Listing rule",
+            "target_entity": "New Zealand Stock Exchange",
+            "relation_type": "PART_OF",
+            "description": "Listing rules are the formal rules issued by the New Zealand Stock Exchange.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Mining company",
+            "target_entity": "Australian Stock Exchange",
+            "relation_type": "MEMBER_OF",
+            "description": "Mining companies must comply with the Code and listing rules when reporting to the Australian Stock Exchange.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Mining company",
+            "target_entity": "New Zealand Stock Exchange",
+            "relation_type": "MEMBER_OF",
+            "description": "Mining companies must comply with the Code and listing rules when reporting to the New Zealand Stock Exchange.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Competent person",
+            "target_entity": "Public report",
+            "relation_type": "AGENT",
+            "description": "Public Reports of Mineral Resources or Ore Reserves are based on the work of the Competent Person.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Competent person",
+            "target_entity": "Firm",
+            "relation_type": "WORKPLACE",
+            "description": "The Competent Person is employed by a firm, whose name must be disclosed in the Public Report.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Clause 8",
+            "target_entity": "Code",
+            "relation_type": "PART_OF",
+            "description": "Clause 8 is a specific provision within the Code, referenced for additional relevant requirements.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Australian Stock Exchange",
+            "target_entity": "1989",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The year 1989 is the point in time when the Australian Stock Exchange incorporated the Code into its listing rules.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "New Zealand Stock Exchange",
+            "target_entity": "1992",
+            "relation_type": "POINT_IN_TIME",
+            "description": "The year 1992 is the point in time when the New Zealand Stock Exchange incorporated the Code into its listing rules.",
+            "relationship_strength": 4
+          }
+        ]
+      },
+      "quality_rating": 10,
+      "id": "b6f146e5-5796-4f50-996d-cbe2be0b10af"
+    },
+    {
+      "input_text": "19 A ‘Mineral Resource’ is a concentration or occurrence of material of\neconomic interest in or on the Earth’s crust in such form, quality and quantity\nthat there are reasonable prospects for eventual economic extraction. The\nlocation, quantity, grade, continuity and other geological characteristics of a\nMineral Resource are known, estimated or interpreted from specific geological\nevidence, sampling and knowledge. Mineral Resources are subdivided, in\norder of increasing geological confidence into Inferred, Indicated and\nMeasured categories.\n\nPortions of a mineral deposit that do not have reasonable prospects for eventual\neconomic extraction must not be included in a Mineral Resource.\n\nThe term ‘Mineral Resource’ covers mineralisation, including dumps and tailings,\nwhich has been identified and estimated through exploration and sampling and within\nwhich Mineral Reserves may be defined by the consideration and application of\nModifying Factors.\n\nThe term ‘reasonable prospects for eventual economic extraction’ implies a\njudgement (albeit preliminary) by the Competent Person in respect of the technical\nand economic factors likely to influence the prospect of economic extraction,\nincluding the approximate mining parameters. In other words, a Mineral Resource is\nnot an inventory of all mineralisation drilled or sampled, regardless of cut-off grade,\nlikely mining dimensions, location or continuity. It is a realistic inventory of\nmineralisation which, under assumed and justifiable technical and economic\nconditions, might, in whole or in part, become economically extractable.",
+      "metadata": {
+        "domain": "minerals_en_2",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T15:19:52.901530Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Mineral Resource",
+            "entity_type": "PRODUCT",
+            "description": "Definition used in the text for a concentration or occurrence of material of economic interest in or on the Earth’s crust with reasonable prospects for eventual economic extraction; further described as being subdivided into confidence categories and as a realistic inventory of mineralisation under assumed technical and economic conditions."
+          },
+          {
+            "entity_name": "Earth",
+            "entity_type": "LOCATION",
+            "description": "The Earth’s solid outer layer (crust) where mineral resources occur."
+          },
+          {
+            "entity_name": "Inferred",
+            "entity_type": "ORDINAL",
+            "description": "Subcategory of Mineral Resources with the lowest level of geological confidence as mentioned in the text."
+          },
+          {
+            "entity_name": "Indicated",
+            "entity_type": "ORDINAL",
+            "description": "Subcategory of Mineral Resources with an intermediate level of geological confidence as mentioned in the text."
+          },
+          {
+            "entity_name": "Measured",
+            "entity_type": "ORDINAL",
+            "description": "Subcategory of Mineral Resources with the highest level of geological confidence as mentioned in the text."
+          },
+          {
+            "entity_name": "Deposit",
+            "entity_type": "PRODUCT",
+            "description": "A naturally occurring concentration of minerals in the Earth’s crust, portions of which may or may not have reasonable prospects for eventual economic extraction."
+          },
+          {
+            "entity_name": "Dump",
+            "entity_type": "PRODUCT",
+            "description": "Mineralisation or processed rock material placed on surface, explicitly included in the term ‘Mineral Resource’ when identified and estimated through exploration and sampling."
+          },
+          {
+            "entity_name": "Tailings",
+            "entity_type": "PRODUCT",
+            "description": "Finely ground waste material from mineral processing, explicitly included in the term ‘Mineral Resource’ when identified and estimated through exploration and sampling."
+          },
+          {
+            "entity_name": "Mineral Reserve",
+            "entity_type": "PRODUCT",
+            "description": "Economically mineable part of a Mineral Resource, mentioned as something that may be defined within Mineral Resources by consideration and application of Modifying Factors."
+          },
+          {
+            "entity_name": "Modifying Factor",
+            "entity_type": "PRODUCT",
+            "description": "Factors (technical, economic, legal, environmental, social and governmental) applied to Mineral Resources to determine Mineral Reserves, referenced as being considered and applied within Mineral Resources."
+          },
+          {
+            "entity_name": "Competent Person",
+            "entity_type": "PROFESSION",
+            "description": "A competent professional responsible for making judgements on reasonable prospects for eventual economic extraction, including technical and economic factors and approximate mining parameters."
+          },
+          {
+            "entity_name": "Technical Condition",
+            "entity_type": "PRODUCT",
+            "description": "Technical conditions (such as mining, processing and engineering parameters) assumed and justified when assessing whether mineralisation might become economically extractable."
+          },
+          {
+            "entity_name": "Economic Condition",
+            "entity_type": "PRODUCT",
+            "description": "Economic conditions (such as commodity prices, costs and other economic parameters) assumed and justified when assessing whether mineralisation might become economically extractable."
+          },
+          {
+            "entity_name": "Mining Parameter",
+            "entity_type": "PRODUCT",
+            "description": "Approximate parameters related to the design and method of mining (such as likely mining dimensions and methods) considered when judging reasonable prospects for eventual economic extraction."
+          }
+        ],
+        "relations": [
+          {
+            "source_entity": "Mineral Resource",
+            "target_entity": "Earth",
+            "relation_type": "LOCATED_IN",
+            "description": "Mineral Resources occur in or on the Earth’s crust.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Inferred",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Inferred is defined as one of the three categories into which Mineral Resources are subdivided by increasing geological confidence.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Indicated",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Indicated is defined as one of the three categories into which Mineral Resources are subdivided by increasing geological confidence.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Measured",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Measured is defined as one of the three categories into which Mineral Resources are subdivided by increasing geological confidence.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Deposit",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Portions of a mineral deposit that have reasonable prospects for eventual economic extraction and meet the definition are included in a Mineral Resource.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Dump",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Dumps are explicitly stated as being covered by the term ‘Mineral Resource’ when mineralisation has been identified and estimated through exploration and sampling.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Tailings",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Tailings are explicitly stated as being covered by the term ‘Mineral Resource’ when mineralisation has been identified and estimated through exploration and sampling.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Mineral Reserve",
+            "target_entity": "Mineral Resource",
+            "relation_type": "PART_OF",
+            "description": "Mineral Reserves may be defined within Mineral Resources by the consideration and application of Modifying Factors.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Modifying Factor",
+            "target_entity": "Mineral Reserve",
+            "relation_type": "PRODUCES",
+            "description": "Modifying Factors are applied to Mineral Resources to define Mineral Reserves.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Mineral Resource",
+            "relation_type": "AGENT",
+            "description": "A Competent Person makes the preliminary judgement about reasonable prospects for eventual economic extraction of a Mineral Resource.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Technical Condition",
+            "target_entity": "Mineral Resource",
+            "relation_type": "HAS_CAUSE",
+            "description": "Technical conditions are part of the assumed and justifiable conditions under which mineralisation might become economically extractable as a Mineral Resource.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Economic Condition",
+            "target_entity": "Mineral Resource",
+            "relation_type": "HAS_CAUSE",
+            "description": "Economic conditions are part of the assumed and justifiable conditions under which mineralisation might become economically extractable as a Mineral Resource.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Mining Parameter",
+            "target_entity": "Mineral Resource",
+            "relation_type": "HAS_CAUSE",
+            "description": "Mining parameters are among the technical factors considered by the Competent Person when assessing reasonable prospects for eventual economic extraction of a Mineral Resource.",
+            "relationship_strength": 3
+          }
+        ]
+      },
+      "quality_rating": 8,
+      "id": "86a9c20a-95ce-4c59-bc87-2cb89f8dd387"
     }
   ]
 }

@@ -4,12 +4,12 @@
     "english",
     "russian"
   ],
-  "total_examples": 10,
+  "total_examples": 12,
   "generated_by": {
     "generator_model": "openai/gpt-5.1",
     "judge_model": "google/gemini-2.5-pro"
   },
-  "generated_at": "2026-05-19T22:19:52.739403Z",
+  "generated_at": "2026-05-21T15:18:16.111197Z",
   "examples": [
     {
       "input_text": "In blog posts and press materials, Google touted Gemini’s superior architecture and capabilities, claiming that the model meets or exceeds the performance of other leading gen AI models like OpenAI’s GPT-4.\nIn our last roundup, we learned how Google spent $26.3 billion in 2021 making itself the default search engine across platforms and how Google tried to have Chrome preinstalled on iPhones.\nWhen Google’s search head Prabhakar Raghavan testified in court on October 28, he revealed that the tech giant had paid $26.3 billion in 2021 to multiple browsers, phones and platforms, from companies including Apple, Samsung and Mozilla, The Verge reports.\nThe case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means.",
@@ -6393,6 +6393,744 @@
       ],
       "quality_rating": 8,
       "id": "3e3f032d-33c8-4e7b-ab8b-01eed40784d4"
+    },
+    {
+      "input_text": "The Australian and New Zealand Stock Exchanges\n(‘ASX’ and ‘NZSX’) have, since 1989 and 1992\nrespectively, incorporated the Code into their\nlisting rules. Under these listing rules, a Public\nReport must be prepared in accordance with the\nCode if it includes a statement on exploration\nresults, Mineral Resources or Ore Reserves. The\nincorporation of the Code imposes certain specific\nrequirements on mining or exploration companies\nreporting to the ASX and NZSX. The guidelines in\nthis section of the Code which paraphrase these\nrequirements should not be used as a replacement\nfor the relevant listing rules, and it is strongly\nrecommended that users of the Code familiarise\nthemselves with those listing rules which relate to\nPublic Reporting of exploration results, Mineral\nResources and Ore Reserves.\nASX listing rules require the Competent Person(s),\non whose work the Public Report of Mineral\nResources or Ore Reserves is based, to be named\nin the report. The report or attached statement must\nsay that the person consents to the inclusion in the\nreport of the matters based on their information in\nthe form and context in which it appears, and must\ninclude the name of the person’s firm or employer.\nRefer also to Clause 8 of the Code.",
+      "metadata": {
+        "domain": "minerals_en",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T15:04:04.847200Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Australian Stock Exchange",
+            "target_entity": "1989",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Since 1989, the Australian Stock Exchange has incorporated the Code into its listing rules.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "New Zealand Stock Exchange",
+            "target_entity": "1992",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Since 1992, the New Zealand Stock Exchange has incorporated the Code into its listing rules.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "The Code",
+            "target_entity": "Listing Rules",
+            "relation_type": "PART_OF",
+            "description": "The Code is incorporated into the listing rules of the Australian and New Zealand Stock Exchanges, so compliance with the Code is mandated through those rules.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Listing Rules",
+            "target_entity": "Australian Stock Exchange",
+            "relation_type": "PART_OF",
+            "description": "The listing rules are issued by and belong to the Australian Stock Exchange, which uses them to govern entities reporting to it.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Listing Rules",
+            "target_entity": "New Zealand Stock Exchange",
+            "relation_type": "PART_OF",
+            "description": "The listing rules are issued by and belong to the New Zealand Stock Exchange, which uses them to govern entities reporting to it.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Mining Or Exploration Companies",
+            "target_entity": "Australian Stock Exchange",
+            "relation_type": "SUBORDINATE_OF",
+            "description": "The incorporation of the Code into the listing rules imposes specific requirements on mining or exploration companies that report to the Australian Stock Exchange.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Mining Or Exploration Companies",
+            "target_entity": "New Zealand Stock Exchange",
+            "relation_type": "SUBORDINATE_OF",
+            "description": "The incorporation of the Code into the listing rules imposes specific requirements on mining or exploration companies that report to the New Zealand Stock Exchange.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Public Report",
+            "target_entity": "The Code",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "A Public Report that includes a statement on exploration results, Mineral Resources or Ore Reserves must be prepared in accordance with the Code under the listing rules.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Public Report",
+            "target_entity": "Exploration Results",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "A Public Report that includes a statement on exploration results is subject to the Code under the listing rules, which govern such inclusion.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Public Report",
+            "target_entity": "Mineral Resources",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "A Public Report that includes a statement on Mineral Resources is subject to the Code under the listing rules, which govern such inclusion.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Public Report",
+            "target_entity": "Ore Reserves",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "A Public Report that includes a statement on Ore Reserves is subject to the Code under the listing rules, which govern such inclusion.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Mining Or Exploration Companies",
+            "target_entity": "Public Report",
+            "relation_type": "PRODUCES",
+            "description": "Mining or exploration companies prepare Public Reports when reporting to the exchanges; if these reports include statements on exploration results, Mineral Resources or Ore Reserves, they must comply with the Code.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Listing Rules",
+            "target_entity": "The Code",
+            "relation_type": "PART_OF",
+            "description": "This section of the Code contains guidelines that paraphrase requirements imposed by the listing rules but explicitly states they are not a replacement, and users are strongly recommended to consult the listing rules themselves.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Public Report",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "ASX listing rules require that the Competent Person or Persons, on whose work a Public Report of Mineral Resources or Ore Reserves is based, be named in that Public Report.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Mineral Resources",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The Public Report of Mineral Resources or Ore Reserves is expressly stated to be based on the work of the Competent Person(s).",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Ore Reserves",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "The Public Report of Mineral Resources or Ore Reserves is expressly stated to be based on the work of the Competent Person(s).",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Competent Person",
+            "target_entity": "Competent Person’s Firm Or Employer",
+            "relation_type": "WORKPLACE",
+            "description": "The report or attached statement must include the name of the Competent Person’s firm or employer, linking the Competent Person to their firm or employer in the context of Public Reports.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Clause 8 Of The Code",
+            "target_entity": "The Code",
+            "relation_type": "PART_OF",
+            "description": "Clause 8 of the Code is referenced as relevant to the reporting and consent requirements for Competent Persons in relation to Public Reports, indicating that it is a specific clause within the Code.",
+            "relationship_strength": 4
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Australian Stock Exchange",
+            "entity_type": "ORGANIZATION",
+            "description": "The stock exchange of Australia, referred to by its abbreviation 'ASX'. Since 1989, it has incorporated the Code into its listing rules and imposes specific reporting requirements on mining or exploration companies, including Public Reporting of exploration results, Mineral Resources and Ore Reserves. Its listing rules require naming the Competent Person in Public Reports and stating that the person consents to inclusion of their information."
+          },
+          {
+            "entity_name": "New Zealand Stock Exchange",
+            "entity_type": "ORGANIZATION",
+            "description": "The stock exchange of New Zealand, referred to by its abbreviation 'NZSX'. Since 1992, it has incorporated the Code into its listing rules and, together with the Australian Stock Exchange, imposes specific requirements on mining or exploration companies reporting to it, particularly concerning Public Reporting of exploration results, Mineral Resources and Ore Reserves."
+          },
+          {
+            "entity_name": "The Code",
+            "entity_type": "LAW",
+            "description": "A set of standards and guidelines referred to throughout the text that has been incorporated into the listing rules of the Australian Stock Exchange and the New Zealand Stock Exchange. The Code governs preparation of Public Reports containing statements on exploration results, Mineral Resources or Ore Reserves, and includes clauses such as Clause 8, as well as a section with guidelines paraphrasing exchange requirements."
+          },
+          {
+            "entity_name": "Listing Rules",
+            "entity_type": "LAW",
+            "description": "Formal rules governing the admission, listing, and ongoing obligations of securities and issuers on the Australian Stock Exchange and New Zealand Stock Exchange. These listing rules incorporate the Code and specify when a Public Report must comply with the Code. They also include specific provisions such as the requirement that a Competent Person be named in Public Reports, that their consent be stated, and that their firm or employer be identified."
+          },
+          {
+            "entity_name": "Public Report",
+            "entity_type": "WORK_OF_ART",
+            "description": "A report that must be prepared in accordance with the Code when it includes statements on exploration results, Mineral Resources or Ore Reserves. Under the ASX and NZSX listing rules, Public Reports must identify the Competent Person(s) whose work they are based on, include a statement of that person’s consent, and provide the name of their firm or employer."
+          },
+          {
+            "entity_name": "Exploration Results",
+            "entity_type": "WORK_OF_ART",
+            "description": "Results of mineral exploration activities. In the context of the Code and listing rules of ASX and NZSX, any Public Report including statements on exploration results must be prepared in accordance with the Code and is subject to specific reporting requirements."
+          },
+          {
+            "entity_name": "Mineral Resources",
+            "entity_type": "WORK_OF_ART",
+            "description": "A classification of mineralization used in mining and exploration reporting. In the context of the Code and ASX/NZSX listing rules, Mineral Resources are subject to formal Public Reporting requirements, including preparation under the Code and attribution to a named Competent Person."
+          },
+          {
+            "entity_name": "Ore Reserves",
+            "entity_type": "WORK_OF_ART",
+            "description": "A classification representing economically mineable mineral deposits. Under the Code and the listing rules of ASX and NZSX, Public Reports containing statements on Ore Reserves must be prepared in accordance with the Code and must identify and obtain consent from the Competent Person responsible."
+          },
+          {
+            "entity_name": "Mining Or Exploration Companies",
+            "entity_type": "ORGANIZATION",
+            "description": "Companies engaged in mining or exploration activities that are reporting to the Australian Stock Exchange and New Zealand Stock Exchange. These companies are subject to specific requirements imposed by the incorporation of the Code into the exchanges’ listing rules, particularly regarding Public Reporting of exploration results, Mineral Resources and Ore Reserves."
+          },
+          {
+            "entity_name": "Competent Person",
+            "entity_type": "PERSON",
+            "description": "A qualified individual whose work forms the basis of a Public Report of Mineral Resources or Ore Reserves. Under ASX listing rules and the Code, the Competent Person must be named in the report, must consent to inclusion of their information in the stated form and context, and their firm or employer must be identified in the report or attached statement."
+          },
+          {
+            "entity_name": "Competent Person’s Firm Or Employer",
+            "entity_type": "ORGANIZATION",
+            "description": "The firm or employer of the Competent Person. The ASX listing rules require that the name of this firm or employer be included in the Public Report or attached statement when the report is based on the Competent Person’s work."
+          },
+          {
+            "entity_name": "Clause 8 Of The Code",
+            "entity_type": "LAW",
+            "description": "Clause 8 of the Code, specifically referenced as relevant to the reporting and consent requirements described. It is a particular provision within the Code to which users are directed for additional or clarifying guidance."
+          },
+          {
+            "entity_name": "1989",
+            "entity_type": "DATE",
+            "description": "The year 1989, identified as the year since which the Australian Stock Exchange has incorporated the Code into its listing rules."
+          },
+          {
+            "entity_name": "1992",
+            "entity_type": "DATE",
+            "description": "The year 1992, identified as the year since which the New Zealand Stock Exchange has incorporated the Code into its listing rules."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Australian Stock Exchange",
+          "entity_type": "ORGANIZATION",
+          "description": "The stock exchange of Australia, referred to by its abbreviation 'ASX'. Since 1989, it has incorporated the Code into its listing rules and imposes specific reporting requirements on mining or exploration companies, including Public Reporting of exploration results, Mineral Resources and Ore Reserves. Its listing rules require naming the Competent Person in Public Reports and stating that the person consents to inclusion of their information."
+        },
+        {
+          "entity_name": "New Zealand Stock Exchange",
+          "entity_type": "ORGANIZATION",
+          "description": "The stock exchange of New Zealand, referred to by its abbreviation 'NZSX'. Since 1992, it has incorporated the Code into its listing rules and, together with the Australian Stock Exchange, imposes specific requirements on mining or exploration companies reporting to it, particularly concerning Public Reporting of exploration results, Mineral Resources and Ore Reserves."
+        },
+        {
+          "entity_name": "The Code",
+          "entity_type": "LAW",
+          "description": "A set of standards and guidelines referred to throughout the text that has been incorporated into the listing rules of the Australian Stock Exchange and the New Zealand Stock Exchange. The Code governs preparation of Public Reports containing statements on exploration results, Mineral Resources or Ore Reserves, and includes clauses such as Clause 8, as well as a section with guidelines paraphrasing exchange requirements."
+        },
+        {
+          "entity_name": "Listing Rules",
+          "entity_type": "LAW",
+          "description": "Formal rules governing the admission, listing, and ongoing obligations of securities and issuers on the Australian Stock Exchange and New Zealand Stock Exchange. These listing rules incorporate the Code and specify when a Public Report must comply with the Code. They also include specific provisions such as the requirement that a Competent Person be named in Public Reports, that their consent be stated, and that their firm or employer be identified."
+        },
+        {
+          "entity_name": "Public Report",
+          "entity_type": "WORK_OF_ART",
+          "description": "A report that must be prepared in accordance with the Code when it includes statements on exploration results, Mineral Resources or Ore Reserves. Under the ASX and NZSX listing rules, Public Reports must identify the Competent Person(s) whose work they are based on, include a statement of that person’s consent, and provide the name of their firm or employer."
+        },
+        {
+          "entity_name": "Exploration Results",
+          "entity_type": "WORK_OF_ART",
+          "description": "Results of mineral exploration activities. In the context of the Code and listing rules of ASX and NZSX, any Public Report including statements on exploration results must be prepared in accordance with the Code and is subject to specific reporting requirements."
+        },
+        {
+          "entity_name": "Mineral Resources",
+          "entity_type": "WORK_OF_ART",
+          "description": "A classification of mineralization used in mining and exploration reporting. In the context of the Code and ASX/NZSX listing rules, Mineral Resources are subject to formal Public Reporting requirements, including preparation under the Code and attribution to a named Competent Person."
+        },
+        {
+          "entity_name": "Ore Reserves",
+          "entity_type": "WORK_OF_ART",
+          "description": "A classification representing economically mineable mineral deposits. Under the Code and the listing rules of ASX and NZSX, Public Reports containing statements on Ore Reserves must be prepared in accordance with the Code and must identify and obtain consent from the Competent Person responsible."
+        },
+        {
+          "entity_name": "Mining Or Exploration Companies",
+          "entity_type": "ORGANIZATION",
+          "description": "Companies engaged in mining or exploration activities that are reporting to the Australian Stock Exchange and New Zealand Stock Exchange. These companies are subject to specific requirements imposed by the incorporation of the Code into the exchanges’ listing rules, particularly regarding Public Reporting of exploration results, Mineral Resources and Ore Reserves."
+        },
+        {
+          "entity_name": "Competent Person",
+          "entity_type": "PERSON",
+          "description": "A qualified individual whose work forms the basis of a Public Report of Mineral Resources or Ore Reserves. Under ASX listing rules and the Code, the Competent Person must be named in the report, must consent to inclusion of their information in the stated form and context, and their firm or employer must be identified in the report or attached statement."
+        },
+        {
+          "entity_name": "Competent Person’s Firm Or Employer",
+          "entity_type": "ORGANIZATION",
+          "description": "The firm or employer of the Competent Person. The ASX listing rules require that the name of this firm or employer be included in the Public Report or attached statement when the report is based on the Competent Person’s work."
+        },
+        {
+          "entity_name": "Clause 8 Of The Code",
+          "entity_type": "LAW",
+          "description": "Clause 8 of the Code, specifically referenced as relevant to the reporting and consent requirements described. It is a particular provision within the Code to which users are directed for additional or clarifying guidance."
+        },
+        {
+          "entity_name": "1989",
+          "entity_type": "DATE",
+          "description": "The year 1989, identified as the year since which the Australian Stock Exchange has incorporated the Code into its listing rules."
+        },
+        {
+          "entity_name": "1992",
+          "entity_type": "DATE",
+          "description": "The year 1992, identified as the year since which the New Zealand Stock Exchange has incorporated the Code into its listing rules."
+        }
+      ],
+      "quality_rating": 8,
+      "id": "70eec327-821c-4c8a-a85f-cda16637529e"
+    },
+    {
+      "input_text": "В целом за шесть лет работы (2001-2006 гг.) содержание золота в добываемых рудах месторождения Грасберг уменьшилось на 14,3%, тогда как содержание меди снизилось только на 8%. В результате прирост запасов золота на месторождении оказался ниже того, на что рассчитывала компания, и даже не компенсировал погашения его запасов при добыче (табл.1). Так, в 2005 г. суммарный прирост запасов руды по всем рудным телам составил 53,4 млн т, но подтверждённые запасы (proven+probable reserves) золота снизились при этом на 89 т. По сравнению с 2001 г. подтверждённые запасы меди выросли, хотя и незначительно, всего на 62 тыс.т; заметно – на 21,7%, или более чем на 2 тыс.т –увеличились запасы серебра, в то время как запасы золота сократились на 6,7%, или на 66 т {Ссылка:43464,21,|World Gold|2006|Т.9|Вып.1|Кн.|}{Ссылка:40785,,|Freeport McMoran Copper & Gold Inc. 10-K Annual Report 2004|2005|Т.|Вып.|Кн.|}{Ссылка:49623,,|Freeport McMoRan Copper & Gold Inc. 2005 Annual Report|2006|Т.|Вып.|Кн.|}{Ссылка:52870,,|Freeport-McMoRan Copper &Gold Inc. News Release. Freeport-McMoRan Copper & Gold Inc. Report Fourth-Quarter and Twelve-Month 2006 Results|2007|Т.|Вып.|Кн.|}[3; 6; 9; 12, с.21].\n\n \n\nТаблица 1\n\nДинамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001-2006 гг.\n\nЗапасы руды, млн т\tСодержания в рудах\tЗапасы металлов\nCu, %\tAu, г/т\tAg, г/т\tCu, млн т\tAu, тонн\tAg, тонн\n2001\t2583,9\t1,13\t1,05\t3,72\t29,198\t2713\t9612\n2002\t2484,5\t1,12\t1,02\t3,73\t27,826\t2534\t9267\n2003\t2695,9\t1,08\t0,98\t3,72\t29,116\t2642\t10029\n2004\t2769,1\t1,09\t0,97\t3,84\t30,18\t2686\t10633\n2005\t2822,5\t1,07\t0,92\t4,02\t30,2\t2597\t11346\n2006\t2813,0\t1,04\t0,9\t4,16\t29,26\t2531\t11702\n2006/2001,%\t108,9\t92,0\t85,7\t111,8\t100,2\t93,3\t121,7",
+      "metadata": {
+        "domain": "minerals",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-21T15:15:26.439454Z"
+      },
+      "output": {
+        "relations": [
+          {
+            "source_entity": "Месторождение Грасберг",
+            "target_entity": "Шестилетний период 2001–2006 годов",
+            "relation_type": "POINT_IN_TIME",
+            "description": "В шестилетний период 2001–2006 годов анализируются запасы руды и металлов месторождения Грасберг; все приведённые данные относятся к этому временному интервалу.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Месторождение Грасберг",
+            "target_entity": "2001–2006 годы",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Период 2001–2006 годов задаёт временные рамки работы и анализа динамики содержания металлов и подтверждённых запасов на месторождении Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Золото",
+            "target_entity": "Шестилетний период 2001–2006 годов",
+            "relation_type": "POINT_IN_TIME",
+            "description": "В шестилетний период 2001–2006 годов содержание золота в добываемых рудах месторождения Грасберг уменьшилось на 14,3%.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Золото",
+            "target_entity": "2001–2006 годы",
+            "relation_type": "POINT_IN_TIME",
+            "description": "За период 2001–2006 годов фиксируется динамика содержания золота и подтверждённых запасов на месторождении Грасберг, включая их уменьшение.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Медь",
+            "target_entity": "Шестилетний период 2001–2006 годов",
+            "relation_type": "POINT_IN_TIME",
+            "description": "За шестилетний период 2001–2006 годов содержание меди в рудах месторождения Грасберг снизилось на 8%.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Медь",
+            "target_entity": "2001–2006 годы",
+            "relation_type": "POINT_IN_TIME",
+            "description": "В период 2001–2006 годов прослеживается динамика содержания меди и подтверждённых запасов меди на месторождении Грасберг, включая их небольшое увеличение по сравнению с 2001 годом.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Серебро",
+            "target_entity": "2001–2006 годы",
+            "relation_type": "POINT_IN_TIME",
+            "description": "В период 2001–2006 годов подтверждённые запасы серебра на месторождении Грасберг заметно увеличились (на 21,7%, более чем на 2 тыс. т).",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Золото",
+            "target_entity": "Месторождение Грасберг",
+            "relation_type": "LOCATED_IN",
+            "description": "Золото входит в состав запасов месторождения Грасберг и добывается там; в тексте приводится динамика содержания и запасов золота по данному месторождению.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Медь",
+            "target_entity": "Месторождение Грасберг",
+            "relation_type": "LOCATED_IN",
+            "description": "Медь входит в состав запасов месторождения Грасберг и добывается там; в тексте приводится динамика содержания и запасов меди по данному месторождению.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Серебро",
+            "target_entity": "Месторождение Грасберг",
+            "relation_type": "LOCATED_IN",
+            "description": "Серебро входит в состав запасов месторождения Грасберг и добывается там; в тексте приводится динамика запасов серебра по данному месторождению.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Прирост запасов руды 53,4 млн т",
+            "target_entity": "Снижение подтверждённых запасов золота на 89 тонн",
+            "relation_type": "PART_OF",
+            "description": "Суммарный прирост запасов руды по всем рудным телам в объёме 53,4 млн т в 2005 году сопровождается снижением подтверждённых запасов золота на 89 т; эти показатели описаны совместно как элементы одного изменения запасов.",
+            "relationship_strength": 4
+          },
+          {
+            "source_entity": "Снижение подтверждённых запасов золота на 89 тонн",
+            "target_entity": "2005 год",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Снижение подтверждённых запасов золота на 89 тонн произошло в 2005 году.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Прирост запасов руды 53,4 млн т",
+            "target_entity": "2005 год",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Прирост запасов руды в объёме 53,4 млн т зафиксирован для 2005 года.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Рост подтверждённых запасов меди на 62 тыс. тонн",
+            "target_entity": "Медь",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Рост подтверждённых запасов меди на 62 тыс. тонн описывает изменение запасов меди на месторождении Грасберг по сравнению с 2001 годом.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Увеличение запасов серебра на 21,7% (более 2 тыс. тонн)",
+            "target_entity": "Серебро",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Увеличение запасов серебра на 21,7% (более 2 тыс. тонн) описывает рост запасов серебра на месторождении Грасберг по сравнению с 2001 годом.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Сокращение запасов золота на 6,7% (66 тонн)",
+            "target_entity": "Золото",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Сокращение запасов золота на 6,7% (66 тонн) характеризует снижение запасов золота на месторождении Грасберг по сравнению с 2001 годом.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "World Gold",
+            "target_entity": "Месторождение Грасберг",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Публикация World Gold указана как источник данных о динамике запасов золота, меди и серебра; среди прочего она содержит сведения о месторождении Грасберг.",
+            "relationship_strength": 3
+          },
+          {
+            "source_entity": "Таблица 1 «Динамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001–2006 гг.»",
+            "target_entity": "Месторождение Грасберг",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Таблица 1 «Динамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001–2006 гг.» содержит данные по запасам руды, содержаниям и запасам металлов месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Таблица 1 «Динамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001–2006 гг.»",
+            "target_entity": "2001–2006 годы",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Таблица 1 описывает динамику запасов руды и содержаний металлов на месторождении Грасберг за период 2001–2006 годов.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Месторождение Грасберг",
+            "target_entity": "2001 год",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Данные по 2001 году в таблице относятся к запасам руды, содержаниям и запасам металлов месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Месторождение Грасберг",
+            "target_entity": "2002 год",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Данные по 2002 году в таблице относятся к запасам руды, содержаниям и запасам металлов месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Месторождение Грасберг",
+            "target_entity": "2003 год",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Данные по 2003 году в таблице относятся к запасам руды, содержаниям и запасам металлов месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Месторождение Грасберг",
+            "target_entity": "2004 год",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Данные по 2004 году в таблице относятся к запасам руды, содержаниям и запасам металлов месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Месторождение Грасберг",
+            "target_entity": "2005 год",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Данные по 2005 году в таблице относятся к запасам руды, содержаниям и запасам металлов месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Месторождение Грасберг",
+            "target_entity": "2006 год",
+            "relation_type": "POINT_IN_TIME",
+            "description": "Данные по 2006 году в таблице относятся к запасам руды, содержаниям и запасам металлов месторождения Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Отношение показателей 2006/2001, %",
+            "target_entity": "Месторождение Грасберг",
+            "relation_type": "PARTICIPANT_IN",
+            "description": "Отношение показателей 2006/2001, % отражает относительные изменения запасов руды, содержаний и запасов металлов месторождения Грасберг между 2001 и 2006 годами.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Рост подтверждённых запасов меди на 62 тыс. тонн",
+            "target_entity": "Отношение показателей 2006/2001, %",
+            "relation_type": "PART_OF",
+            "description": "Рост подтверждённых запасов меди на 62 тыс. тонн соответствует значению 100,2% в строке «2006/2001, %» таблицы для запасов меди и является частью этого относительного показателя.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Увеличение запасов серебра на 21,7% (более 2 тыс. тонн)",
+            "target_entity": "Отношение показателей 2006/2001, %",
+            "relation_type": "PART_OF",
+            "description": "Увеличение запасов серебра на 21,7% (более 2 тыс. тонн) соответствует значению 121,7% в строке «2006/2001, %» таблицы для запасов серебра и является частью этого относительного показателя.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Сокращение запасов золота на 6,7% (66 тонн)",
+            "target_entity": "Отношение показателей 2006/2001, %",
+            "relation_type": "PART_OF",
+            "description": "Сокращение запасов золота на 6,7% (66 тонн) соответствует значению 93,3% в строке «2006/2001, %» таблицы для запасов золота и является частью этого относительного показателя.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Рост подтверждённых запасов меди на 62 тыс. тонн",
+            "target_entity": "2001–2006 годы",
+            "relation_type": "POINT_IN_TIME",
+            "description": "По сравнению с 2001 годом подтверждённые запасы меди выросли всего на 62 тыс. т, что отражено в таблице по руднику Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Увеличение запасов серебра на 21,7% (более 2 тыс. тонн)",
+            "target_entity": "2001–2006 годы",
+            "relation_type": "POINT_IN_TIME",
+            "description": "По сравнению с 2001 годом запасы серебра увеличились на 21,7%, или более чем на 2 тыс. т, что отражено в таблице по руднику Грасберг.",
+            "relationship_strength": 5
+          },
+          {
+            "source_entity": "Сокращение запасов золота на 6,7% (66 тонн)",
+            "target_entity": "2001–2006 годы",
+            "relation_type": "POINT_IN_TIME",
+            "description": "По сравнению с 2001 годом запасы золота сократились на 6,7%, или на 66 т, что отражено в таблице по руднику Грасберг.",
+            "relationship_strength": 5
+          }
+        ],
+        "entities": [
+          {
+            "entity_name": "Шестилетний период 2001–2006 годов",
+            "entity_type": "DATE",
+            "description": "Период шесть лет, в течение которого анализируется работа и изменение содержания металлов и запасов на месторождении Грасберг; охватывает 2001-2006 годы."
+          },
+          {
+            "entity_name": "Месторождение Грасберг",
+            "entity_type": "LOCATION",
+            "description": "Крупное месторождение (рудник) Грасберг, для которого анализируется содержание золота, меди и серебра в добываемых рудах и динамика подтверждённых запасов руды и металлов за период 2001–2006 гг.; характеризуется уменьшением содержания золота и меди в рудах и изменением запасов металлов."
+          },
+          {
+            "entity_name": "2001–2006 годы",
+            "entity_type": "DATE",
+            "description": "Период времени с 2001 по 2006 годы, для которого приводится динамика содержания металлов в рудах и подтверждённых запасов руды и металлов на месторождении Грасберг, в том числе годовые значения и относительные изменения."
+          },
+          {
+            "entity_name": "Золото",
+            "entity_type": "PRODUCT",
+            "description": "Золото как добываемый драгоценный металл; его содержание в рудах месторождения Грасберг за период 2001–2006 гг. уменьшилось на 14,3%, прирост его запасов оказался ниже ожиданий компании и не компенсировал погашение запасов при добыче; подтверждённые запасы золота сократились на 6,7%, или на 66 тонн, а в 2005 г. при приросте запасов руды на 53,4 млн т подтверждённые запасы золота снизились на 89 тонн."
+          },
+          {
+            "entity_name": "Медь",
+            "entity_type": "PRODUCT",
+            "description": "Медь как добываемый металл на месторождении Грасберг; её содержание в добываемых рудах за период 2001–2006 гг. снизилось на 8%; подтверждённые запасы меди по сравнению с 2001 г. выросли на 62 тыс. тонн; в таблице приводятся данные по содержанию меди в рудах (в процентах) и запасам меди (в млн т)."
+          },
+          {
+            "entity_name": "Серебро",
+            "entity_type": "PRODUCT",
+            "description": "Серебро как добываемый металл на месторождении Грасберг; согласно данным, подтверждённые запасы серебра существенно увеличились – на 21,7%, или более чем на 2 тыс. тонн, по сравнению с 2001 г.; в таблице приведены значения содержания серебра в рудах (г/т) и запасов серебра (тонн)."
+          },
+          {
+            "entity_name": "Freeport-McMoRan Copper & Gold Inc.",
+            "entity_type": "ORGANIZATION",
+            "description": "Компания, владеющая и/или разрабатывающая месторождение Грасберг; рассчитывала на больший прирост запасов золота, чем был фактически достигнут; связана с отчётами и новостными релизами Freeport-McMoRan Copper & Gold Inc., упомянутыми в ссылках."
+          },
+          {
+            "entity_name": "Прирост запасов руды 53,4 млн т",
+            "entity_type": "NUMBER",
+            "description": "Показатель, отражающий прирост запасов руды по всем рудным телам месторождения Грасберг; в 2005 году составил 53,4 млн тонн, при этом подтверждённые запасы золота уменьшились."
+          },
+          {
+            "entity_name": "Снижение подтверждённых запасов золота на 89 тонн",
+            "entity_type": "NUMBER",
+            "description": "Количество – 89 тонн, на которое в 2005 г. снизились подтверждённые запасы золота при одновременном суммарном приросте запасов руды в 53,4 млн т."
+          },
+          {
+            "entity_name": "Рост подтверждённых запасов меди на 62 тыс. тонн",
+            "entity_type": "NUMBER",
+            "description": "Рост подтверждённых запасов меди по сравнению с 2001 годом на 62 тысячи тонн; характеризует незначительное увеличение запасов меди на месторождении Грасберг за рассматриваемый период."
+          },
+          {
+            "entity_name": "Увеличение запасов серебра на 21,7% (более 2 тыс. тонн)",
+            "entity_type": "PERCENT",
+            "description": "Увеличение запасов серебра по сравнению с 2001 годом на 21,7%, что эквивалентно более чем 2 тыс. тонн; отражает заметный рост запасов серебра в структуре ресурсов месторождения."
+          },
+          {
+            "entity_name": "Сокращение запасов золота на 6,7% (66 тонн)",
+            "entity_type": "PERCENT",
+            "description": "Сокращение запасов золота по сравнению с 2001 годом на 6,7%, что соответствует снижению на 66 тонн; характеризует ухудшение золотого компонентa ресурсов месторождения."
+          },
+          {
+            "entity_name": "World Gold",
+            "entity_type": "WORK_OF_ART",
+            "description": "Статья или публикация под названием \"World Gold\" 2006 года (Том 9, Выпуск 1), на которую даны библиографические ссылки в тексте как источник данных о динамике запасов золота, меди и серебра на месторождении Грасберг."
+          },
+          {
+            "entity_name": "2001 год",
+            "entity_type": "DATE",
+            "description": "Год 2001, начальная точка рассматриваемого периода; для него в таблице приведены значения запасов руды (2583,9 млн т), содержания меди (1,13%), золота (1,05 г/т), серебра (3,72 г/т) и запасов металлов (Cu 29,198 млн т, Au 2713 т, Ag 9612 т)."
+          },
+          {
+            "entity_name": "2002 год",
+            "entity_type": "DATE",
+            "description": "Год 2002, один из отчётных годов; в таблице представлены значения запасов руды (2484,5 млн т), содержания меди (1,12%), золота (1,02 г/т), серебра (3,73 г/т) и соответствующие запасы металлов (Cu 27,826 млн т, Au 2534 т, Ag 9267 т)."
+          },
+          {
+            "entity_name": "2003 год",
+            "entity_type": "DATE",
+            "description": "Год 2003, отчётный год в динамике запасов; таблица содержит данные по запасам руды (2695,9 млн т), содержаниям меди (1,08%), золота (0,98 г/т), серебра (3,72 г/т) и запасам металлов (Cu 29,116 млн т, Au 2642 т, Ag 10029 т)."
+          },
+          {
+            "entity_name": "2004 год",
+            "entity_type": "DATE",
+            "description": "Год 2004, отчётный год; в таблице приведены запасы руды (2769,1 млн т), содержания меди (1,09%), золота (0,97 г/т), серебра (3,84 г/т) и запасы металлов (Cu 30,18 млн т, Au 2686 т, Ag 10633 т)."
+          },
+          {
+            "entity_name": "2005 год",
+            "entity_type": "DATE",
+            "description": "Год 2005, отчётный год, для которого отдельно упоминается суммарный прирост запасов руды (53,4 млн т) при одновременном снижении подтверждённых запасов золота на 89 т; в таблице также указаны запасы руды (2822,5 млн т), содержания и запасы металлов."
+          },
+          {
+            "entity_name": "2006 год",
+            "entity_type": "DATE",
+            "description": "Год 2006, конечная точка анализируемого периода; таблица содержит данные о запасах руды (2813,0 млн т), содержании меди (1,04%), золота (0,9 г/т), серебра (4,16 г/т) и запасах металлов (Cu 29,26 млн т, Au 2531 т, Ag 11702 т)."
+          },
+          {
+            "entity_name": "Отношение показателей 2006/2001, %",
+            "entity_type": "PERCENT",
+            "description": "Строка таблицы, отражающая относительные изменения показателей 2006 года по отношению к 2001 году; включает: запасы руды 108,9%, содержание меди 92,0%, содержание золота 85,7%, содержание серебра 111,8%, запасы меди 100,2%, запасы золота 93,3%, запасы серебра 121,7%."
+          },
+          {
+            "entity_name": "Таблица 1 «Динамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001–2006 гг.»",
+            "entity_type": "WORK_OF_ART",
+            "description": "Наименование таблицы, в которой приведена динамика прироста и сокращения подтверждённых запасов рудника Грасберг за 2001–2006 годы, включая запасы руды, содержания металлов в рудах и запасы металлов."
+          }
+        ]
+      },
+      "entities": [
+        {
+          "entity_name": "Шестилетний период 2001–2006 годов",
+          "entity_type": "DATE",
+          "description": "Период шесть лет, в течение которого анализируется работа и изменение содержания металлов и запасов на месторождении Грасберг; охватывает 2001-2006 годы."
+        },
+        {
+          "entity_name": "Месторождение Грасберг",
+          "entity_type": "LOCATION",
+          "description": "Крупное месторождение (рудник) Грасберг, для которого анализируется содержание золота, меди и серебра в добываемых рудах и динамика подтверждённых запасов руды и металлов за период 2001–2006 гг.; характеризуется уменьшением содержания золота и меди в рудах и изменением запасов металлов."
+        },
+        {
+          "entity_name": "2001–2006 годы",
+          "entity_type": "DATE",
+          "description": "Период времени с 2001 по 2006 годы, для которого приводится динамика содержания металлов в рудах и подтверждённых запасов руды и металлов на месторождении Грасберг, в том числе годовые значения и относительные изменения."
+        },
+        {
+          "entity_name": "Золото",
+          "entity_type": "PRODUCT",
+          "description": "Золото как добываемый драгоценный металл; его содержание в рудах месторождения Грасберг за период 2001–2006 гг. уменьшилось на 14,3%, прирост его запасов оказался ниже ожиданий компании и не компенсировал погашение запасов при добыче; подтверждённые запасы золота сократились на 6,7%, или на 66 тонн, а в 2005 г. при приросте запасов руды на 53,4 млн т подтверждённые запасы золота снизились на 89 тонн."
+        },
+        {
+          "entity_name": "Медь",
+          "entity_type": "PRODUCT",
+          "description": "Медь как добываемый металл на месторождении Грасберг; её содержание в добываемых рудах за период 2001–2006 гг. снизилось на 8%; подтверждённые запасы меди по сравнению с 2001 г. выросли на 62 тыс. тонн; в таблице приводятся данные по содержанию меди в рудах (в процентах) и запасам меди (в млн т)."
+        },
+        {
+          "entity_name": "Серебро",
+          "entity_type": "PRODUCT",
+          "description": "Серебро как добываемый металл на месторождении Грасберг; согласно данным, подтверждённые запасы серебра существенно увеличились – на 21,7%, или более чем на 2 тыс. тонн, по сравнению с 2001 г.; в таблице приведены значения содержания серебра в рудах (г/т) и запасов серебра (тонн)."
+        },
+        {
+          "entity_name": "Freeport-McMoRan Copper & Gold Inc.",
+          "entity_type": "ORGANIZATION",
+          "description": "Компания, владеющая и/или разрабатывающая месторождение Грасберг; рассчитывала на больший прирост запасов золота, чем был фактически достигнут; связана с отчётами и новостными релизами Freeport-McMoRan Copper & Gold Inc., упомянутыми в ссылках."
+        },
+        {
+          "entity_name": "Прирост запасов руды 53,4 млн т",
+          "entity_type": "NUMBER",
+          "description": "Показатель, отражающий прирост запасов руды по всем рудным телам месторождения Грасберг; в 2005 году составил 53,4 млн тонн, при этом подтверждённые запасы золота уменьшились."
+        },
+        {
+          "entity_name": "Снижение подтверждённых запасов золота на 89 тонн",
+          "entity_type": "NUMBER",
+          "description": "Количество – 89 тонн, на которое в 2005 г. снизились подтверждённые запасы золота при одновременном суммарном приросте запасов руды в 53,4 млн т."
+        },
+        {
+          "entity_name": "Рост подтверждённых запасов меди на 62 тыс. тонн",
+          "entity_type": "NUMBER",
+          "description": "Рост подтверждённых запасов меди по сравнению с 2001 годом на 62 тысячи тонн; характеризует незначительное увеличение запасов меди на месторождении Грасберг за рассматриваемый период."
+        },
+        {
+          "entity_name": "Увеличение запасов серебра на 21,7% (более 2 тыс. тонн)",
+          "entity_type": "PERCENT",
+          "description": "Увеличение запасов серебра по сравнению с 2001 годом на 21,7%, что эквивалентно более чем 2 тыс. тонн; отражает заметный рост запасов серебра в структуре ресурсов месторождения."
+        },
+        {
+          "entity_name": "Сокращение запасов золота на 6,7% (66 тонн)",
+          "entity_type": "PERCENT",
+          "description": "Сокращение запасов золота по сравнению с 2001 годом на 6,7%, что соответствует снижению на 66 тонн; характеризует ухудшение золотого компонентa ресурсов месторождения."
+        },
+        {
+          "entity_name": "World Gold",
+          "entity_type": "WORK_OF_ART",
+          "description": "Статья или публикация под названием \"World Gold\" 2006 года (Том 9, Выпуск 1), на которую даны библиографические ссылки в тексте как источник данных о динамике запасов золота, меди и серебра на месторождении Грасберг."
+        },
+        {
+          "entity_name": "2001 год",
+          "entity_type": "DATE",
+          "description": "Год 2001, начальная точка рассматриваемого периода; для него в таблице приведены значения запасов руды (2583,9 млн т), содержания меди (1,13%), золота (1,05 г/т), серебра (3,72 г/т) и запасов металлов (Cu 29,198 млн т, Au 2713 т, Ag 9612 т)."
+        },
+        {
+          "entity_name": "2002 год",
+          "entity_type": "DATE",
+          "description": "Год 2002, один из отчётных годов; в таблице представлены значения запасов руды (2484,5 млн т), содержания меди (1,12%), золота (1,02 г/т), серебра (3,73 г/т) и соответствующие запасы металлов (Cu 27,826 млн т, Au 2534 т, Ag 9267 т)."
+        },
+        {
+          "entity_name": "2003 год",
+          "entity_type": "DATE",
+          "description": "Год 2003, отчётный год в динамике запасов; таблица содержит данные по запасам руды (2695,9 млн т), содержаниям меди (1,08%), золота (0,98 г/т), серебра (3,72 г/т) и запасам металлов (Cu 29,116 млн т, Au 2642 т, Ag 10029 т)."
+        },
+        {
+          "entity_name": "2004 год",
+          "entity_type": "DATE",
+          "description": "Год 2004, отчётный год; в таблице приведены запасы руды (2769,1 млн т), содержания меди (1,09%), золота (0,97 г/т), серебра (3,84 г/т) и запасы металлов (Cu 30,18 млн т, Au 2686 т, Ag 10633 т)."
+        },
+        {
+          "entity_name": "2005 год",
+          "entity_type": "DATE",
+          "description": "Год 2005, отчётный год, для которого отдельно упоминается суммарный прирост запасов руды (53,4 млн т) при одновременном снижении подтверждённых запасов золота на 89 т; в таблице также указаны запасы руды (2822,5 млн т), содержания и запасы металлов."
+        },
+        {
+          "entity_name": "2006 год",
+          "entity_type": "DATE",
+          "description": "Год 2006, конечная точка анализируемого периода; таблица содержит данные о запасах руды (2813,0 млн т), содержании меди (1,04%), золота (0,9 г/т), серебра (4,16 г/т) и запасах металлов (Cu 29,26 млн т, Au 2531 т, Ag 11702 т)."
+        },
+        {
+          "entity_name": "Отношение показателей 2006/2001, %",
+          "entity_type": "PERCENT",
+          "description": "Строка таблицы, отражающая относительные изменения показателей 2006 года по отношению к 2001 году; включает: запасы руды 108,9%, содержание меди 92,0%, содержание золота 85,7%, содержание серебра 111,8%, запасы меди 100,2%, запасы золота 93,3%, запасы серебра 121,7%."
+        },
+        {
+          "entity_name": "Таблица 1 «Динамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001–2006 гг.»",
+          "entity_type": "WORK_OF_ART",
+          "description": "Наименование таблицы, в которой приведена динамика прироста и сокращения подтверждённых запасов рудника Грасберг за 2001–2006 годы, включая запасы руды, содержания металлов в рудах и запасы металлов."
+        }
+      ],
+      "quality_rating": 8,
+      "id": "f1d6c759-7085-4341-a40e-332292bf4418"
     }
   ]
 }

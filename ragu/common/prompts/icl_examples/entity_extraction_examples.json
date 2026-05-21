@@ -4,12 +4,12 @@
     "english",
     "russian"
   ],
-  "total_examples": 20,
+  "total_examples": 23,
   "generated_by": {
     "generator_model": "openai/gpt-5.1",
     "judge_model": "google/gemini-2.5-pro"
   },
-  "generated_at": "2026-05-19T22:10:52.143941Z",
+  "generated_at": "2026-05-21T15:08:05.584412Z",
   "examples": [
     {
       "input_text": "The highly anticipated criminal trial for Sam Bankman-Fried, former CEO of bankrupt crypto exchange FTX, started Tuesday to determine whether he’s guilty of seven counts of fraud and conspiracy.\nSBF, as he’s known, has pleaded not-guilty to some seven charges of fraud and conspiracy.\nThe second week of the trial’s standout testimony came from Alameda Research’s former CEO Caroline Ellison, who claimed she took $14 billion from customers to repay debts to lenders, using them as a line of credit under the instruction of SBF.\nThe prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head.",
@@ -2720,6 +2720,929 @@
       },
       "quality_rating": 10,
       "id": "590feed0-672a-475d-be99-99c162100b45"
+    },
+    {
+      "input_text": "Universal Declaration of Human Rights\nThe Universal Declaration of Human Rights (UDHR) is a milestone document in the history of human rights. Drafted by representatives with different legal and cultural backgrounds from all regions of the world, the Declaration was proclaimed by the United Nations General Assembly in Paris on 10 December 1948 (General Assembly resolution 217 A) as a common standard of achievements for all peoples and all nations. It sets out, for the first time, fundamental human rights to be universally protected and it has been translated into over 500 languages. The UDHR is widely recognized as having inspired, and paved the way for, the adoption of more than seventy human rights treaties, applied today on a permanent basis at global and regional levels (all containing references to it in their preambles). \n\nPreamble\nWhereas recognition of the inherent dignity and of the equal and inalienable rights of all members of the human family is the foundation of freedom, justice and peace in the world,\n\nWhereas disregard and contempt for human rights have resulted in barbarous acts which have outraged the conscience of mankind, and the advent of a world in which human beings shall enjoy freedom of speech and belief and freedom from fear and want has been proclaimed as the highest aspiration of the common people,\n\nWhereas it is essential, if man is not to be compelled to have recourse, as a last resort, to rebellion against tyranny and oppression, that human rights should be protected by the rule of law,\n\nWhereas it is essential to promote the development of friendly relations between nations,\n\nWhereas the peoples of the United Nations have in the Charter reaffirmed their faith in fundamental human rights, in the dignity and worth of the human person and in the equal rights of men and women and have determined to promote social progress and better standards of life in larger freedom,\n\nWhereas Member States have pledged themselves to achieve, in co-operation with the United Nations, the promotion of universal respect for and observance of human rights and fundamental freedoms,\n\nWhereas a common understanding of these rights and freedoms is of the greatest importance for the full realization of this pledge,\n\nNow, therefore,\n\nThe General Assembly,\n\nProclaims this Universal Declaration of Human Rights as a common standard of achievement for all peoples and all nations, to the end that every individual and every organ of society, keeping this Declaration constantly in mind, shall strive by teaching and education to promote respect for these rights and freedoms and by progressive measures, national and international, to secure their universal and effective recognition and observance, both among the peoples of Member States themselves and among the peoples of territories under their jurisdiction. \n\nArticle 1\nAll human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood.\n\nArticle 2\nEveryone is entitled to all the rights and freedoms set forth in this Declaration, without distinction of any kind, such as race, colour, sex, language, religion, political or other opinion, national or social origin, property, birth or other status. Furthermore, no distinction shall be made on the basis of the political, jurisdictional or international status of the country or territory to which a person belongs, whether it be independent, trust, non-self-governing or under any other limitation of sovereignty.\n\nArticle 3\nEveryone has the right to life, liberty and security of person.\n\nArticle 4\nNo one shall be held in slavery or servitude; slavery and the slave trade shall be prohibited in all their forms.\n\nArticle 5\nNo one shall be subjected to torture or to cruel, inhuman or degrading treatment or punishment.\n\nArticle 6\nEveryone has the right to recognition everywhere as a person before the law.\n\nArticle 7\nAll are equal before the law and are entitled without any discrimination to equal protection of the law. All are entitled to equal protection against any discrimination in violation of this Declaration and against any incitement to such discrimination.\n\nArticle 8\nEveryone has the right to an effective remedy by the competent national tribunals for acts violating the fundamental rights granted him by the constitution or by law.\n\nArticle 9\nNo one shall be subjected to arbitrary arrest, detention or exile.\n\nArticle 10\nEveryone is entitled in full equality to a fair and public hearing by an independent and impartial tribunal, in the determination of his rights and obligations and of any criminal charge against him.\n\nArticle 11\nEveryone charged with a penal offence has the right to be presumed innocent until proved guilty according to law in a public trial at which he has had all the guarantees necessary for his defence.\nNo one shall be held guilty of any penal offence on account of any act or omission which did not constitute a penal offence, under national or international law, at the time when it was committed. Nor shall a heavier penalty be imposed than the one that was applicable at the time the penal offence was committed.\nArticle 12\nNo one shall be subjected to arbitrary interference with his privacy, family, home or correspondence, nor to attacks upon his honour and reputation. Everyone has the right to the protection of the law against such interference or attacks.\n\nArticle 13\nEveryone has the right to freedom of movement and residence within the borders of each state.\nEveryone has the right to leave any country, including his own, and to return to his country.\nArticle 14\nEveryone has the right to seek and to enjoy in other countries asylum from persecution.\nThis right may not be invoked in the case of prosecutions genuinely arising from non-political crimes or from acts contrary to the purposes and principles of the United Nations.\nArticle 15\nEveryone has the right to a nationality.\nNo one shall be arbitrarily deprived of his nationality nor denied the right to change his nationality.\nArticle 16\nMen and women of full age, without any limitation due to race, nationality or religion, have the right to marry and to found a family. They are entitled to equal rights as to marriage, during marriage and at its dissolution.\nMarriage shall be entered into only with the free and full consent of the intending spouses.\nThe family is the natural and fundamental group unit of society and is entitled to protection by society and the State.\nArticle 17\nEveryone has the right to own property alone as well as in association with others.\nNo one shall be arbitrarily deprived of his property.\nArticle 18\nEveryone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance.\n\nArticle 19\nEveryone has the right to freedom of opinion and expression; this right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers.\n\nArticle 20\nEveryone has the right to freedom of peaceful assembly and association.\nNo one may be compelled to belong to an association.\nArticle 21\nEveryone has the right to take part in the government of his country, directly or through freely chosen representatives.\nEveryone has the right of equal access to public service in his country.\nThe will of the people shall be the basis of the authority of government; this will shall be expressed in periodic and genuine elections which shall be by universal and equal suffrage and shall be held by secret vote or by equivalent free voting procedures.\nArticle 22\nEveryone, as a member of society, has the right to social security and is entitled to realization, through national effort and international co-operation and in accordance with the organization and resources of each State, of the economic, social and cultural rights indispensable for his dignity and the free development of his personality.\n\nArticle 23\nEveryone has the right to work, to free choice of employment, to just and favourable conditions of work and to protection against unemployment.\nEveryone, without any discrimination, has the right to equal pay for equal work.\nEveryone who works has the right to just and favourable remuneration ensuring for himself and his family an existence worthy of human dignity, and supplemented, if necessary, by other means of social protection.\nEveryone has the right to form and to join trade unions for the protection of his interests.\nArticle 24\nEveryone has the right to rest and leisure, including reasonable limitation of working hours and periodic holidays with pay.\n\nArticle 25\nEveryone has the right to a standard of living adequate for the health and well-being of himself and of his family, including food, clothing, housing and medical care and necessary social services, and the right to security in the event of unemployment, sickness, disability, widowhood, old age or other lack of livelihood in circumstances beyond his control.\nMotherhood and childhood are entitled to special care and assistance. All children, whether born in or out of wedlock, shall enjoy the same social protection.\nArticle 26\nEveryone has the right to education. Education shall be free, at least in the elementary and fundamental stages. Elementary education shall be compulsory. Technical and professional education shall be made generally available and higher education shall be equally accessible to all on the basis of merit.\nEducation shall be directed to the full development of the human personality and to the strengthening of respect for human rights and fundamental freedoms. It shall promote understanding, tolerance and friendship among all nations, racial or religious groups, and shall further the activities of the United Nations for the maintenance of peace.\nParents have a prior right to choose the kind of education that shall be given to their children.\nArticle 27\nEveryone has the right freely to participate in the cultural life of the community, to enjoy the arts and to share in scientific advancement and its benefits.\nEveryone has the right to the protection of the moral and material interests resulting from any scientific, literary or artistic production of which he is the author.\nArticle 28\nEveryone is entitled to a social and international order in which the rights and freedoms set forth in this Declaration can be fully realized.\n\nArticle 29\nEveryone has duties to the community in which alone the free and full development of his personality is possible.\nIn the exercise of his rights and freedoms, everyone shall be subject only to such limitations as are determined by law solely for the purpose of securing due recognition and respect for the rights and freedoms of others and of meeting the just requirements of morality, public order and the general welfare in a democratic society.\nThese rights and freedoms may in no case be exercised contrary to the purposes and principles of the United Nations.\nArticle 30\nNothing in this Declaration may be interpreted as implying for any State, group or person any right to engage in any activity or to perform any act aimed at the destruction of any of the rights and freedoms set forth herein.",
+      "metadata": {
+        "domain": "human_rights_en",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T14:22:55.684225Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "A milestone legal document in the history of human rights, proclaimed by the United Nations General Assembly on 10 December 1948 as a common standard of achievement for all peoples and nations. It sets out fundamental human rights to be universally protected, has been translated into over 500 languages, and inspired more than seventy human rights treaties. The text provided is its preamble and initial articles defining various rights and freedoms."
+          },
+          {
+            "entity_name": "United Nations General Assembly",
+            "entity_type": "ORGANIZATION",
+            "description": "The principal deliberative organ of the United Nations that proclaimed the Universal Declaration of Human Rights in Paris on 10 December 1948 through resolution 217 A, and that is described as proclaiming the Declaration as a common standard of achievement for all peoples and nations."
+          },
+          {
+            "entity_name": "United Nations",
+            "entity_type": "ORGANIZATION",
+            "description": "The global intergovernmental organization whose Charter reaffirms faith in fundamental human rights, dignity and worth of the human person, and equal rights of men and women. It cooperates with its Member States to promote universal respect for and observance of human rights and fundamental freedoms, and its purposes and principles are referenced as limiting asylum and the exercise of rights and freedoms."
+          },
+          {
+            "entity_name": "Charter of the United Nations",
+            "entity_type": "LAW",
+            "description": "The foundational treaty of the United Nations, referenced as the document in which the peoples of the United Nations reaffirm their faith in fundamental human rights, the dignity and worth of the human person, and equal rights of men and women, and determine to promote social progress and better standards of life in larger freedom."
+          },
+          {
+            "entity_name": "General Assembly resolution 217 A",
+            "entity_type": "LAW",
+            "description": "Resolution 217 A of the United Nations General Assembly, adopted in Paris on 10 December 1948, which proclaims the Universal Declaration of Human Rights as a common standard of achievement for all peoples and nations."
+          },
+          {
+            "entity_name": "Paris",
+            "entity_type": "CITY",
+            "description": "The city identified as the place where the United Nations General Assembly proclaimed the Universal Declaration of Human Rights on 10 December 1948."
+          },
+          {
+            "entity_name": "10 December 1948",
+            "entity_type": "DATE",
+            "description": "The date on which the United Nations General Assembly proclaimed the Universal Declaration of Human Rights in Paris, formally adopting it as General Assembly resolution 217 A."
+          },
+          {
+            "entity_name": "Human rights",
+            "entity_type": "IDELOGY",
+            "description": "A concept referenced as the foundation of freedom, justice and peace in the world, based on recognition of the inherent dignity and equal and inalienable rights of all members of the human family. It is also described as being strengthened by education directed to respect for human rights and fundamental freedoms."
+          },
+          {
+            "entity_name": "Rule of law",
+            "entity_type": "LAW",
+            "description": "A legal and philosophical principle mentioned as being essential to protect human rights so that people are not compelled to rebellion against tyranny and oppression. It provides the framework for recognizing individuals as persons before the law and for limiting rights only as determined by law."
+          },
+          {
+            "entity_name": "Freedom",
+            "entity_type": "IDEOLOGY",
+            "description": "An overarching social condition described as including freedom of speech and belief and freedom from fear and want, proclaimed as the highest aspiration of the common people. It is also mentioned as something to be maintained through the activities of the United Nations and supported by international order."
+          },
+          {
+            "entity_name": "Justice",
+            "entity_type": "IDEOLOGY",
+            "description": "A concept cited as part of the foundation in the preamble, paired with freedom and peace, and as a just requirement in a democratic society that may justify limitations on rights, particularly in relation to public order and general welfare."
+          },
+          {
+            "entity_name": "Peace",
+            "entity_type": "IDEOLOGY",
+            "description": "A global condition mentioned as part of the foundation of freedom, justice and peace in the world, and later as something that the United Nations seeks to maintain through its activities and through education fostering understanding, tolerance and friendship among nations and groups."
+          },
+          {
+            "entity_name": "Inherent dignity",
+            "entity_type": "IDEOLOGY",
+            "description": "A foundational concept in the preamble, referring to the inherent dignity of all members of the human family, which underpins the equal and inalienable rights recognized in the Universal Declaration of Human Rights and is linked to an existence worthy of human dignity in relation to work and living standards."
+          },
+          {
+            "entity_name": "Human family",
+            "entity_type": "FAMILY",
+            "description": "A term used to describe the entire human population, whose conscience is outraged by barbarous acts resulting from disregard and contempt for human rights, and whose members are recognized as born free and equal in dignity and rights."
+          },
+          {
+            "entity_name": "Mankind",
+            "entity_type": "PERSON",
+            "description": "The collective body described as having its conscience outraged by barbarous acts resulting from disregard and contempt for human rights, serving as a moral reference for the need for a world in which human beings enjoy freedom of speech, belief, and freedom from fear and want."
+          },
+          {
+            "entity_name": "Barbarous acts",
+            "entity_type": "EVENT",
+            "description": "An abstract concept representing acts of extreme cruelty and brutality that have resulted from disregard and contempt for human rights and have outraged the conscience of mankind, serving as justification for the proclamation of the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Tyranny",
+            "entity_type": "CRIME",
+            "description": "A concept cited in the preamble as a form of extreme injustice and domination that, if not checked by the protection of human rights through the rule of law, may lead people to rebellion as a last resort."
+          },
+          {
+            "entity_name": "Oppression",
+            "entity_type": "CRIME",
+            "description": "A condition named alongside tyranny in the preamble as a form of severe injustice that people might rebel against if human rights are not protected by the rule of law."
+          },
+          {
+            "entity_name": "States",
+            "entity_type": "COUNTRY",
+            "description": "A term referring to sovereign political entities whose peoples are addressed by the Universal Declaration of Human Rights, and between which friendly relations are to be promoted. States are mentioned as having organization and resources that influence realization of economic, social and cultural rights, and as entities subject to limitations regarding activities destructive of rights and freedoms."
+          },
+          {
+            "entity_name": "Member States of the United Nations",
+            "entity_type": "ORGANIZATION",
+            "description": "Member countries of the United Nations that have pledged to achieve, in cooperation with the United Nations, the promotion of universal respect for and observance of human rights and fundamental freedoms, and whose peoples are intended beneficiaries of universal and effective recognition and observance of the rights in the Declaration."
+          },
+          {
+            "entity_name": "Friendly relations between nations",
+            "entity_type": "IDELOGY",
+            "description": "A concept referenced as necessary to develop and maintain peaceful and cooperative interactions between nations, cited in the preamble as an essential objective."
+          },
+          {
+            "entity_name": "Social progress",
+            "entity_type": "IDELOGY",
+            "description": "A social and economic concept mentioned as an objective determined by the peoples of the United Nations in the Charter, involving better standards of life in larger freedom, and later referenced in relation to general welfare in a democratic society as a justification for certain limitations on rights."
+          },
+          {
+            "entity_name": "Better standards of life",
+            "entity_type": "IDEOLOGY",
+            "description": "An economic and social concept described as better standards of life in larger freedom, which the peoples of the United Nations are determined to promote according to the Charter, and which relates to general welfare in a democratic society."
+          },
+          {
+            "entity_name": "Common standard of achievement",
+            "entity_type": "IDEOLOGY",
+            "description": "The idea of a common benchmark or reference point for achievements in the area of human rights, which the Universal Declaration of Human Rights is proclaimed to be for all peoples and nations, guiding teaching, education, and progressive measures."
+          },
+          {
+            "entity_name": "Freedom of speech",
+            "entity_type": "IDEOLOGY",
+            "description": "A fundamental freedom highlighted in the preamble as part of the highest aspiration of the common people and later explicitly protected under the right to freedom of opinion and expression, allowing individuals to express opinions through any media and regardless of frontiers."
+          },
+          {
+            "entity_name": "Freedom of belief",
+            "entity_type": "IDEOLOGY",
+            "description": "A fundamental liberty mentioned in the preamble as part of the highest aspiration of the common people, referring to the freedom to hold and practice personal belief, particularly in relation to religion and conscience."
+          },
+          {
+            "entity_name": "Freedom from fear",
+            "entity_type": "IDEOLOGY",
+            "description": "A condition cited in the preamble as part of the highest aspiration of the common people, describing a state where individuals are free from fear, and later connected with the maintenance of peace and rights protections."
+          },
+          {
+            "entity_name": "Freedom from want",
+            "entity_type": "IDEOLOGY",
+            "description": "A condition mentioned in the preamble as part of the highest aspiration of the common people, indicating freedom from want of basic necessities, and later connected to economic and social rights like standard of living, social security, and work."
+          },
+          {
+            "entity_name": "Economic, social and cultural rights",
+            "entity_type": "LAW",
+            "description": "A broad concept referenced multiple times, including economic, social and cultural rights indispensable for dignity, rights related to work, social security, education, and standard of living, which the Universal Declaration of Human Rights seeks to protect and realize."
+          },
+          {
+            "entity_name": "Common understanding of rights and freedoms",
+            "entity_type": "IDEOLOGY",
+            "description": "The idea that rights and freedoms must be understood in common by all, described as being of the greatest importance for the full realization of the pledge by Member States to promote universal respect and observance of human rights and fundamental freedoms."
+          },
+          {
+            "entity_name": "Human rights treaties",
+            "entity_type": "LAW",
+            "description": "The overarching reference to the international legal instruments, more than seventy in number, that were inspired by and followed the Universal Declaration of Human Rights and contain references to it in their preambles, applying its principles on a permanent basis at global and regional levels."
+          },
+          {
+            "entity_name": "Preamble of the Universal Declaration of Human Rights",
+            "entity_type": "WORK_OF_ART",
+            "description": "The type of document section introducing the Universal Declaration of Human Rights, listing the \"Whereas\" clauses that set out the philosophical and practical reasons for the Declaration, including inherent dignity, contempt for human rights, the need for rule of law, friendly relations between nations, and commitments in the United Nations Charter."
+          },
+          {
+            "entity_name": "Articles of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "Numbered sections of the Universal Declaration of Human Rights that enumerate specific rights and freedoms. The text includes Articles 1 through 30, covering rights such as equality, life, freedom from slavery and torture, fair trial, education, work, and participation in government."
+          },
+          {
+            "entity_name": "Article 1 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The first article of the Universal Declaration of Human Rights, stating that all human beings are born free and equal in dignity and rights, endowed with reason and conscience, and should act towards one another in a spirit of brotherhood."
+          },
+          {
+            "entity_name": "Article 2 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The second article of the Universal Declaration of Human Rights, guaranteeing entitlement to all rights and freedoms in the Declaration without distinctions such as race, colour, sex, language, religion, political or other opinion, national or social origin, property, birth or other status, and prohibiting discrimination based on political, jurisdictional or international status of a country or territory."
+          },
+          {
+            "entity_name": "Article 3 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The third article of the Universal Declaration of Human Rights, stating that everyone has the right to life, liberty and security of person."
+          },
+          {
+            "entity_name": "Article 4 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The fourth article of the Universal Declaration of Human Rights, prohibiting slavery and servitude and mandating that slavery and the slave trade be prohibited in all their forms."
+          },
+          {
+            "entity_name": "Article 5 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The fifth article of the Universal Declaration of Human Rights, prohibiting torture and cruel, inhuman or degrading treatment or punishment."
+          },
+          {
+            "entity_name": "Article 6 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The sixth article of the Universal Declaration of Human Rights, stating that everyone has the right to recognition everywhere as a person before the law."
+          },
+          {
+            "entity_name": "Article 7 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The seventh article of the Universal Declaration of Human Rights, stating that all are equal before the law and entitled without discrimination to equal protection of the law, and to protection against discrimination in violation of the Declaration and against incitement to such discrimination."
+          },
+          {
+            "entity_name": "Article 8 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The eighth article of the Universal Declaration of Human Rights, recognizing the right to an effective remedy by competent national tribunals for acts violating fundamental rights granted by the constitution or by law."
+          },
+          {
+            "entity_name": "Article 9 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The ninth article of the Universal Declaration of Human Rights, stating that no one shall be subjected to arbitrary arrest, detention or exile."
+          },
+          {
+            "entity_name": "Article 10 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The tenth article of the Universal Declaration of Human Rights, recognizing the right to a fair and public hearing by an independent and impartial tribunal in the determination of rights, obligations, and any criminal charge."
+          },
+          {
+            "entity_name": "Article 11 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The eleventh article of the Universal Declaration of Human Rights, establishing the right to be presumed innocent until proved guilty in a public trial with necessary guarantees, and prohibiting conviction for acts not criminal under national or international law at the time committed, as well as heavier penalties than those applicable at the time of the offence."
+          },
+          {
+            "entity_name": "Article 12 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twelfth article of the Universal Declaration of Human Rights, protecting individuals from arbitrary interference with privacy, family, home or correspondence, and from attacks on honour and reputation, and granting the right to legal protection against such interference or attacks."
+          },
+          {
+            "entity_name": "Article 13 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The thirteenth article of the Universal Declaration of Human Rights, granting the right to freedom of movement and residence within the borders of each state, and the right to leave any country, including one’s own, and to return to one’s country."
+          },
+          {
+            "entity_name": "Article 14 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The fourteenth article of the Universal Declaration of Human Rights, recognizing the right to seek and enjoy asylum from persecution in other countries, with the limitation that it cannot be invoked for prosecutions arising from non-political crimes or acts contrary to the purposes and principles of the United Nations."
+          },
+          {
+            "entity_name": "Article 15 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The fifteenth article of the Universal Declaration of Human Rights, stating that everyone has the right to a nationality and prohibiting arbitrary deprivation of nationality or denial of the right to change nationality."
+          },
+          {
+            "entity_name": "Article 16 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The sixteenth article of the Universal Declaration of Human Rights, recognizing the right of men and women of full age, without limitation due to race, nationality or religion, to marry and found a family, with equal rights in marriage and at its dissolution, requiring free and full consent of spouses, and recognizing the family as the natural and fundamental group unit of society entitled to protection by society and the State."
+          },
+          {
+            "entity_name": "Article 17 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The seventeenth article of the Universal Declaration of Human Rights, recognizing the right to own property alone and in association with others, and prohibiting arbitrary deprivation of property."
+          },
+          {
+            "entity_name": "Article 18 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The eighteenth article of the Universal Declaration of Human Rights, establishing the right to freedom of thought, conscience and religion, including the freedom to change religion or belief, and to manifest religion or belief in teaching, practice, worship and observance, alone or with others, in public or private."
+          },
+          {
+            "entity_name": "Article 19 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The nineteenth article of the Universal Declaration of Human Rights, recognizing the right to freedom of opinion and expression, including the freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers."
+          },
+          {
+            "entity_name": "Article 20 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twentieth article of the Universal Declaration of Human Rights, recognizing the right to freedom of peaceful assembly and association and prohibiting compulsion to belong to an association."
+          },
+          {
+            "entity_name": "Article 21 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twenty-first article of the Universal Declaration of Human Rights, establishing the right of everyone to take part in government directly or through freely chosen representatives, to equal access to public service, and declaring that the will of the people shall be the basis of the authority of government, expressed in periodic and genuine elections by universal and equal suffrage and secret or equivalent free voting procedures."
+          },
+          {
+            "entity_name": "Article 22 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twenty-second article of the Universal Declaration of Human Rights, stating that everyone, as a member of society, has the right to social security and is entitled to realization of economic, social and cultural rights indispensable for dignity and free development of personality, through national effort and international cooperation in accordance with the organization and resources of each State."
+          },
+          {
+            "entity_name": "Article 23 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twenty-third article of the Universal Declaration of Human Rights, recognizing the right to work, free choice of employment, just and favourable conditions of work, protection against unemployment, equal pay for equal work without discrimination, just and favourable remuneration ensuring an existence worthy of human dignity for oneself and family, supplemented by social protection if necessary, and the right to form and join trade unions."
+          },
+          {
+            "entity_name": "Article 24 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twenty-fourth article of the Universal Declaration of Human Rights, recognizing the right to rest and leisure, including reasonable limitation of working hours and periodic holidays with pay."
+          },
+          {
+            "entity_name": "Article 25 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twenty-fifth article of the Universal Declaration of Human Rights, recognizing the right to an adequate standard of living for health and well-being of oneself and family, including food, clothing, housing, medical care and necessary social services, and security in the event of unemployment, sickness, disability, widowhood, old age or other lack of livelihood beyond one’s control; and providing that motherhood and childhood are entitled to special care and assistance and that all children shall enjoy the same social protection regardless of birth status."
+          },
+          {
+            "entity_name": "Article 26 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twenty-sixth article of the Universal Declaration of Human Rights, establishing the right to education, requiring that education be free at least in elementary and fundamental stages, that elementary education be compulsory, and that technical, professional and higher education be generally available and accessible on the basis of merit; directing education toward full development of the human personality and strengthening respect for human rights and fundamental freedoms, promoting understanding, tolerance and friendship among nations and groups, and furthering the activities of the United Nations for peace; and recognizing parents’ prior right to choose their children’s education."
+          },
+          {
+            "entity_name": "Article 27 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twenty-seventh article of the Universal Declaration of Human Rights, recognizing the right to freely participate in cultural life, enjoy the arts, and share in scientific advancement and its benefits, and the right to protection of moral and material interests resulting from scientific, literary or artistic productions of which a person is the author."
+          },
+          {
+            "entity_name": "Article 28 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twenty-eighth article of the Universal Declaration of Human Rights, stating that everyone is entitled to a social and international order in which the rights and freedoms in the Declaration can be fully realized."
+          },
+          {
+            "entity_name": "Article 29 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The twenty-ninth article of the Universal Declaration of Human Rights, stating that everyone has duties to the community where free and full development of personality is possible, that rights and freedoms may be subject only to limitations determined by law for securing recognition and respect for others’ rights and for meeting just requirements of morality, public order and general welfare in a democratic society, and that rights may not be exercised contrary to the purposes and principles of the United Nations."
+          },
+          {
+            "entity_name": "Article 30 of the Universal Declaration of Human Rights",
+            "entity_type": "LAW",
+            "description": "The thirtieth article of the Universal Declaration of Human Rights, stating that nothing in the Declaration may be interpreted as implying for any State, group or person any right to engage in activities or acts aimed at the destruction of any rights and freedoms set forth in the Declaration."
+          },
+          {
+            "entity_name": "Equal and inalienable rights",
+            "entity_type": "LAW",
+            "description": "The concept of equal and inalienable rights belonging to all members of the human family, referenced in the preamble as part of the foundation of freedom, justice and peace and forming the basis for the rights enumerated throughout the Declaration."
+          },
+          {
+            "entity_name": "Law",
+            "entity_type": "LAW",
+            "description": "Legal and societal norms mentioned repeatedly, including those granting fundamental rights and providing for remedies, as well as national and international laws that determine penal offences at the time acts are committed."
+          },
+          {
+            "entity_name": "National tribunals",
+            "entity_type": "FACILITY",
+            "description": "National courts referenced as competent bodies that provide effective remedies for acts violating fundamental rights granted by the constitution or law, as described in Article 8 of the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Independent and impartial tribunals",
+            "entity_type": "FACILITY",
+            "description": "Judicial bodies described as independent and impartial tribunals that provide fair and public hearings in determining rights, obligations and criminal charges, as guaranteed by Article 10 of the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Arbitrary arrest",
+            "entity_type": "CRIME",
+            "description": "A form of deprivation of liberty mentioned in Article 9, where a person is taken into custody without lawful basis or proper legal process, and explicitly prohibited by the Universal Declaration of Human Rights when arbitrary."
+          },
+          {
+            "entity_name": "Arbitrary detention",
+            "entity_type": "CRIME",
+            "description": "A form of deprivation of liberty mentioned in Article 9, where a person is held in confinement without lawful justification, and explicitly prohibited when arbitrary by the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Arbitrary exile",
+            "entity_type": "CRIME",
+            "description": "A form of forced removal from one’s country or home mentioned in Article 9, where a person is sent away without lawful basis, and explicitly prohibited when arbitrary by the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Servitude",
+            "entity_type": "CRIME",
+            "description": "The condition in which a person’s labour or services are controlled by another under coercion, referenced in Article 4 along with slavery and prohibited in all their forms by the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Slave trade",
+            "entity_type": "CRIME",
+            "description": "A practice explicitly prohibited by Article 4 of the Universal Declaration of Human Rights, referring to the trade in human beings as property, which must be abolished in all forms."
+          },
+          {
+            "entity_name": "Torture",
+            "entity_type": "CRIME",
+            "description": "The infliction of severe physical or mental pain or suffering, prohibited by Article 5 of the Universal Declaration of Human Rights as a form of treatment or punishment that no one shall be subjected to."
+          },
+          {
+            "entity_name": "Cruel, inhuman or degrading treatment or punishment",
+            "entity_type": "CRIME",
+            "description": "Punitive or disciplinary actions described in Article 5 as cruel, inhuman or degrading treatment or punishment, which are prohibited by the Universal Declaration of Human Rights."
+          },
+          {
+            "entity_name": "Heavier penalty",
+            "entity_type": "PENALTY",
+            "description": "The concept in Article 11 that any heavier penalty must not be imposed than the one applicable at the time a penal offence was committed, prohibiting retroactively harsher punishments and protecting against ex post facto increases in penalties."
+          },
+          {
+            "entity_name": "Penal offence",
+            "entity_type": "CRIME",
+            "description": "A criterion in Article 11 requiring that penal offences be defined by national or international law at the time acts or omissions occur, thus preventing retroactive criminalization."
+          },
+          {
+            "entity_name": "Freedom of movement",
+            "entity_type": "IDEOLOGY",
+            "description": "The right described in Article 13 allowing individuals to move freely and choose their residence within the borders of each state, forming part of the broader freedom of movement."
+          },
+          {
+            "entity_name": "Residence within state borders",
+            "entity_type": "LOCATION",
+            "description": "The right described in Article 13 allowing individuals to select their place of residence inside the borders of a state, subject to the general freedom of movement."
+          },
+          {
+            "entity_name": "Right to asylum",
+            "entity_type": "LAW",
+            "description": "The right in Article 14 to seek and enjoy protection in another country from persecution, subject to limitations regarding non-political crimes and acts contrary to the purposes and principles of the United Nations."
+          },
+          {
+            "entity_name": "Nationality",
+            "entity_type": "NATIONALITY",
+            "description": "The legal concept referenced in Article 15, referring to a person’s legal bond with a state, which everyone has a right to and may not be arbitrarily deprived of, including the right to change this status."
+          },
+          {
+            "entity_name": "Family",
+            "entity_type": "FAMILY",
+            "description": "A social unit recognized in Article 16 as the natural and fundamental group unit of society, entitled to protection by society and the State, formed through marriage and central to rights related to standard of living and social protection."
+          },
+          {
+            "entity_name": "Marriage",
+            "entity_type": "LAW",
+            "description": "The institution described in Article 16 as entered into only with the free and full consent of intending spouses, providing equal rights to men and women during marriage and at dissolution, and serving as the basis for founding a family."
+          },
+          {
+            "entity_name": "Right to own property",
+            "entity_type": "LAW",
+            "description": "The right recognized in Article 17 to own possessions alone or jointly, and to be free from arbitrary deprivation of those possessions."
+          },
+          {
+            "entity_name": "Freedom of religion",
+            "entity_type": "RELIGION",
+            "description": "The freedom recognized in Article 18, encompassing the liberty to hold, change and manifest religious beliefs, including worship and observance, in public or private, alone or with others."
+          },
+          {
+            "entity_name": "Freedom of thought and conscience",
+            "entity_type": "IDEOLOGY",
+            "description": "The freedom recognized in Article 18, encompassing the liberty to hold internal thoughts and moral judgments without interference, often linked to the ability to follow one’s conscience in matters of belief."
+          },
+          {
+            "entity_name": "Freedom of opinion and expression",
+            "entity_type": "IDEOLOGY",
+            "description": "The freedom recognized in Article 19, covering the liberty to hold opinions, express them, and access and disseminate information and ideas through any media and across frontiers."
+          },
+          {
+            "entity_name": "Freedom of peaceful assembly and association",
+            "entity_type": "IDEOLOGY",
+            "description": "The freedom recognized in Article 20, covering the right to gather peacefully with others, and the prohibition on being compelled to belong to any association."
+          },
+          {
+            "entity_name": "Associations",
+            "entity_type": "ORGANIZATION",
+            "description": "Organizations referenced implicitly in Article 20 as bodies people may belong to or be compelled to join, and explicitly in the prohibition of compulsion to belong, and in the context of trade unions in Article 23."
+          },
+          {
+            "entity_name": "Trade unions",
+            "entity_type": "ORGANIZATION",
+            "description": "Organizations mentioned in Article 23 that individuals have the right to form and join for the protection of their interests, especially in the context of work, pay and conditions."
+          },
+          {
+            "entity_name": "Work",
+            "entity_type": "PROFESSION",
+            "description": "The activity mentioned in Article 23 as a right of everyone, including free choice of employment, with associated rights to just and favourable conditions, protection against unemployment, equal pay for equal work, and remuneration ensuring an existence worthy of human dignity."
+          },
+          {
+            "entity_name": "Public service",
+            "entity_type": "ORGANIZATION",
+            "description": "The public systems referenced in Article 21 to which everyone has the right of equal access, and within which they may participate in government, including roles and functions administered by states."
+          },
+          {
+            "entity_name": "Elections",
+            "entity_type": "EVENT",
+            "description": "The process described in Article 21 by which the will of the people shall be expressed as the basis of government authority, characterized as periodic and genuine elections with universal and equal suffrage and secret or equivalent free voting procedures."
+          },
+          {
+            "entity_name": "Universal and equal suffrage",
+            "entity_type": "LAW",
+            "description": "The concept in Article 21 that every citizen’s vote has equal weight and that all adults should have the right to vote in elections expressing the will of the people as the basis of government authority."
+          },
+          {
+            "entity_name": "Secret vote",
+            "entity_type": "LAW",
+            "description": "The secret voting procedures described in Article 21 as a means of ensuring free expression of the will of the people in elections, used as an example of free voting procedures."
+          },
+          {
+            "entity_name": "Social security",
+            "entity_type": "LAW",
+            "description": "The right in Article 22 to protection provided by society and the state against social risks and hardships, enabling realization of economic, social and cultural rights indispensable for dignity and free development of personality."
+          },
+          {
+            "entity_name": "Education",
+            "entity_type": "WORK_OF_ART",
+            "description": "The learning process recognized in Article 26 as a right, which must be free at least at elementary and fundamental stages, compulsory at elementary level, and directed to full development of the human personality and strengthening respect for human rights, as well as promoting understanding, tolerance and friendship among nations and groups."
+          },
+          {
+            "entity_name": "Elementary education",
+            "entity_type": "WORK_OF_ART",
+            "description": "The stage of schooling referenced in Article 26 that must be free and compulsory, forming the foundation of basic education and human development."
+          },
+          {
+            "entity_name": "Technical and professional education",
+            "entity_type": "WORK_OF_ART",
+            "description": "Forms of instruction referenced in Article 26 that must be made generally available, characterized as technical and professional, often tied to vocational training and skills development."
+          },
+          {
+            "entity_name": "Higher education",
+            "entity_type": "WORK_OF_ART",
+            "description": "Advanced education referenced in Article 26, which must be equally accessible to all on the basis of merit, often associated with universities and higher institutes of learning."
+          },
+          {
+            "entity_name": "Cultural life of the community",
+            "entity_type": "EVENT",
+            "description": "A social and cultural condition referenced in Article 27 in which individuals can participate freely in cultural life, including arts and scientific advancement, and enjoy related benefits."
+          },
+          {
+            "entity_name": "Arts",
+            "entity_type": "WORK_OF_ART",
+            "description": "Creative activities referenced in Article 27 that people have the right to enjoy as part of cultural life, and from which authors derive moral and material interests to be protected."
+          },
+          {
+            "entity_name": "Scientific advancement",
+            "entity_type": "WORK_OF_ART",
+            "description": "Scientific progress referenced in Article 27, in which individuals have the right to share and from which they may derive benefits, and which produces scientific works whose authors’ moral and material interests are protected."
+          },
+          {
+            "entity_name": "Moral and material interests of authors",
+            "entity_type": "LAW",
+            "description": "The moral and material benefits referenced in Article 27 that authors of scientific, literary or artistic productions have a right to protect, including rights related to attribution and economic interests."
+          },
+          {
+            "entity_name": "Scientific, literary and artistic productions",
+            "entity_type": "WORK_OF_ART",
+            "description": "Works referenced in Article 27, including scientific, literary or artistic productions, whose authors are entitled to protection of their moral and material interests."
+          },
+          {
+            "entity_name": "Social and international order",
+            "entity_type": "IDEOLOGY",
+            "description": "A condition in Article 28 where social and international systems are structured so that the rights and freedoms in the Declaration can be fully realized, implying global cooperation and order."
+          },
+          {
+            "entity_name": "Country",
+            "entity_type": "COUNTRY",
+            "description": "The geographical and political entity referenced in multiple articles as the area within which freedom of movement and residence is exercised, and to which a person may belong in terms of nationality, asylum, government participation and return."
+          },
+          {
+            "entity_name": "Territories",
+            "entity_type": "LOCATION",
+            "description": "Territorial entities referenced in Article 2 as units whose political, jurisdictional or international status shall not be grounds for discrimination, and as areas under the jurisdiction of Member States whose peoples are to benefit from universal and effective recognition and observance of rights."
+          },
+          {
+            "entity_name": "Teaching and education",
+            "entity_type": "WORK_OF_ART",
+            "description": "The process referenced in the preamble and Article 26 as the means by which individuals and organs of society promote respect for rights and freedoms, emphasizing teaching and education to develop understanding, tolerance and friendship among nations and groups."
+          },
+          {
+            "entity_name": "General welfare",
+            "entity_type": "IDEOLOGY",
+            "description": "The general welfare referenced in Article 29 as one of the just requirements that may justify legal limitations on rights and freedoms in a democratic society, along with morality and public order."
+          },
+          {
+            "entity_name": "Democratic society",
+            "entity_type": "IDEOLOGY",
+            "description": "The form of political organization referenced in Article 29 in which limitations on rights must meet just requirements of morality, public order and general welfare, indicating that rights should be exercised within a democratic framework."
+          },
+          {
+            "entity_name": "Groups",
+            "entity_type": "ORGANIZATION",
+            "description": "Collective bodies referenced in Article 30, including any state, group or person, that may not claim rights under the Declaration to engage in activities aimed at destruction of the rights and freedoms set forth therein."
+          },
+          {
+            "entity_name": "Persons",
+            "entity_type": "PERSON",
+            "description": "Individuals referenced in Article 30 as entities that may not claim any right, under the Declaration, to undertake activities or acts aimed at destroying the rights and freedoms set forth in the Declaration."
+          },
+          {
+            "entity_name": "Common people",
+            "entity_type": "PERSON",
+            "description": "The people referenced in the preamble whose highest aspiration includes a world in which human beings enjoy freedom of speech and belief and freedom from fear and want, representing ordinary members of society whose rights the Declaration aims to protect."
+          },
+          {
+            "entity_name": "Parents",
+            "entity_type": "PERSON",
+            "description": "Parents referenced in Article 26 as having a prior right to choose the kind of education that shall be given to their children, indicating their primary role in educational decisions."
+          },
+          {
+            "entity_name": "Children",
+            "entity_type": "PERSON",
+            "description": "Children referenced in Article 25 and Article 26 as entitled to special care and assistance, equal social protection regardless of birth status, and as subjects of parental educational choice."
+          },
+          {
+            "entity_name": "Motherhood",
+            "entity_type": "PERSON",
+            "description": "Mothers referenced in Article 25 as part of motherhood and childhood, which are entitled to special care and assistance in relation to health, well-being and social protection."
+          },
+          {
+            "entity_name": "Old age",
+            "entity_type": "AGE",
+            "description": "A life stage referenced in Article 25 as a condition in which individuals should enjoy social protection and an adequate standard of living, including security in old age."
+          }
+        ],
+        "relations": []
+      },
+      "quality_rating": 9,
+      "id": "3e18fc1c-07e9-4eeb-8904-0fcf5a5daf13"
+    },
+    {
+      "input_text": "The Australian and New Zealand Stock Exchanges\n(‘ASX’ and ‘NZSX’) have, since 1989 and 1992\nrespectively, incorporated the Code into their\nlisting rules. Under these listing rules, a Public\nReport must be prepared in accordance with the\nCode if it includes a statement on exploration\nresults, Mineral Resources or Ore Reserves. The\nincorporation of the Code imposes certain specific\nrequirements on mining or exploration companies\nreporting to the ASX and NZSX. The guidelines in\nthis section of the Code which paraphrase these\nrequirements should not be used as a replacement\nfor the relevant listing rules, and it is strongly\nrecommended that users of the Code familiarise\nthemselves with those listing rules which relate to\nPublic Reporting of exploration results, Mineral\nResources and Ore Reserves.\nASX listing rules require the Competent Person(s),\non whose work the Public Report of Mineral\nResources or Ore Reserves is based, to be named\nin the report. The report or attached statement must\nsay that the person consents to the inclusion in the\nreport of the matters based on their information in\nthe form and context in which it appears, and must\ninclude the name of the person’s firm or employer.\nRefer also to Clause 8 of the Code.",
+      "metadata": {
+        "domain": "minerals_en",
+        "difficulty": "medium",
+        "language": "english",
+        "generated_at": "2026-05-21T14:59:43.129571Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Australian Stock Exchange",
+            "entity_type": "ORGANIZATION",
+            "description": "The stock exchange operating in Australia, referred to by the abbreviation 'ASX'. It has incorporated the Code into its listing rules since 1989. Under its listing rules, Public Reports containing statements on exploration results, Mineral Resources or Ore Reserves must be prepared in accordance with the Code. It imposes specific reporting requirements on mining or exploration companies and requires that the Competent Person(s) whose work underpins Public Reports of Mineral Resources or Ore Reserves be named, give consent, and have their firm or employer named in the report."
+          },
+          {
+            "entity_name": "New Zealand Stock Exchange",
+            "entity_type": "ORGANIZATION",
+            "description": "The stock exchange operating in New Zealand, referred to by the abbreviation 'NZSX'. It has incorporated the Code into its listing rules since 1992. Under its listing rules, Public Reports containing statements on exploration results, Mineral Resources or Ore Reserves must be prepared in accordance with the Code, and it imposes specific reporting requirements on mining or exploration companies similar to those of the ASX."
+          },
+          {
+            "entity_name": "ASX",
+            "entity_type": "ORGANIZATION",
+            "description": "An abbreviation referring collectively to the Australian Stock Exchange in the context of the text. It is used in relation to listing rules, reporting requirements for mining or exploration companies, and obligations concerning Public Reports of Mineral Resources or Ore Reserves and Competent Persons."
+          },
+          {
+            "entity_name": "NZSX",
+            "entity_type": "ORGANIZATION",
+            "description": "An abbreviation referring collectively to the New Zealand Stock Exchange in the context of the text. It is used in relation to listing rules and obligations for mining or exploration companies reporting exploration results, Mineral Resources or Ore Reserves."
+          },
+          {
+            "entity_name": "The Code",
+            "entity_type": "LAW",
+            "description": "A formal reporting and classification code governing how exploration results, Mineral Resources and Ore Reserves are reported in Public Reports to the Australian Stock Exchange and New Zealand Stock Exchange. The Code is incorporated into the listing rules of both exchanges and imposes specific requirements on mining or exploration companies. It includes guidelines and clauses, including Clause 8, and is intended to be followed in preparing Public Reports, though it is not a replacement for the listing rules themselves."
+          },
+          {
+            "entity_name": "Listing rules",
+            "entity_type": "LAW",
+            "description": "A set of rules established by a stock exchange, in this case by the Australian Stock Exchange and New Zealand Stock Exchange, which have incorporated the Code since 1989 and 1992 respectively. Under these rules, Public Reports containing statements on exploration results, Mineral Resources or Ore Reserves must comply with the Code. They include provisions that require naming Competent Persons and their firm or employer, and obtaining their consent for inclusion of information."
+          },
+          {
+            "entity_name": "Public Report",
+            "entity_type": "PRODUCT",
+            "description": "The requirement that a report prepared under the listing rules and the Code is made available to the public and must be prepared in accordance with the Code when it includes statements on exploration results, Mineral Resources or Ore Reserves. Public Reports must identify the Competent Person(s) whose work underpins the report and must include that person’s consent and the name of their firm or employer."
+          },
+          {
+            "entity_name": "Exploration results",
+            "entity_type": "WORK_OF_ART",
+            "description": "Reports or statements within a Public Report that relate to the outcomes of geological exploration activities. Under the Code and the listing rules of the Australian Stock Exchange and New Zealand Stock Exchange, statements on exploration results in Public Reports trigger the requirement that the report be prepared in accordance with the Code."
+          },
+          {
+            "entity_name": "Mineral Resources",
+            "entity_type": "WORK_OF_ART",
+            "description": "A defined category of mineralization representing a concentration of material of economic interest in the earth's crust, whose quantity, grade or quality, densities, shape, and physical characteristics are estimated. Under the Code and the listing rules of the Australian Stock Exchange and New Zealand Stock Exchange, statements on Mineral Resources in a Public Report require compliance with the Code."
+          },
+          {
+            "entity_name": "Ore Reserves",
+            "entity_type": "WORK_OF_ART",
+            "description": "A defined category representing the economically mineable part of a Mineral Resource. Under the Code and the listing rules of the Australian Stock Exchange and New Zealand Stock Exchange, statements on Ore Reserves in a Public Report must be prepared in accordance with the Code, and the Competent Person(s) responsible must be named."
+          },
+          {
+            "entity_name": "Mining or exploration companies",
+            "entity_type": "ORGANIZATION",
+            "description": "Companies engaged in mining or mineral exploration activities that report to the Australian Stock Exchange or the New Zealand Stock Exchange. Under the listing rules and the Code, these companies must comply with specific reporting requirements when issuing Public Reports that include statements on exploration results, Mineral Resources or Ore Reserves."
+          },
+          {
+            "entity_name": "Competent Person",
+            "entity_type": "PERSON",
+            "description": "Individuals whose professional work forms the basis for the Public Report of Mineral Resources or Ore Reserves. Under ASX listing rules, these Competent Persons must be named in the report, must consent to the inclusion of matters based on their information in the form and context in which it appears, and the report must include the name of their firm or employer."
+          },
+          {
+            "entity_name": "Firm or employer of the Competent Person",
+            "entity_type": "ORGANIZATION",
+            "description": "The business entity or organization that employs or is associated with the Competent Person whose work underpins a Public Report of Mineral Resources or Ore Reserves. The ASX listing rules require that the name of this firm or employer be included in the report or attached statement."
+          },
+          {
+            "entity_name": "Clause 8 of the Code",
+            "entity_type": "LAW",
+            "description": "A specific provision within the Code referenced as relevant to the reporting obligations discussed in the text. Users are directed to refer to Clause 8 of the Code for additional or related requirements concerning Public Reporting of Mineral Resources or Ore Reserves and the role of the Competent Person."
+          },
+          {
+            "entity_name": "1989",
+            "entity_type": "DATE",
+            "description": "The calendar year 1989, specified as the year since which the Australian Stock Exchange has incorporated the Code into its listing rules."
+          },
+          {
+            "entity_name": "1992",
+            "entity_type": "DATE",
+            "description": "The calendar year 1992, specified as the year since which the New Zealand Stock Exchange has incorporated the Code into its listing rules."
+          }
+        ],
+        "relations": []
+      },
+      "quality_rating": 8,
+      "id": "d83b55a1-c780-4a05-9021-3324d56b878f"
+    },
+    {
+      "input_text": "В целом за шесть лет работы (2001-2006 гг.) содержание золота в добываемых рудах месторождения Грасберг уменьшилось на 14,3%, тогда как содержание меди снизилось только на 8%. В результате прирост запасов золота на месторождении оказался ниже того, на что рассчитывала компания, и даже не компенсировал погашения его запасов при добыче (табл.1). Так, в 2005 г. суммарный прирост запасов руды по всем рудным телам составил 53,4 млн т, но подтверждённые запасы (proven+probable reserves) золота снизились при этом на 89 т. По сравнению с 2001 г. подтверждённые запасы меди выросли, хотя и незначительно, всего на 62 тыс.т; заметно – на 21,7%, или более чем на 2 тыс.т –увеличились запасы серебра, в то время как запасы золота сократились на 6,7%, или на 66 т {Ссылка:43464,21,|World Gold|2006|Т.9|Вып.1|Кн.|}{Ссылка:40785,,|Freeport McMoran Copper & Gold Inc. 10-K Annual Report 2004|2005|Т.|Вып.|Кн.|}{Ссылка:49623,,|Freeport McMoRan Copper & Gold Inc. 2005 Annual Report|2006|Т.|Вып.|Кн.|}{Ссылка:52870,,|Freeport-McMoRan Copper &Gold Inc. News Release. Freeport-McMoRan Copper & Gold Inc. Report Fourth-Quarter and Twelve-Month 2006 Results|2007|Т.|Вып.|Кн.|}[3; 6; 9; 12, с.21].\n\n \n\nТаблица 1\n\nДинамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001-2006 гг.\n\nЗапасы руды, млн т\tСодержания в рудах\tЗапасы металлов\nCu, %\tAu, г/т\tAg, г/т\tCu, млн т\tAu, тонн\tAg, тонн\n2001\t2583,9\t1,13\t1,05\t3,72\t29,198\t2713\t9612\n2002\t2484,5\t1,12\t1,02\t3,73\t27,826\t2534\t9267\n2003\t2695,9\t1,08\t0,98\t3,72\t29,116\t2642\t10029\n2004\t2769,1\t1,09\t0,97\t3,84\t30,18\t2686\t10633\n2005\t2822,5\t1,07\t0,92\t4,02\t30,2\t2597\t11346\n2006\t2813,0\t1,04\t0,9\t4,16\t29,26\t2531\t11702\n2006/2001,%\t108,9\t92,0\t85,7\t111,8\t100,2\t93,3\t121,7",
+      "metadata": {
+        "domain": "minerals",
+        "difficulty": "medium",
+        "language": "russian",
+        "generated_at": "2026-05-21T15:06:49.929502Z"
+      },
+      "output": {
+        "entities": [
+          {
+            "entity_name": "Шесть лет работы (2001–2006 годы)",
+            "entity_type": "DATE",
+            "description": "Период шесть лет, в течение которого анализируются показатели добычи и запасов руды и металлов на месторождении Грасберг; соответствует 2001–2006 годам."
+          },
+          {
+            "entity_name": "Месторождение Грасберг",
+            "entity_type": "LOCATION",
+            "description": "Крупное месторождение (рудник) Грасберг, для которого приводятся данные по содержанию и запасам меди, золота и серебра за 2001–2006 годы; фиксируется снижение содержания золота и рост запасов меди и серебра."
+          },
+          {
+            "entity_name": "2001–2006 годы",
+            "entity_type": "DATE",
+            "description": "Период, в течение которого рассматривается динамика содержания золота и меди в рудах и изменения запасов металлов на месторождении Грасберг; охватывает шесть лет, совпадает с анализируемым интервалом таблицы."
+          },
+          {
+            "entity_name": "Золото",
+            "entity_type": "PRODUCT",
+            "description": "Золото, благородный металл, содержание которого в добываемых рудах месторождения Грасберг за период 2001–2006 годов уменьшилось на 14,3%, а подтверждённые запасы снизились в целом на 6,7% (66 тонн); при этом в 2005 году при приросте запасов руды запасы золота уменьшились на 89 тонн."
+          },
+          {
+            "entity_name": "Медь",
+            "entity_type": "PRODUCT",
+            "description": "Медь, цветной металл (Cu), содержание которого в рудах месторождения Грасберг за 2001–2006 годы снизилось на 8%; при этом подтверждённые запасы меди по сравнению с 2001 годом выросли на 62 тыс. тонн; приведены процентные содержания меди в рудах и запасы меди по годам."
+          },
+          {
+            "entity_name": "Серебро",
+            "entity_type": "PRODUCT",
+            "description": "Серебро, благородный металл (Ag), запасы которого на месторождении Грасберг по сравнению с 2001 годом заметно увеличились — на 21,7% (более чем на 2 тыс. тонн); по таблице показана динамика содержания серебра в рудах и запасов серебра за 2001–2006 годы."
+          },
+          {
+            "entity_name": "Содержание золота в рудах",
+            "entity_type": "NUMBER",
+            "description": "Показатель содержания золота в добываемых рудах месторождения Грасберг, который за период 2001–2006 годов снизился на 14,3%; выражается в граммах на тонну (г/т) в таблице."
+          },
+          {
+            "entity_name": "Содержание меди в рудах",
+            "entity_type": "NUMBER",
+            "description": "Показатель содержания меди в добываемых рудах месторождения Грасберг, который за период 2001–2006 годов снизился на 8%; выражается в процентах содержания Cu в таблице."
+          },
+          {
+            "entity_name": "Прирост запасов золота",
+            "entity_type": "NUMBER",
+            "description": "Прирост запасов золота на месторождении Грасберг за рассматриваемый период; отмечается, что он оказался ниже ожидаемого компанией и не компенсировал погашение запасов при добыче."
+          },
+          {
+            "entity_name": "53,4 миллиона тонн",
+            "entity_type": "NUMBER",
+            "description": "Суммарный прирост запасов руды по всем рудным телам месторождения Грасберг в 2005 году, составивший 53,4 млн тонн; сопоставляется с уменьшением подтверждённых запасов золота на 89 тонн."
+          },
+          {
+            "entity_name": "89 тонн золота",
+            "entity_type": "NUMBER",
+            "description": "Показатель уменьшения подтверждённых запасов золота в 2005 году при одновременном приросте запасов руды; зафиксировано снижение на 89 тонн."
+          },
+          {
+            "entity_name": "62 тысячи тонн меди",
+            "entity_type": "NUMBER",
+            "description": "Показатель прироста подтверждённых запасов меди по сравнению с 2001 годом, составивший 62 тысячи тонн; описывает незначительный рост запасов меди на месторождении Грасберг."
+          },
+          {
+            "entity_name": "21,7% (рост запасов серебра)",
+            "entity_type": "PERCENT",
+            "description": "Показатель увеличения запасов серебра по сравнению с 2001 годом, выраженный как рост на 21,7% или более чем на 2 тысячи тонн; характеризует значительное увеличение запасов серебра."
+          },
+          {
+            "entity_name": "Более 2 тысяч тонн серебра",
+            "entity_type": "NUMBER",
+            "description": "Показатель абсолютного увеличения запасов серебра по сравнению с 2001 годом, составивший более 2 тысяч тонн."
+          },
+          {
+            "entity_name": "6,7% (сокращение запасов золота)",
+            "entity_type": "PERCENT",
+            "description": "Показатель сокращения запасов золота по сравнению с 2001 годом — на 6,7% или 66 тонн; отражает снижение подтверждённых запасов золота на месторождении Грасберг."
+          },
+          {
+            "entity_name": "66 тонн золота",
+            "entity_type": "NUMBER",
+            "description": "Показатель сокращения запасов золота по сравнению с 2001 годом в абсолютном выражении — 66 тонн; количественная оценка уменьшения запасов золота."
+          },
+          {
+            "entity_name": "World Gold",
+            "entity_type": "WORK_OF_ART",
+            "description": "Издание World Gold (вероятно, журнал или ежегодник), на который ссылаются при описании динамики запасов золота, меди и серебра; указан год 2006, том 9, выпуск 1."
+          },
+          {
+            "entity_name": "2006 год",
+            "entity_type": "DATE",
+            "description": "Год выхода одного из источников данных (издания World Gold), использованных для анализа динамики запасов металлов на месторождении Грасберг; указан как 2006 год."
+          },
+          {
+            "entity_name": "Freeport‑McMoRan Copper & Gold Inc.",
+            "entity_type": "ORGANIZATION",
+            "description": "Компания Freeport‑McMoRan Copper & Gold Inc., на которую делаются ссылки как на источник годовых отчётов и новостных релизов; владеет и/или эксплуатирует месторождение Грасберг и публикует данные о запасах и результатах добычи."
+          },
+          {
+            "entity_name": "Freeport‑McMoRan Copper & Gold Inc. 10‑K Annual Report 2004",
+            "entity_type": "WORK_OF_ART",
+            "description": "Годовой отчёт по форме 10‑K за 2004 год компании Freeport‑McMoRan Copper & Gold Inc., опубликованный в 2005 году; служит источником данных о запасах и результатах деятельности компании."
+          },
+          {
+            "entity_name": "2005 год",
+            "entity_type": "DATE",
+            "description": "Год выхода в свет годового отчёта 10‑K за 2004 год компании Freeport‑McMoRan Copper & Gold Inc.; отчёт был опубликован в 2005 году."
+          },
+          {
+            "entity_name": "Freeport‑McMoRan Copper & Gold Inc. 2005 Annual Report",
+            "entity_type": "WORK_OF_ART",
+            "description": "Годовой отчёт компании Freeport‑McMoRan Copper & Gold Inc. за 2005 год, опубликованный в 2006 году; используется как источник информации о запасах и результатах за соответствующий период."
+          },
+          {
+            "entity_name": "2006 год (годовой отчёт)",
+            "entity_type": "DATE",
+            "description": "Год выхода годового отчёта компании Freeport‑McMoRan Copper & Gold Inc. за 2005 год; указано, что отчёт датирован 2006 годом."
+          },
+          {
+            "entity_name": "Freeport‑McMoRan Copper & Gold Inc. News Release. Freeport‑McMoRan Copper & Gold Inc. Report Fourth‑Quarter and Twelve‑Month 2006 Results",
+            "entity_type": "WORK_OF_ART",
+            "description": "Новостной релиз компании Freeport‑McMoRan Copper & Gold Inc., в котором сообщаются результаты за четвёртый квартал и двенадцать месяцев 2006 года; выступает как источник данных, цитируемый в тексте."
+          },
+          {
+            "entity_name": "2007 год",
+            "entity_type": "DATE",
+            "description": "Год публикации новостного релиза Freeport‑McMoRan Copper & Gold Inc., в котором представлены результаты четвёртого квартала и всего 2006 года; указан как 2007 год."
+          },
+          {
+            "entity_name": "Таблица 1",
+            "entity_type": "WORK_OF_ART",
+            "description": "Таблица 1 в тексте, содержащая данные о динамике прироста/сокращения подтверждённых запасов рудника Грасберг в 2001–2006 годах; включает показатели запасов руды, содержания Cu, Au, Ag и запасов металлов по годам."
+          },
+          {
+            "entity_name": "Динамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001–2006 гг.",
+            "entity_type": "EVENT",
+            "description": "Динамика прироста/сокращения подтверждённых запасов рудника Грасберг в 2001–2006 годах, описанная в заголовке таблицы 1; включает изменение запасов руды и металлов (меди, золота, серебра) и их содержание в рудах."
+          },
+          {
+            "entity_name": "Запасы руды, миллионов тонн",
+            "entity_type": "NUMBER",
+            "description": "Показатель запасов руды (масса руды в миллионах тонн), приведённый в таблице 1 для каждого года 2001–2006; характеризует объём руды на месторождении Грасберг."
+          },
+          {
+            "entity_name": "Cu, % (содержание меди)",
+            "entity_type": "NUMBER",
+            "description": "Содержание меди (Cu) в рудах, выраженное в процентах, по годам 2001–2006; отражает концентрацию меди в добываемой руде."
+          },
+          {
+            "entity_name": "Au, г/т (содержание золота)",
+            "entity_type": "NUMBER",
+            "description": "Содержание золота (Au) в рудах, выраженное в граммах на тонну (г/т), по годам 2001–2006; характеризует концентрацию золота в руде."
+          },
+          {
+            "entity_name": "Ag, г/т (содержание серебра)",
+            "entity_type": "NUMBER",
+            "description": "Содержание серебра (Ag) в рудах, выраженное в граммах на тонну (г/т), по годам 2001–2006; характеризует концентрацию серебра в руде."
+          },
+          {
+            "entity_name": "Cu, миллионов тонн (запасы меди)",
+            "entity_type": "NUMBER",
+            "description": "Запасы меди в миллионах тонн, приведённые в таблице 1 для каждого года 2001–2006; характеризуют объём подтверждённых запасов меди на месторождении Грасберг."
+          },
+          {
+            "entity_name": "Au, тонн (запасы золота)",
+            "entity_type": "NUMBER",
+            "description": "Запасы золота в тоннах, приведённые в таблице 1 для каждого года 2001–2006; характеризуют объём подтверждённых запасов золота на месторождении Грасберг."
+          },
+          {
+            "entity_name": "Ag, тонн (запасы серебра)",
+            "entity_type": "NUMBER",
+            "description": "Запасы серебра в тоннах, приведённые в таблице 1 для каждого года 2001–2006; характеризуют объём подтверждённых запасов серебра."
+          },
+          {
+            "entity_name": "2001 год",
+            "entity_type": "DATE",
+            "description": "Год 2001, для которого в таблице приведены исходные значения запасов руды, содержания и запасов Cu, Au и Ag на месторождении Грасберг; используется как база для сравнения динамики к 2006 году."
+          },
+          {
+            "entity_name": "2002 год",
+            "entity_type": "DATE",
+            "description": "Год 2002, для которого в таблице указаны запасы руды и металлов и их содержания; один из промежуточных годов в анализе динамики."
+          },
+          {
+            "entity_name": "2003 год",
+            "entity_type": "DATE",
+            "description": "Год 2003, для которого таблица содержит данные по запасам руды и металлов и их содержаниям на месторождении Грасберг."
+          },
+          {
+            "entity_name": "2004 год",
+            "entity_type": "DATE",
+            "description": "Год 2004, для которого представлены показатели запасов руды, содержаний и запасов металлов; также фигурирует как год отчётности в документах компании Freeport‑McMoRan Copper & Gold Inc."
+          },
+          {
+            "entity_name": "2005 год (динамика запасов)",
+            "entity_type": "DATE",
+            "description": "Год 2005, для которого в тексте и таблице указаны значимые изменения: суммарный прирост запасов руды 53,4 млн тонн при одновременном снижении подтверждённых запасов золота на 89 тонн."
+          },
+          {
+            "entity_name": "2006 год (динамика запасов)",
+            "entity_type": "DATE",
+            "description": "Год 2006, для которого в таблице приведены конечные значения запасов руды, содержания и запасов металлов; используется для расчёта относительных изменений 2006/2001."
+          },
+          {
+            "entity_name": "2006/2001, %",
+            "entity_type": "PERCENT",
+            "description": "Относительное изменение показателей 2006 года по сравнению с 2001 годом, выраженное в процентах (2006/2001,%); фиксирует рост запасов руды до 108,9%, снижение содержания меди и золота, рост запасов меди и серебра и сокращение запасов золота."
+          },
+          {
+            "entity_name": "Proven + probable reserves",
+            "entity_type": "NUMBER",
+            "description": "Параметр «proven + probable reserves» — категория подтверждённых запасов (достоверных и вероятных), используемая для классификации запасов золота и меди; по тексту именно эти запасы золота сокращаются, а меди — растут."
+          }
+        ],
+        "relations": []
+      },
+      "quality_rating": 7,
+      "id": "77fa905a-8542-4d2a-a7fc-62c2eae07546"
     }
   ]
 }
