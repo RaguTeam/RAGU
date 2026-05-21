@@ -75,53 +75,85 @@ def icl_config():
     )
 
 
+EN_ENTITY_EXAMPLES = [
+    {
+        "id": "ex-1",
+        "input_text": "Apple was founded by Steve Jobs in California.",
+        "output": {
+            "entities": [
+                {"entity_name": "Apple", "entity_type": "ORGANIZATION"},
+                {"entity_name": "Steve Jobs", "entity_type": "PERSON"},
+            ],
+            "relations": [
+                {"source_entity": "Steve Jobs", "target_entity": "Apple", "relation_type": "FOUNDED_BY"},
+            ],
+        },
+        "metadata": {"domain": "technology", "language": "english"},
+        "quality_rating": 9,
+    },
+    {
+        "id": "ex-2",
+        "input_text": "Einstein developed the theory of relativity in Berlin.",
+        "output": {
+            "entities": [
+                {"entity_name": "Einstein", "entity_type": "PERSON"},
+                {"entity_name": "Berlin", "entity_type": "CITY"},
+            ],
+            "relations": [],
+        },
+        "metadata": {"domain": "science", "language": "english"},
+        "quality_rating": 8,
+    },
+]
+
+RU_EXAMPLE = {
+    "id": "ex-3",
+    "input_text": "\u041c\u043e\u0441\u043a\u0432\u0430 \u2014 \u0441\u0442\u043e\u043b\u0438\u0446\u0430 \u0420\u043e\u0441\u0441\u0438\u0438.",
+    "output": {
+        "entities": [
+            {"entity_name": "\u041c\u043e\u0441\u043a\u0432\u0430", "entity_type": "CITY"},
+        ],
+        "relations": [],
+    },
+    "metadata": {"domain": "geography", "language": "russian"},
+    "quality_rating": 9,
+}
+
+EN_RELATION_EXAMPLES = [
+    {
+        "id": "rel-1",
+        "input_text": "Microsoft acquired LinkedIn for $26 billion.",
+        "output": {
+            "relations": [
+                {"source_entity": "Microsoft", "target_entity": "LinkedIn", "relation_type": "ACQUIRED"},
+            ],
+            "entities": [],
+        },
+        "metadata": {"domain": "business", "language": "english"},
+        "quality_rating": 9,
+    },
+]
+
+
 @pytest.fixture
 def example_file(tmp_path):
     path = str(tmp_path / "test_examples.json")
-    examples = [
-        {
-            "id": "ex-1",
-            "input_text": "Apple was founded by Steve Jobs in California.",
-            "output": {
-                "entities": [
-                    {"entity_name": "Apple", "entity_type": "ORGANIZATION"},
-                    {"entity_name": "Steve Jobs", "entity_type": "PERSON"},
-                ],
-                "relations": [
-                    {"source_entity": "Steve Jobs", "target_entity": "Apple", "relation_type": "FOUNDED_BY"},
-                ],
-            },
-            "metadata": {"domain": "technology", "language": "english"},
-            "quality_rating": 9,
-        },
-        {
-            "id": "ex-2",
-            "input_text": "Einstein developed the theory of relativity in Berlin.",
-            "output": {
-                "entities": [
-                    {"entity_name": "Einstein", "entity_type": "PERSON"},
-                    {"entity_name": "Berlin", "entity_type": "CITY"},
-                ],
-                "relations": [],
-            },
-            "metadata": {"domain": "science", "language": "english"},
-            "quality_rating": 8,
-        },
-        {
-            "id": "ex-3",
-            "input_text": "Москва — столица России.",
-            "output": {
-                "entities": [
-                    {"entity_name": "Москва", "entity_type": "CITY"},
-                ],
-                "relations": [],
-            },
-            "metadata": {"domain": "geography", "language": "russian"},
-            "quality_rating": 9,
-        },
-    ]
-    _write_example_file(path, examples)
+    _write_example_file(path, EN_ENTITY_EXAMPLES + [RU_EXAMPLE])
     return path
+
+
+@pytest.fixture
+def example_files(tmp_path):
+    entity_path = str(tmp_path / "entity_examples.json")
+    _write_example_file(entity_path, EN_ENTITY_EXAMPLES + [RU_EXAMPLE])
+
+    relation_path = str(tmp_path / "relation_examples.json")
+    _write_example_file(relation_path, EN_RELATION_EXAMPLES)
+
+    return {
+        "entity_extraction": entity_path,
+        "relation_extraction": relation_path,
+    }
 
 
 class TestExample:
@@ -143,23 +175,23 @@ class TestExample:
 
 class TestInContextLearningManagerInit:
     @pytest.mark.asyncio
-    async def test_initialize_loads_examples(self, embedder, icl_config, example_file):
+    async def test_initialize_loads_examples(self, embedder, icl_config, example_files):
         manager = InContextLearningManager(
             embedder=embedder,
-            example_file=example_file,
+            example_files=example_files,
             config=icl_config,
             language="english",
         )
         await manager.initialize()
-        assert len(manager.examples) == 2
+        assert len(manager.examples) == 3
         assert all(ex.language == "english" for ex in manager.examples)
         assert manager._embeddings_computed
 
     @pytest.mark.asyncio
-    async def test_initialize_filters_by_language(self, embedder, icl_config, example_file):
+    async def test_initialize_filters_by_language(self, embedder, icl_config, example_files):
         manager = InContextLearningManager(
             embedder=embedder,
-            example_file=example_file,
+            example_files=example_files,
             config=icl_config,
             language="russian",
         )
@@ -171,50 +203,84 @@ class TestInContextLearningManagerInit:
     async def test_initialize_missing_file(self, embedder, icl_config, tmp_path):
         manager = InContextLearningManager(
             embedder=embedder,
-            example_file=str(tmp_path / "nonexistent.json"),
+            example_files={"test": str(tmp_path / "nonexistent.json")},
             config=icl_config,
         )
         await manager.initialize()
         assert len(manager.examples) == 0
 
     @pytest.mark.asyncio
-    async def test_initialize_no_matching_language(self, embedder, icl_config, example_file):
+    async def test_initialize_no_matching_language(self, embedder, icl_config, example_files):
         manager = InContextLearningManager(
             embedder=embedder,
-            example_file=example_file,
+            example_files=example_files,
             config=icl_config,
             language="french",
         )
         await manager.initialize()
         assert len(manager.examples) == 0
 
+    @pytest.mark.asyncio
+    async def test_task_indices_built(self, embedder, icl_config, example_files):
+        manager = InContextLearningManager(
+            embedder=embedder,
+            example_files=example_files,
+            config=icl_config,
+            language="english",
+        )
+        await manager.initialize()
+        assert "entity_extraction" in manager._task_indices
+        assert "relation_extraction" in manager._task_indices
+        assert len(manager._task_indices["entity_extraction"]) == 2
+        assert len(manager._task_indices["relation_extraction"]) == 1
+
+    @pytest.mark.asyncio
+    async def test_examples_tagged_with_task(self, embedder, icl_config, example_files):
+        manager = InContextLearningManager(
+            embedder=embedder,
+            example_files=example_files,
+            config=icl_config,
+            language="english",
+        )
+        await manager.initialize()
+        entity_examples = [ex for ex in manager.examples if ex.task == "entity_extraction"]
+        relation_examples = [ex for ex in manager.examples if ex.task == "relation_extraction"]
+        assert len(entity_examples) == 2
+        assert len(relation_examples) == 1
+
 
 class TestInContextLearningManagerSelection:
     @pytest.mark.asyncio
-    async def test_select_examples_returns_correct_count(self, constant_embedder, icl_config, example_file):
+    async def test_select_examples_returns_correct_count(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_file=example_file, config=icl_config,
+            embedder=constant_embedder, example_files=example_files, config=icl_config,
         )
         await manager.initialize()
-        results = await manager.batch_select_examples(["Tech company founded in California"])
+        results = await manager.batch_select_examples(
+            ["Tech company founded in California"], task="entity_extraction",
+        )
         assert len(results[0]) == 2
 
     @pytest.mark.asyncio
-    async def test_select_examples_respects_num_examples_override(self, constant_embedder, icl_config, example_file):
+    async def test_select_examples_respects_num_examples_override(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_file=example_file, config=icl_config,
+            embedder=constant_embedder, example_files=example_files, config=icl_config,
         )
         await manager.initialize()
-        results = await manager.batch_select_examples(["Tech company founded in California"], num_examples=1)
+        results = await manager.batch_select_examples(
+            ["Tech company founded in California"], task="entity_extraction", num_examples=1,
+        )
         assert len(results[0]) == 1
 
     @pytest.mark.asyncio
-    async def test_select_examples_returns_dicts(self, constant_embedder, icl_config, example_file):
+    async def test_select_examples_returns_dicts(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_file=example_file, config=icl_config,
+            embedder=constant_embedder, example_files=example_files, config=icl_config,
         )
         await manager.initialize()
-        results = await manager.batch_select_examples(["Tech company founded in California"], num_examples=1)
+        results = await manager.batch_select_examples(
+            ["Tech company founded in California"], task="entity_extraction", num_examples=1,
+        )
         ex = results[0][0]
         assert "input_text" in ex
         assert "output" in ex
@@ -225,32 +291,74 @@ class TestInContextLearningManagerSelection:
         empty_file = str(tmp_path / "empty.json")
         _write_example_file(empty_file, [])
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_file=empty_file, config=icl_config,
+            embedder=constant_embedder, example_files={"test": empty_file}, config=icl_config,
         )
         await manager.initialize()
-        results = await manager.batch_select_examples(["some query"])
+        results = await manager.batch_select_examples(["some query"], task="test")
         assert results == [[]]
 
     @pytest.mark.asyncio
-    async def test_select_examples_empty_without_initialize(self, constant_embedder, icl_config, example_file):
+    async def test_select_examples_empty_without_initialize(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_file=example_file, config=icl_config,
+            embedder=constant_embedder, example_files=example_files, config=icl_config,
         )
-        results = await manager.batch_select_examples(["some query"])
+        results = await manager.batch_select_examples(["some query"], task="entity_extraction")
         assert results == [[]]
 
     @pytest.mark.asyncio
-    async def test_select_examples_threshold_filtering(self, embedder, icl_config, example_file):
+    async def test_select_examples_threshold_filtering(self, embedder, icl_config, example_files):
         high_threshold_config = ICLConfig(
             enabled=True, num_examples=2,
             similarity_threshold=0.99,
         )
         manager = InContextLearningManager(
-            embedder=embedder, example_file=example_file, config=high_threshold_config,
+            embedder=embedder, example_files=example_files, config=high_threshold_config,
         )
         await manager.initialize()
-        results = await manager.batch_select_examples(["something completely unrelated xyzzy"])
+        results = await manager.batch_select_examples(
+            ["something completely unrelated xyzzy"], task="entity_extraction",
+        )
         assert results == [[]]
+
+    @pytest.mark.asyncio
+    async def test_select_examples_filters_by_task(self, constant_embedder, icl_config, example_files):
+        manager = InContextLearningManager(
+            embedder=constant_embedder, example_files=example_files, config=icl_config,
+        )
+        await manager.initialize()
+
+        entity_results = await manager.batch_select_examples(
+            ["Tech company"], task="entity_extraction", num_examples=10,
+        )
+        relation_results = await manager.batch_select_examples(
+            ["Tech company"], task="relation_extraction", num_examples=10,
+        )
+
+        assert all(ex["id"].startswith("ex-") for ex in entity_results[0])
+        assert all(ex["id"].startswith("rel-") for ex in relation_results[0])
+        assert len(relation_results[0]) == 1
+
+    @pytest.mark.asyncio
+    async def test_select_examples_unknown_task_returns_empty(self, constant_embedder, icl_config, example_files):
+        manager = InContextLearningManager(
+            embedder=constant_embedder, example_files=example_files, config=icl_config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["some query"], task="nonexistent_task",
+        )
+        assert results == [[]]
+
+    @pytest.mark.asyncio
+    async def test_select_examples_no_task_uses_all(self, constant_embedder, icl_config, example_files):
+        manager = InContextLearningManager(
+            embedder=constant_embedder, example_files=example_files, config=icl_config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["Tech company"], num_examples=10,
+        )
+        assert len(results[0]) == 3
 
 
 class TestResolveExamplePath:
@@ -281,7 +389,7 @@ class TestBuiltinExamples:
         config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
         path = resolve_example_path(None, "artifact_extraction_examples.json")
         manager = InContextLearningManager(
-            embedder=embedder, example_file=path, config=config,
+            embedder=embedder, example_files={"artifact_extraction": path}, config=config,
         )
         await manager.initialize()
         assert len(manager.examples) > 0
@@ -291,7 +399,7 @@ class TestBuiltinExamples:
         config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
         path = resolve_example_path(None, "entity_extraction_examples.json")
         manager = InContextLearningManager(
-            embedder=embedder, example_file=path, config=config,
+            embedder=embedder, example_files={"entity_extraction": path}, config=config,
         )
         await manager.initialize()
         assert len(manager.examples) > 0
@@ -301,7 +409,24 @@ class TestBuiltinExamples:
         config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
         path = resolve_example_path(None, "relation_extraction_examples.json")
         manager = InContextLearningManager(
-            embedder=embedder, example_file=path, config=config,
+            embedder=embedder, example_files={"relation_extraction": path}, config=config,
         )
         await manager.initialize()
         assert len(manager.examples) > 0
+
+    @pytest.mark.asyncio
+    async def test_load_multiple_builtin_examples(self, embedder):
+        config = ICLConfig(enabled=True, similarity_threshold=0.0, language="english")
+        manager = InContextLearningManager(
+            embedder=embedder,
+            example_files={
+                "entity_extraction": resolve_example_path(None, "entity_extraction_examples.json"),
+                "entity_validation": resolve_example_path(None, "entity_validation_examples.json"),
+                "relation_extraction": resolve_example_path(None, "relation_extraction_examples.json"),
+                "relation_validation": resolve_example_path(None, "relation_validation_examples.json"),
+            },
+            config=config,
+        )
+        await manager.initialize()
+        assert len(manager.examples) > 0
+        assert len(manager._task_indices) == 4

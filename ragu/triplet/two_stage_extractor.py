@@ -84,26 +84,30 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         self.do_relation_validation = do_relation_validation
 
         # Initialize separate ICL managers for each stage
-        self.icl_entity: InContextLearningManager | None = None
-        self.icl_relation: InContextLearningManager | None = None
+        self.icl_manager: InContextLearningManager | None = None
         if icl_config and icl_config.enabled and embedder:
-            self.icl_entity = InContextLearningManager(
+            self.icl_manager = InContextLearningManager(
                 embedder=embedder,
-                example_file=resolve_example_path(
-                    icl_config.examples_base_path,
-                    "entity_extraction_examples.json",
-                ),
+                example_files={
+                    "entity_extraction": resolve_example_path(
+                        icl_config.examples_base_path,
+                        "entity_extraction_examples.json",
+                    ),
+                    "entity_validation": resolve_example_path(
+                        icl_config.examples_base_path,
+                        "entity_validation_examples.json",
+                    ),
+                    "relation_extraction": resolve_example_path(
+                        icl_config.examples_base_path,
+                        "relation_extraction_examples.json",
+                    ),
+                    "relation_validation": resolve_example_path(
+                        icl_config.examples_base_path,
+                        "relation_validation_examples.json",
+                    ),
+                },
                 config=icl_config,
-                language=icl_config.language
-            )
-            self.icl_relation = InContextLearningManager(
-                embedder=embedder,
-                example_file=resolve_example_path(
-                    icl_config.examples_base_path,
-                    "relation_extraction_examples.json",
-                ),
-                config=icl_config,
-                language=icl_config.language
+                language=icl_config.language,
             )
 
     @override
@@ -219,11 +223,12 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
 
         # Select ICL examples for entity extraction if manager is initialized
         examples_list: List[List[dict[str, Any]] | None] = []
-        if self.icl_entity:
-            await self.icl_entity.initialize()
-            examples_list = await self.icl_entity.batch_select_examples(
+        if self.icl_manager:
+            await self.icl_manager.initialize()
+            examples_list = await self.icl_manager.batch_select_examples(
                 query_texts=context,
-                num_examples=self.icl_entity.config.num_examples
+                task="entity_extraction",
+                num_examples=self.icl_manager.config.num_examples
             )
         else:
             examples_list = [None] * len(context)
@@ -267,10 +272,11 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
 
         # Select ICL examples for entity validation if manager is initialized
         examples_list: List[List[dict[str, Any]] | None] = []
-        if self.icl_entity:
-            examples_list = await self.icl_entity.batch_select_examples(
+        if self.icl_manager:
+            examples_list = await self.icl_manager.batch_select_examples(
                 query_texts=context,
-                num_examples=self.icl_entity.config.num_examples
+                task="entity_validation",
+                num_examples=self.icl_manager.config.num_examples
             )
         else:
             examples_list = [None] * len(context)
@@ -315,10 +321,11 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
 
         # Select ICL examples for relation extraction if manager is initialized
         examples_list: List[List[dict[str, Any]] | None] = []
-        if self.icl_relation:
-            examples_list = await self.icl_relation.batch_select_examples(
+        if self.icl_manager:
+            examples_list = await self.icl_manager.batch_select_examples(
                 query_texts=context,
-                num_examples=self.icl_relation.config.num_examples
+                task="relation_extraction",
+                num_examples=self.icl_manager.config.num_examples
             )
         else:
             examples_list = [None] * len(context)
@@ -365,10 +372,11 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
 
         # Select ICL examples for relation validation if manager is initialized
         examples_list: List[List[dict[str, Any]] | None] = []
-        if self.icl_relation:
-            examples_list = await self.icl_relation.batch_select_examples(
+        if self.icl_manager:
+            examples_list = await self.icl_manager.batch_select_examples(
                 query_texts=context,
-                num_examples=self.icl_relation.config.num_examples
+                task="relation_validation",
+                num_examples=self.icl_manager.config.num_examples
             )
         else:
             examples_list = [None] * len(context)

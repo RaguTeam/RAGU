@@ -1,6 +1,7 @@
 checkpoints/
 benchmark/*.json
 ragu_working_dir/
+*.html
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

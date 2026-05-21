@@ -66,12 +66,18 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         if icl_config and icl_config.enabled and embedder:
             self.icl_manager = InContextLearningManager(
                 embedder=embedder,
-                example_file=resolve_example_path(
-                    icl_config.examples_base_path,
-                    "artifact_extraction_examples.json",
-                ),
+                example_files={
+                    "artifact_extraction": resolve_example_path(
+                        icl_config.examples_base_path,
+                        "artifact_extraction_examples.json",
+                    ),
+                    "artifact_validation": resolve_example_path(
+                        icl_config.examples_base_path,
+                        "artifact_validation_examples.json",
+                    ),
+                },
                 config=icl_config,
-                language=icl_config.language
+                language=icl_config.language,
             )
 
     async def _extract_artifacts(
@@ -89,6 +95,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             await self.icl_manager.initialize()
             examples_list = await self.icl_manager.batch_select_examples(
                 query_texts=context,
+                task="artifact_extraction",
                 num_examples=self.icl_manager.config.num_examples
             )
         else:
@@ -137,6 +144,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         if self.icl_manager:
             examples_list = await self.icl_manager.batch_select_examples(
                 query_texts=context,
+                task="artifact_validation",
                 num_examples=self.icl_manager.config.num_examples
             )
         else:

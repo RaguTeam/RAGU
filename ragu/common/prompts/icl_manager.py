@@ -62,6 +62,7 @@ class Example:
     :param metadata: Additional metadata (domain, difficulty, etc.).
     :param language: Language of the example.
     :param quality_rating: Quality rating from judge (1-10).
+    :param task: Task name this example belongs to (e.g. ``"entity_extraction"``).
     """
 
     id: str
@@ -70,19 +71,22 @@ class Example:
     metadata: Dict[str, Any]
     language: str
     quality_rating: int | None
+    task: str = ""
 
 
 class InContextLearningManager:
     """
     Manages in-context learning examples with on-the-fly embedding computation.
 
-    This manager loads examples from JSON files, computes embeddings
-    at initialization using the provided Embedder, and selects
-    the most relevant examples for queries using semantic similarity.
+    This manager loads examples from multiple JSON files (one per task),
+    computes embeddings at initialization using the provided Embedder,
+    and selects the most relevant examples for queries using semantic
+    similarity with optional per-task filtering.
 
     Key features:
-    - Embeddings computed on-the-fly at initialization
-    - Example storage independent of embedding model
+    - Loads examples from multiple task-specific JSON files
+    - Embeddings computed on-the-fly at initialization (single pass)
+    - Task-based filtering during example selection
     - Semantic selection by cosine similarity
     - Multi-language support
     - Portable examples for any embedder
@@ -96,20 +100,24 @@ class InContextLearningManager:
     config = ICLConfig(num_examples=2, language="english")
     manager = InContextLearningManager(
         embedder=embedder,
-        example_file=resolve_example_path(None, "artifact_extraction_examples.json"),
+        example_files={
+            "entity_extraction": resolve_example_path(None, "entity_extraction_examples.json"),
+            "relation_extraction": resolve_example_path(None, "relation_extraction_examples.json"),
+        },
         config=config,
         language="english"
     )
 
-    # Select relevant examples for multiple queries (batch)
+    # Select relevant entity examples for multiple queries (batch)
     examples_per_query = await manager.batch_select_examples(
         query_texts=["Tim Cook announced Apple Vision Pro...", "Another text..."],
+        task="entity_extraction",
         num_examples=2
     )
     ```
 
     :param embedder: Embedder instance for computing embeddings.
-    :param example_file: Path to JSON file containing examples.
+    :param example_files: Mapping from task name to path of JSON file with examples.
     :param config: ICL configuration.
     :param language: Target language for example selection.
     """
@@ -117,7 +125,7 @@ class InContextLearningManager:
     def __init__(
         self,
         embedder: Embedder,
-        example_file: str,
+        example_files: Dict[str, str],
         config: ICLConfig,
         language: str = "english",
     ):
@@ -125,15 +133,16 @@ class InContextLearningManager:
         Initialize ICL manager.
 
         :param embedder: Embedder for computing embeddings on-the-fly.
-        :param example_file: Path to JSON file with examples.
+        :param example_files: Mapping from task name to JSON file path with examples.
         :param config: ICL configuration.
         :param language: Target language for example selection.
         """
         self.embedder = embedder
-        self.example_file = example_file
+        self.example_files = example_files
         self.config = config
         self.language = language
         self.examples: List[Example] = []
+        self._task_indices: Dict[str, List[int]] = {}
         self._embeddings_computed = False
         self._example_matrix: np.ndarray | None = None
         self._example_norms: np.ndarray | None = None
@@ -155,47 +164,62 @@ class InContextLearningManager:
         await self._load_examples()
         await self._compute_embeddings()
         self._embeddings_computed = True
+
+        task_summary = ", ".join(
+            f"{task}={len(indices)}" for task, indices in self._task_indices.items()
+        )
         logger.info(
             f"Initialized InContextLearningManager with "
-            f"{len(self.examples)} examples for language '{self.language}'"
+            f"{len(self.examples)} examples for language '{self.language}' "
+            f"({task_summary})"
         )
 
     async def _load_examples(self) -> None:
         """
-        Load examples from JSON file.
+        Load examples from JSON files.
 
-        Loads examples and filters by language if specified.
+        Iterates over ``example_files``, loads each JSON, filters by
+        language, and tags each example with its task name.
+        Builds ``_task_indices`` for efficient task-based filtering.
         """
-        if not os.path.exists(self.example_file):
-            logger.warning(f"Example file not found: {self.example_file}")
-            return
-
-        def _read_sync() -> list[dict]:
-            with open(self.example_file, "r", encoding="utf-8") as f:
-                return json.load(f).get("examples", [])
-
-        examples_data = await asyncio.to_thread(_read_sync)
         self.examples = []
+        self._task_indices = {}
 
-        for ex_data in examples_data:
-            example_language = ex_data.get("metadata", {}).get("language", "english")
-            if example_language != self.language:
+        for task_name, file_path in self.example_files.items():
+            if not os.path.exists(file_path):
+                logger.warning(f"Example file not found: {file_path}")
                 continue
 
-            example = Example(
-                id=ex_data.get("id", str(uuid4())),
-                input_text=ex_data["input_text"],
-                output=ex_data["output"],
-                metadata=ex_data.get("metadata", {}),
-                language=example_language,
-                quality_rating=ex_data.get("quality_rating"),
-            )
-            self.examples.append(example)
+            def _read_sync(path: str = file_path) -> list[dict]:
+                with open(path, "r", encoding="utf-8") as f:
+                    return json.load(f).get("examples", [])
 
-        logger.debug(
-            f"Loaded {len(self.examples)} examples for language '{self.language}' "
-            f"from {self.example_file}"
-        )
+            examples_data = await asyncio.to_thread(_read_sync)
+            task_start = len(self.examples)
+
+            for ex_data in examples_data:
+                example_language = ex_data.get("metadata", {}).get("language", "english")
+                if example_language != self.language:
+                    continue
+
+                example = Example(
+                    id=ex_data.get("id", str(uuid4())),
+                    input_text=ex_data["input_text"],
+                    output=ex_data["output"],
+                    metadata=ex_data.get("metadata", {}),
+                    language=example_language,
+                    quality_rating=ex_data.get("quality_rating"),
+                    task=task_name,
+                )
+                self.examples.append(example)
+
+            task_indices = list(range(task_start, len(self.examples)))
+            self._task_indices[task_name] = task_indices
+
+            logger.debug(
+                f"Loaded {len(task_indices)} examples for task '{task_name}', "
+                f"language '{self.language}' from {file_path}"
+            )
 
     async def _compute_embeddings(self) -> None:
         """
@@ -242,6 +266,7 @@ class InContextLearningManager:
     async def batch_select_examples(
         self,
         query_texts: List[str],
+        task: str | None = None,
         num_examples: int | None = None,
     ) -> List[List[Dict[str, Any]]]:
         """
@@ -250,18 +275,20 @@ class InContextLearningManager:
         Computes all query embeddings in a single batch API call, then
         selects top-k examples per query using cosine similarity.
 
+        When ``task`` is provided, only examples tagged with that task
+        name are considered during selection.
+
         Query embeddings are cached: if the same ``query_texts`` list is
         passed on a subsequent call (e.g. extraction then validation),
         the embeddings are reused without an additional API call.
 
         :param query_texts: Input texts for which to select examples.
+        :param task: Task name to filter examples by (e.g. ``"entity_extraction"``).
+            When ``None``, all loaded examples are considered.
         :param num_examples: Number of examples to return per query
             (uses config default if None).
         :return: Per-query lists of example dictionaries.
         """
-        if not self.examples or self._example_matrix is None:
-            return [[] for _ in query_texts]
-
         if not self._embeddings_computed:
             logger.warning(
                 "Embeddings not computed. Call initialize() first."
@@ -271,9 +298,19 @@ class InContextLearningManager:
         if num_examples is None:
             num_examples = self.config.num_examples
 
+        if task is not None:
+            candidate_indices = self._task_indices.get(task, [])
+        else:
+            candidate_indices = list(range(len(self.examples)))
+
+        if not candidate_indices or self._example_matrix is None:
+            return [[] for _ in query_texts]
+
         query_matrix = await self._get_query_matrix(query_texts)
-        ex_matrix = self._example_matrix
-        ex_norms = self._example_norms
+
+        idx_arr = np.array(candidate_indices, dtype=np.intp)
+        ex_matrix = self._example_matrix[idx_arr]
+        ex_norms = self._example_norms[idx_arr]
 
         query_norms = np.linalg.norm(query_matrix, axis=1)
         valid_examples = ex_norms > 0.0
@@ -301,10 +338,11 @@ class InContextLearningManager:
                 results.append([])
                 continue
 
-            top_indices = indices[np.argsort(similarities[indices])[-num_examples:]][::-1]
+            top_local = indices[np.argsort(similarities[indices])[-num_examples:]][::-1]
+            top_global = idx_arr[top_local]
 
             selected = []
-            for idx in top_indices:
+            for idx in top_global:
                 example = self.examples[idx]
                 selected.append({
                     "id": example.id,
@@ -317,7 +355,7 @@ class InContextLearningManager:
 
             logger.debug(
                 f"Selected {len(selected)} examples for query {i} "
-                f"(similarities: {[float(similarities[j]) for j in top_indices]})"
+                f"(task='{task}', similarities: {[float(similarities[j]) for j in top_local]})"
             )
 
             results.append(selected)
