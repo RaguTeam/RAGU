@@ -169,7 +169,7 @@
           },
           {
             "entity_name": "Arkansas",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "A U.S. state in which the publisher Helena World Chronicle is based, providing the geographic context for the filing of the legal case against Google."
           },
           {
@@ -326,7 +326,7 @@
           },
           {
             "entity_name": "Arkansas",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "The U.S. state where the publisher Helena World Chronicle is based."
           },
           {
@@ -387,7 +387,7 @@
           },
           {
             "entity_name": "Intelligence support",
-            "entity_type": "IDELOGY",
+            "entity_type": "IDEOLOGY",
             "description": "A form of assistance involving gathering and providing information needed to plan or execute a major attack against Israel. The text notes that no one can carry out such a major attack without this kind of support, highlighting its importance for complex operations."
           },
           {
@@ -483,7 +483,7 @@
           },
           {
             "entity_name": "Arkansas",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Arkansas is the U.S. state where the publisher Helena World Chronicle is based, as mentioned in the description of the plaintiff in the case against Google."
           },
           {
@@ -665,7 +665,7 @@
           },
           {
             "entity_name": "Arkansas",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "The U.S. state where the news publisher Helena World Chronicle is based."
           },
           {
@@ -1448,7 +1448,7 @@
           },
           {
             "entity_name": "Субъекты Российской Федерации",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Территориальные единицы внутри Российской Федерации (республики, края, области и другие), которые могут выступать участниками гражданских правоотношений наряду с Российской Федерацией и муниципальными образованиями."
           },
           {
@@ -1688,7 +1688,7 @@
           },
           {
             "entity_name": "Московская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Московская область, субъект Российской Федерации, упоминаемый в скобках как регион, к которому относится один из номеров бесплатной юридической консультации."
           },
           {
@@ -1698,12 +1698,12 @@
           },
           {
             "entity_name": "Ленинградская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Ленинградская область, субъект Российской Федерации, упоминаемый в скобках как «ЛО» в контексте телефонного номера бесплатной юридической консультации."
           },
           {
             "entity_name": "Регионы Российской Федерации",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Совокупность субъектов Российской Федерации за пределами Москвы и Санкт-Петербурга, для которых указан федеральный бесплатный номер юридической консультации (8 (800) ...)."
           },
           {
@@ -1744,7 +1744,7 @@
           },
           {
             "entity_name": "Новосибирская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Субъект Российской Федерации, на территории которого действует министерство, Правительство и Фонд модернизации и развития жилищно-коммунального хозяйства муниципальных образований; место издания приказа"
           },
           {
@@ -1824,7 +1824,7 @@
           },
           {
             "entity_name": "Министр жилищно-коммунального хозяйства и энергетики Новосибирской области",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность руководителя Министерства жилищно-коммунального хозяйства и энергетики Новосибирской области, подписавшего приказ и оставившего контроль за исполнением приказа за собой"
           },
           {
@@ -1915,7 +1915,7 @@
           },
           {
             "entity_name": "Высокий интеллектуальный уровень среды",
-            "entity_type": "IDELOGY",
+            "entity_type": "IDEOLOGY",
             "description": "Высокий уровень интеллектуального развития и образования людей, окружающих студентов НГУ и жителей Академгородка. В тексте подчеркивается, что именно высокий интеллектуальный уровень среды в сочетании с относительной свободой способствовал появлению смелых культурных и политических инициатив, в частности концерта Александра Галича."
           },
           {
@@ -2672,7 +2672,7 @@
           },
           {
             "entity_name": "Московская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Субъект Российской Федерации, окружающий Москву (Московская область), для которого предоставляется бесплатная юридическая консультация по указанному номеру."
           },
           {
@@ -2687,7 +2687,7 @@
           },
           {
             "entity_name": "Ленинградская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Субъект Российской Федерации Ленинградская область, для которого также действует указанный номер бесплатной юридической консультации."
           },
           {
@@ -2768,7 +2768,7 @@
           },
           {
             "entity_name": "Human rights",
-            "entity_type": "IDELOGY",
+            "entity_type": "IDEOLOGY",
             "description": "A concept referenced as the foundation of freedom, justice and peace in the world, based on recognition of the inherent dignity and equal and inalienable rights of all members of the human family. It is also described as being strengthened by education directed to respect for human rights and fundamental freedoms."
           },
           {
@@ -2833,12 +2833,12 @@
           },
           {
             "entity_name": "Friendly relations between nations",
-            "entity_type": "IDELOGY",
+            "entity_type": "IDEOLOGY",
             "description": "A concept referenced as necessary to develop and maintain peaceful and cooperative interactions between nations, cited in the preamble as an essential objective."
           },
           {
             "entity_name": "Social progress",
-            "entity_type": "IDELOGY",
+            "entity_type": "IDEOLOGY",
             "description": "A social and economic concept mentioned as an objective determined by the peoples of the United Nations in the Charter, involving better standards of life in larger freedom, and later referenced in relation to general welfare in a democratic society as a justification for certain limitations on rights."
           },
           {
@@ -3691,17 +3691,17 @@
           },
           {
             "entity_name": "Экономическая эффективность",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Показатель, по которому в соответствии с Классификацией осуществляется подразделение запасов и ресурсов нефти и горючих газов."
           },
           {
             "entity_name": "Геологическая изученность",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Показатель, по которому в соответствии с Классификацией осуществляется подразделение запасов и ресурсов нефти и горючих газов."
           },
           {
             "entity_name": "Степень промышленного освоения",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Показатель, по которому в соответствии с Классификацией осуществляется подразделение запасов и ресурсов нефти и горючих газов."
           },
           {
@@ -3716,27 +3716,27 @@
           },
           {
             "entity_name": "Фазовое состояние",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Критерий, по которому в соответствии с Классификацией осуществляется подразделение месторождений или залежей."
           },
           {
             "entity_name": "Величина извлекаемых запасов",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Критерий, по которому в соответствии с Классификацией осуществляется подразделение месторождений или залежей."
           },
           {
             "entity_name": "Сложность геологического строения",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Критерий, по которому в соответствии с Классификацией осуществляется подразделение месторождений или залежей."
           },
           {
             "entity_name": "Категории запасов и ресурсов нефти и газа",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Категории, выделяемые в пределах отдельной залежи, промышленная продуктивность которой доказана. В тексте они связаны с применением Классификации и относятся к нефти и газу."
           },
           {
             "entity_name": "Промышленная продуктивность",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Признак залежи, наличие которого должно быть доказано для выделения категорий запасов и ресурсов нефти и газа. Залежь с доказанной промышленной продуктивностью должна разрабатываться на основании проектного документа."
           },
           {
@@ -3746,52 +3746,52 @@
           },
           {
             "entity_name": "Геолого-геофизические данные",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Данные, по результатам интерпретации которых должны быть обоснованы геологическое строение, подсчетные параметры и степень неоднородности пласта."
           },
           {
             "entity_name": "Инженерные данные",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Данные, которые вместе с геолого-геофизическими данными используются при интерпретации для обоснования геологического строения, подсчетных параметров и степени неоднородности пласта."
           },
           {
             "entity_name": "Геологическое строение",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Характеристика, которая должна быть обоснована по данным интерпретации геолого-геофизических и инженерных данных; также сложность геологического строения используется как критерий подразделения месторождений или залежей."
           },
           {
             "entity_name": "Подсчетные параметры",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Параметры, которые должны быть обоснованы по данным интерпретации геолого-геофизических и инженерных данных; их обоснование наряду с геолого-промысловыми характеристиками и экономическими показателями следует осуществлять на основании достоверных данных, полученных на дату подсчета."
           },
           {
             "entity_name": "Степень неоднородности пласта",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Характеристика пласта, которая должна быть обоснована по данным интерпретации геолого-геофизических и инженерных данных."
           },
           {
             "entity_name": "Экономические расчеты",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Расчеты, на основании которых должна быть доказана экономическая рентабельность извлечения запасов."
           },
           {
             "entity_name": "Экономическая рентабельность извлечения запасов",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Показатель, который должен быть доказан на основании экономических расчетов применительно к извлечению запасов."
           },
           {
             "entity_name": "Геолого-промысловые характеристики",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Характеристики, обоснование которых, наряду с подсчетными параметрами и экономическими показателями, должно осуществляться на основании достоверных данных, полученных на дату подсчета."
           },
           {
             "entity_name": "Экономические показатели",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Показатели, обоснование которых вместе с геолого-промысловыми характеристиками и подсчетными параметрами следует осуществлять на основании достоверных данных, полученных на дату подсчета."
           },
           {
             "entity_name": "Достоверные данные",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Данные, на основании которых должны обосновываться геолого-промысловые характеристики, подсчетные параметры и экономические показатели; в тексте подчеркивается, что они должны быть получены на дату подсчета."
           },
           {
@@ -4214,7 +4214,7 @@
           },
           {
             "entity_name": "Благоприятные Санитарно-Гигиенические Условия",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "Условия внутри помещений, ради создания которых устанавливаются требуемые значения теплотехнических характеристик. В тексте они названы благоприятными и санитарно-гигиеническими."
           },
           {
@@ -4571,72 +4571,72 @@
           },
           {
             "entity_name": "Научный руководитель Центра искусственного интеллекта НГУ",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Профессиональная должность Михаила Петровича Федорука в Центре искусственного интеллекта НГУ."
           },
           {
             "entity_name": "Директор Центра искусственного интеллекта НГУ",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Александра Николаевича Люлько в Центре искусственного интеллекта НГУ."
           },
           {
             "entity_name": "Ректор НГУ",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Михаила Петровича Федорука в НГУ."
           },
           {
             "entity_name": "Академик РАН",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Звание, которым в тексте обозначены Михаил Петрович Федорук, Сергей Владимирович Алексеенко, Сергей Савостьянович Гончаров и Алексей Владимирович Кочетов."
           },
           {
             "entity_name": "Руководитель Научно-технического совета ЦИИ НГУ",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Роль Михаила Петровича Федорука в Научно-техническом совете ЦИИ НГУ."
           },
           {
             "entity_name": "Заведующий кафедрой физики неравновесных процессов Физического факультета НГУ",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Сергея Владимировича Алексеенко в кафедре физики неравновесных процессов Физического факультета НГУ."
           },
           {
             "entity_name": "Научный руководитель Института теплофизики СО РАН",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Сергея Владимировича Алексеенко в Институте теплофизики СО РАН."
           },
           {
             "entity_name": "Заведующий кафедрой дискретной математики и информатики НГУ",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Сергея Савостьяновича Гончарова в кафедре дискретной математики и информатики НГУ."
           },
           {
             "entity_name": "Профессор кафедры цитологии и генетики Факультета естественных наук НГУ",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Алексея Владимировича Кочетова на кафедре цитологии и генетики Факультета естественных наук НГУ."
           },
           {
             "entity_name": "Директор Института цитологии и генетики СО РАН",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Алексея Владимировича Кочетова в Институте цитологии и генетики СО РАН."
           },
           {
             "entity_name": "Индустриальный профессор НГУ",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Александра Николаевича Люлько в НГУ."
           },
           {
             "entity_name": "Вице-президент ПАО «Ростелеком»",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Николая Сергеевича Зенина в ПАО «Ростелеком»."
           },
           {
             "entity_name": "Директор Новосибирского филиала ПАО «Ростелеком»",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Николая Сергеевича Зенина в Новосибирском филиале ПАО «Ростелеком»."
           },
           {
             "entity_name": "Управляющий директор по взаимодействию с академическим сообществом и университетами ПАО «Сбербанк»",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Ивана Борисовича Хлебникова в ПАО «Сбербанк», связанная с взаимодействием с академическим сообществом и университетами."
           }
         ],
@@ -4793,17 +4793,17 @@
         "entities": [
           {
             "entity_name": "Перечень планируемых результатов обучения по дисциплине",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Название раздела документа, в котором перечисляются планируемые результаты обучения по дисциплине и соотносятся с планируемыми результатами освоения образовательной программы."
           },
           {
             "entity_name": "Место дисциплины в структуре образовательной программы",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Название раздела документа, описывающего, где дисциплина находится в структуре образовательной программы."
           },
           {
             "entity_name": "Методы и алгоритмы компьютерной лингвистики",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Дисциплина образовательной программы, реализуемая в 5-м семестре в рамках Блока 1; по ней указаны результаты обучения, связанные с машинным обучением, компьютерными моделями и задачами компьютерной лингвистики."
           },
           {
@@ -4813,17 +4813,17 @@
           },
           {
             "entity_name": "Блок 1",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Структурный компонент образовательной программы, в рамках которого реализуется дисциплина «Методы и алгоритмы компьютерной лингвистики»."
           },
           {
             "entity_name": "ПКС-1",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Компетенция образовательной программы: обучающийся способен проводить научно-исследовательские и опытно-конструкторские разработки по отдельным разделам темы."
           },
           {
             "entity_name": "ПКС-1.2",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Индикатор компетенции ПКС-1: обучающийся демонстрирует знание математических понятий, теорий и методов в объеме, достаточном для построения математических и компьютерных моделей естественных и формальных языков."
           },
           {
@@ -4893,7 +4893,7 @@
           },
           {
             "entity_name": "Компьютерная лингвистика",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Область, отраженная в названии дисциплины «Методы и алгоритмы компьютерной лингвистики»; контекст дисциплины включает машинное обучение, классификацию текстов, морфологический анализ и распознавание именованных сущностей."
           }
         ],
@@ -4954,12 +4954,12 @@
           },
           {
             "entity_name": "Бакалавриат",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Уровень образовательных программ, для поступающих на который указан отдельный контакт приемной комиссии."
           },
           {
             "entity_name": "Магистратура",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Уровень образовательных программ, для поступающих на который указан отдельный контакт приемной комиссии."
           },
           {
@@ -4994,7 +4994,7 @@
           },
           {
             "entity_name": "Аспирантура",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Уровень подготовки, для которого указан отдельный контакт приемной комиссии НГУ."
           },
           {
@@ -5024,7 +5024,7 @@
           },
           {
             "entity_name": "Ординатура",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Форма медицинского постдипломного образования, для которой указана приемная комиссия Центра постдипломного медицинского образования."
           },
           {
@@ -5039,12 +5039,12 @@
           },
           {
             "entity_name": "Луганская Народная Республика",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Территория, упомянутая в контактах для перевода и в перечне территорий специальной военной операции."
           },
           {
             "entity_name": "Донецкая Народная Республика",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Территория, упомянутая в контактах для перевода и в перечне территорий специальной военной операции."
           },
           {
@@ -5054,7 +5054,7 @@
           },
           {
             "entity_name": "Начальник управления академической политики",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Должность Шашковой Марины Викторовны, указанная в контактной информации."
           },
           {
@@ -5084,7 +5084,7 @@
           },
           {
             "entity_name": "Белгородская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Регион, для поступающих из которого указаны отдельные контакты; упомянут вместе с участниками специальной военной операции и их детьми."
           },
           {
@@ -5104,12 +5104,12 @@
           },
           {
             "entity_name": "Запорожская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Регион, указанный среди территорий специальной военной операции в контексте контактов для поступающих и участников."
           },
           {
             "entity_name": "Херсонская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Регион, указанный среди территорий специальной военной операции в контексте контактов для поступающих и участников."
           },
           {
@@ -5878,12 +5878,12 @@
           },
           {
             "entity_name": "Mathematics",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "The academic field central to the Center’s mission, including research and development, fundamental and applied research, professional growth of teachers and young researchers, and related fields."
           },
           {
             "entity_name": "Related Fields",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "The broader set of fields connected to mathematics in which the Center aims to support research and development and provide an advanced level of fundamental and applied research."
           },
           {
@@ -5954,7 +5954,7 @@
         "entities": [
           {
             "entity_name": "News",
-            "entity_type": "TITLE",
+            "entity_type": "WORK_OF_ART",
             "description": "A section or page heading introducing a chronological list of release updates for APIs, scripts, checkpoints, demos, paper, and code."
           },
           {
@@ -6165,7 +6165,7 @@
         "entities": [
           {
             "entity_name": "Model Card",
-            "entity_type": "TITLE",
+            "entity_type": "WORK_OF_ART",
             "description": "The document section heading introducing a model card that lists parameters and pretrained checkpoints for ONE-PEACE, including a separate vision branch configuration."
           },
           {
@@ -6528,7 +6528,7 @@
         "entities": [
           {
             "entity_name": "Water Boards Data and Databases",
-            "entity_type": "TITLE",
+            "entity_type": "WORK_OF_ART",
             "description": "The webpage or section title for Water Boards data resources; it appears as “Data and Databases” and “Water Boards Data and Databases” and introduces access to data and databases maintained by the Water Boards."
           },
           {
@@ -6548,82 +6548,82 @@
           },
           {
             "entity_name": "California",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "The U.S. state whose water quality, water quantity, water uses, and valuable water resources are discussed throughout the text; the California State Water Resources Control Board and CalEPA are state-level entities associated with it."
           },
           {
             "entity_name": "Plans and Policies",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A navigation or program area listed on the Water Boards site for plans and policies."
           },
           {
             "entity_name": "Recycled Water Policy and Research",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards program or content area listed under plans and policies, focused on recycled water policy and research."
           },
           {
             "entity_name": "Storage Tanks",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards program or content area listed in the navigation, concerning storage tanks."
           },
           {
             "entity_name": "Storm Water Planning and Permitting",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards program or content area listed in the navigation, concerning storm water planning and permitting."
           },
           {
             "entity_name": "Surface Water Quality Assessment",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards program or content area listed in the navigation, concerning assessment of surface water quality."
           },
           {
             "entity_name": "Water Quality Total Maximum Daily Loads",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards water-quality program item listed as “TMDLs,” normalized to Total Maximum Daily Loads; it appears in the navigation in connection with water quality."
           },
           {
             "entity_name": "Water Quality Certification and Wetlands",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards program or content area listed in the navigation for water quality certification and wetlands; it is also related to the later navigation item “Water Quality Certifications.”"
           },
           {
             "entity_name": "Water Quality Monitoring",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards program or content area listed in the navigation for monitoring water quality."
           },
           {
             "entity_name": "Water Quality Goals",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards program or content area listed in the navigation for water quality goals."
           },
           {
             "entity_name": "Water Rights",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A major Water Boards program area listed in the navigation, with related items such as applications, fees, hearings, decisions, petitions and transfers, public notices, public trust, registrations, revocation information, reports, and water rights notices."
           },
           {
             "entity_name": "Bay Delta Program",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights program item listed in the navigation."
           },
           {
             "entity_name": "Cannabis Cultivation",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights program item listed in the navigation concerning cannabis cultivation."
           },
           {
             "entity_name": "Drought Information & Updates",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights program item listed in the navigation for drought-related information and updates."
           },
           {
             "entity_name": "Water Rights Applications",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights navigation item for applications."
           },
           {
             "entity_name": "Water Rights Fees",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights navigation item for fees."
           },
           {
@@ -6633,102 +6633,102 @@
           },
           {
             "entity_name": "Water Rights Decisions",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights navigation item for decisions."
           },
           {
             "entity_name": "Water Rights Petitions & Transfers",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights navigation item for petitions and transfers."
           },
           {
             "entity_name": "Water Rights Public Notices",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights navigation item for public notices."
           },
           {
             "entity_name": "Public Trust",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights navigation item concerning the public trust."
           },
           {
             "entity_name": "Water Rights Registrations",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights navigation item for registrations."
           },
           {
             "entity_name": "Revocation Information",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights navigation item for revocation information."
           },
           {
             "entity_name": "Water Rights Reports",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Rights navigation item for reports."
           },
           {
             "entity_name": "Notices",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A navigation category on the Water Boards site for notices and public-facing announcements or participation items."
           },
           {
             "entity_name": "Press Releases",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item for press releases."
           },
           {
             "entity_name": "Past Announcements",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item for past announcements."
           },
           {
             "entity_name": "Public Participation",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item concerning public participation."
           },
           {
             "entity_name": "Board Calendar",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item for the Board calendar."
           },
           {
             "entity_name": "Public Comments",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item for public comments."
           },
           {
             "entity_name": "Petitions",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item for petitions."
           },
           {
             "entity_name": "Drinking Water Petitions",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item for drinking water petitions."
           },
           {
             "entity_name": "Underground Storage Tank Petitions",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item listed as “UST Petitions,” normalized as Underground Storage Tank Petitions."
           },
           {
             "entity_name": "Water Quality Petitions",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item for water quality petitions."
           },
           {
             "entity_name": "Water Rights Notices",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item for water rights notices."
           },
           {
             "entity_name": "Contracts",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A notices navigation item for contracts."
           },
           {
             "entity_name": "Water Boards Map",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards navigation item providing a map of the Water Boards."
           },
           {
@@ -6798,12 +6798,12 @@
           },
           {
             "entity_name": "My Water Quality",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards-related navigation item titled “My Water Quality.”"
           },
           {
             "entity_name": "Santa Monica Bay Restoration",
-            "entity_type": "TITLE",
+            "entity_type": "LAW",
             "description": "A Water Boards-related navigation item for Santa Monica Bay restoration."
           },
           {
@@ -6828,7 +6828,7 @@
           },
           {
             "entity_name": "Accessing Data",
-            "entity_type": "TITLE",
+            "entity_type": "WORK_OF_ART",
             "description": "A section heading appearing after the discussion of the Water Boards Strategic Data Action Plan, indicating information about how to access data."
           }
         ],
@@ -6899,12 +6899,12 @@
           },
           {
             "entity_name": "Guest Host",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "A hosting role used on The Tonight Show Starring Johnny Carson when Johnny Carson was not hosting, including Monday night shows and most shows during Carson's weeks off."
           },
           {
             "entity_name": "Permanent Guest Host",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "A more stable recurring guest-hosting role introduced starting in 1983 because substitutes were frequently needed for The Tonight Show Starring Johnny Carson."
           },
           {

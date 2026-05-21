@@ -120,7 +120,7 @@
           },
           {
             "entity_name": "Arkansas",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Arkansas, a U.S. state where the publisher Helena World Chronicle is based"
           },
           {
@@ -304,7 +304,7 @@
           },
           {
             "entity_name": "Arkansas",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "US state where the publisher Helena World Chronicle is based"
           },
           {
@@ -703,7 +703,7 @@
           },
           {
             "entity_name": "Arkansas",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "US state where the publisher Helena World Chronicle is based"
           },
           {
@@ -3725,7 +3725,7 @@
           },
           {
             "entity_name": "Академик РАН",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Ученое звание академика РАН, указанное для Михаила Федорука, Сергея Алексеенко, Сергея Гончарова и Алексея Кочетова."
           },
           {
@@ -4469,17 +4469,17 @@
         "entities": [
           {
             "entity_name": "Методы и алгоритмы компьютерной лингвистики",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Учебная дисциплина, для которой перечислены планируемые результаты обучения и указано место в структуре образовательной программы."
           },
           {
             "entity_name": "ПКС-1",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Компетенция образовательной программы: способность проводить научно-исследовательские и опытно-конструкторские разработки по отдельным разделам темы."
           },
           {
             "entity_name": "ПКС-1.2",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Индикатор компетенции ПКС-1: демонстрация знания математических понятий, теорий и методов в объеме, достаточном для построения математических и компьютерных моделей естественных и формальных языков."
           },
           {
@@ -4494,7 +4494,7 @@
           },
           {
             "entity_name": "Блок 1",
-            "entity_type": "TITLE",
+            "entity_type": "PRODUCT",
             "description": "Структурный компонент образовательной программы, в рамках которого реализуется дисциплина."
           }
         ],
@@ -4611,27 +4611,27 @@
           },
           {
             "entity_name": "Луганская Народная Республика",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Территориальное образование, упомянутое среди республик для перевода и среди территорий специальной военной операции."
           },
           {
             "entity_name": "Донецкая Народная Республика",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Территориальное образование, упомянутое среди республик для перевода и среди территорий специальной военной операции."
           },
           {
             "entity_name": "Белгородская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Регион, из которого упомянуты поступающие, для которых приведены контакты."
           },
           {
             "entity_name": "Запорожская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Регион, названный среди территорий специальной военной операции."
           },
           {
             "entity_name": "Херсонская область",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "Регион, названный среди территорий специальной военной операции."
           },
           {
@@ -5953,7 +5953,7 @@
           },
           {
             "entity_name": "Академик",
-            "entity_type": "TITLE",
+            "entity_type": "PROFESSION",
             "description": "Звание А.В. Николаева, указанное в названии стипендий и премий."
           },
           {
@@ -6562,7 +6562,7 @@
         "entities": [
           {
             "entity_name": "News",
-            "entity_type": "TITLE",
+            "entity_type": "WORK_OF_ART",
             "description": "A news section heading introducing a chronological list of releases and updates."
           },
           {
@@ -6888,7 +6888,7 @@
         "entities": [
           {
             "entity_name": "Geopolitical Biases In LLMs: What Are The “Good” And The “Bad” Countries According To Contemporary Language Models",
-            "entity_type": "TITLE",
+            "entity_type": "WORK_OF_ART",
             "description": "The title/topic of the project, which concerns geopolitical biases in large language models and asks which countries are treated as 'good' or 'bad' by contemporary language models."
           },
           {
@@ -7704,7 +7704,7 @@
         "entities": [
           {
             "entity_name": "Data And Databases",
-            "entity_type": "TITLE",
+            "entity_type": "WORK_OF_ART",
             "description": "The page or document title shown at the beginning of the text, associated with the California State Water Resources Control Board and focused on data and database resources."
           },
           {
@@ -7739,7 +7739,7 @@
           },
           {
             "entity_name": "Water Boards Data And Databases",
-            "entity_type": "TITLE",
+            "entity_type": "WORK_OF_ART",
             "description": "The title of the page section introducing the data and database resources of the Water Boards."
           },
           {
@@ -7764,7 +7764,7 @@
           },
           {
             "entity_name": "California",
-            "entity_type": "STATE_OR_PROVINCE",
+            "entity_type": "STATE_OR_PROV",
             "description": "The U.S. state whose water quality, quantity, uses, and valuable water resources are discussed in the text."
           },
           {
