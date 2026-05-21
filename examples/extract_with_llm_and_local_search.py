@@ -54,7 +54,7 @@ async def main():
     # Configure in-context learning (optional, improves extraction quality)
     icl_config = ICLConfig(
         enabled=True,
-        num_examples=3,
+        num_examples=2,
         selection_strategy="hybrid"
     )
 

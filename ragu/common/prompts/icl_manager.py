@@ -150,6 +150,7 @@ class InContextLearningManager:
         self._cached_query_key: int | None = None
         self._cached_query_matrix: np.ndarray | None = None
         self._bm25_retriever: Any | None = None
+        self._bm25_retrievers: Dict[str, tuple[Any, List[int]]] | None = None
 
     async def initialize(self) -> None:
         """
@@ -259,20 +260,41 @@ class InContextLearningManager:
 
     def _build_bm25_index(self) -> None:
         """
-        Build a BM25 index over all example texts using bm25s.
+        Build BM25 indices over example texts using bm25s.
+
+        Constructs a global index (for ``task=None`` fallback) and per-task
+        indices (one for each key in ``_task_indices``).  Per-task indices
+        produce more accurate IDF scores and avoid post-hoc filtering.
         """
         import bm25s
 
         if not self.examples:
             return
 
-        texts = [ex.input_text for ex in self.examples]
         stopwords = _LANGUAGE_TO_STOPWORDS.get(self.language, "en")
+
+        texts = [ex.input_text for ex in self.examples]
         corpus_tokens = bm25s.tokenize(texts, stopwords=stopwords)
         self._bm25_retriever = bm25s.BM25()
         self._bm25_retriever.index(corpus_tokens)
 
-        logger.debug("Built BM25 index for all examples")
+        self._bm25_retrievers = {}
+        for task_name, indices in self._task_indices.items():
+            if not indices:
+                continue
+            task_texts = [self.examples[i].input_text for i in indices]
+            task_tokens = bm25s.tokenize(task_texts, stopwords=stopwords)
+            task_retriever = bm25s.BM25()
+            task_retriever.index(task_tokens)
+            self._bm25_retrievers[task_name] = (task_retriever, indices)
+
+        task_summary = ", ".join(
+            f"{t}={len(idx)}" for t, idx in self._task_indices.items()
+        )
+        logger.debug(
+            f"Built BM25 indices: global ({len(self.examples)} docs), "
+            f"per-task ({task_summary})"
+        )
 
     async def _get_query_matrix(self, query_texts: List[str]) -> np.ndarray:
         """
@@ -440,6 +462,38 @@ class InContextLearningManager:
     ) -> List[List[Dict[str, Any]]]:
         import bm25s
 
+        stopwords = self._get_stopwords()
+        query_tokens = bm25s.tokenize(query_texts, stopwords=stopwords)
+
+        if (
+            task is not None
+            and self._bm25_retrievers
+            and task in self._bm25_retrievers
+        ):
+            retriever, task_indices = self._bm25_retrievers[task]
+            k = min(num_examples, len(task_indices))
+            if k == 0:
+                return [[] for _ in query_texts]
+            bm25_results, bm25_scores = retriever.retrieve(query_tokens, k=k)
+
+            output: List[List[Dict[str, Any]]] = []
+            for i in range(len(query_texts)):
+                selected = []
+                for local_idx, score in zip(bm25_results[i], bm25_scores[i]):
+                    if len(selected) >= num_examples:
+                        break
+                    global_idx = task_indices[int(local_idx)]
+                    selected.append(self._example_to_dict(self.examples[global_idx]))
+
+                logger.debug(
+                    f"Selected {len(selected)} examples for query {i} "
+                    f"(task='{task}', strategy='bm25', index='per-task')"
+                )
+
+                output.append(selected)
+
+            return output
+
         if self._bm25_retriever is None:
             return [[] for _ in query_texts]
 
@@ -448,9 +502,6 @@ class InContextLearningManager:
             return [[] for _ in query_texts]
 
         candidate_set = set(candidate_indices)
-        stopwords = self._get_stopwords()
-        query_tokens = bm25s.tokenize(query_texts, stopwords=stopwords)
-
         k = min(len(self.examples), max(num_examples, len(self.examples)))
         bm25_results, bm25_scores = self._bm25_retriever.retrieve(query_tokens, k=k)
 
@@ -468,7 +519,7 @@ class InContextLearningManager:
 
             logger.debug(
                 f"Selected {len(selected)} examples for query {i} "
-                f"(task='{task}', strategy='bm25')"
+                f"(task='{task}', strategy='bm25', index='global')"
             )
 
             output.append(selected)
@@ -510,8 +561,27 @@ class InContextLearningManager:
 
         stopwords = self._get_stopwords()
         query_tokens = bm25s.tokenize(query_texts, stopwords=stopwords)
-        k = len(self.examples)
-        bm25_results, bm25_scores = self._bm25_retriever.retrieve(query_tokens, k=k)
+
+        use_per_task = (
+            task is not None
+            and self._bm25_retrievers
+            and task in self._bm25_retrievers
+        )
+        if use_per_task:
+            task_retriever, task_bm25_indices = self._bm25_retrievers[task]
+            bm25_results, bm25_scores = task_retriever.retrieve(
+                query_tokens, k=len(task_bm25_indices)
+            )
+            bm25_global_results = [
+                [task_bm25_indices[int(idx)] for idx in row]
+                for row in bm25_results
+            ]
+        else:
+            k = len(self.examples)
+            bm25_results, bm25_scores = self._bm25_retriever.retrieve(
+                query_tokens, k=k
+            )
+            bm25_global_results = bm25_results
 
         rrf_k = max(len(candidate_indices) // 2, 1)
 
@@ -525,9 +595,9 @@ class InContextLearningManager:
                 global_idx = int(idx_arr[local_idx])
                 rrf_scores[global_idx] = 1.0 / (rrf_k + rank + 1)
 
-            for rank, doc_idx in enumerate(bm25_results[i]):
+            for rank, doc_idx in enumerate(bm25_global_results[i]):
                 doc_idx_int = int(doc_idx)
-                if doc_idx_int not in candidate_set:
+                if not use_per_task and doc_idx_int not in candidate_set:
                     continue
                 rrf_scores[doc_idx_int] = (
                     rrf_scores.get(doc_idx_int, 0.0) + 1.0 / (rrf_k + rank + 1)
@@ -539,9 +609,11 @@ class InContextLearningManager:
                 example = self.examples[global_idx]
                 selected.append(self._example_to_dict(example))
 
+            index_type = "per-task" if use_per_task else "global"
             logger.debug(
                 f"Selected {len(selected)} examples for query {i} "
-                f"(task='{task}', strategy='hybrid', rrf_k={rrf_k})"
+                f"(task='{task}', strategy='hybrid', rrf_k={rrf_k}, "
+                f"bm25_index='{index_type}')"
             )
 
             output.append(selected)

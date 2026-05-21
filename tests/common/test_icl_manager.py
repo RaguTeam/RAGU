@@ -361,6 +361,7 @@ class TestBM25Selection:
         )
         await manager.initialize()
         assert manager._bm25_retriever is not None
+        assert manager._bm25_retrievers is not None
         results = await manager.batch_select_examples(
             ["Tech company founded in California"],
             task="entity_extraction",
@@ -481,6 +482,7 @@ class TestHybridSelection:
         await manager.initialize()
         assert manager._example_matrix is not None
         assert manager._bm25_retriever is not None
+        assert manager._bm25_retrievers is not None
 
         results = await manager.batch_select_examples(
             ["Apple was founded by Steve Jobs"],
