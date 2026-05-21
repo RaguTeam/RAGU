@@ -93,11 +93,13 @@ async def main():
     questions = [
         "Кто написал гимн Норвегии?",
         "Шум, издаваемый ЭТИМИ ПАУКООБРАЗНЫМИ, слышен за пять километров. Отсюда и их название.",
-        "Как переводится роман 'Ка́мо гряде́ши, Го́споди?'"
+        "Как переводится название романа 'Ка́мо гряде́ши, Го́споди?' на русский языке"
     ]
 
     for question in questions:
-        print(await search_engine.a_query(question))
+        print(f'\nВопрос: {question}')
+        answer = await search_engine.a_query(question)
+        print(f'Ответ: {answer}')
 
 if __name__ == "__main__":
     asyncio.run(main())
