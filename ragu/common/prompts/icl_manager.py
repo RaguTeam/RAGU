@@ -1,14 +1,18 @@
 """
 In-context learning manager for RAGU extractors.
 
-This module manages few-shot examples and provides semantic
-selection of relevant examples for LLM-based extraction.
+This module manages few-shot examples and provides multiple
+selection strategies (semantic, BM25, hybrid, random) for
+LLM-based extraction.
 
 Key design decisions:
 - Embeddings are computed at initialization using provided Embedder
+  (required for ``semantic`` and ``hybrid`` strategies)
+- BM25 index is built at initialization via bm25s
+  (used by ``bm25`` and ``hybrid`` strategies)
+- ``random`` strategy needs neither embedder nor BM25
 - Example storage is independent of specific embedding model
 - Portable examples can be used with any embedder
-- Supports semantic selection strategies
 
 Classes
 -------
@@ -20,9 +24,10 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import random as _random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 from uuid import uuid4
 
 import numpy as np
@@ -33,6 +38,11 @@ from ragu.models.embedder import Embedder
 from ragu.common.prompts.icl_config import ICLConfig
 
 _BUILTIN_EXAMPLES_DIR = Path(__file__).parent / "icl_examples"
+
+_LANGUAGE_TO_STOPWORDS = {
+    "english": "en",
+    "russian": "ru",
+}
 
 
 def resolve_example_path(base_path: str | None, filename: str) -> str:
@@ -77,35 +87,31 @@ class Example:
 
 class InContextLearningManager:
     """
-    Manages in-context learning examples with on-the-fly embedding computation.
+    Manages in-context learning examples with multiple selection strategies.
 
     This manager loads examples from multiple JSON files (one per task),
-    computes embeddings at initialization using the provided Embedder,
-    and selects the most relevant examples for queries using semantic
-    similarity with optional per-task filtering.
+    computes embeddings and/or builds a BM25 index at initialization,
+    and selects the most relevant examples for queries using one of
+    four strategies:
 
-    Key features:
-    - Loads examples from multiple task-specific JSON files
-    - Embeddings computed on-the-fly at initialization (single pass)
-    - Task-based filtering during example selection
-    - Semantic selection by cosine similarity
-    - Multi-language support
-    - Portable examples for any embedder
-    - Query embedding caching to avoid redundant API calls
+    - ``"semantic"``: cosine similarity on dense embeddings.
+    - ``"bm25"``: lexical matching via BM25 (bm25s).
+    - ``"hybrid"``: Reciprocal Rank Fusion of semantic and BM25 rankings.
+    - ``"random"``: uniform random sampling.
 
     Example usage:
     ```python
     from ragu.common.prompts.icl_manager import resolve_example_path
 
     embedder = EmbedderOpenAI(client=client, model_name="text-embedding-3-small", dim=1536)
-    config = ICLConfig(num_examples=2)
+    config = ICLConfig(num_examples=2, selection_strategy="hybrid")
     manager = InContextLearningManager(
-        embedder=embedder,
         example_files={
             "entity_extraction": resolve_example_path(None, "entity_extraction_examples.json"),
             "relation_extraction": resolve_example_path(None, "relation_extraction_examples.json"),
         },
         config=config,
+        embedder=embedder,
     )
 
     # Select relevant entity examples for multiple queries (batch)
@@ -116,56 +122,54 @@ class InContextLearningManager:
     )
     ```
 
-    :param embedder: Embedder instance for computing embeddings.
     :param example_files: Mapping from task name to path of JSON file with examples.
     :param config: ICL configuration.
+    :param embedder: Embedder instance for computing embeddings.
+        Required for ``"semantic"`` and ``"hybrid"`` strategies,
+        not needed for ``"bm25"`` and ``"random"``.
     :param language: Target language for example selection.
         Defaults to ``Settings.language`` when ``None``.
     """
 
     def __init__(
         self,
-        embedder: Embedder,
         example_files: Dict[str, str],
         config: ICLConfig,
+        embedder: Embedder | None = None,
         language: str | None = None,
     ):
-        """
-        Initialize ICL manager.
-
-        :param embedder: Embedder for computing embeddings on-the-fly.
-        :param example_files: Mapping from task name to JSON file path with examples.
-        :param config: ICL configuration.
-        :param language: Target language for example selection.
-            Defaults to ``Settings.language`` when ``None``.
-        """
-        self.embedder = embedder
         self.example_files = example_files
         self.config = config
+        self.embedder = embedder
         self.language = language if language else Settings.language
         self.examples: List[Example] = []
         self._task_indices: Dict[str, List[int]] = {}
-        self._embeddings_computed = False
+        self._initialized = False
         self._example_matrix: np.ndarray | None = None
         self._example_norms: np.ndarray | None = None
         self._cached_query_key: int | None = None
         self._cached_query_matrix: np.ndarray | None = None
+        self._bm25_retriever: Any | None = None
 
     async def initialize(self) -> None:
         """
-        Load examples and compute embeddings.
+        Load examples and build indices according to the selected strategy.
 
-        This should be called after initialization to load examples
-        and compute embeddings for all example texts.  Subsequent
-        calls are no-ops — examples and embeddings are reused.
-
-        For 20-50 examples, this typically takes < 1 second.
+        Subsequent calls are no-ops — examples and indices are reused.
         """
-        if self._embeddings_computed:
+        if self._initialized:
             return
+
         await self._load_examples()
-        await self._compute_embeddings()
-        self._embeddings_computed = True
+
+        strategy = self.config.selection_strategy
+        if strategy in ("semantic", "hybrid"):
+            self._validate_embedder()
+            await self._compute_embeddings()
+        if strategy in ("bm25", "hybrid"):
+            self._build_bm25_index()
+
+        self._initialized = True
 
         task_summary = ", ".join(
             f"{task}={len(indices)}" for task, indices in self._task_indices.items()
@@ -173,8 +177,15 @@ class InContextLearningManager:
         logger.info(
             f"Initialized InContextLearningManager with "
             f"{len(self.examples)} examples for language '{self.language}' "
-            f"({task_summary})"
+            f"(strategy='{strategy}', {task_summary})"
         )
+
+    def _validate_embedder(self) -> None:
+        if self.embedder is None:
+            raise ValueError(
+                f"Embedder is required for selection_strategy="
+                f"'{self.config.selection_strategy}'"
+            )
 
     async def _load_examples(self) -> None:
         """
@@ -246,6 +257,23 @@ class InContextLearningManager:
 
         logger.debug("Computed embeddings for all examples")
 
+    def _build_bm25_index(self) -> None:
+        """
+        Build a BM25 index over all example texts using bm25s.
+        """
+        import bm25s
+
+        if not self.examples:
+            return
+
+        texts = [ex.input_text for ex in self.examples]
+        stopwords = _LANGUAGE_TO_STOPWORDS.get(self.language, "en")
+        corpus_tokens = bm25s.tokenize(texts, stopwords=stopwords)
+        self._bm25_retriever = bm25s.BM25()
+        self._bm25_retriever.index(corpus_tokens)
+
+        logger.debug("Built BM25 index for all examples")
+
     async def _get_query_matrix(self, query_texts: List[str]) -> np.ndarray:
         """
         Get query embeddings matrix, using cached result if texts unchanged.
@@ -265,6 +293,46 @@ class InContextLearningManager:
         self._cached_query_matrix = matrix
         return matrix
 
+    def _get_candidate_indices(self, task: str | None) -> List[int]:
+        if task is not None:
+            return self._task_indices.get(task, [])
+        return list(range(len(self.examples)))
+
+    @staticmethod
+    def _example_to_dict(example: Example) -> Dict[str, Any]:
+        return {
+            "id": example.id,
+            "input_text": example.input_text,
+            "output": example.output,
+            "metadata": example.metadata,
+            "language": example.language,
+            "quality_rating": example.quality_rating,
+        }
+
+    def _get_stopwords(self) -> str:
+        return _LANGUAGE_TO_STOPWORDS.get(self.language, "en")
+
+    def _check_low_match_rate(
+        self,
+        results: List[List[Dict[str, Any]]],
+        task: str | None,
+        candidate_count: int,
+    ) -> None:
+        total = len(results)
+        empty_count = sum(1 for r in results if not r)
+        if (
+            total > 0
+            and self.config.low_match_warning_threshold > 0.0
+            and empty_count / total >= self.config.low_match_warning_threshold
+        ):
+            logger.warning(
+                f"ICL low match rate for task='{task}': "
+                f"{empty_count}/{total} queries ({empty_count / total:.0%}) "
+                f"received no examples "
+                f"(available_examples={candidate_count}). "
+                f"Consider adding more examples."
+            )
+
     async def batch_select_examples(
         self,
         query_texts: List[str],
@@ -274,15 +342,12 @@ class InContextLearningManager:
         """
         Select most relevant examples for a batch of queries.
 
-        Computes all query embeddings in a single batch API call, then
-        selects top-k examples per query using cosine similarity.
+        Routing is based on ``config.selection_strategy``:
 
-        When ``task`` is provided, only examples tagged with that task
-        name are considered during selection.
-
-        Query embeddings are cached: if the same ``query_texts`` list is
-        passed on a subsequent call (e.g. extraction then validation),
-        the embeddings are reused without an additional API call.
+        - ``"semantic"``: cosine similarity on dense embeddings.
+        - ``"bm25"``: lexical matching via BM25.
+        - ``"hybrid"``: Reciprocal Rank Fusion of semantic and BM25.
+        - ``"random"``: uniform random sampling.
 
         :param query_texts: Input texts for which to select examples.
         :param task: Task name to filter examples by (e.g. ``"entity_extraction"``).
@@ -291,20 +356,38 @@ class InContextLearningManager:
             (uses config default if None).
         :return: Per-query lists of example dictionaries.
         """
-        if not self._embeddings_computed:
-            logger.warning(
-                "Embeddings not computed. Call initialize() first."
-            )
+        if not self._initialized:
+            logger.warning("Not initialized. Call initialize() first.")
             return [[] for _ in query_texts]
 
         if num_examples is None:
             num_examples = self.config.num_examples
 
-        if task is not None:
-            candidate_indices = self._task_indices.get(task, [])
+        strategy = self.config.selection_strategy
+        if strategy == "semantic":
+            results = await self._select_semantic(query_texts, task, num_examples)
+        elif strategy == "bm25":
+            results = self._select_bm25(query_texts, task, num_examples)
+        elif strategy == "hybrid":
+            results = await self._select_hybrid(query_texts, task, num_examples)
+        elif strategy == "random":
+            results = self._select_random(query_texts, task, num_examples)
         else:
-            candidate_indices = list(range(len(self.examples)))
+            logger.warning(f"Unknown selection strategy: {strategy}")
+            return [[] for _ in query_texts]
 
+        candidate_indices = self._get_candidate_indices(task)
+        self._check_low_match_rate(results, task, len(candidate_indices))
+
+        return results
+
+    async def _select_semantic(
+        self,
+        query_texts: List[str],
+        task: str | None,
+        num_examples: int,
+    ) -> List[List[Dict[str, Any]]]:
+        candidate_indices = self._get_candidate_indices(task)
         if not candidate_indices or self._example_matrix is None:
             return [[] for _ in query_texts]
 
@@ -330,47 +413,162 @@ class InContextLearningManager:
                 continue
 
             similarities = sim_matrix[i]
-            indices = np.where(similarities >= self.config.similarity_threshold)[0]
-
-            if len(indices) == 0:
-                logger.debug(
-                    f"No examples passed similarity threshold "
-                    f"({self.config.similarity_threshold}) for query {i}"
-                )
-                results.append([])
-                continue
-
-            top_local = indices[np.argsort(similarities[indices])[-num_examples:]][::-1]
+            k = min(num_examples, len(candidate_indices))
+            top_local = np.argsort(similarities)[-k:][::-1]
             top_global = idx_arr[top_local]
 
-            selected = []
-            for idx in top_global:
-                example = self.examples[idx]
-                selected.append({
-                    "id": example.id,
-                    "input_text": example.input_text,
-                    "output": example.output,
-                    "metadata": example.metadata,
-                    "language": example.language,
-                    "quality_rating": example.quality_rating,
-                })
+            selected = [
+                self._example_to_dict(self.examples[idx])
+                for idx in top_global
+            ]
 
             logger.debug(
                 f"Selected {len(selected)} examples for query {i} "
-                f"(task='{task}', similarities: {[float(similarities[j]) for j in top_local]})"
+                f"(task='{task}', strategy='semantic', "
+                f"similarities: {[float(similarities[j]) for j in top_local]})"
             )
 
             results.append(selected)
 
-        total = len(results)
-        empty_count = sum(1 for r in results if not r)
-        if total > 0 and self.config.low_match_warning_threshold > 0.0 and empty_count / total >= self.config.low_match_warning_threshold:
-            logger.warning(
-                f"ICL low match rate for task='{task}': "
-                f"{empty_count}/{total} queries ({empty_count / total:.0%}) "
-                f"received no examples (similarity_threshold={self.config.similarity_threshold}, "
-                f"available_examples={len(candidate_indices)}). "
-                f"Consider lowering similarity_threshold or adding more examples."
+        return results
+
+    def _select_bm25(
+        self,
+        query_texts: List[str],
+        task: str | None,
+        num_examples: int,
+    ) -> List[List[Dict[str, Any]]]:
+        import bm25s
+
+        if self._bm25_retriever is None:
+            return [[] for _ in query_texts]
+
+        candidate_indices = self._get_candidate_indices(task)
+        if not candidate_indices:
+            return [[] for _ in query_texts]
+
+        candidate_set = set(candidate_indices)
+        stopwords = self._get_stopwords()
+        query_tokens = bm25s.tokenize(query_texts, stopwords=stopwords)
+
+        k = min(len(self.examples), max(num_examples, len(self.examples)))
+        bm25_results, bm25_scores = self._bm25_retriever.retrieve(query_tokens, k=k)
+
+        output: List[List[Dict[str, Any]]] = []
+        for i in range(len(query_texts)):
+            selected = []
+            for doc_idx, score in zip(bm25_results[i], bm25_scores[i]):
+                doc_idx_int = int(doc_idx)
+                if doc_idx_int not in candidate_set:
+                    continue
+                if len(selected) >= num_examples:
+                    break
+                example = self.examples[doc_idx_int]
+                selected.append(self._example_to_dict(example))
+
+            logger.debug(
+                f"Selected {len(selected)} examples for query {i} "
+                f"(task='{task}', strategy='bm25')"
             )
 
-        return results
+            output.append(selected)
+
+        return output
+
+    async def _select_hybrid(
+        self,
+        query_texts: List[str],
+        task: str | None,
+        num_examples: int,
+    ) -> List[List[Dict[str, Any]]]:
+        import bm25s
+
+        assert self.embedder is not None
+
+        if self._bm25_retriever is None:
+            return [[] for _ in query_texts]
+
+        candidate_indices = self._get_candidate_indices(task)
+        if not candidate_indices:
+            return [[] for _ in query_texts]
+
+        candidate_set = set(candidate_indices)
+        idx_arr = np.array(candidate_indices, dtype=np.intp)
+
+        query_matrix = await self._get_query_matrix(query_texts)
+        ex_matrix = self._example_matrix[idx_arr]
+        ex_norms = self._example_norms[idx_arr]
+
+        query_norms = np.linalg.norm(query_matrix, axis=1)
+        valid_examples = ex_norms > 0.0
+        ex_norms_safe = np.where(valid_examples, ex_norms, 1.0)
+
+        sim_matrix = (query_matrix @ ex_matrix.T) / (
+            query_norms[:, np.newaxis] * ex_norms_safe[np.newaxis, :]
+        )
+        sim_matrix[:, ~valid_examples] = 0.0
+
+        stopwords = self._get_stopwords()
+        query_tokens = bm25s.tokenize(query_texts, stopwords=stopwords)
+        k = len(self.examples)
+        bm25_results, bm25_scores = self._bm25_retriever.retrieve(query_tokens, k=k)
+
+        rrf_k = max(len(candidate_indices) // 2, 1)
+
+        output: List[List[Dict[str, Any]]] = []
+        for i in range(len(query_texts)):
+            rrf_scores: Dict[int, float] = {}
+
+            sims = sim_matrix[i]
+            semantic_order = np.argsort(-sims)
+            for rank, local_idx in enumerate(semantic_order):
+                global_idx = int(idx_arr[local_idx])
+                rrf_scores[global_idx] = 1.0 / (rrf_k + rank + 1)
+
+            for rank, doc_idx in enumerate(bm25_results[i]):
+                doc_idx_int = int(doc_idx)
+                if doc_idx_int not in candidate_set:
+                    continue
+                rrf_scores[doc_idx_int] = (
+                    rrf_scores.get(doc_idx_int, 0.0) + 1.0 / (rrf_k + rank + 1)
+                )
+
+            sorted_items = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)
+            selected = []
+            for global_idx, score in sorted_items[:num_examples]:
+                example = self.examples[global_idx]
+                selected.append(self._example_to_dict(example))
+
+            logger.debug(
+                f"Selected {len(selected)} examples for query {i} "
+                f"(task='{task}', strategy='hybrid', rrf_k={rrf_k})"
+            )
+
+            output.append(selected)
+
+        return output
+
+    def _select_random(
+        self,
+        query_texts: List[str],
+        task: str | None,
+        num_examples: int,
+    ) -> List[List[Dict[str, Any]]]:
+        candidate_indices = self._get_candidate_indices(task)
+        if not candidate_indices:
+            return [[] for _ in query_texts]
+
+        k = min(num_examples, len(candidate_indices))
+        output: List[List[Dict[str, Any]]] = []
+        for i in range(len(query_texts)):
+            chosen = _random.sample(candidate_indices, k)
+            selected = [self._example_to_dict(self.examples[idx]) for idx in chosen]
+
+            logger.debug(
+                f"Selected {len(selected)} examples for query {i} "
+                f"(task='{task}', strategy='random')"
+            )
+
+            output.append(selected)
+
+        return output

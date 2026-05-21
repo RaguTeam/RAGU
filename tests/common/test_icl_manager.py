@@ -72,7 +72,6 @@ def icl_config():
     return ICLConfig(
         enabled=True,
         num_examples=2,
-        similarity_threshold=0.1,
     )
 
 
@@ -178,33 +177,33 @@ class TestInContextLearningManagerInit:
     @pytest.mark.asyncio
     async def test_initialize_loads_examples(self, embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=embedder,
             example_files=example_files,
             config=icl_config,
+            embedder=embedder,
         )
         await manager.initialize()
         assert len(manager.examples) == 3
         assert all(ex.language == "english" for ex in manager.examples)
-        assert manager._embeddings_computed
+        assert manager._initialized
 
     @pytest.mark.asyncio
     async def test_initialize_filters_by_language(self, embedder, icl_config, example_files, monkeypatch):
         monkeypatch.setattr(Settings, "language", "russian")
         manager = InContextLearningManager(
-            embedder=embedder,
             example_files=example_files,
             config=icl_config,
+            embedder=embedder,
         )
         await manager.initialize()
         assert len(manager.examples) == 1
         assert manager.examples[0].id == "ex-3"
 
     @pytest.mark.asyncio
-    async def test_initialize_missing_file(self, embedder, icl_config, tmp_path):
+    async def test_initialize_missing_file(self, icl_config, tmp_path):
         manager = InContextLearningManager(
-            embedder=embedder,
             example_files={"test": str(tmp_path / "nonexistent.json")},
             config=icl_config,
+            embedder=DeterministicEmbedder(dim=64),
         )
         await manager.initialize()
         assert len(manager.examples) == 0
@@ -213,9 +212,9 @@ class TestInContextLearningManagerInit:
     async def test_initialize_no_matching_language(self, embedder, icl_config, example_files, monkeypatch):
         monkeypatch.setattr(Settings, "language", "french")
         manager = InContextLearningManager(
-            embedder=embedder,
             example_files=example_files,
             config=icl_config,
+            embedder=embedder,
         )
         await manager.initialize()
         assert len(manager.examples) == 0
@@ -223,9 +222,9 @@ class TestInContextLearningManagerInit:
     @pytest.mark.asyncio
     async def test_task_indices_built(self, embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=embedder,
             example_files=example_files,
             config=icl_config,
+            embedder=embedder,
         )
         await manager.initialize()
         assert "entity_extraction" in manager._task_indices
@@ -236,9 +235,9 @@ class TestInContextLearningManagerInit:
     @pytest.mark.asyncio
     async def test_examples_tagged_with_task(self, embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=embedder,
             example_files=example_files,
             config=icl_config,
+            embedder=embedder,
         )
         await manager.initialize()
         entity_examples = [ex for ex in manager.examples if ex.task == "entity_extraction"]
@@ -247,11 +246,12 @@ class TestInContextLearningManagerInit:
         assert len(relation_examples) == 1
 
 
-class TestInContextLearningManagerSelection:
+class TestSemanticSelection:
     @pytest.mark.asyncio
     async def test_select_examples_returns_correct_count(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_files=example_files, config=icl_config,
+            example_files=example_files, config=icl_config,
+            embedder=constant_embedder,
         )
         await manager.initialize()
         results = await manager.batch_select_examples(
@@ -262,7 +262,8 @@ class TestInContextLearningManagerSelection:
     @pytest.mark.asyncio
     async def test_select_examples_respects_num_examples_override(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_files=example_files, config=icl_config,
+            example_files=example_files, config=icl_config,
+            embedder=constant_embedder,
         )
         await manager.initialize()
         results = await manager.batch_select_examples(
@@ -273,7 +274,8 @@ class TestInContextLearningManagerSelection:
     @pytest.mark.asyncio
     async def test_select_examples_returns_dicts(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_files=example_files, config=icl_config,
+            example_files=example_files, config=icl_config,
+            embedder=constant_embedder,
         )
         await manager.initialize()
         results = await manager.batch_select_examples(
@@ -289,7 +291,8 @@ class TestInContextLearningManagerSelection:
         empty_file = str(tmp_path / "empty.json")
         _write_example_file(empty_file, [])
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_files={"test": empty_file}, config=icl_config,
+            example_files={"test": empty_file}, config=icl_config,
+            embedder=constant_embedder,
         )
         await manager.initialize()
         results = await manager.batch_select_examples(["some query"], task="test")
@@ -298,30 +301,17 @@ class TestInContextLearningManagerSelection:
     @pytest.mark.asyncio
     async def test_select_examples_empty_without_initialize(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_files=example_files, config=icl_config,
+            example_files=example_files, config=icl_config,
+            embedder=constant_embedder,
         )
         results = await manager.batch_select_examples(["some query"], task="entity_extraction")
         assert results == [[]]
 
     @pytest.mark.asyncio
-    async def test_select_examples_threshold_filtering(self, embedder, icl_config, example_files):
-        high_threshold_config = ICLConfig(
-            enabled=True, num_examples=2,
-            similarity_threshold=0.99,
-        )
-        manager = InContextLearningManager(
-            embedder=embedder, example_files=example_files, config=high_threshold_config,
-        )
-        await manager.initialize()
-        results = await manager.batch_select_examples(
-            ["something completely unrelated xyzzy"], task="entity_extraction",
-        )
-        assert results == [[]]
-
-    @pytest.mark.asyncio
     async def test_select_examples_filters_by_task(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_files=example_files, config=icl_config,
+            example_files=example_files, config=icl_config,
+            embedder=constant_embedder,
         )
         await manager.initialize()
 
@@ -339,7 +329,8 @@ class TestInContextLearningManagerSelection:
     @pytest.mark.asyncio
     async def test_select_examples_unknown_task_returns_empty(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_files=example_files, config=icl_config,
+            example_files=example_files, config=icl_config,
+            embedder=constant_embedder,
         )
         await manager.initialize()
         results = await manager.batch_select_examples(
@@ -350,7 +341,8 @@ class TestInContextLearningManagerSelection:
     @pytest.mark.asyncio
     async def test_select_examples_no_task_uses_all(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_files=example_files, config=icl_config,
+            example_files=example_files, config=icl_config,
+            embedder=constant_embedder,
         )
         await manager.initialize()
         results = await manager.batch_select_examples(
@@ -359,35 +351,332 @@ class TestInContextLearningManagerSelection:
         assert len(results[0]) == 3
 
 
+class TestBM25Selection:
+    @pytest.mark.asyncio
+    async def test_bm25_returns_examples_without_embedder(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="bm25")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+        assert manager._bm25_retriever is not None
+        results = await manager.batch_select_examples(
+            ["Tech company founded in California"],
+            task="entity_extraction",
+        )
+        assert len(results[0]) == 2
+
+    @pytest.mark.asyncio
+    async def test_bm25_returns_correct_count(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=1, selection_strategy="bm25")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["Tech company"],
+            task="entity_extraction",
+        )
+        assert len(results[0]) == 1
+
+    @pytest.mark.asyncio
+    async def test_bm25_filters_by_task(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=10, selection_strategy="bm25")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+
+        entity_results = await manager.batch_select_examples(
+            ["Tech company"], task="entity_extraction",
+        )
+        relation_results = await manager.batch_select_examples(
+            ["Business acquisition"], task="relation_extraction",
+        )
+
+        assert all(ex["id"].startswith("ex-") for ex in entity_results[0])
+        assert all(ex["id"].startswith("rel-") for ex in relation_results[0])
+
+    @pytest.mark.asyncio
+    async def test_bm25_selects_relevant_examples(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=1, selection_strategy="bm25")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+
+        results = await manager.batch_select_examples(
+            ["Apple and Steve Jobs founded a company"],
+            task="entity_extraction",
+        )
+        assert len(results[0]) == 1
+        assert results[0][0]["id"] == "ex-1"
+
+    @pytest.mark.asyncio
+    async def test_bm25_with_empty_examples(self, tmp_path):
+        empty_file = str(tmp_path / "empty.json")
+        _write_example_file(empty_file, [])
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="bm25")
+        manager = InContextLearningManager(
+            example_files={"test": empty_file},
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(["some query"], task="test")
+        assert results == [[]]
+
+    @pytest.mark.asyncio
+    async def test_bm25_unknown_task_returns_empty(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="bm25")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["some query"], task="nonexistent_task",
+        )
+        assert results == [[]]
+
+    @pytest.mark.asyncio
+    async def test_bm25_multiple_queries(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=1, selection_strategy="bm25")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["Apple was founded by Steve Jobs", "Microsoft acquired LinkedIn"],
+            task="entity_extraction",
+        )
+        assert len(results) == 2
+        assert results[0][0]["id"] == "ex-1"
+        assert results[1][0]["id"] == "ex-2"
+
+
+class TestHybridSelection:
+    @pytest.mark.asyncio
+    async def test_hybrid_requires_embedder(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="hybrid")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        with pytest.raises(ValueError, match="Embedder is required"):
+            await manager.initialize()
+
+    @pytest.mark.asyncio
+    async def test_hybrid_returns_examples(self, embedder, example_files):
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="hybrid")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+            embedder=embedder,
+        )
+        await manager.initialize()
+        assert manager._example_matrix is not None
+        assert manager._bm25_retriever is not None
+
+        results = await manager.batch_select_examples(
+            ["Apple was founded by Steve Jobs"],
+            task="entity_extraction",
+        )
+        assert len(results[0]) == 2
+
+    @pytest.mark.asyncio
+    async def test_hybrid_filters_by_task(self, embedder, example_files):
+        config = ICLConfig(enabled=True, num_examples=10, selection_strategy="hybrid")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+            embedder=embedder,
+        )
+        await manager.initialize()
+
+        entity_results = await manager.batch_select_examples(
+            ["Tech company"], task="entity_extraction",
+        )
+        relation_results = await manager.batch_select_examples(
+            ["Business acquisition"], task="relation_extraction",
+        )
+
+        assert all(ex["id"].startswith("ex-") for ex in entity_results[0])
+        assert all(ex["id"].startswith("rel-") for ex in relation_results[0])
+
+    @pytest.mark.asyncio
+    async def test_hybrid_respects_num_examples(self, constant_embedder, example_files):
+        config = ICLConfig(enabled=True, num_examples=1, selection_strategy="hybrid")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+            embedder=constant_embedder,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["Tech company"],
+            task="entity_extraction",
+        )
+        assert len(results[0]) == 1
+
+    @pytest.mark.asyncio
+    async def test_hybrid_with_empty_examples(self, embedder, tmp_path):
+        empty_file = str(tmp_path / "empty.json")
+        _write_example_file(empty_file, [])
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="hybrid")
+        manager = InContextLearningManager(
+            example_files={"test": empty_file},
+            config=config,
+            embedder=embedder,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(["some query"], task="test")
+        assert results == [[]]
+
+
+class TestRandomSelection:
+    @pytest.mark.asyncio
+    async def test_random_returns_examples_without_embedder(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="random")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["Tech company"],
+            task="entity_extraction",
+        )
+        assert len(results[0]) == 2
+
+    @pytest.mark.asyncio
+    async def test_random_returns_correct_count(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=1, selection_strategy="random")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["Tech company"],
+            task="entity_extraction",
+        )
+        assert len(results[0]) == 1
+
+    @pytest.mark.asyncio
+    async def test_random_filters_by_task(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=10, selection_strategy="random")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+
+        entity_results = await manager.batch_select_examples(
+            ["Tech company"], task="entity_extraction",
+        )
+        relation_results = await manager.batch_select_examples(
+            ["Business"], task="relation_extraction",
+        )
+
+        assert all(ex["id"].startswith("ex-") for ex in entity_results[0])
+        assert all(ex["id"].startswith("rel-") for ex in relation_results[0])
+        assert len(entity_results[0]) == 2
+        assert len(relation_results[0]) == 1
+
+    @pytest.mark.asyncio
+    async def test_random_returns_dicts(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=1, selection_strategy="random")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["Tech company"], task="entity_extraction",
+        )
+        ex = results[0][0]
+        assert "input_text" in ex
+        assert "output" in ex
+        assert "id" in ex
+
+    @pytest.mark.asyncio
+    async def test_random_unknown_task_returns_empty(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="random")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["some query"], task="nonexistent_task",
+        )
+        assert results == [[]]
+
+    @pytest.mark.asyncio
+    async def test_random_with_empty_examples(self, tmp_path):
+        empty_file = str(tmp_path / "empty.json")
+        _write_example_file(empty_file, [])
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="random")
+        manager = InContextLearningManager(
+            example_files={"test": empty_file},
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(["some query"], task="test")
+        assert results == [[]]
+
+    @pytest.mark.asyncio
+    async def test_random_multiple_queries(self, example_files):
+        config = ICLConfig(enabled=True, num_examples=2, selection_strategy="random")
+        manager = InContextLearningManager(
+            example_files=example_files,
+            config=config,
+        )
+        await manager.initialize()
+        results = await manager.batch_select_examples(
+            ["query one", "query two", "query three"],
+        )
+        assert len(results) == 3
+        for per_query in results:
+            assert len(per_query) == 2
+
+
 class TestInContextLearningManagerLowMatchWarning:
     @pytest.mark.asyncio
-    async def test_low_match_warning_logged(self, embedder, example_files):
+    async def test_low_match_warning_logged_with_empty_corpus(self, embedder, tmp_path):
+        empty_file = str(tmp_path / "empty.json")
+        _write_example_file(empty_file, [])
         config = ICLConfig(
             enabled=True,
             num_examples=2,
-            similarity_threshold=0.99,
-            low_match_warning_threshold=0.99,
+            low_match_warning_threshold=0.01,
         )
         manager = InContextLearningManager(
-            embedder=embedder, example_files=example_files, config=config,
+            example_files={"test": empty_file}, config=config,
+            embedder=embedder,
         )
         await manager.initialize()
         captured = []
         handler_id = logger.add(captured.append, level="WARNING", format="{message}")
         try:
             await manager.batch_select_examples(
-                ["query one", "query two", "query three"],
-                task="entity_extraction",
+                ["query one", "query two"],
+                task="test",
             )
         finally:
             logger.remove(handler_id)
         assert any("ICL low match rate" in msg for msg in captured)
-        assert any("task='entity_extraction'" in msg for msg in captured)
 
     @pytest.mark.asyncio
     async def test_no_warning_when_match_rate_ok(self, constant_embedder, icl_config, example_files):
         manager = InContextLearningManager(
-            embedder=constant_embedder, example_files=example_files, config=icl_config,
+            example_files=example_files, config=icl_config,
+            embedder=constant_embedder,
         )
         await manager.initialize()
         captured = []
@@ -402,48 +691,24 @@ class TestInContextLearningManagerLowMatchWarning:
         assert not any("ICL low match rate" in msg for msg in captured)
 
     @pytest.mark.asyncio
-    async def test_warning_includes_diagnostic_info(self, embedder, example_files):
+    async def test_warning_suppressed_when_threshold_zero(self, embedder, tmp_path):
+        empty_file = str(tmp_path / "empty.json")
+        _write_example_file(empty_file, [])
         config = ICLConfig(
             enabled=True,
-            similarity_threshold=0.99,
-            low_match_warning_threshold=0.01,
-        )
-        manager = InContextLearningManager(
-            embedder=embedder, example_files=example_files, config=config,
-        )
-        await manager.initialize()
-        captured = []
-        handler_id = logger.add(captured.append, level="WARNING", format="{message}")
-        try:
-            await manager.batch_select_examples(
-                ["query one"], task="entity_extraction",
-            )
-        finally:
-            logger.remove(handler_id)
-        warning_msgs = [msg for msg in captured if "ICL low match rate" in msg]
-        assert len(warning_msgs) == 1
-        msg = warning_msgs[0]
-        assert "similarity_threshold=0.99" in msg
-        assert "available_examples=" in msg
-        assert "Consider lowering" in msg
-        assert "task='entity_extraction'" in msg
-
-    @pytest.mark.asyncio
-    async def test_warning_suppressed_when_threshold_zero(self, embedder, example_files):
-        config = ICLConfig(
-            enabled=True,
-            similarity_threshold=0.99,
+            num_examples=2,
             low_match_warning_threshold=0.0,
         )
         manager = InContextLearningManager(
-            embedder=embedder, example_files=example_files, config=config,
+            example_files={"test": empty_file}, config=config,
+            embedder=embedder,
         )
         await manager.initialize()
         captured = []
         handler_id = logger.add(captured.append, level="WARNING", format="{message}")
         try:
             await manager.batch_select_examples(
-                ["query one"], task="entity_extraction",
+                ["query one"], task="test",
             )
         finally:
             logger.remove(handler_id)
@@ -475,39 +740,41 @@ class TestResolveExamplePath:
 class TestBuiltinExamples:
     @pytest.mark.asyncio
     async def test_load_builtin_artifact_examples(self, embedder):
-        config = ICLConfig(enabled=True, similarity_threshold=0.0)
+        config = ICLConfig(enabled=True)
         path = resolve_example_path(None, "artifact_extraction_examples.json")
         manager = InContextLearningManager(
-            embedder=embedder, example_files={"artifact_extraction": path}, config=config,
+            example_files={"artifact_extraction": path}, config=config,
+            embedder=embedder,
         )
         await manager.initialize()
         assert len(manager.examples) > 0
 
     @pytest.mark.asyncio
     async def test_load_builtin_entity_examples(self, embedder):
-        config = ICLConfig(enabled=True, similarity_threshold=0.0)
+        config = ICLConfig(enabled=True)
         path = resolve_example_path(None, "entity_extraction_examples.json")
         manager = InContextLearningManager(
-            embedder=embedder, example_files={"entity_extraction": path}, config=config,
+            example_files={"entity_extraction": path}, config=config,
+            embedder=embedder,
         )
         await manager.initialize()
         assert len(manager.examples) > 0
 
     @pytest.mark.asyncio
     async def test_load_builtin_relation_examples(self, embedder):
-        config = ICLConfig(enabled=True, similarity_threshold=0.0)
+        config = ICLConfig(enabled=True)
         path = resolve_example_path(None, "relation_extraction_examples.json")
         manager = InContextLearningManager(
-            embedder=embedder, example_files={"relation_extraction": path}, config=config,
+            example_files={"relation_extraction": path}, config=config,
+            embedder=embedder,
         )
         await manager.initialize()
         assert len(manager.examples) > 0
 
     @pytest.mark.asyncio
     async def test_load_multiple_builtin_examples(self, embedder):
-        config = ICLConfig(enabled=True, similarity_threshold=0.0)
+        config = ICLConfig(enabled=True)
         manager = InContextLearningManager(
-            embedder=embedder,
             example_files={
                 "entity_extraction": resolve_example_path(None, "entity_extraction_examples.json"),
                 "entity_validation": resolve_example_path(None, "entity_validation_examples.json"),
@@ -515,6 +782,7 @@ class TestBuiltinExamples:
                 "relation_validation": resolve_example_path(None, "relation_validation_examples.json"),
             },
             config=config,
+            embedder=embedder,
         )
         await manager.initialize()
         assert len(manager.examples) > 0

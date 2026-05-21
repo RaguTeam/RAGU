@@ -39,6 +39,6 @@ python examples/extract_with_llm_and_local_search.py
 ### Key configuration points
 
 - **Rate limiting**: The example creates a shared `CachedAsyncOpenAI` with `rate_max_simultaneous=10` and `rate_max_per_minute=100`. For large corpora (thousands of entities/relations), consider using separate clients for LLM and embedder — see the main README ("Client and Rate Limiting Configuration" section).
-- **ICL (in-context learning)**: The example enables few-shot example selection via `ICLConfig`. This improves extraction quality by providing the LLM with relevant examples before each extraction call. You can disable it by setting `icl_config=None` or `ICLConfig(enabled=False)`.
-- **Language**: Set via `Settings.language` and `ICLConfig.language`. Supported: `"english"`, `"russian"`.
+- **ICL (in-context learning)**: The example enables few-shot example selection via `ICLConfig`. This improves extraction quality by providing the LLM with relevant examples before each extraction call. Four strategies are available: `"semantic"` (default, requires embedder), `"bm25"` (lexical matching, no embedder needed), `"hybrid"` (combines both), and `"random"` (baseline). You can disable it by setting `icl_config=None` or `ICLConfig(enabled=False)`.
+- **Language**: Set via `Settings.language`. Examples are filtered to match this language. Supported: `"english"`, `"russian"`.
 - **Validation**: Set `do_validation=True` on the extractor to enable a second LLM pass that validates extracted artifacts.

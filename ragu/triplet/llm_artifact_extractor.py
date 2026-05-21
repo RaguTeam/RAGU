@@ -61,11 +61,9 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         self.entity_types = ", ".join(entity_types) if entity_types else None
         self.relation_types = ", ".join(relation_types) if relation_types else None
 
-        # Initialize ICL manager if config provided
         self.icl_manager: InContextLearningManager | None = None
-        if icl_config and icl_config.enabled and embedder:
+        if icl_config and icl_config.enabled:
             self.icl_manager = InContextLearningManager(
-                embedder=embedder,
                 example_files={
                     "artifact_extraction": resolve_example_path(
                         icl_config.examples_base_path,
@@ -77,6 +75,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                     ),
                 },
                 config=icl_config,
+                embedder=embedder,
             )
 
     async def _extract_artifacts(

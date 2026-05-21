@@ -927,14 +927,22 @@ async def main(
     """
     config = load_config(config_path)
 
-    logger.info("Initializing generator LLM...")
-    generator_llm = LLMOpenAI(
-        client=CachedAsyncOpenAI(
-            base_url=config["generator_model"]["base_url"],
-            api_key=config["generator_model"]["api_key"],
-        ),
-        model_name=config["generator_model"]["model_name"],
-        temperature=config["generator_model"].get("temperature", 0.2),
+    logger.info("Initializing generator LLMs...")
+    gen_base_url = config["generator_model"]["base_url"]
+    gen_api_key = config["generator_model"]["api_key"]
+    gen_model_name = config["generator_model"]["model_name"]
+    gen_temperature = config["generator_model"].get("temperature", 0.2)
+
+    synthesis_llm = LLMOpenAI(
+        client=CachedAsyncOpenAI(base_url=gen_base_url, api_key=gen_api_key),
+        model_name=gen_model_name,
+        temperature=gen_temperature,
+    )
+
+    extraction_llm = LLMOpenAI(
+        client=CachedAsyncOpenAI(base_url=gen_base_url, api_key=gen_api_key, cache={}),
+        model_name=gen_model_name,
+        temperature=gen_temperature,
     )
 
     logger.info("Initializing judge LLM...")
@@ -946,6 +954,7 @@ async def main(
         client=CachedAsyncOpenAI(
             base_url=config["judge_model"]["base_url"],
             api_key=config["judge_model"]["api_key"],
+            cache={},
         ),
         model_name=config["judge_model"]["model_name"],
         **judge_kwargs,
@@ -963,7 +972,7 @@ async def main(
             logger.info(f"Loading texts from {texts_path}")
             corpus = list(filter(lambda it: it["language"] == lang, load_input_texts(texts_path, languages)))
         else:
-            corpus = await synthesize_corpus(generator_llm, config, lang)
+            corpus = await synthesize_corpus(synthesis_llm, config, lang)
 
         corpus = deduplicate_corpus(corpus)
 
@@ -1001,7 +1010,7 @@ async def main(
             examples = await generate_examples_for_prompt_type(
                 prompt_type=prompt_type,
                 corpus=corpus_for_type,
-                generator_llm=generator_llm,
+                generator_llm=extraction_llm,
                 language=lang,
                 entity_types=entity_types,
                 relation_types=relation_types,

@@ -27,7 +27,16 @@ class ICLConfig:
         When ``None`` (default), the built-in examples shipped with the package
         are used.  Pass an absolute or relative path to use custom examples.
     :param selection_strategy: Strategy for selecting relevant examples.
-    :param similarity_threshold: Minimum cosine similarity for example inclusion.
+
+        - ``"semantic"``: cosine similarity on dense embeddings (default).
+          Requires an ``Embedder``.
+        - ``"bm25"``: lexical matching via BM25 (bm25s library).
+          No embedder needed, fast and terminology-focused.
+        - ``"hybrid"``: Reciprocal Rank Fusion of semantic and BM25 rankings.
+          Requires an ``Embedder``.
+        - ``"random"``: uniform random sampling from the candidate pool.
+          Useful as a baseline for evaluating other strategies.
+
     :param low_match_warning_threshold: Fraction of queries that received no
         examples at which a WARNING is logged (0.3 = warn when 30%+ queries
         are unmatched).  Set to ``0.0`` to disable the warning or ``1.0``
@@ -37,6 +46,5 @@ class ICLConfig:
     enabled: bool = True
     num_examples: int = 2
     examples_base_path: str | None = None
-    selection_strategy: Literal["semantic", "hybrid"] = "semantic"
-    similarity_threshold: float = 0.3
+    selection_strategy: Literal["semantic", "bm25", "hybrid", "random"] = "semantic"
     low_match_warning_threshold: float = 0.3

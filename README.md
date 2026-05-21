@@ -398,26 +398,32 @@ embedder = EmbedderOpenAI(
 
 #### In-Context Learning (Few-Shot Examples)
 
-RAGU extractors can use few-shot examples to improve extraction quality. When enabled, the extractor selects the most relevant examples by semantic similarity and includes them in the LLM prompt.
+RAGU extractors can use few-shot examples to improve extraction quality. When enabled, the extractor selects relevant examples and includes them in the LLM prompt. Four selection strategies are available:
+
+| Strategy | Description | Requires `embedder` |
+|----------|-------------|:---:|
+| `"semantic"` | Cosine similarity on dense embeddings (default) | Yes |
+| `"bm25"` | Lexical matching via BM25 — fast, no API calls | No |
+| `"hybrid"` | Reciprocal Rank Fusion of semantic + BM25 rankings | Yes |
+| `"random"` | Uniform random sampling — useful as a baseline | No |
 
 ```python
 from ragu.common.prompts import ICLConfig
 
 icl_config = ICLConfig(
-    enabled=True,               # Enable/disable ICL
-    num_examples=2,             # Number of examples per extraction call (1-3 recommended)
-    language="english",         # Filter examples by language ("english" or "russian")
-    similarity_threshold=0.3,   # Minimum cosine similarity for example selection
+    enabled=True,                       # Enable/disable ICL
+    num_examples=2,                     # Number of examples per extraction call (1-3 recommended)
+    selection_strategy="semantic",      # "semantic" | "bm25" | "hybrid" | "random"
 )
 
 artifact_extractor = TwoStageArtifactsExtractorLLM(
     llm=llm,
-    embedder=embedder,          # Required when using ICL
+    embedder=embedder,                  # Required for "semantic" and "hybrid"; optional for "bm25" and "random"
     icl_config=icl_config,
 )
 ```
 
-Both `ArtifactsExtractorLLM` and `TwoStageArtifactsExtractorLLM` support ICL. You need an `embedder` to compute example embeddings. Pre-built example files ship with RAGU in `ragu/common/prompts/icl_examples/`.
+Both `ArtifactsExtractorLLM` and `TwoStageArtifactsExtractorLLM` support ICL. An `embedder` is required for `"semantic"` and `"hybrid"` strategies; for `"bm25"` and `"random"` it can be omitted. Pre-built example files ship with RAGU in `ragu/common/prompts/icl_examples/`.
 
 To generate custom examples for your domain, use the generation script:
 

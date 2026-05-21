@@ -85,9 +85,8 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
 
         # Initialize separate ICL managers for each stage
         self.icl_manager: InContextLearningManager | None = None
-        if icl_config and icl_config.enabled and embedder:
+        if icl_config and icl_config.enabled:
             self.icl_manager = InContextLearningManager(
-                embedder=embedder,
                 example_files={
                     "entity_extraction": resolve_example_path(
                         icl_config.examples_base_path,
@@ -107,6 +106,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                     ),
                 },
                 config=icl_config,
+                embedder=embedder,
             )
 
     @override

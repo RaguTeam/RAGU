@@ -54,7 +54,8 @@ async def main():
     # Configure in-context learning (optional, improves extraction quality)
     icl_config = ICLConfig(
         enabled=True,
-        num_examples=2,
+        num_examples=3,
+        selection_strategy="hybrid"
     )
 
     # Set up artifact extractor with ICL
