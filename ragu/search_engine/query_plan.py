@@ -54,15 +54,11 @@ class QueryPlanEngine(BaseEngine):
         )
         rendered = rendered_list[0]
 
-        try:
-            response: QueryPlan = await self.engine.llm.chat_completion(    # type: ignore
-                rendered.to_openai(),
-                output_schema=instruction.pydantic_model,
-            )
-            return response.subqueries
-        except Exception as e:
-            logger.warning("Query decomposition failed: {}: {}", type(e).__name__, e)
-            return [SubQuery(id="q1", query=query)]
+        response: QueryPlan = await self.engine.llm.chat_completion(    # type: ignore
+            rendered.to_openai(),
+            output_schema=instruction.pydantic_model,
+        )
+        return response.subqueries
 
     async def _rewrite_subquery(self, subquery: SubQuery, context: Dict[str, SearchEngineResponse]) -> SubQuery:
         """
@@ -85,15 +81,11 @@ class QueryPlanEngine(BaseEngine):
         )
         rendered = rendered_list[0]
 
-        try:
-            response: List[RewriteQuery | str] = await self.engine.llm.chat_completion(
-                rendered.to_openai(),
-                output_schema=instruction.pydantic_model,
-            )
-            rewritten = response.query if isinstance(response, RewriteQuery) else response
-        except Exception as e:
-            logger.warning("Query rewrite failed: {}: {}", type(e).__name__, e)
-            rewritten = subquery.query
+        response: List[RewriteQuery | str] = await self.engine.llm.chat_completion(
+            rendered.to_openai(),
+            output_schema=instruction.pydantic_model,
+        )
+        rewritten = response.query if isinstance(response, RewriteQuery) else response
 
         return subquery.model_copy(update={"query": rewritten})
 
@@ -135,29 +127,16 @@ class QueryPlanEngine(BaseEngine):
                  subquery answer, ``retrieval`` is the final subquery retrieval,
                  and ``payload`` contains all subquery responses by ID.
         """
-        try:
-            subqueries = await self.process_query(query)
-        except Exception as e:
-            logger.warning("Query planning failed: {}: {}", type(e).__name__, e)
-            subqueries = [SubQuery(id="q1", query=query)]
+        subqueries = await self.process_query(query)
 
         ordered = _topological_sort(subqueries)
 
         context: Dict[str,  SearchEngineResponse] = {}
         retrieve: Dict[str, SearchEngineRetrieve] = {}
         for subquery in ordered:
-            try:
-                rewritten_subquery, response = await self._answer_subquery(subquery, context)
-                context[subquery.id] = response
-                retrieve[subquery.id] = response.retrieval
-            except Exception as e:
-                logger.warning(
-                    "Subquery '{}' failed: {}: {}",
-                    subquery.id, type(e).__name__, e,
-                )
-                context[subquery.id] = SearchEngineResponse(
-                    query=subquery.query, response="", retrieval=None, payload={}  # type: ignore[arg-type]
-                )
+            rewritten_subquery, response = await self._answer_subquery(subquery, context)
+            context[subquery.id] = response
+            retrieve[subquery.id] = response.retrieval
 
         if not context:
             return SearchEngineResponse(

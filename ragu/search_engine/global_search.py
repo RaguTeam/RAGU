@@ -193,14 +193,10 @@ class GlobalSearchEngine(BaseEngine):
             language=self.language,
         )
         rendered = rendered_list[0]
-        try:
-            answer = await self.llm.chat_completion(
-                conversation=rendered.to_openai(),
-                output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
-            )  # type: ignore[assignment]
-        except Exception as e:
-            logger.warning("Global search LLM query failed: {}: {}", type(e).__name__, e)
-            answer = ""
+        answer = await self.llm.chat_completion(
+            conversation=rendered.to_openai(),
+            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+        )  # type: ignore[assignment]
 
         return SearchEngineResponse(
             query=query,

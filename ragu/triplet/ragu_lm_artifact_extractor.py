@@ -142,6 +142,9 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
 
         # Parse responses back to contexts
         for ctx, response in zip(contexts, responses):
+            if response is None:
+                ctx.raw_entities = []
+                continue
             lines = response.splitlines()
             entities = [ln.strip() for ln in lines if ln.strip()]
             unique_entities = list(dict.fromkeys(entities))  # Preserve order, remove duplicates
@@ -264,6 +267,8 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
         context_candidates: Dict[int, List[Relation]] = {id(ctx): [] for ctx in contexts}
 
         for (ctx, subject, obj), response in zip(prompt_map, responses):
+            if response is None:
+                continue
             assert subject.id and obj.id, (
                 'On error here, decide what to do if .id is None,'
                 'but .subject_id and .object_id cannot be None'
@@ -284,17 +289,18 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
             candidates = context_candidates[id(ctx)]
             ctx.relations = self.filter_relations(candidates)
 
-    async def _run(self, conversations: List[ChatMessages], description: str = "") -> List[str]:
+    async def _run(self, conversations: List[ChatMessages], description: str = "") -> List[str | None]:
         """
         Run LLM inference on a batch of conversations.
 
         :param conversations: List of ChatMessages to process.
         :param description: Description for progress bar.
-        :return: List of response strings.
+        :return: List of response strings.  ``None`` marks failed calls.
         """
         return self.llm.batch_chat_completion(
             [c.to_openai() for c in conversations],
             output_schema=str,
+            continue_on_error=True,
             temperature=self.temperature,
             top_p=self.top_p,
             desc=description,

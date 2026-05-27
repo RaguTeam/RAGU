@@ -8,7 +8,6 @@ from typing_extensions import override
 
 from openai.types.chat import ChatCompletionMessageParam
 from pydantic import BaseModel
-from pydantic_core import PydanticUndefined
 
 from ragu.common.logger import logger
 from ragu.models.openai import CachedAsyncOpenAI
@@ -42,20 +41,23 @@ class LLM(ABC):
         conversations: list[list[ChatCompletionMessageParam]],
         output_schema: type[T] = str,
         desc: str | None = None,
-        continue_on_error: bool = True,
+        continue_on_error: bool = False,
         **kwargs: Any,
-    ) -> Sequence[T]:
+    ) -> Sequence[T | None]:
         """
         Runs multiple :meth:`chat_completion` calls concurrently.
 
         :param conversations: List of conversation message lists.
         :param output_schema: Output schema applied to each call.
         :param desc: Optional tqdm progress description.
-        :param continue_on_error: If ``True`` (default), log a warning and
-            return a fallback value for failed calls instead of raising.
-            If ``False``, raise on the first failure.
+        :param continue_on_error: If ``True``, log a warning and return
+            ``None`` for failed calls instead of raising.  If ``False``
+            (default), raise on the first failure.
         :param kwargs: Extra kwargs forwarded to each call.
         :returns: Responses in the same order as input conversations.
+            When *continue_on_error* is ``True``, failed items are
+            represented as ``None`` so the caller can distinguish a
+            legitimate empty response from an API error.
         """
         logger.debug(f'Calling batch_chat_completion with size {len(conversations)}')
 
@@ -81,7 +83,7 @@ class LLM(ABC):
         ]
 
         task_to_idx = {id(t): i for i, t in enumerate(tasks)}
-        results: list[T] = [None] * len(tasks)  # type: ignore[assignment]
+        results: list[T | None] = [None] * len(tasks)
         pending: set[asyncio.Future[Any]] = set(tasks)
         pbar = tqdm(total=len(tasks), desc=desc)
 
@@ -96,18 +98,7 @@ class LLM(ABC):
                         "batch_chat_completion failed for item {}: {}: {}",
                         idx, type(e).__name__, e,
                     )
-                    if issubclass(output_schema, str):
-                        results[idx] = ""  # type: ignore[assignment]
-                    else:
-                        fallback = {}
-                        for _name, _fi in output_schema.model_fields.items():
-                            if _fi.default is not PydanticUndefined:
-                                fallback[_name] = _fi.default
-                            elif callable(_fi.default_factory):
-                                fallback[_name] = _fi.default_factory()
-                            else:
-                                fallback[_name] = None
-                        results[idx] = output_schema.model_construct(**fallback)  # type: ignore[assignment]
+                    results[idx] = None
                 pbar.update(1)
 
         pbar.close()

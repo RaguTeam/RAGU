@@ -203,14 +203,10 @@ class NaiveSearchEngine(BaseEngine):
         )
         rendered: ChatMessages = rendered_list[0]
 
-        try:
-            answer = await self.llm.chat_completion(
-                conversation=rendered.to_openai(),
-                output_schema=instruction.pydantic_model
-            ) # type: ignore
-        except Exception as e:
-            logger.warning("Naive search LLM query failed: {}: {}", type(e).__name__, e)
-            answer = ""
+        answer = await self.llm.chat_completion(
+            conversation=rendered.to_openai(),
+            output_schema=instruction.pydantic_model
+        ) # type: ignore
 
         return SearchEngineResponse(
             query=query,

@@ -30,7 +30,7 @@ class ICLConfig:
 
         - ``"semantic"``: cosine similarity on dense embeddings (default).
           Requires an ``Embedder``.
-        - ``"bm25"``: lexical matching via BM25 (bm25s library).
+        - ``"bm25"``: lexical matching via BM25 sparse embeddings (FastEmbed).
           No embedder needed, fast and terminology-focused.
         - ``"hybrid"``: Reciprocal Rank Fusion of semantic and BM25 rankings.
           Requires an ``Embedder``.

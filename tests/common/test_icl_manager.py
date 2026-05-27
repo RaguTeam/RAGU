@@ -360,8 +360,8 @@ class TestBM25Selection:
             config=config,
         )
         await manager.initialize()
-        assert manager._bm25_retriever is not None
-        assert manager._bm25_retrievers is not None
+        assert manager._bm25_embedder is not None
+        assert manager._bm25_doc_embeddings is not None
         results = await manager.batch_select_examples(
             ["Tech company founded in California"],
             task="entity_extraction",
@@ -452,7 +452,7 @@ class TestBM25Selection:
         )
         await manager.initialize()
         results = await manager.batch_select_examples(
-            ["Apple was founded by Steve Jobs", "Microsoft acquired LinkedIn"],
+            ["Apple was founded by Steve Jobs", "Einstein developed the theory of relativity"],
             task="entity_extraction",
         )
         assert len(results) == 2
@@ -481,8 +481,8 @@ class TestHybridSelection:
         )
         await manager.initialize()
         assert manager._example_matrix is not None
-        assert manager._bm25_retriever is not None
-        assert manager._bm25_retrievers is not None
+        assert manager._bm25_embedder is not None
+        assert manager._bm25_doc_embeddings is not None
 
         results = await manager.batch_select_examples(
             ["Apple was founded by Steve Jobs"],

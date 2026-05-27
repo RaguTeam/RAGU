@@ -8,7 +8,7 @@ LLM-based extraction.
 Key design decisions:
 - Embeddings are computed at initialization using provided Embedder
   (required for ``semantic`` and ``hybrid`` strategies)
-- BM25 index is built at initialization via bm25s
+- BM25 sparse embeddings are built at initialization via FastEmbed BM25
   (used by ``bm25`` and ``hybrid`` strategies)
 - ``random`` strategy needs neither embedder nor BM25
 - Example storage is independent of specific embedding model
@@ -35,14 +35,11 @@ import numpy as np
 from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
 from ragu.models.embedder import Embedder
+from ragu.models.sparse_embedder import BM25 as BM25SparseEmbedder
 from ragu.common.prompts.icl_config import ICLConfig
+from ragu.storage.types import SparseEmbedding
 
 _BUILTIN_EXAMPLES_DIR = Path(__file__).parent / "icl_examples"
-
-_LANGUAGE_TO_STOPWORDS = {
-    "english": "en",
-    "russian": "ru",
-}
 
 
 def resolve_example_path(base_path: str | None, filename: str) -> str:
@@ -95,7 +92,7 @@ class InContextLearningManager:
     four strategies:
 
     - ``"semantic"``: cosine similarity on dense embeddings.
-    - ``"bm25"``: lexical matching via BM25 (bm25s).
+    - ``"bm25"``: lexical matching via BM25 sparse embeddings (FastEmbed).
     - ``"hybrid"``: Reciprocal Rank Fusion of semantic and BM25 rankings.
     - ``"random"``: uniform random sampling.
 
@@ -149,8 +146,9 @@ class InContextLearningManager:
         self._example_norms: np.ndarray | None = None
         self._cached_query_key: int | None = None
         self._cached_query_matrix: np.ndarray | None = None
-        self._bm25_retriever: Any | None = None
-        self._bm25_retrievers: Dict[str, tuple[Any, List[int]]] | None = None
+        self._bm25_embedder: BM25SparseEmbedder | None = None
+        self._bm25_doc_embeddings: list[SparseEmbedding] | None = None
+        self._bm25_task_embeddings: Dict[str, tuple[list[SparseEmbedding], List[int]]] | None = None
 
     async def initialize(self) -> None:
         """
@@ -260,39 +258,32 @@ class InContextLearningManager:
 
     def _build_bm25_index(self) -> None:
         """
-        Build BM25 indices over example texts using bm25s.
+        Build BM25 sparse embeddings over example texts using FastEmbed BM25.
 
-        Constructs a global index (for ``task=None`` fallback) and per-task
-        indices (one for each key in ``_task_indices``).  Per-task indices
-        produce more accurate IDF scores and avoid post-hoc filtering.
+        Constructs a global embedding list (for ``task=None`` fallback) and
+        per-task subsets (one for each key in ``_task_indices``).  Per-task
+        subsets avoid post-hoc filtering.
         """
-        import bm25s
-
         if not self.examples:
             return
 
-        stopwords = _LANGUAGE_TO_STOPWORDS.get(self.language, "en")
+        self._bm25_embedder = BM25SparseEmbedder(language=self.language)
 
         texts = [ex.input_text for ex in self.examples]
-        corpus_tokens = bm25s.tokenize(texts, stopwords=stopwords)
-        self._bm25_retriever = bm25s.BM25()
-        self._bm25_retriever.index(corpus_tokens)
+        self._bm25_doc_embeddings = self._bm25_embedder.embed_document(texts)
 
-        self._bm25_retrievers = {}
+        self._bm25_task_embeddings = {}
         for task_name, indices in self._task_indices.items():
             if not indices:
                 continue
-            task_texts = [self.examples[i].input_text for i in indices]
-            task_tokens = bm25s.tokenize(task_texts, stopwords=stopwords)
-            task_retriever = bm25s.BM25()
-            task_retriever.index(task_tokens)
-            self._bm25_retrievers[task_name] = (task_retriever, indices)
+            task_embeddings = [self._bm25_doc_embeddings[i] for i in indices]
+            self._bm25_task_embeddings[task_name] = (task_embeddings, indices)
 
         task_summary = ", ".join(
             f"{t}={len(idx)}" for t, idx in self._task_indices.items()
         )
         logger.debug(
-            f"Built BM25 indices: global ({len(self.examples)} docs), "
+            f"Built BM25 sparse embeddings: global ({len(self.examples)} docs), "
             f"per-task ({task_summary})"
         )
 
@@ -331,8 +322,13 @@ class InContextLearningManager:
             "quality_rating": example.quality_rating,
         }
 
-    def _get_stopwords(self) -> str:
-        return _LANGUAGE_TO_STOPWORDS.get(self.language, "en")
+    @staticmethod
+    def _sparse_dot_product(a: SparseEmbedding, b: SparseEmbedding) -> float:
+        b_map = dict(zip(b.indices, b.values))
+        return sum(
+            val * b_map.get(idx, 0.0)
+            for idx, val in zip(a.indices, a.values)
+        )
 
     def _check_low_match_rate(
         self,
@@ -460,29 +456,34 @@ class InContextLearningManager:
         task: str | None,
         num_examples: int,
     ) -> List[List[Dict[str, Any]]]:
-        import bm25s
+        if self._bm25_embedder is None or self._bm25_doc_embeddings is None:
+            return [[] for _ in query_texts]
 
-        stopwords = self._get_stopwords()
-        query_tokens = bm25s.tokenize(query_texts, stopwords=stopwords)
+        query_embeddings = self._bm25_embedder.embed_query(query_texts)
 
         if (
             task is not None
-            and self._bm25_retrievers
-            and task in self._bm25_retrievers
+            and self._bm25_task_embeddings
+            and task in self._bm25_task_embeddings
         ):
-            retriever, task_indices = self._bm25_retrievers[task]
+            task_embs, task_indices = self._bm25_task_embeddings[task]
             k = min(num_examples, len(task_indices))
             if k == 0:
                 return [[] for _ in query_texts]
-            bm25_results, bm25_scores = retriever.retrieve(query_tokens, k=k)
 
             output: List[List[Dict[str, Any]]] = []
-            for i in range(len(query_texts)):
+            for i, query_emb in enumerate(query_embeddings):
+                scored = sorted(
+                    (
+                        (self._sparse_dot_product(query_emb, doc_emb), local_idx)
+                        for local_idx, doc_emb in enumerate(task_embs)
+                    ),
+                    key=lambda x: (-x[0], x[1]),
+                )
+
                 selected = []
-                for local_idx, score in zip(bm25_results[i], bm25_scores[i]):
-                    if len(selected) >= num_examples:
-                        break
-                    global_idx = task_indices[int(local_idx)]
+                for _score, local_idx in scored[:num_examples]:
+                    global_idx = task_indices[local_idx]
                     selected.append(self._example_to_dict(self.examples[global_idx]))
 
                 logger.debug(
@@ -494,28 +495,23 @@ class InContextLearningManager:
 
             return output
 
-        if self._bm25_retriever is None:
-            return [[] for _ in query_texts]
-
         candidate_indices = self._get_candidate_indices(task)
         if not candidate_indices:
             return [[] for _ in query_texts]
 
-        candidate_set = set(candidate_indices)
-        k = min(len(self.examples), max(num_examples, len(self.examples)))
-        bm25_results, bm25_scores = self._bm25_retriever.retrieve(query_tokens, k=k)
-
         output: List[List[Dict[str, Any]]] = []
-        for i in range(len(query_texts)):
+        for i, query_emb in enumerate(query_embeddings):
+            scored = sorted(
+                (
+                    (self._sparse_dot_product(query_emb, self._bm25_doc_embeddings[j]), j)
+                    for j in candidate_indices
+                ),
+                key=lambda x: (-x[0], x[1]),
+            )
+
             selected = []
-            for doc_idx, score in zip(bm25_results[i], bm25_scores[i]):
-                doc_idx_int = int(doc_idx)
-                if doc_idx_int not in candidate_set:
-                    continue
-                if len(selected) >= num_examples:
-                    break
-                example = self.examples[doc_idx_int]
-                selected.append(self._example_to_dict(example))
+            for _score, idx in scored[:num_examples]:
+                selected.append(self._example_to_dict(self.examples[idx]))
 
             logger.debug(
                 f"Selected {len(selected)} examples for query {i} "
@@ -532,11 +528,10 @@ class InContextLearningManager:
         task: str | None,
         num_examples: int,
     ) -> List[List[Dict[str, Any]]]:
-        import bm25s
-
         assert self.embedder is not None
 
-        if self._bm25_retriever is None:
+        if (self._bm25_embedder is None or self._bm25_doc_embeddings is None
+                or self._example_matrix is None):
             return [[] for _ in query_texts]
 
         candidate_indices = self._get_candidate_indices(task)
@@ -559,34 +554,18 @@ class InContextLearningManager:
         )
         sim_matrix[:, ~valid_examples] = 0.0
 
-        stopwords = self._get_stopwords()
-        query_tokens = bm25s.tokenize(query_texts, stopwords=stopwords)
+        query_embeddings = self._bm25_embedder.embed_query(query_texts)
 
         use_per_task = (
             task is not None
-            and self._bm25_retrievers
-            and task in self._bm25_retrievers
+            and self._bm25_task_embeddings
+            and task in self._bm25_task_embeddings
         )
-        if use_per_task:
-            task_retriever, task_bm25_indices = self._bm25_retrievers[task]
-            bm25_results, bm25_scores = task_retriever.retrieve(
-                query_tokens, k=len(task_bm25_indices)
-            )
-            bm25_global_results = [
-                [task_bm25_indices[int(idx)] for idx in row]
-                for row in bm25_results
-            ]
-        else:
-            k = len(self.examples)
-            bm25_results, bm25_scores = self._bm25_retriever.retrieve(
-                query_tokens, k=k
-            )
-            bm25_global_results = bm25_results
 
         rrf_k = max(len(candidate_indices) // 2, 1)
 
         output: List[List[Dict[str, Any]]] = []
-        for i in range(len(query_texts)):
+        for i, query_emb in enumerate(query_embeddings):
             rrf_scores: Dict[int, float] = {}
 
             sims = sim_matrix[i]
@@ -595,7 +574,29 @@ class InContextLearningManager:
                 global_idx = int(idx_arr[local_idx])
                 rrf_scores[global_idx] = 1.0 / (rrf_k + rank + 1)
 
-            for rank, doc_idx in enumerate(bm25_global_results[i]):
+            if use_per_task:
+                task_embs, task_bm25_indices = self._bm25_task_embeddings[task]
+                bm25_scored = sorted(
+                    (
+                        (self._sparse_dot_product(query_emb, doc_emb), local_idx)
+                        for local_idx, doc_emb in enumerate(task_embs)
+                    ),
+                    key=lambda x: (-x[0], x[1]),
+                )
+                bm25_global_results = [
+                    task_bm25_indices[local_idx] for _, local_idx in bm25_scored
+                ]
+            else:
+                bm25_scored = sorted(
+                    (
+                        (self._sparse_dot_product(query_emb, self._bm25_doc_embeddings[j]), j)
+                        for j in candidate_indices
+                    ),
+                    key=lambda x: (-x[0], x[1]),
+                )
+                bm25_global_results = [idx for _, idx in bm25_scored]
+
+            for rank, doc_idx in enumerate(bm25_global_results):
                 doc_idx_int = int(doc_idx)
                 if not use_per_task and doc_idx_int not in candidate_set:
                     continue

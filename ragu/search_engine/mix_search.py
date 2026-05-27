@@ -239,14 +239,10 @@ class MixSearchEngine(BaseEngine):
         )
         rendered = rendered_list[0]
 
-        try:
-            response = await self.llm.chat_completion(
-                conversation=rendered.to_openai(),
-                output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
-            )  # type: ignore[return-value]
-        except Exception as e:
-            logger.warning("Mix search LLM query failed: {}: {}", type(e).__name__, e)
-            response = ""
+        response = await self.llm.chat_completion(
+            conversation=rendered.to_openai(),
+            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+        )  # type: ignore[return-value]
 
         # TODO: maybe it is good idea to pass every child engine metrics in 'metrics' field here.
         return SearchEngineResponse(

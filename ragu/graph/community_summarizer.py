@@ -63,18 +63,12 @@ class CommunitySummarizer(RaguGenerativeModule):
 
         output_schema = instruction.pydantic_model
         assert output_schema is CommunityReportModel
-        try:
-            summaries: List[CommunityReportModel] = await self.llm.batch_chat_completion( # type: ignore
-                [c.to_openai() for c in rendered_list],
-                output_schema=output_schema,
-                desc="Summarized communities",
-            )
-        except Exception as e:
-            logger.warning(
-                "Community summarization failed: {}: {}",
-                type(e).__name__, e,
-            )
-            return []
+        summaries: List[CommunityReportModel | None] = await self.llm.batch_chat_completion(
+            [c.to_openai() for c in rendered_list],
+            output_schema=output_schema,
+            continue_on_error=True,
+            desc="Summarized communities",
+        )
 
         output: List[CommunitySummary] = []
         for community, summary in zip(sorted_communities, summaries):

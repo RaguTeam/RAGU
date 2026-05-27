@@ -194,7 +194,7 @@ Edges cannot reference non-existent endpoints. `Index._validate_edge_endpoints_e
 - Prompts are `RAGUInstruction` instances (frozen dataclass) registered in `DEFAULT_PROMPT_TEMPLATES` (`ragu/common/prompts/prompt_storage.py`). Refer to that file for the current list of names — do not duplicate it elsewhere.
 - Each `RAGUInstruction` binds `messages: ChatMessages`, an optional `pydantic_model` for structured output, an optional `description`, and an optional `few_shot_formatter`.
 - Rendering is done with **Jinja2** via `ChatMessages.render(**params)`.
-- Few-shot examples are injected by `FewShotFormatter`; example selection is controlled by `ICLConfig` via four strategies: `"semantic"` (dense cosine similarity, requires `Embedder`), `"bm25"` (lexical matching via `bm25s`, no embedder needed), `"hybrid"` (Reciprocal Rank Fusion of both), and `"random"` (uniform sampling baseline).
+- Few-shot examples are injected by `FewShotFormatter`; example selection is controlled by `ICLConfig` via four strategies: `"semantic"` (dense cosine similarity, requires `Embedder`), `"bm25"` (lexical matching via FastEmbed BM25, no embedder needed), `"hybrid"` (Reciprocal Rank Fusion of both), and `"random"` (uniform sampling baseline).
 
 ### Customization rule
 **Never modify `DEFAULT_PROMPT_TEMPLATES` directly.** Use `module.update_prompt(name, instruction)` on the relevant `RaguGenerativeModule` instance.

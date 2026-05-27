@@ -114,15 +114,19 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         result_list = await self.llm.batch_chat_completion(
             [c.to_openai() for c in conversations],
             output_schema=instruction.pydantic_model or str,
+            continue_on_error=True,
             desc="Extracting a knowledge graph from chunks",
         )
-        result_list = cast(list[ArtifactsModel], result_list)
+        result_list = cast(list[ArtifactsModel | None], result_list)
 
-        for artifacts in result_list:
-            logger.debug(
-                f'Got {len(artifacts.entities)} entities'
-                f' and {len(artifacts.relations)} relations for chunk'
-            )
+        for i, artifacts in enumerate(result_list):
+            if artifacts is not None:
+                logger.debug(
+                    f'Got {len(artifacts.entities)} entities'
+                    f' and {len(artifacts.relations)} relations for chunk'
+                )
+            else:
+                logger.warning('LLM call failed for chunk at index {}', i)
 
         return result_list
 
@@ -165,15 +169,19 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         result_list = await self.llm.batch_chat_completion(
             [c.to_openai() for c in conversations],
             output_schema=instruction.pydantic_model or str,
+            continue_on_error=True,
             desc="Validation of extracted artifacts",
         )
-        result_list = cast(list[ArtifactsModel], result_list)
+        result_list = cast(list[ArtifactsModel | None], result_list)
 
-        for artifacts_validated in result_list:
-            logger.debug(
-                f'After validation got {len(artifacts_validated.entities)} entities'
-                f' and {len(artifacts_validated.relations)} relations for chunk'
-            )
+        for i, artifacts_validated in enumerate(result_list):
+            if artifacts_validated is not None:
+                logger.debug(
+                    f'After validation got {len(artifacts_validated.entities)} entities'
+                    f' and {len(artifacts_validated.relations)} relations for chunk'
+                )
+            else:
+                logger.warning('LLM call failed for validation chunk at index {}', i)
 
         return result_list
 
@@ -211,7 +219,11 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
 
         if self.do_validation:
             try:
+                pre_validation = result_list
                 result_list = await self._validate_artifacts(context, result_list)
+                for i, validated in enumerate(result_list):
+                    if validated is None and i < len(pre_validation):
+                        result_list[i] = pre_validation[i]
             except Exception as e:
                 logger.warning(
                     "Artifact validation failed: {}: {}. Using unvalidated results.",
@@ -222,6 +234,9 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         relations_result: List[Relation] = []
 
         for artifacts, chunk in zip(result_list, chunks):
+
+            if artifacts is None:
+                continue
 
             current_chunk_entities: List[Entity] = []
 

@@ -102,5 +102,6 @@ async def main():
         answer = await search_engine.a_query(question)
         print(f'Ответ: {answer}')
 
+
 if __name__ == "__main__":
     asyncio.run(main())

@@ -41,7 +41,7 @@ async def test_batch_partial_failure_str():
 
     assert len(results) == 3
     assert results[0] == "result-1"
-    assert results[1] == ""
+    assert results[1] is None
     assert results[2] == "result-3"
 
 
@@ -56,7 +56,7 @@ async def test_batch_all_fail_str():
     )
 
     assert len(results) == 2
-    assert results == ["", ""]
+    assert results == [None, None]
 
 
 async def test_batch_partial_failure_schema():
@@ -74,9 +74,7 @@ async def test_batch_partial_failure_schema():
     )
 
     assert len(results) == 2
-    assert isinstance(results[0], _TestSchema)
-    assert results[0].value == ""
-    assert results[0].count == 0
+    assert results[0] is None
     assert isinstance(results[1], _TestSchema)
     assert results[1].value == "ok"
     assert results[1].count == 42
@@ -91,6 +89,17 @@ async def test_batch_continue_on_error_false():
             conversations=[_MSG],
             output_schema=str,
             continue_on_error=False,
+        )
+
+
+async def test_batch_default_raises():
+    llm = _make_llm()
+    llm.client.chat_completion = AsyncMock(side_effect=RuntimeError("boom"))
+
+    with pytest.raises(RuntimeError, match="boom"):
+        await llm.batch_chat_completion(
+            conversations=[_MSG],
+            output_schema=str,
         )
 
 

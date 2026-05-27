@@ -142,21 +142,16 @@ class EntitySummarizer(RaguGenerativeModule):
             assert self.llm
             output_schema = instruction.pydantic_model
             assert output_schema is EntityDescriptionModel
-            try:
-                response: Sequence[EntityDescriptionModel] = await self.llm.batch_chat_completion(
-                    conversations=[c.to_openai() for c in rendered_list],
-                    output_schema=output_schema,
-                    desc="Entity summarization",
-                ) # type: ignore
+            response: Sequence[EntityDescriptionModel | None] = await self.llm.batch_chat_completion(
+                conversations=[c.to_openai() for c in rendered_list],
+                output_schema=output_schema,
+                continue_on_error=True,
+                desc="Entity summarization",
+            )
 
-                for i, summary in enumerate(response):
-                    if summary and getattr(summary, 'description', None) is not None:
-                        entities_to_summarize[i].description = summary.description
-            except Exception as e:
-                logger.warning(
-                    "Entity summarization failed: {}: {}. Keeping original descriptions.",
-                    type(e).__name__, e,
-                )
+            for i, summary in enumerate(response):
+                if summary is not None and getattr(summary, 'description', None) is not None:
+                    entities_to_summarize[i].description = summary.description
         else:
             entities_to_summarize = [Entity(**row) for _, row in entity_multi_desc.iterrows()]
 
@@ -223,25 +218,19 @@ class EntitySummarizer(RaguGenerativeModule):
             )
 
             result_description: List[str] = []
-            try:
-                results = await self.llm.batch_chat_completion(
-                    [c.to_openai() for c in rendered_list],
-                    output_schema=instruction.pydantic_model,
-                    desc="Map reduce for clustering",
-                )
-                flat_results = [
-                    r.content for r in results
-                    if r and getattr(r, 'content', None)
-                ]
-            except Exception as e:
-                logger.warning(
-                    "Cluster summarization failed: {}: {}. Using raw descriptions.",
-                    type(e).__name__, e,
-                )
-                flat_results = None
+            results = await self.llm.batch_chat_completion(
+                [c.to_openai() for c in rendered_list],
+                output_schema=instruction.pydantic_model,
+                continue_on_error=True,
+                desc="Map reduce for clustering",
+            )
+            flat_results = [
+                r.content for r in results
+                if r is not None and getattr(r, 'content', None)
+            ]
 
             for cluster_idx, (start, end) in enumerate(cluster_boundaries):
-                if flat_results is not None:
+                if flat_results:
                     result_description.extend(flat_results[start:end])
                 else:
                     result_description.extend(
@@ -364,20 +353,15 @@ class RelationSummarizer(RaguGenerativeModule):
 
             output_schema = instruction.pydantic_model
             assert output_schema is RelationDescriptionModel
-            try:
-                response: List[RelationDescriptionModel] = await self.llm.batch_chat_completion(
-                    [c.to_openai() for c in rendered_list],
-                    output_schema=output_schema,
-                ) # type: ignore
+            response: List[RelationDescriptionModel | None] = await self.llm.batch_chat_completion(
+                [c.to_openai() for c in rendered_list],
+                output_schema=output_schema,
+                continue_on_error=True,
+            )
 
-                for i, summary in enumerate(response):
-                    if summary and getattr(summary, 'description', None) is not None:
-                        relations_to_summarize[i].description = summary.description
-            except Exception as e:
-                logger.warning(
-                    "Relation summarization failed: {}: {}. Keeping original descriptions.",
-                    type(e).__name__, e,
-                )
+            for i, summary in enumerate(response):
+                if summary is not None and getattr(summary, 'description', None) is not None:
+                    relations_to_summarize[i].description = summary.description
         else:
             relations_to_summarize = [Relation(**row) for _, row in relation_multi_desc.iterrows()]
 

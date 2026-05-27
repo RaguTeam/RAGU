@@ -44,7 +44,7 @@ async def test_extraction_total_failure():
             few_shot_formatter=None,
         ))
 
-        llm.batch_chat_completion.side_effect = RuntimeError("LLM timeout")
+        llm.batch_chat_completion.return_value = [None, None]
 
         chunks = [_make_chunk("chunk 1"), _make_chunk("chunk 2")]
         entities, relations = await extractor.extract(chunks)
@@ -82,6 +82,33 @@ async def test_extraction_success():
         patcher.stop()
 
 
+async def test_extraction_partial_failure():
+    extractor, llm = _make_extractor()
+
+    import ragu.triplet.llm_artifact_extractor as module
+    patcher, mock_render = _patch_render(module)
+    try:
+        extractor.get_prompt = MagicMock(return_value=SimpleNamespace(
+            messages=[MagicMock()],
+            pydantic_model=ArtifactsModel,
+            few_shot_formatter=None,
+        ))
+
+        artifacts_ok = ArtifactsModel(
+            entities=[EntityModel(entity_name="Alice", entity_type="Person", description="A person")],
+            relations=[],
+        )
+        llm.batch_chat_completion.return_value = [None, artifacts_ok]
+
+        chunks = [_make_chunk("chunk 1"), _make_chunk("chunk 2")]
+        entities, relations = await extractor.extract(chunks)
+
+        assert len(entities) == 1
+        assert entities[0].entity_name == "Alice"
+    finally:
+        patcher.stop()
+
+
 async def test_validation_failure_falls_back_to_unvalidated():
     extractor, llm = _make_extractor()
     extractor.do_validation = True
@@ -106,7 +133,7 @@ async def test_validation_failure_falls_back_to_unvalidated():
             call_count += 1
             if call_count == 1:
                 return [artifacts]
-            raise RuntimeError("validation failed")
+            return [None]
 
         llm.batch_chat_completion.side_effect = _batch_side_effect
 

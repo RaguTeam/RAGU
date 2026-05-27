@@ -13,7 +13,7 @@ from ragu.graph.types import Community, Entity, Relation
 @pytest.mark.asyncio
 async def test_community_summarizer_llm_exception_returns_empty(monkeypatch):
     llm = AsyncMock()
-    llm.batch_chat_completion = AsyncMock(side_effect=RuntimeError("boom"))
+    llm.batch_chat_completion = AsyncMock(return_value=[None])
     summarizer = CommunitySummarizer(llm=llm)
 
     monkeypatch.setattr(

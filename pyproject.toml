@@ -30,7 +30,6 @@ dependencies = [
     "graspologic-native>=1.2.5",
     "scikit-learn>=1.7.2",
     "requests>=2.33.1",
-    "bm25s>=0.3.0",
 ]
 
 [project.optional-dependencies]
