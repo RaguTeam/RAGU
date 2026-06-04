@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import field, dataclass
 from textwrap import dedent
-from typing import Any, List, Literal
+from typing import Any, List
 
 from jinja2 import Template
 from ragu.common.global_parameters import Settings
@@ -64,9 +64,6 @@ class GlobalSearchEngine(BaseEngine):
         self,
         llm: LLM,
         knowledge_graph: KnowledgeGraph,
-        max_context_length: int = 30_000,
-        tokenizer_backend: Literal["tiktoken", "local"] = "tiktoken",
-        tokenizer_model: str = "gpt-4",
         language: str | None = None,
         *args: Any,
         **kwargs: Any,
@@ -76,18 +73,12 @@ class GlobalSearchEngine(BaseEngine):
 
         :param llm: Language model client for meta-evaluation and final answer generation.
         :param knowledge_graph: Knowledge graph providing access to community-level summaries.
-        :param max_context_length: Maximum number of tokens allowed in the truncated context.
-        :param tokenizer_backend: Tokenizer backend used for token counting (default: ``"tiktoken"``).
-        :param tokenizer_model: Model name for tokenizer calibration (default: ``"gpt-4"``).
         :param language: Default output language (fed into prompt templates).
         """
         _PROMPTS = ["global_search_context", "global_search"]
         super().__init__(
             llm=llm,
             prompts=_PROMPTS,
-            max_context_length=max_context_length,
-            tokenizer_backend=tokenizer_backend,
-            tokenizer_model=tokenizer_model,
             *args,
             **kwargs,
         )

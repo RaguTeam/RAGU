@@ -8,7 +8,6 @@ from typing import (
     List,
     Optional,
     Set,
-    Literal,
     Tuple
 )
 
@@ -32,7 +31,6 @@ from ragu.graph.index import Index, StorageArguments
 from ragu.storage.types import ClusterInfo
 from ragu.triplet.base_artifact_extractor import BaseArtifactExtractor
 from ragu.storage.base_storage import EdgeSpec
-from ragu.utils.token_truncation import TokenTruncation
 
 
 def _duplicate_ids(items: Iterable[Entity | Relation | CommunitySummary | Chunk | Community]) -> List[str]:
@@ -207,11 +205,6 @@ class KnowledgeGraph:
         storage_settings: Optional[StorageArguments] = None,
         additional_modules: Optional[List[GraphBuilderModule]] = None,
         language: Optional[str] = None,
-        llm_token_limit: int = 32_798,
-        embedder_token_limit: int = 8_192,
-        tokenizer_backend: Literal["tiktoken", "local"] = "tiktoken",
-        tokenizer_llm_name: str = "gpt-4o",
-        tokenizer_embedder_name: str = "text-embedding-3-large",
     ):
         """
         Initialize KnowledgeGraph with pipeline and storage components.
@@ -225,11 +218,6 @@ class KnowledgeGraph:
         :param storage_settings: Optional storage backend settings.
         :param additional_modules: Optional post-processing modules for graph items.
         :param language: Optional language override. Defaults to ``Settings.language``.
-        :param llm_token_limit: Token limit for LLM inputs.
-        :param embedder_token_limit: Token limit for Embedder inputs.
-        :param tokenizer_backend: Optional tokenizer backend.
-        :param tokenizer_llm_name: What tokenizer to use for llm inputs truncation.
-        :param tokenizer_embedder_name: What tokenizer to use for embedder inputs truncation.
         """
         self.builder_settings = builder_settings or BuilderArguments()
         self.storage_settings = storage_settings or StorageArguments()
@@ -241,18 +229,6 @@ class KnowledgeGraph:
 
         if self.builder_settings.remove_isolated_nodes:
             what_to_add.append(RemoveIsolatedNodes())
-
-        self._llm_context_truncator = TokenTruncation(
-            model_id=tokenizer_llm_name,
-            tokenizer_type=tokenizer_backend,
-            max_tokens=llm_token_limit,
-        )
-
-        self._embedder_context_truncator = TokenTruncation(
-            model_id=tokenizer_embedder_name,
-            tokenizer_type=tokenizer_backend,
-            max_tokens=embedder_token_limit,
-        )
 
         # Build graph
         self.pipeline = InMemoryGraphBuilder(
@@ -269,7 +245,6 @@ class KnowledgeGraph:
             embedder=embedder,
             sparse_embedder=sparse_embedder,
             arguments=self.storage_settings,
-            context_truncator=self._embedder_context_truncator,
             node_t=Entity,
             edge_t=Relation,
         )

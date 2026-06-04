@@ -60,14 +60,28 @@ class TokenTruncation:
         """
         Truncate text using HuggingFace tokenizer.
 
+        Accounts for special tokens (e.g. ``[CLS]``, ``[SEP]``) that the
+        embedding server will add on top of the text tokens.  The returned
+        text, when re-encoded by the server with special tokens, will not
+        exceed *max_tokens*.
+
         :param text: Input text
         :return: (Truncated text, original token length, truncated token length)
         """
-        tokens = self.local_tokenizer.encode(text, add_special_tokens=False) # type: ignore
-        original_len = len(tokens) # type: ignore
-        truncated_tokens = tokens[:self.max_tokens] # type: ignore
+        tokens_with_special = self.local_tokenizer.encode(text, add_special_tokens=True) # type: ignore
+        original_len = len(tokens_with_special) # type: ignore
+
+        if original_len <= self.max_tokens:
+            return text, original_len, original_len
+
+        tokens_without_special = self.local_tokenizer.encode(text, add_special_tokens=False) # type: ignore
+        num_special = original_len - len(tokens_without_special)
+
+        max_text_tokens = max(0, self.max_tokens - num_special)
+        truncated_tokens = tokens_without_special[:max_text_tokens] # type: ignore
         decoded = self.local_tokenizer.decode(truncated_tokens, skip_special_tokens=True) # type: ignore
-        return decoded, original_len, len(truncated_tokens) # type: ignore
+
+        return decoded, original_len, len(truncated_tokens) + num_special
 
     def __call__(self, text: str, return_stats: bool = False) -> str:
         """

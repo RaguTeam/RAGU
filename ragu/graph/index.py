@@ -22,7 +22,6 @@ from ragu.storage.graph_storage_adapters.networkx_adapter import NetworkXStorage
 from ragu.storage.kv_storage_adapters.json_storage import JsonKVStorage
 from ragu.storage.types import Point
 from ragu.storage.vdb_storage_adapters.nano_vdb import NanoVectorDBStorage
-from ragu.utils.token_truncation import TokenTruncation
 
 
 @dataclass
@@ -115,7 +114,6 @@ class Index(Generic[NodeT, EdgeT]):
             sparse_embedder: SparseEmbedder | None = None,
             node_t: Type[NodeT] = Entity,
             edge_t: Type[EdgeT] = Relation,
-            context_truncator: TokenTruncation | None = None,
     ):
         """
         Initialize storage backends and in-memory reverse indexes.
@@ -128,9 +126,6 @@ class Index(Generic[NodeT, EdgeT]):
 
         self.embedder = embedder
         self.sparse_embedder = sparse_embedder
-
-        # If truncator is not set, just return all text as is
-        self._context_truncator = context_truncator or (lambda x: str(x))
 
         # Reverse indexes for cascade operations
         self._chunk_to_nodes: Dict[str, Set[str]] = defaultdict(set)
@@ -246,7 +241,7 @@ class Index(Generic[NodeT, EdgeT]):
         nodes_to_upsert = [group[0] for group in incoming_by_id.values()]
 
         dense_embeddings = await self.embedder.batch_embed_text(
-            [self._context_truncator(node.to_text()) for node in nodes_to_upsert],
+            [node.to_text() for node in nodes_to_upsert],
             desc="Nodes vectorization",
         )
         sparse_embeddings = self.sparse_embedder.embed_document(
@@ -307,7 +302,7 @@ class Index(Generic[NodeT, EdgeT]):
         nodes_to_update = [group[0] for group in incoming_by_id.values()]
 
         dense_embeddings = await self.embedder.batch_embed_text(
-            [self._context_truncator(node.to_text()) for node in nodes_to_update],
+            [node.to_text() for node in nodes_to_update],
             desc="Nodes vectorization",
         )
         sparse_embeddings = self.sparse_embedder.embed_document(
@@ -371,7 +366,7 @@ class Index(Generic[NodeT, EdgeT]):
         ]
 
         dense_embeddings = await self.embedder.batch_embed_text(
-            [self._context_truncator(edge.to_text()) for edge in edges_to_upsert],
+            [edge.to_text() for edge in edges_to_upsert],
             desc="Edges vectorization",
         )
         sparse_embeddings = self.sparse_embedder.embed_document(
@@ -444,7 +439,7 @@ class Index(Generic[NodeT, EdgeT]):
         await self._validate_edge_endpoints_exist(edges_to_update)
 
         dense_embeddings = await self.embedder.batch_embed_text(
-            [self._context_truncator(edge.to_text()) for edge in edges_to_update],
+            [edge.to_text() for edge in edges_to_update],
             desc="Edges vectorization",
         )
         sparse_embeddings = self.sparse_embedder.embed_document(

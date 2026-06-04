@@ -87,7 +87,6 @@ async def main():
         llm,
         knowledge_graph,
         embedder,
-        tokenizer_model="gpt-4o-mini",
     )
 
     # Run local search

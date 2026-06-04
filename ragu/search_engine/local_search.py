@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from typing_extensions import override
 from textwrap import dedent
-from typing import Any, List, Literal
+from typing import Any, List
 
 from jinja2 import Template
 
@@ -115,9 +115,6 @@ class LocalSearchEngine(BaseEngine):
         embedder: Embedder,
         sparse_embedder: SparseEmbedder | None = None,
         reranker: Scorer | None = None,
-        max_context_length: int = 30_000,
-        tokenizer_backend: Literal["tiktoken", "local"] = "tiktoken",
-        tokenizer_model: str = "gpt-4",
         language: str | None = None,
         *args: Any,
         **kwargs: Any,
@@ -130,18 +127,12 @@ class LocalSearchEngine(BaseEngine):
         :param embedder: Dense embedder used for retrieval queries.
         :param sparse_embedder: Optional sparse embedder used for hybrid retrieval queries.
         :param reranker: Optional reranker used to reorder retrieved context sections.
-        :param max_context_length: Max tokens allowed for the final context (after truncation).
-        :param tokenizer_backend: Tokenizer backend used for token counting/truncation.
-        :param tokenizer_model: Model name used by the tokenizer backend.
         :param language: Default output language (fed into prompt template).
         """
         _PROMPTS_NAMES = ["local_search"]
         super().__init__(
             llm=llm,
             prompts=_PROMPTS_NAMES,
-            max_context_length=max_context_length,
-            tokenizer_backend=tokenizer_backend,
-            tokenizer_model=tokenizer_model,
             *args,
             **kwargs,
         )

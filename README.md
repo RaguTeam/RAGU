@@ -182,7 +182,6 @@ local_search = LocalSearchEngine(
     llm=llm,  # or use another LLM for answering
     knowledge_graph=knowledge_graph,
     embedder=embedder,
-    tokenizer_model="gpt-4o-mini",
 )
 # found = await local_search.a_search("What is the Betweenlands??")
 local_answer = await local_search.a_query(
@@ -393,6 +392,50 @@ embedder = EmbedderOpenAI(
 |-----------|-------------|---------|
 | `batch_size` | Max texts per single API call | `500` |
 | `max_concurrent_batches` | Max concurrent batch API calls | `5` |
+| `embedder_token_limit` | Max tokens per input text (overrides `Settings`) | `None` |
+| `tokenizer_backend` | Tokenizer: `"tiktoken"` or `"local"` (overrides `Settings`) | `None` |
+| `tokenizer_name` | Tokenizer model ID (overrides `Settings`) | `None` |
+
+All input texts are automatically truncated to the token limit before being sent to the embedding API. The limit defaults to `Settings.embedder_token_limit` (8192) and can be overridden per `EmbedderOpenAI` instance.
+
+---
+
+#### Token Limits and Settings
+
+RAGU centralises token-limit and tokenizer configuration in the `Settings` singleton. These defaults are used by `EmbedderOpenAI` (for embedding input truncation) and search engines (for LLM context truncation).
+
+```python
+from ragu import Settings
+
+# Embedder truncation (applied automatically inside EmbedderOpenAI)
+Settings.embedder_token_limit = 8_192                    # max tokens per embedding input
+Settings.tokenizer_embedder_backend = "tiktoken"         # "tiktoken" or "local"
+Settings.tokenizer_embedder_name = "text-embedding-3-large"
+
+# LLM context truncation (applied by search engines before answer generation)
+Settings.llm_token_limit = 32_798                        # max tokens for LLM inputs during indexing
+Settings.llm_context_token_limit = 30_000                # max tokens for search-engine context
+Settings.tokenizer_llm_backend = "tiktoken"              # "tiktoken" or "local"
+Settings.tokenizer_llm_name = "gpt-4o"
+
+# Example: using a local BGE model with 512-token context
+# pip install graph_ragu[local]
+Settings.embedder_token_limit = 512
+Settings.tokenizer_embedder_backend = "local"
+Settings.tokenizer_embedder_name = "BAAI/bge-large-en-v1.5"
+```
+
+Per-instance overrides on `EmbedderOpenAI` take precedence over `Settings`:
+
+```python
+embedder = EmbedderOpenAI(
+    client=embed_client,
+    model_name="BAAI/bge-large-en-v1.5",
+    embedder_token_limit=512,
+    tokenizer_backend="local",
+    tokenizer_name="BAAI/bge-large-en-v1.5",
+)
+```
 
 ---
 

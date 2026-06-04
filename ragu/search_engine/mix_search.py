@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import dataclass, field
 from textwrap import dedent
-from typing import Any, List, Literal
+from typing import Any, List
 
 from jinja2 import Template
 from typing_extensions import override
@@ -65,9 +65,6 @@ class MixSearchEngine(BaseEngine):
         llm: LLM,
         engines: List[BaseEngine],
         allow_partial_failures: bool = True,
-        max_context_length: int = 30_000,
-        tokenizer_backend: Literal["tiktoken", "local"] = "tiktoken",
-        tokenizer_model: str = "gpt-4",
         language: str | None = None,
         *args: Any,
         **kwargs: Any,
@@ -79,18 +76,12 @@ class MixSearchEngine(BaseEngine):
         :param engines: Ordered list of child engines used for retrieval or answer ensembling.
         :param allow_partial_failures: Whether to tolerate failures from individual child engines.
                                        Failed engines are omitted from the result list.
-        :param max_context_length: Max tokens allowed for the synthesized context after truncation.
-        :param tokenizer_backend: Tokenizer backend used for token truncation.
-        :param tokenizer_model: Model name used by the tokenizer backend.
         :param language: Default output language.
         """
         prompts = ["mix_search_context", "mix_search"]
         super().__init__(
             llm=llm,
             prompts=prompts,
-            max_context_length=max_context_length,
-            tokenizer_backend=tokenizer_backend,
-            tokenizer_model=tokenizer_model,
             *args,
             **kwargs,
         )

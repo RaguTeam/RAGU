@@ -8,9 +8,11 @@ from typing_extensions import override
 from pydantic import BaseModel
 from tqdm.asyncio import tqdm_asyncio
 
+from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
 from ragu.models.openai import CachedAsyncOpenAI
 from ragu.utils.ragu_utils import FLOATS
+from ragu.utils.token_truncation import TokenTruncation
 
 
 T = TypeVar('T', BaseModel, str)
@@ -74,6 +76,11 @@ class EmbedderOpenAI(Embedder):
     dramatically reducing the number of HTTP requests compared to one
     request per text.
     
+    All input texts are automatically truncated to the embedding model's
+    context window before being sent to the API.  The token limit and
+    tokenizer are configured via constructor parameters (per-instance
+    override) or :class:`GlobalSettings` defaults.
+
     :param client: OpenAI-compatible backend client.
     :param model_name: Embedding model identifier.
     :param dim: Embedding dimension. If ``None``, it is auto-detected on the
@@ -84,6 +91,14 @@ class EmbedderOpenAI(Embedder):
     :param max_concurrent_batches: Maximum number of batch API calls in
         flight simultaneously.  Controls peak concurrency and prevents
         connection-pool exhaustion.  Defaults to 5.
+    :param embedder_token_limit: Maximum number of tokens per input text.
+        Overrides ``Settings.embedder_token_limit`` when provided.
+    :param tokenizer_backend: Tokenizer backend (``"tiktoken"`` or
+        ``"local"``).  Overrides ``Settings.tokenizer_embedder_backend`` when
+        provided.
+    :param tokenizer_name: Tokenizer model identifier (e.g.
+        ``"text-embedding-3-large"``).  Overrides
+        ``Settings.tokenizer_embedder_name`` when provided.
     :param kwargs: Default kwargs merged into each ``embed_text`` call.
     
     Example:
@@ -105,6 +120,9 @@ class EmbedderOpenAI(Embedder):
         dim: int | None = None,
         batch_size: int = DEFAULT_EMBED_BATCH_SIZE,
         max_concurrent_batches: int = DEFAULT_MAX_CONCURRENT_EMBED_BATCHES,
+        embedder_token_limit: int | None = None,
+        tokenizer_backend: str | None = None,
+        tokenizer_name: str | None = None,
         **kwargs: Any,
     ):
         self.client = client
@@ -114,6 +132,11 @@ class EmbedderOpenAI(Embedder):
         self.batch_size = batch_size
         self.max_concurrent_batches = max_concurrent_batches
         self._semaphore = asyncio.Semaphore(max_concurrent_batches)
+        self._truncator = TokenTruncation(
+            model_id=tokenizer_name or Settings.tokenizer_embedder_name,
+            tokenizer_type=tokenizer_backend or Settings.tokenizer_embedder_backend,
+            max_tokens=embedder_token_limit if embedder_token_limit is not None else Settings.embedder_token_limit,
+        )
 
     async def initialize(self) -> None:
         """
@@ -146,6 +169,7 @@ class EmbedderOpenAI(Embedder):
             Per-call values override constructor defaults on conflicts.
         :returns: Embedding vector.
         """
+        text = self._truncator(text)
         return await self.client.embed_text(
             model_name=self.model_name,
             text=text,
@@ -180,9 +204,11 @@ class EmbedderOpenAI(Embedder):
         logger.debug(f'Calling batch_embed_text with size {len(texts)}')
         merged_kwargs = self.kwargs | kwargs
 
+        truncated = [self._truncator(t) for t in texts]
+
         sub_batches: list[list[str]] = [
-            texts[i:i + self.batch_size]
-            for i in range(0, len(texts), self.batch_size)
+            truncated[i:i + self.batch_size]
+            for i in range(0, len(truncated), self.batch_size)
         ]
 
         first_error: Exception | None = None

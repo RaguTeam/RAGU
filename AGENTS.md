@@ -136,6 +136,9 @@ After modifying code, the agent **must**:
 
 ```python
 monkeypatch.setattr(Settings, "storage_folder", str(tmp_path / "storage"))
+monkeypatch.setattr(Settings, "embedder_token_limit", 512)
+monkeypatch.setattr(Settings, "tokenizer_embedder_backend", "local")
+monkeypatch.setattr(Settings, "tokenizer_embedder_name", "BAAI/bge-large-en-v1.5")
 ```
 
 ### Useful fixtures and helpers
@@ -159,7 +162,9 @@ These rules are not visible from class signatures but must always hold.
 
 - **Domain object IDs are deterministic MD5 hashes** computed by `compute_mdhash_id(content, prefix)`. This enables deduplication and incremental upserts.
 
-- **`Settings.storage_folder` is the single source of truth** for persistence paths. Never hardcode paths.
+- **`Settings` is the single source of truth** for persistence paths, language, and token limits. Never hardcode paths or token limits. Token limits (`embedder_token_limit`, `llm_token_limit`, `llm_context_token_limit`) and tokenizer settings (`tokenizer_embedder_backend`, `tokenizer_llm_backend`, `tokenizer_embedder_name`, `tokenizer_llm_name`) are class-level attributes on `GlobalSettings`.
+
+- **`EmbedderOpenAI` automatically truncates input text** to `Settings.embedder_token_limit` tokens before sending to the API. This protects all embedding call sites (indexing, search, ICL, clustering) from exceeding the model's context window. Per-instance override is available via constructor parameters.
 
 ---
 

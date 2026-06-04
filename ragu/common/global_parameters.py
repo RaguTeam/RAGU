@@ -26,6 +26,14 @@ class GlobalSettings:
 
     language: str = "english"
 
+    tokenizer_embedder_backend: str = "tiktoken"
+    tokenizer_llm_backend: str = "tiktoken"
+    tokenizer_embedder_name: str = "text-embedding-3-large"
+    tokenizer_llm_name: str = "gpt-4o"
+    embedder_token_limit: int = 8_192
+    llm_token_limit: int = 32_798
+    llm_context_token_limit: int = 30_000
+
     def __new__(cls, *args: Any, **kwargs: Any):
         if cls.__instance is None:
             cls.__instance = super(GlobalSettings, cls).__new__(cls)

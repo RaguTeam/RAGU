@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Literal, TypeVar, Generic
+from typing import Any, TypeVar, Generic
 
 from pydantic import BaseModel
 from ragu.common.base import RaguGenerativeModule
+from ragu.common.global_parameters import Settings
 from ragu.models.llm import LLM
 from ragu.utils.ragu_utils import always_get_an_event_loop
 from ragu.utils.token_truncation import TokenTruncation
@@ -67,25 +68,21 @@ class BaseEngine(RaguGenerativeModule, ABC):
         self,
         llm: LLM,
         *args: Any,
-        max_context_length: int = 30_000,
-        tokenizer_backend: Literal["tiktoken", "local"] = "tiktoken",
-        tokenizer_model: str = "gpt-4",
         **kwargs: Any,
     ):
         """
         Initialize an engine with an LLM and context truncation settings.
 
+        Context truncation parameters are read from :class:`GlobalSettings`.
+
         :param llm: LLM used by concrete engines for answer generation.
-        :param max_context_length: Maximum context length after token truncation.
-        :param tokenizer_backend: Tokenizer backend used for truncation.
-        :param tokenizer_model: Tokenizer model name used by the backend.
         """
         super().__init__(*args, **kwargs)
         self.llm = llm
         self.truncation = TokenTruncation(
-            tokenizer_model,
-            tokenizer_backend,
-            max_context_length,
+            Settings.tokenizer_llm_name,
+            Settings.tokenizer_llm_backend,
+            Settings.llm_context_token_limit,
         )
 
     @abstractmethod

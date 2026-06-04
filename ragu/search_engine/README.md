@@ -362,10 +362,10 @@ asyncio.run(main())
 
 Shared engine parameters:
 
-- `max_context_length`: token budget for prompt context.
-- `tokenizer_backend`: `"tiktoken"` or `"local"`.
-- `tokenizer_model`: tokenizer model name.
 - `language`: prompt language, defaulting to `Settings.language`.
+
+Engine token limits are configured centrally via `Settings.llm_context_token_limit`,
+`Settings.tokenizer_llm_backend`, and `Settings.tokenizer_llm_name`.
 
 Retrieval parameters:
 

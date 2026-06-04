@@ -153,7 +153,9 @@ class TestTokenTruncationWithLocalTokenizer:
         truncator_local(text)
         tokenizer = _FakeAutoTokenizer.last_instance
         assert tokenizer is not None
-        assert tokenizer.encode_calls[-1][1] is False
+        add_special_flags = [call[1] for call in tokenizer.encode_calls]
+        assert True in add_special_flags
+        assert False in add_special_flags
         assert tokenizer.decode_calls[-1][1] is True
 
     def test_local_unicode_truncation_returns_valid_string(self, truncator_local):
@@ -183,3 +185,69 @@ class TestTokenTruncationWithLocalTokenizer:
     def test_unsupported_tokenizer_type_raises(self):
         with pytest.raises(ValueError, match="Unsupported tokenizer_type"):
             TokenTruncation(model_id="x", tokenizer_type="unknown")
+
+
+class _FakeBERTTokenizer:
+    SPECIAL_TOKEN_COUNT = 2
+
+    def __init__(self):
+        self.special = ["[CLS]", "[SEP]"]
+
+    def encode(self, text: str, add_special_tokens: bool = False):
+        word_tokens = text.split()
+        if add_special_tokens:
+            return self.special[:1] + word_tokens + self.special[1:2]
+        return word_tokens
+
+    def decode(self, tokens, skip_special_tokens: bool = True):
+        if skip_special_tokens:
+            tokens = [t for t in tokens if t not in self.special]
+        return " ".join(tokens)
+
+
+class _FakeBERTAutoTokenizer:
+    last_instance = None
+
+    @classmethod
+    def from_pretrained(cls, model_id: str):
+        cls.last_instance = _FakeBERTTokenizer()
+        return cls.last_instance
+
+
+class TestTokenTruncationSpecialTokens:
+    @pytest.fixture
+    def bert_truncator(self, monkeypatch):
+        fake_transformers = types.SimpleNamespace(AutoTokenizer=_FakeBERTAutoTokenizer)
+        monkeypatch.setitem(__import__("sys").modules, "transformers", fake_transformers)
+        return TokenTruncation(
+            model_id="fake-bert-model",
+            tokenizer_type="local",
+            max_tokens=7,
+        )
+
+    def test_special_tokens_accounted_in_limit(self, bert_truncator):
+        tokenizer = _FakeBERTAutoTokenizer.last_instance
+        words = ["w" + str(i) for i in range(20)]
+        text = " ".join(words)
+
+        truncated = bert_truncator(text)
+
+        re_encoded = tokenizer.encode(truncated, add_special_tokens=True)
+        assert len(re_encoded) <= 7
+
+    def test_short_text_unchanged(self, bert_truncator):
+        tokenizer = _FakeBERTAutoTokenizer.last_instance
+        text = "a b c d"
+        truncated = bert_truncator(text)
+
+        assert truncated == text
+        re_encoded = tokenizer.encode(truncated, add_special_tokens=True)
+        assert len(re_encoded) <= 7
+
+    def test_exact_boundary_text(self, bert_truncator):
+        tokenizer = _FakeBERTAutoTokenizer.last_instance
+        text = "a b c d e"
+        truncated = bert_truncator(text)
+
+        re_encoded = tokenizer.encode(truncated, add_special_tokens=True)
+        assert len(re_encoded) <= 7

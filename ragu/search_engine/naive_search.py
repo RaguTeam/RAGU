@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from textwrap import dedent
-from typing import Any, Optional, List, Literal
+from typing import Any, Optional, List
 
 from jinja2 import Template
 from ragu.chunker.types import Chunk
@@ -74,9 +74,6 @@ class NaiveSearchEngine(BaseEngine):
         embedder: Embedder,
         sparse_embedder: SparseEmbedder | None = None,
         reranker: Optional[Scorer] = None,
-        max_context_length: int = 30_000,
-        tokenizer_backend: Literal["tiktoken", "local"] = "tiktoken",
-        tokenizer_model: str = "gpt-4",
         language: str | None = None,
         *args: Any,
         **kwargs: Any,
@@ -89,18 +86,12 @@ class NaiveSearchEngine(BaseEngine):
         :param embedder: Dense embedder used for retrieval queries.
         :param sparse_embedder: Optional sparse embedder used for hybrid retrieval queries.
         :param reranker: Optional reranker used to improve ranking of retrieved chunks.
-        :param max_context_length: Max tokens allowed for context after truncation.
-        :param tokenizer_backend: Tokenizer backend used for token truncation.
-        :param tokenizer_model: Model name used by the tokenizer backend.
         :param language: Default output language
         """
         _PROMPTS_NAMES = ["naive_search"]
         super().__init__(
             llm=llm,
             prompts=_PROMPTS_NAMES,
-            max_context_length=max_context_length,
-            tokenizer_backend=tokenizer_backend,
-            tokenizer_model=tokenizer_model,
             *args,
             **kwargs,
         )
