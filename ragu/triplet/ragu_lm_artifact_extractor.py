@@ -3,7 +3,7 @@ import itertools
 import re
 import time
 from dataclasses import dataclass, field
-from typing import List, Tuple, Dict, Any, Optional, Union
+from typing import List, Tuple, Dict, Any, Optional, Union, Sequence
 
 from ragu.chunker.types import Chunk
 from ragu.common.logger import logger
@@ -289,7 +289,7 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
             candidates = context_candidates[id(ctx)]
             ctx.relations = self.filter_relations(candidates)
 
-    async def _run(self, conversations: List[ChatMessages], description: str = "") -> List[str | None]:
+    async def _run(self, conversations: List[ChatMessages], description: str = "") -> Sequence[str | None]:
         """
         Run LLM inference on a batch of conversations.
 
@@ -297,7 +297,7 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
         :param description: Description for progress bar.
         :return: List of response strings.  ``None`` marks failed calls.
         """
-        return self.llm.batch_chat_completion(
+        return await self.llm.batch_chat_completion(
             [c.to_openai() for c in conversations],
             output_schema=str,
             continue_on_error=True,
