@@ -34,7 +34,7 @@ def get_disk_cache(dir: str | Path) -> MutableMapping[str, Any]:
     path = str(Path(dir).resolve())
     if (cache := _dish_caches.get(path, None)):
         return cache
-    _dish_caches[path] = cache = Index(path)
+    _dish_caches[path] = cache = Index(path, sqlite_synchronous=2)
     return cache
 
 

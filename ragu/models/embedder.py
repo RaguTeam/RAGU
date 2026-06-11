@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar
+from typing import Any, Literal, TypeVar
 
 from typing_extensions import override
 from pydantic import BaseModel
@@ -121,7 +121,7 @@ class EmbedderOpenAI(Embedder):
         batch_size: int = DEFAULT_EMBED_BATCH_SIZE,
         max_concurrent_batches: int = DEFAULT_MAX_CONCURRENT_EMBED_BATCHES,
         embedder_token_limit: int | None = None,
-        tokenizer_backend: str | None = None,
+        tokenizer_backend: Literal["tiktoken", "local"] | None = None,
         tokenizer_name: str | None = None,
         **kwargs: Any,
     ):
