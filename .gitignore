@@ -177,3 +177,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# OpenCode
+.opencode
