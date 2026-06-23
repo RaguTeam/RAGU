@@ -439,6 +439,43 @@ embedder = EmbedderOpenAI(
 
 ---
 
+#### Serializing Global Settings
+
+When running benchmarks or reproducible experiments, it is useful to store the
+RAGU configuration alongside the produced artifacts. `GlobalSettings` exposes
+two explicit methods for this — `save(path)` writes a JSON snapshot and
+`load(path)` restores it. Serialization is **never** invoked automatically
+(there are no constructor/destructor hooks): you decide when to persist and
+reload.
+
+```python
+from ragu import Settings
+
+# Persist the current configuration next to your experiment artifacts.
+Settings.save("./runs/exp_42/ragu_settings.json")
+
+# Later, in a fresh process, reproduce the exact same configuration.
+Settings.load("./runs/exp_42/ragu_settings.json")
+```
+
+What gets serialized: `language`, `tokenizer_embedder_backend`,
+`tokenizer_llm_backend`, `tokenizer_embedder_name`, `tokenizer_llm_name`,
+`embedder_token_limit`, `llm_token_limit`, `llm_context_token_limit`.
+
+What does **not** get serialized:
+
+- `storage_folder` — by default it contains a runtime timestamp, and restoring
+  it silently would redirect subsequent writes into a stale directory. Manage
+  the storage folder explicitly if you need to reproduce it.
+- Internal state (singleton handle, the current timestamp).
+
+`load` validates every value against the declared type hints and raises
+`ValueError` on a mismatch (e.g. an unknown tokenizer backend or a non-positive
+token limit). Unknown keys in the file are reported via a warning and ignored,
+so files produced by a newer RAGU version remain loadable.
+
+---
+
 #### In-Context Learning (Few-Shot Examples)
 
 RAGU extractors can use few-shot examples to improve extraction quality. When enabled, the extractor selects relevant examples and includes them in the LLM prompt. Four selection strategies are available:

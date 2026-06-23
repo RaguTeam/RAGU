@@ -22,8 +22,17 @@ The module keeps shared behavior out of the domain packages. It centralizes the 
 Singleton instance of `GlobalSettings`.
 
 - Purpose: stores process-wide defaults.
-- Important fields: `language`, `storage_folder`.
+- Important fields: `language`, `storage_folder`, tokenizer backends/names,
+  token limits (`embedder_token_limit`, `llm_token_limit`,
+  `llm_context_token_limit`).
+- Tokenizer backend fields (`tokenizer_embedder_backend`,
+  `tokenizer_llm_backend`) are typed as `Literal["tiktoken", "local"]`; the
+  same constraint applies to the `tokenizer_backend` parameter of
+  `EmbedderOpenAI`.
 - Used by: storage initialization, prompts, builders, search engines, sparse embedders.
+- Serialization: `Settings.save(path)` / `Settings.load(path)` persist and
+  restore the user-configurable fields as JSON. See the main README for
+  motivation and caveats. `storage_folder` is excluded on purpose.
 
 ```python
 from ragu.common.global_parameters import Settings
@@ -33,6 +42,10 @@ Settings.storage_folder = "./ragu_working_dir/demo"
 Settings.init_storage_folder()
 
 print(Settings.storage_folder)
+
+# Persist / restore the configuration as a JSON artifact.
+Settings.save("./demo/ragu_settings.json")
+Settings.load("./demo/ragu_settings.json")
 ```
 
 ### Env
