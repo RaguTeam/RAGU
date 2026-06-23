@@ -14,7 +14,7 @@ Chunk/Community/CommunitySummary -> KV storage -> retrieval context resolution
 
 KV adapters store JSON-like payloads that do not belong in the graph backend or vector database. The default implementation is local and file-backed.
 
-## Key Components 
+## Key Components
 
 ### JsonKVStorage
 

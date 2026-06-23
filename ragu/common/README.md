@@ -31,8 +31,23 @@ Singleton instance of `GlobalSettings`.
   `EmbedderOpenAI`.
 - Used by: storage initialization, prompts, builders, search engines, sparse embedders.
 - Serialization: `Settings.save(path)` / `Settings.load(path)` persist and
-  restore the user-configurable fields as JSON. See the main README for
-  motivation and caveats. `storage_folder` is excluded on purpose.
+  restore the user-configurable fields as JSON. Serialization is **never**
+  invoked automatically (there are no constructor/destructor hooks): you decide
+  when to persist and reload.
+  - Serialized fields: `language`, `tokenizer_embedder_backend`,
+    `tokenizer_llm_backend`, `tokenizer_embedder_name`, `tokenizer_llm_name`,
+    `embedder_token_limit`, `llm_token_limit`, `llm_context_token_limit`.
+  - **Not** serialized: `storage_folder` (it contains a runtime timestamp by
+    default, and restoring it silently would redirect subsequent writes into a
+    stale directory — manage it explicitly) and internal state (singleton
+    handle, current timestamp).
+  - `load` validates every value against the declared type hints and raises
+    `ValueError` on a mismatch (e.g. an unknown tokenizer backend or a
+    non-positive token limit). Unknown keys are reported via a warning and
+    ignored, so files produced by a newer RAGU version remain loadable.
+- Token-limit defaults: `embedder_token_limit` is used by `EmbedderOpenAI`
+  (embedding input truncation); `llm_token_limit` and `llm_context_token_limit`
+  are used by search engines (LLM context truncation during indexing/answering).
 
 ```python
 from ragu.common.global_parameters import Settings

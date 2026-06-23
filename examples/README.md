@@ -10,7 +10,7 @@ End-to-end example that builds a knowledge graph from Russian-language text file
 
 1. Loads `.txt` files from `data/ru/`
 2. Chunks documents with `SimpleChunker`
-3. Extracts entities and relations using `ArtifactsExtractorLLM` with in-context learning (few-shot examples selected by semantic similarity)
+3. Extracts entities and relations using `ArtifactsExtractorLLM` with in-context learning (few-shot examples selected via a hybrid of semantic similarity and BM25)
 4. Builds a knowledge graph with Leiden community detection
 5. Runs local search queries against the graph
 

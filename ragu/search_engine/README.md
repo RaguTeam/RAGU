@@ -24,9 +24,11 @@ Abstract base for query engines.
 - Important methods: `a_search`, `a_query`, sync wrappers `search`, `query`.
 
 ```python
+from ragu.search_engine.base_engine import BaseEngine
 from ragu.search_engine.naive_search import NaiveSearchEngine
 
-print(issubclass(NaiveSearchEngine, object))
+print(issubclass(NaiveSearchEngine, BaseEngine))  # True — every engine inherits BaseEngine
+print([m for m in ("a_search", "a_query", "search", "query") if hasattr(BaseEngine, m)])
 ```
 
 ### SearchEngineRetrieve
@@ -90,7 +92,7 @@ graph = KnowledgeGraph(
     embedder=embedder,
     builder_settings=BuilderArguments(build_only_vector_context=True),
 )
-engine = NaiveSearchEngine(llm, graph, embedder)
+engine = NaiveSearchEngine(llm=llm, knowledge_graph=graph, embedder=embedder)
 
 print(engine.language)
 ```
@@ -113,7 +115,7 @@ client = CachedAsyncOpenAI(base_url="https://api.openai.com/v1", api_key="dummy-
 llm = LLMOpenAI(client=client, model_name="gpt-4o-mini")
 embedder = EmbedderOpenAI(client=client, model_name="text-embedding-3-small", dim=1536)
 graph = KnowledgeGraph(llm=llm, embedder=embedder)
-engine = LocalSearchEngine(llm, graph, embedder)
+engine = LocalSearchEngine(llm=llm, knowledge_graph=graph, embedder=embedder)
 
 print(engine.language)
 ```
@@ -136,7 +138,7 @@ client = CachedAsyncOpenAI(base_url="https://api.openai.com/v1", api_key="dummy-
 llm = LLMOpenAI(client=client, model_name="gpt-4o-mini")
 embedder = EmbedderOpenAI(client=client, model_name="text-embedding-3-small", dim=1536)
 graph = KnowledgeGraph(llm=llm, embedder=embedder)
-engine = GlobalSearchEngine(llm, graph)
+engine = GlobalSearchEngine(llm=llm, knowledge_graph=graph)
 
 print(engine.language)
 ```
@@ -162,15 +164,15 @@ graph = KnowledgeGraph(
     embedder=embedder,
     builder_settings=BuilderArguments(build_only_vector_context=True),
 )
-naive = NaiveSearchEngine(llm, graph, embedder)
-mix = MixSearchEngine(llm, engines=[naive])
+naive = NaiveSearchEngine(llm=llm, knowledge_graph=graph, embedder=embedder)
+mix = MixSearchEngine(llm=llm, engines=[naive])
 
 print(len(mix.engines))
 ```
 
 ### QueryPlanEngine
 
-Prompt-based query planning engine exported by the package. It extends the same generation infrastructure and is intended for decomposed query workflows.
+Wraps any search engine and decomposes a complex query into dependent subqueries: each subquery is executed via the wrapped engine, intermediate answers are fed into subsequent subqueries, and the partial answers are synthesized into a final response. Useful for multi-hop questions that no single retrieval strategy can answer directly.
 
 ```python
 from ragu import BuilderArguments, KnowledgeGraph, NaiveSearchEngine, QueryPlanEngine
@@ -186,7 +188,7 @@ graph = KnowledgeGraph(
     embedder=embedder,
     builder_settings=BuilderArguments(build_only_vector_context=True),
 )
-engine = NaiveSearchEngine(llm, graph, embedder)
+engine = NaiveSearchEngine(llm=llm, knowledge_graph=graph, embedder=embedder)
 planner = QueryPlanEngine(engine)
 
 print(planner.get_prompt("query_decomposition").description)
@@ -234,7 +236,7 @@ async def main():
     )
     await graph.build_from_docs(["Python is a programming language."])
 
-    engine = NaiveSearchEngine(llm, graph, embedder)
+    engine = NaiveSearchEngine(llm=llm, knowledge_graph=graph, embedder=embedder)
     retrieval = await engine.a_search("What is Python?", top_k=1)
     print(retrieval.result.chunks[0].content)
 
@@ -285,9 +287,9 @@ async def main():
     await graph.upsert_relations([relation])
     await graph.upsert_summaries([CommunitySummary(id="com-1", summary="Python has a creator.")])
 
-    local = LocalSearchEngine(llm, graph, embedder)
-    global_ = GlobalSearchEngine(llm, graph)
-    mix = MixSearchEngine(llm, engines=[local, global_])
+    local = LocalSearchEngine(llm=llm, knowledge_graph=graph, embedder=embedder)
+    global_ = GlobalSearchEngine(llm=llm, knowledge_graph=graph)
+    mix = MixSearchEngine(llm=llm, engines=[local, global_])
 
     response = await mix.a_query("Summarize the main people and organizations.")
     print(response.response)
@@ -298,57 +300,19 @@ asyncio.run(main())
 
 ### Example 3 - Override a search engine instruction
 
+Every search engine inherits `RaguGenerativeModule`, so `get_prompt` /
+`update_prompt` work out of the box:
+
 ```python
-import asyncio
-
-from ragu import BuilderArguments, KnowledgeGraph, NaiveSearchEngine
-from ragu.common.prompts.messages import ChatMessages, UserMessage
-from ragu.common.prompts.prompt_storage import RAGUInstruction
-from ragu.models.embedder import EmbedderOpenAI
-from ragu.models.llm import LLMOpenAI
-from ragu.models.openai import CachedAsyncOpenAI
-
-
-async def main():
-    client = CachedAsyncOpenAI(
-        base_url="https://api.openai.com/v1",
-        api_key="dummy-api-token",
-    )
-    llm = LLMOpenAI(client=client, model_name="gpt-4o-mini")
-    embedder = EmbedderOpenAI(
-        client=client,
-        model_name="text-embedding-3-small",
-        dim=1536,
-    )
-    graph = KnowledgeGraph(
-        llm=None,
-        embedder=embedder,
-        builder_settings=BuilderArguments(build_only_vector_context=True),
-    )
-    engine = NaiveSearchEngine(llm, graph, embedder)
-    engine.update_prompt(
-        "naive_search",
-        RAGUInstruction(
-            messages=ChatMessages.from_messages([
-                UserMessage(
-                    content=(
-                        "You are answering from retrieved chunks only.\n"
-                        "Language: {{ language }}\n"
-                        "Question: {{ query }}\n"
-                        "Chunks:\n{{ context }}"
-                    )
-                )
-            ]),
-            pydantic_model=str,
-            description="Chunk-grounded answer prompt.",
-        ),
-    )
-
-    print(engine.get_prompt("naive_search").description)
-
-
-asyncio.run(main())
+engine = NaiveSearchEngine(llm=llm, knowledge_graph=graph, embedder=embedder)
+engine.get_prompt("naive_search")            # inspect current instruction
+engine.update_prompt("naive_search", my_instruction)  # override for this instance only
 ```
+
+For a full custom-message example see
+[`ragu/common/prompts/README.md`](../common/prompts/README.md). Do **not** edit
+`DEFAULT_PROMPT_TEMPLATES` directly; `update_prompt` scopes the change to a
+single engine instance.
 
 ## Integration Points
 

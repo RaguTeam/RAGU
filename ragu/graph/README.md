@@ -32,12 +32,12 @@ from ragu.models.embedder import EmbedderOpenAI
 from ragu.models.openai import CachedAsyncOpenAI
 
 client = CachedAsyncOpenAI(
-    base_url="https://api.openai.com/v1", 
+    base_url="https://api.openai.com/v1",
     api_key="dummy-api-token"
 )
 embedder = EmbedderOpenAI(
-    client=client, 
-    model_name="text-embedding-3-small", 
+    client=client,
+    model_name="text-embedding-3-small",
     dim=1536
 )
 
@@ -109,19 +109,19 @@ Directed graph edge dataclass.
 
 > NOTE: custom relation extraction is not supported in RAGU versions 0.0.1 and 0.0.2.
 > Full support expected in 0.0.3.
-> 
+>
 ```python
 from ragu.graph.types import Entity, Relation
 
 python = Entity(
-    entity_name="Python", 
-    entity_type="Language", 
-    description="A programming language.", 
+    entity_name="Python",
+    entity_type="Language",
+    description="A programming language.",
     source_chunk_id=["chunk-1"]
 )
 guido = Entity(
     entity_name="Guido van Rossum",
-    entity_type="Person", 
+    entity_type="Person",
     description="Creator of Python.",
     source_chunk_id=["chunk-1"]
 )
@@ -150,16 +150,16 @@ class EvidenceRelation(Relation):
 
 
 python = Entity(
-    entity_name="Python", 
-    entity_type="Language", 
-    description="A programming language.", 
+    entity_name="Python",
+    entity_type="Language",
+    description="A programming language.",
     source_chunk_id=["chunk-1"]
 )
 
 # "Short" creation
 guido = Entity(
-    "Guido van Rossum", 
-    "Person", 
+    "Guido van Rossum",
+    "Person",
     "Creator of Python.",
     ["chunk-1"]
 )

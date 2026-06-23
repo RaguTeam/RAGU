@@ -97,26 +97,26 @@ ragu/
 
 ## What the folders contain
 
-`chunker/`  
+`chunker/`
 Chunking logic and chunk data types.
 
-`common/`  
+`common/`
 Shared settings, prompt helpers, cache utilities, logging, and base classes.
 
-`graph/`  
+`graph/`
 Graph construction, summarization, indexing, and the `KnowledgeGraph` facade.
 
-`models/`  
+`models/`
 LLM, embedder, scoring, caching, and OpenAI client adapters.
 
-`search_engine/`  
+`search_engine/`
 Retrieval engines.
 
-`storage/`  
+`storage/`
 Graph, key-value, and vector storage contracts plus concrete adapters.
 
-`triplet/`  
+`triplet/`
 Entity and relation extraction modules.
 
-`utils/`  
+`utils/`
 General utilities and testing helpers.
