@@ -121,7 +121,7 @@ Testing server for OpenAI-compatible endpoints.
 ```python
 from ragu.utils.testing.openai_mock_server import OpenAIMockServer
 
-server = OpenAIMockServer(("127.0.0.1", 0))
+server = OpenAIMockServer("127.0.0.1", 0)
 print(server.server_port)
 server.server_close()
 ```
@@ -203,7 +203,7 @@ External:
 - `diskcache`
 - `numpy`
 - tokenizer libraries used by `TokenTruncation`
-- optional `pymorphy2` or compatible packages for morphology normalization
+- `pymorphy3` for Russian morphology normalization (see `pyproject.toml`)
 
 ## Notes / Pitfalls
 

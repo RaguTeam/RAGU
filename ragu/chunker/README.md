@@ -1,5 +1,3 @@
-from smart_chunker import chunker
-
 # Module: ragu.chunker
 
 ## Role in RAGU Pipeline
@@ -52,7 +50,7 @@ documents = [
 
 async def main():
     chunker = SimpleChunker(max_chunk_size=512, overlap=0)
-    chunks: list[Chunk] = await chunker(documents)
+    chunks: list[Chunk] = chunker(documents)
 
     print(chunks)
 
@@ -83,7 +81,7 @@ async def main():
         max_chunk_size=1024,
         device="cuda:0"
     )
-    chunks: list[Chunk] = await chunker(documents)
+    chunks: list[Chunk] = chunker(documents)
 
     print(chunks)
 
@@ -114,7 +112,7 @@ async def main():
         minibatch_size=16
         # And more parameter
     )
-    chunks: list[Chunk] = await chunker(documents)
+    chunks: list[Chunk] = chunker(documents)
 
     print(chunks)
 

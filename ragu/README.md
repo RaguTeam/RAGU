@@ -22,6 +22,10 @@ ragu/
 │       ├── __init__.py
 │       ├── default_models.py
 │       ├── default_templates.py
+│       ├── few_shot.py
+│       ├── icl_config.py
+│       ├── icl_examples/
+│       ├── icl_manager.py
 │       ├── messages.py
 │       ├── prompt_storage.py
 │       └── README.md
@@ -42,6 +46,7 @@ ragu/
 │   ├── embedder.py
 │   ├── llm.py
 │   ├── openai.py
+│   ├── README.md
 │   ├── scorer.py
 │   └── sparse_embedder.py
 ├── search_engine/
@@ -61,7 +66,6 @@ ragu/
 │   ├── README.md
 │   ├── graph_storage_adapters/
 │   │   ├── README.md
-│   │   ├── memgraph_adapter.py
 │   │   └── networkx_adapter.py
 │   ├── kv_storage_adapters/
 │   │   ├── README.md
@@ -74,7 +78,7 @@ ragu/
 │   ├── __init__.py
 │   ├── base_artifact_extractor.py
 │   ├── llm_artifact_extractor.py
-│   ├── multi_stage_artifacts_extractor.py
+│   ├── prompts.py
 │   ├── ragu_lm_artifact_extractor.py
 │   ├── two_stage_extractor.py
 │   ├── types.py

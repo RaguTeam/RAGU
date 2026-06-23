@@ -132,8 +132,7 @@
 
 Для возможности ответа на абстрактивные вопросы, следуя методологии GraphRAG, применяется выделение комьюнити в графе и получение саммари по этим комьюнити.
 Для выделения комьюнити используется [алгоритм Лейдена](https://en.wikipedia.org/wiki/Leiden_algorithm).
-этого используется двухэтапная стратегия:
-Затем, для каждого комьюнити генерируется саммари - текстовый отчет, описывающий ключевую смысловую составляющую, объединяющую узлы в комьюнити.
+Затем для каждого комьюнити генерируется саммари — текстовый отчёт, описывающий ключевую смысловую составляющую, объединяющую узлы в комьюнити.
 Отчет имеет следующий вид:
 ```json
 {
@@ -305,6 +304,7 @@ two_stage_extractor = TwoStageArtifactsExtractorLLM(
 
 **Expected output**:
 
+```text
 Семья Обамы
 Обамы
 приобрела дом
@@ -353,6 +353,7 @@ two_stage_extractor = TwoStageArtifactsExtractorLLM(
 Чикаго
 третьем
 главою Белого дома
+```
 </details>
 
 
@@ -375,7 +376,9 @@ two_stage_extractor = TwoStageArtifactsExtractorLLM(
 
 **Expected output**:
 
+```text
 пресс-секретарь
+```
 </details>
 
 **Entity description generation**:
@@ -398,7 +401,9 @@ two_stage_extractor = TwoStageArtifactsExtractorLLM(
 
 **Expected output**:
 
+```text
 Бывший представитель СМИ экс-президента США Билла Клинтона.
+```
 </details>
 
 **Relation extraction**:
@@ -422,7 +427,9 @@ two_stage_extractor = TwoStageArtifactsExtractorLLM(
 Смысл отношения между двумя именованными сущностями: 
 
 **Expected output:**
+```text
 Возглавляет пресс-службу Национальной футбольной лиги США.
+```
 </details>
 
 
@@ -664,11 +671,12 @@ for subquery in subqueries:
 
 Сейчас все инструкции представлены классом `RAGUInstruction`.
 ```python
-@dataclass
+@dataclass(frozen=True, slots=True)
 class RAGUInstruction:
     messages: ChatMessages
     pydantic_model: Type[BaseModel] | Type[str] = str
     description: str | None = None
+    few_shot_formatter: FewShotFormatter | None = None
 ```
 
 Получение словаря вида `"название_инструкции" : "соответствующий_prompt_template"`:

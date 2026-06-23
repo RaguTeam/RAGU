@@ -316,6 +316,7 @@ The model is trained to perform the following tasks:
 
 **Expected output**:
 
+```text
 Семья Обамы
 Обамы
 приобрела дом
@@ -364,6 +365,7 @@ The model is trained to perform the following tasks:
 Чикаго
 третьем
 главою Белого дома
+```
 </details>
 
 
@@ -386,7 +388,9 @@ The model is trained to perform the following tasks:
 
 **Expected output**:
 
+```text
 пресс-секретарь
+```
 </details>
 
 **Entity description generation**:
@@ -409,7 +413,9 @@ The model is trained to perform the following tasks:
 
 **Expected output**:
 
+```text
 Бывший представитель СМИ экс-президента США Билла Клинтона.
+```
 </details>
 
 **Relation extraction**:
@@ -433,7 +439,9 @@ The model is trained to perform the following tasks:
 Смысл отношения между двумя именованными сущностями: 
 
 **Expected output:**
+```text
 Возглавляет пресс-службу Национальной футбольной лиги США.
+```
 </details>
 
 
@@ -666,23 +674,28 @@ Every LLM-powered component in RAGU allows you to change instructions.
 Prompts are defined by the `RAGUInstruction` class.
 
 ```python
-@dataclass
-class PromptTemplate:
+@dataclass(frozen=True, slots=True)
+class RAGUInstruction:
     """
-    Represents a Jinja2-based prompt template for instruction generation.
+    Binds a Jinja2-templated conversation with its structured-output schema
+    and optional few-shot formatting.
 
-    Each template defines:
-      - a Jinja2 text pattern (`template`)
-      - an optional Pydantic schema for structured output validation (`schema`)
+    Each instruction defines:
+      - a conversation template (`messages: ChatMessages`)
+      - an optional Pydantic schema for structured output decoding
+        (`pydantic_model`, defaults to `str` for free-form text)
       - a short description of its purpose (`description`)
+      - an optional few-shot formatter callable (`few_shot_formatter`)
 
-    The template can be rendered dynamically with keyword arguments,
-    supporting both single-instance and batched (list/tuple) generation.
+    The conversation can be rendered dynamically with keyword arguments via
+    `render` / `render_with_few_shots`, supporting both single-instance and
+    batched (list/tuple) generation.
     """
 
-    template: str                                           # Jinja2 template
-    pydantic_model: Type[BaseModel] | Type[str] = str       # Pydantic schema
-    description: str = ""                                   # Short instruction description
+    messages: ChatMessages                                   # Conversation template
+    pydantic_model: Type[BaseModel] | Type[str] = str        # Pydantic schema
+    description: str | None = None                           # Short instruction description
+    few_shot_formatter: FewShotFormatter | None = None       # Optional few-shot formatter
 ```
 
 Retrieve all available instructions:

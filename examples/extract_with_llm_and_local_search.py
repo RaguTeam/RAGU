@@ -69,7 +69,6 @@ async def main():
     # Configure graph builder
     builder_settings = BuilderArguments(
         use_llm_summarization=True,
-        vectorize_chunks=True,
     )
 
     # Build knowledge graph
@@ -99,7 +98,7 @@ async def main():
     for question in questions:
         print(f'\nВопрос: {question}')
         answer = await search_engine.a_query(question)
-        print(f'Ответ: {answer}')
+        print(f'Ответ: {answer.response}')
 
 
 if __name__ == "__main__":

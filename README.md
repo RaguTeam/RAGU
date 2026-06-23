@@ -136,7 +136,6 @@ from ragu.common.prompts import ICLConfig
 icl_config = ICLConfig(
     enabled=True,
     num_examples=2,
-    language="english",
 )
 
 artifact_extractor = TwoStageArtifactsExtractorLLM(
@@ -238,15 +237,15 @@ from ragu import QueryPlanEngine
 # Wrap any base engine
 planned_local = QueryPlanEngine(local_search)
 result = await planned_local.a_query("What is the capital of France?")
-print(result)
+print(result.response)
 
 planned_global = QueryPlanEngine(global_search)
 result = await planned_global.a_query("Your broad query here")
-print(result)
+print(result.response)
 
 planned_naive = QueryPlanEngine(naive_search)
 result = await planned_naive.a_query("Your query here")
-print(result)
+print(result.response)
 ```
 
 ---
@@ -266,7 +265,6 @@ builder_arguments = BuilderArguments(
     build_only_vector_context=False,  # Skip graph extraction, only chunk embeddings
     make_community_summary=True,  # Generate community summaries 
     remove_isolated_nodes=True,  # Remove entities without relations
-    vectorize_chunks=True,  # Vectorize chunk for naive (vector) search
     cluster_only_if_more_than=10000,  # Minimum entities before clustering kicks in
     summarize_only_if_more_than=7,  # Summarize descriptions only when there are many duplicates
     max_cluster_size=128,  # Maximum entities per cluster

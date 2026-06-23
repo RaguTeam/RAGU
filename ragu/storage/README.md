@@ -569,7 +569,6 @@ External:
 - `qdrant-client`
 - `numpy`
 - `pydantic`
-- optional Memgraph client dependencies
 
 ## Notes / Pitfalls
 

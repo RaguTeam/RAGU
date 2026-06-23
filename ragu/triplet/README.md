@@ -238,4 +238,4 @@ External:
 - Relations are skipped when their source or target entity name cannot be resolved in the same chunk's extracted entity list.
 - Entity IDs are generated from entity name and type, so repeated mentions of the same entity merge later in `KnowledgeGraph`.
 - The single-pass extractor may produce relation endpoints that do not exactly match extracted entity names; the two-stage extractor is stricter.
-- The `multi_stage_artifacts_extractor.py` file currently contains commented-out experimental code and is not exported by `ragu.triplet`.
+- The `multi_stage_artifacts_extractor.py` file previously referenced in this package has been removed. The two-stage prompts for entity/relation extraction and validation live in `ragu/triplet/prompts.py` and are registered as `entity_extraction`, `entity_validation`, `relation_extraction`, and `relation_validation`.

@@ -186,7 +186,7 @@ Configuration for build behavior.
 - `build_only_vector_context`: skip graph artifact extraction and store chunks only.
 - `make_community_summary`: run community detection and summarization.
 - `remove_isolated_nodes`: add `RemoveIsolatedNodes` post-processor.
-- `vectorize_chunks`: stored on `KnowledgeGraph`; chunk vectorization currently happens in `Index.upsert_chunks`.
+- `vectorize_chunks`: **currently a no-op**, kept for backward compatibility. Chunk vectorization always happens inside `Index.upsert_chunks` regardless of this value.
 
 #### Pipeline preset: chunk-vector index only
 

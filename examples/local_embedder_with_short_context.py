@@ -127,7 +127,6 @@ async def main():
 
     builder_settings = BuilderArguments(
         use_llm_summarization=True,
-        vectorize_chunks=True,
     )
 
     knowledge_graph = KnowledgeGraph(
@@ -156,7 +155,7 @@ async def main():
         print(f"\nQ: {question}")
         # top_k=40 compensates for lower retrieval precision of smaller embedders
         answer = await search_engine.a_query(question, top_k=40)
-        print(f"A: {answer}")
+        print(f"A: {answer.response}")
 
 
 if __name__ == "__main__":

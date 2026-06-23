@@ -34,7 +34,11 @@ class BuilderArguments:
     :param make_community_summary: Generate high-level summaries for detected
         graph communities.
     :param remove_isolated_nodes: Remove entities that have no relations.
-    :param vectorize_chunks: Generate and store embeddings for text chunks.
+    :param vectorize_chunks: Reserved for backward compatibility; currently a no-op.
+        Chunk embeddings are always generated and stored inside ``Index.upsert_chunks``
+        regardless of this flag. The field is kept on ``BuilderArguments`` (and mirrored
+        on ``KnowledgeGraph.vectorize_chunks``) for API stability and may be wired up in
+        a future release.
     :param cluster_only_if_more_than: Minimum number of entities required before
         clustering is applied.
     :param max_cluster_size: Maximum number of entities per cluster.
