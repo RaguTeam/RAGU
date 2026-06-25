@@ -1,13 +1,12 @@
 import asyncio
 from dataclasses import dataclass, field
 from textwrap import dedent
-from typing import Any, List
+from typing import Any, List, Literal
 
 from jinja2 import Template
 from typing_extensions import override
 
 from ragu.common.global_parameters import Settings
-from ragu.common.logger import logger
 from ragu.models.llm import LLM
 from ragu.search_engine.base_engine import BaseEngine, SearchEngineRetrieve, SearchEngineResponse
 from ragu.common.prompts.prompt_storage import RAGUInstruction
@@ -66,6 +65,9 @@ class MixSearchEngine(BaseEngine):
         engines: List[BaseEngine],
         allow_partial_failures: bool = True,
         language: str | None = None,
+        max_context_length: int | None = None,
+        tokenizer_backend: Literal["tiktoken", "local"] | None = None,
+        tokenizer_model: str | None = None,
         *args: Any,
         **kwargs: Any,
     ):
@@ -77,11 +79,23 @@ class MixSearchEngine(BaseEngine):
         :param allow_partial_failures: Whether to tolerate failures from individual child engines.
                                        Failed engines are omitted from the result list.
         :param language: Default output language.
+        :param max_context_length: Maximum tokens for the assembled context fed to
+            the LLM. When ``None``, falls back to ``Settings.llm_context_token_limit``.
+            This truncation is applied only to the MixSearchEngine's own final context
+            and is NOT propagated to the child engines (each child keeps its own
+            tokenizer configuration).
+        :param tokenizer_backend: Tokenizer backend for context truncation. When
+            ``None``, falls back to ``Settings.tokenizer_llm_backend``.
+        :param tokenizer_model: Tokenizer model identifier for context truncation.
+            When ``None``, falls back to ``Settings.tokenizer_llm_name``.
         """
         prompts = ["mix_search_context", "mix_search"]
         super().__init__(
             llm=llm,
             prompts=prompts,
+            max_context_length=max_context_length,
+            tokenizer_backend=tokenizer_backend,
+            tokenizer_model=tokenizer_model,
             *args,
             **kwargs,
         )

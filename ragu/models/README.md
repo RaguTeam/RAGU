@@ -93,8 +93,14 @@ main README and the docs link here instead of duplicating it.
 | `rate_min_delay` | Min seconds between request starts | `None` |
 | `retry_times_sec` | Retry wait schedule on transient errors | `(2, 4, 8)` |
 | `embed_timeout` | Per-request timeout for embedding calls (seconds) | `60.0` |
-| `cache` | Cache directory path | `None` |
-| `debug_errors_storage` | Directory for dumping failed request payloads | `None` |
+| `cache` | Cache directory path. When `None`, falls back to `Settings.cache_path` (also `None` by default → caching disabled). An explicit value (incl. in-memory `{}`) always takes precedence. | `None` |
+| `debug_errors_storage` | Directory for dumping failed request payloads. When `None`, falls back to `Settings.debug_errors_path` (also `None` by default). | `None` |
+
+> **Tip:** instead of passing `cache=` to every client, set a process-wide
+> default once via `Settings.cache_path = "./my_cache"` (and similarly
+> `Settings.debug_errors_path`). The cache path must be a **stable, long-lived
+> directory independent of `Settings.storage_folder`** (which is per-run). See
+> `ragu/common/README.md` for the invalidation caveats.
 
 #### Shared client (simpler, works for most cases)
 

@@ -234,6 +234,8 @@ two_stage_extractor = TwoStageArtifactsExtractorLLM(
 )
 ```
 
+Чтобы включить кэширование ответов сразу для всех клиентов без повторения `cache=...`, задайте `Settings.cache_path` один раз (см. `ragu/models/README.md` и `ragu/common/README.md`). Путь должен быть стабильным каталогом, **не зависящим от `Settings.storage_folder`** (который пересоздаётся при каждом запуске); учитывайте риск устаревших попаданий при смене модели, температуры или поведения провайдера.
+
 За одношаговое выделение/валидацию элементов графа отвечают инструкции `artifact_extraction` и `artifact_validation`. Двухшаговый пайплайн использует `entity_extraction`, `entity_validation`, `relation_extraction` и `relation_validation`.
 
 #### RAGU-lm

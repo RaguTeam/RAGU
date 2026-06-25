@@ -51,7 +51,6 @@ def test_save_writes_all_serializable_fields(isolated_settings, tmp_path):
         "tokenizer_embedder_name",
         "tokenizer_llm_name",
         "embedder_token_limit",
-        "llm_token_limit",
         "llm_context_token_limit",
     }
 

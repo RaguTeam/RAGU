@@ -183,7 +183,7 @@ These rules are not visible from class signatures but must always hold.
 
 - **Domain object IDs are deterministic MD5 hashes** computed by `compute_mdhash_id(content, prefix)`. This enables deduplication and incremental upserts.
 
-- **`Settings` is the single source of truth** for persistence paths, language, and token limits. Never hardcode paths or token limits. Token limits (`embedder_token_limit`, `llm_token_limit`, `llm_context_token_limit`) and tokenizer settings (`tokenizer_embedder_backend`, `tokenizer_llm_backend`, `tokenizer_embedder_name`, `tokenizer_llm_name`) are class-level attributes on `GlobalSettings`.
+- **`Settings` is the single source of truth** for persistence paths, language, and token limits. Never hardcode paths or token limits. Token limits (`embedder_token_limit`, `llm_context_token_limit`) and tokenizer settings (`tokenizer_embedder_backend`, `tokenizer_llm_backend`, `tokenizer_embedder_name`, `tokenizer_llm_name`) are class-level attributes on `GlobalSettings`.
 
 - **`EmbedderOpenAI` automatically truncates input text** to `Settings.embedder_token_limit` tokens before sending to the API. This protects all embedding call sites (indexing, search, ICL, clustering) from exceeding the model's context window. Per-instance override is available via constructor parameters.
 - **`BuilderArguments.vectorize_chunks` is currently a no-op.** Chunk vectorization always happens inside `Index.upsert_chunks` regardless of this flag. The field is kept only for backward compatibility / API stability.

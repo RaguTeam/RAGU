@@ -246,6 +246,8 @@ two_stage_extractor = TwoStageArtifactsExtractorLLM(
 )
 ```
 
+To enable response caching for every client without repeating `cache=...`, set `Settings.cache_path` once (see `ragu/models/README.md` and `ragu/common/README.md`). The path must be a stable directory **independent of `Settings.storage_folder`** (which is per-run); mind stale hits when changing model, temperature, or provider.
+
 Single-step extraction and validation are driven by the `artifact_extraction` and `artifact_validation` prompts. Two-stage extraction uses `entity_extraction`, `entity_validation`, `relation_extraction`, and `relation_validation`.
 
 #### RAGU-lm

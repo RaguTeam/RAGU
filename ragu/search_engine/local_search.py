@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from typing_extensions import override
 from textwrap import dedent
-from typing import Any, List
+from typing import Any, List, Literal
 
 from jinja2 import Template
 
@@ -116,6 +116,9 @@ class LocalSearchEngine(BaseEngine):
         sparse_embedder: SparseEmbedder | None = None,
         reranker: Scorer | None = None,
         language: str | None = None,
+        max_context_length: int | None = None,
+        tokenizer_backend: Literal["tiktoken", "local"] | None = None,
+        tokenizer_model: str | None = None,
         *args: Any,
         **kwargs: Any,
     ):
@@ -128,11 +131,20 @@ class LocalSearchEngine(BaseEngine):
         :param sparse_embedder: Optional sparse embedder used for hybrid retrieval queries.
         :param reranker: Optional reranker used to reorder retrieved context sections.
         :param language: Default output language (fed into prompt template).
+        :param max_context_length: Maximum tokens for the assembled context fed to
+            the LLM. When ``None``, falls back to ``Settings.llm_context_token_limit``.
+        :param tokenizer_backend: Tokenizer backend for context truncation. When
+            ``None``, falls back to ``Settings.tokenizer_llm_backend``.
+        :param tokenizer_model: Tokenizer model identifier for context truncation.
+            When ``None``, falls back to ``Settings.tokenizer_llm_name``.
         """
         _PROMPTS_NAMES = ["local_search"]
         super().__init__(
             llm=llm,
             prompts=_PROMPTS_NAMES,
+            max_context_length=max_context_length,
+            tokenizer_backend=tokenizer_backend,
+            tokenizer_model=tokenizer_model,
             *args,
             **kwargs,
         )

@@ -21,6 +21,7 @@ from aiolimiter import AsyncLimiter
 
 from ragu.models.caching import ResponseCachingMixin
 from ragu.utils.ragu_utils import FLOATS, LoguruAdapter, attach_async_contexts, get_disk_cache, save_args_on_exception
+from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
 
 
@@ -119,10 +120,14 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             Passed to ``max_completion_tokens`` in API calls. Useful when
             structured output parsing fails due to length limits.
         :param cache: Optional cache mapping or path accepted by
-            :class:`ResponseCachingMixin`.
+            :class:`ResponseCachingMixin`. When ``None``, falls back to
+            ``Settings.cache_path`` (also ``None`` by default, i.e. caching
+            disabled). An explicit value (including an in-memory ``{}``)
+            always takes precedence.
         :param cache_prefix: Prefix included in cache keys.
         :param debug_errors_storage: Optional mapping/path to store failing call
-            arguments for debugging.
+            arguments for debugging. When ``None``, falls back to
+            ``Settings.debug_errors_path`` (also ``None`` by default).
         :param embed_timeout: Per-request timeout in seconds for embedding API
             calls.  Defaults to ``60.0``.  Set to ``None`` to use the client
             default (typically 600 s).
@@ -136,7 +141,9 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         )
 
         # saving successuful responses
-        ResponseCachingMixin.__init__(self, cache=cache, cache_prefix=cache_prefix)
+        # Per-instance `cache` overrides `Settings.cache_path`; both default to None (caching disabled).
+        effective_cache = cache if cache is not None else Settings.cache_path
+        ResponseCachingMixin.__init__(self, cache=effective_cache, cache_prefix=cache_prefix)
 
         # storing original unwrapped medthods to be able to call them for debugging
         self._uncached_raw_chat_completion = self._uncached_chat_completion
@@ -145,14 +152,18 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         self._uncached_raw_score = self._uncached_score
 
         # saving errors to debug
+        # Per-instance `debug_errors_storage` overrides `Settings.debug_errors_path`; both default to None.
+        effective_debug_errors_storage = (
+            debug_errors_storage if debug_errors_storage is not None else Settings.debug_errors_path
+        )
         self.debug_errors_storage: MutableMapping[str, Any] | None
-        match debug_errors_storage:
+        match effective_debug_errors_storage:
             case None:
                 self.debug_errors_storage = None
             case str() | Path():
-                self.debug_errors_storage = get_disk_cache(debug_errors_storage)
+                self.debug_errors_storage = get_disk_cache(effective_debug_errors_storage)
             case _:
-                self.debug_errors_storage = debug_errors_storage
+                self.debug_errors_storage = effective_debug_errors_storage
         if self.debug_errors_storage is not None:
             self._uncached_chat_completion = save_args_on_exception(
                 self._uncached_chat_completion, self.debug_errors_storage)

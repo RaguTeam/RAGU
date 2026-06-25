@@ -331,6 +331,26 @@ Shared engine parameters:
 Engine token limits are configured centrally via `Settings.llm_context_token_limit`,
 `Settings.tokenizer_llm_backend`, and `Settings.tokenizer_llm_name`.
 
+For per-instance control (e.g. several engines with different LLMs / context
+windows in the same process), every engine also accepts these constructor
+parameters, each defaulting to `None`:
+
+- `max_context_length` (`int | None`) — falls back to `Settings.llm_context_token_limit`.
+- `tokenizer_backend` (`Literal["tiktoken", "local"] | None`) — falls back to `Settings.tokenizer_llm_backend`.
+- `tokenizer_model` (`str | None`) — falls back to `Settings.tokenizer_llm_name`.
+
+```python
+engine = LocalSearchEngine(
+    llm=llm, knowledge_graph=kg, embedder=emb,
+    max_context_length=16_000,
+    tokenizer_model="gpt-4o",
+)
+```
+
+> Note: an override on `MixSearchEngine` affects **only** its own final-context
+> truncation and is **not** propagated to the child engines — each child keeps
+> the tokenizer configuration it was constructed with.
+
 Retrieval parameters:
 
 - `top_k`: initial result count for local and naive search.

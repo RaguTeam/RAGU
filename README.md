@@ -318,7 +318,6 @@ Settings.tokenizer_embedder_backend = "tiktoken"         # "tiktoken" or "local"
 Settings.tokenizer_embedder_name = "text-embedding-3-large"
 
 # LLM context truncation (applied by search engines before answer generation)
-Settings.llm_token_limit = 32_798                        # max tokens for LLM inputs during indexing
 Settings.llm_context_token_limit = 30_000                # max tokens for search-engine context
 Settings.tokenizer_llm_backend = "tiktoken"              # "tiktoken" or "local"
 Settings.tokenizer_llm_name = "gpt-4o"

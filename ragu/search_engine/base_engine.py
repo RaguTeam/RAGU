@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, TypeVar, Generic
+from typing import Any, Literal, TypeVar, Generic
 
 from pydantic import BaseModel
 from ragu.common.base import RaguGenerativeModule
@@ -68,21 +68,38 @@ class BaseEngine(RaguGenerativeModule, ABC):
         self,
         llm: LLM,
         *args: Any,
+        max_context_length: int | None = None,
+        tokenizer_backend: Literal["tiktoken", "local"] | None = None,
+        tokenizer_model: str | None = None,
         **kwargs: Any,
     ):
         """
         Initialize an engine with an LLM and context truncation settings.
 
-        Context truncation parameters are read from :class:`GlobalSettings`.
+        Context truncation parameters default to the corresponding
+        :class:`GlobalSettings` fields when ``None`` (the default), so an
+        engine built without overrides behaves exactly as before. Pass
+        explicit values to configure a specific instance independently of the
+        global singleton (e.g. several engines with different LLMs / context
+        windows in the same process).
 
         :param llm: LLM used by concrete engines for answer generation.
+        :param max_context_length: Maximum number of tokens the assembled
+            context is truncated to. When ``None``, falls back to
+            ``Settings.llm_context_token_limit``.
+        :param tokenizer_backend: Tokenizer backend (``"tiktoken"`` or
+            ``"local"``). When ``None``, falls back to
+            ``Settings.tokenizer_llm_backend``.
+        :param tokenizer_model: Tokenizer model identifier (e.g.
+            ``"gpt-4o"``). When ``None``, falls back to
+            ``Settings.tokenizer_llm_name``.
         """
         super().__init__(*args, **kwargs)
         self.llm = llm
         self.truncation = TokenTruncation(
-            Settings.tokenizer_llm_name,
-            Settings.tokenizer_llm_backend,
-            Settings.llm_context_token_limit,
+            tokenizer_model or Settings.tokenizer_llm_name,
+            tokenizer_backend or Settings.tokenizer_llm_backend,
+            max_context_length if max_context_length is not None else Settings.llm_context_token_limit,
         )
 
     @abstractmethod

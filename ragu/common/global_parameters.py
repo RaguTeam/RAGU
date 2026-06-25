@@ -25,13 +25,16 @@ class GlobalSettings:
 
     The user-configurable fields carry type annotations and are the only
     attributes participating in :meth:`save` / :meth:`load`. Runtime state
-    such as ``_working_dir`` (the storage folder, which embeds a timestamp)
+    such as ``_working_dir`` (the storage folder, which embeds a timestamp),
+    ``cache_path`` / ``debug_errors_path`` (local, machine-specific paths),
     and the singleton handle are intentionally excluded from serialization.
     """
 
     __instance = None
     _current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     _working_dir = os.path.join(os.path.join(os.getcwd(), "ragu_working_dir"), _current_time)
+    _cache_path: str | None = None
+    _debug_errors_path: str | None = None
 
     language: str = "english"
 
@@ -40,7 +43,6 @@ class GlobalSettings:
     tokenizer_embedder_name: str = "text-embedding-3-large"
     tokenizer_llm_name: str = "gpt-4o"
     embedder_token_limit: int = 8_192
-    llm_token_limit: int = 32_798
     llm_context_token_limit: int = 30_000
 
     def __new__(cls, *args: Any, **kwargs: Any):
@@ -63,14 +65,43 @@ class GlobalSettings:
             logger.info(f"Creating folder for current run: {self._working_dir}")
             os.makedirs(self._working_dir, exist_ok=True)
 
+    @property
+    def cache_path(self) -> str | None:
+        """Stable directory for the LLM/embedding response cache, or ``None``.
+
+        Not serialized: it is a local, machine-specific path. Defaults to
+        ``None`` (caching disabled). Deliberately independent of
+        :attr:`storage_folder`, which is per-run and timestamped.
+        """
+        return self._cache_path
+
+    @cache_path.setter
+    def cache_path(self, value: str | Path | None) -> None:
+        self._cache_path = str(value) if value is not None else None
+
+    @property
+    def debug_errors_path(self) -> str | None:
+        """Stable directory for the error-debug store, or ``None``.
+
+        Not serialized: local, machine-specific path. Defaults to ``None``
+        (error-args capture disabled).
+        """
+        return self._debug_errors_path
+
+    @debug_errors_path.setter
+    def debug_errors_path(self, value: str | Path | None) -> None:
+        self._debug_errors_path = str(value) if value is not None else None
+
     def save(self, path: str | Path) -> None:
         """Serialize the user-configurable settings to a JSON file.
 
-        Only annotated public class attributes are written. ``storage_folder``
-        is deliberately excluded: by default it embeds a runtime timestamp,
-        and restoring it silently would redirect subsequent writes into a
-        stale directory. Manage the storage folder explicitly in application
-        code if it must be reproduced.
+        Only annotated public class attributes are written. ``storage_folder``,
+        ``cache_path`` and ``debug_errors_path`` are deliberately excluded: by
+        default ``storage_folder`` embeds a runtime timestamp, and the cache /
+        debug paths are local and machine-specific, so restoring any of them
+        silently would redirect subsequent writes into a stale or nonexistent
+        location. Manage these paths explicitly in application code if they
+        must be reproduced.
 
         :param path: Path to the output JSON file. Parent directories are
             created automatically.
@@ -92,7 +123,8 @@ class GlobalSettings:
         Unknown keys are reported via ``logger.warning`` and ignored so that
         files written by a newer RAGU version remain loadable.
 
-        Mutates the singleton in place. ``storage_folder`` is never touched.
+        Mutates the singleton in place. ``storage_folder``, ``cache_path`` and
+        ``debug_errors_path`` are never touched.
 
         :param path: Path to the JSON file to read.
         :raises ValueError: if the file cannot be read, is not a JSON
