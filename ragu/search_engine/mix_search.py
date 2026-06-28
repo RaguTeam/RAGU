@@ -7,10 +7,27 @@ from jinja2 import Template
 from typing_extensions import override
 
 from ragu.common.global_parameters import Settings
+from ragu.common.logger import logger
 from ragu.models.llm import LLM
-from ragu.search_engine.base_engine import BaseEngine, SearchEngineRetrieve, SearchEngineResponse
+from ragu.search_engine.base_engine import (
+    BaseEngine,
+    SearchEngineRetrieve,
+    SearchEngineResponse,
+    EngineParams,
+)
 from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.common.prompts.messages import ChatMessages, render
+
+
+@dataclass
+class MixQueryParams(EngineParams):
+    """
+    Query parameters for :class:`MixSearchEngine`.
+
+    :param ensemble_responses: When ``True``, ensemble child-engine *answers*
+        (via their ``batch_query``) instead of child-engine retrieval contexts.
+    """
+    ensemble_responses: bool = False
 
 
 @dataclass(slots=True)
@@ -18,8 +35,8 @@ class MixSearchResult:
     """
     Aggregated child-engine outputs.
 
-    ``results`` contains either retrieval containers from child ``a_search``
-    calls or full ``SearchEngineResponse`` objects from child ``a_query`` calls,
+    ``results`` contains either retrieval containers from child ``search``
+    calls or full ``SearchEngineResponse`` objects from child ``query`` calls,
     depending on the synthesis mode.
     """
     results: list[SearchEngineRetrieve[Any]] | list[SearchEngineResponse] = field(default_factory=list)
@@ -63,6 +80,7 @@ class MixSearchEngine(BaseEngine):
         self,
         llm: LLM,
         engines: List[BaseEngine],
+        engine_params: List[EngineParams | None] | None = None,
         allow_partial_failures: bool = True,
         language: str | None = None,
         max_context_length: int | None = None,
@@ -76,6 +94,12 @@ class MixSearchEngine(BaseEngine):
 
         :param llm: LLM used to generate the final synthesized answer.
         :param engines: Ordered list of child engines used for retrieval or answer ensembling.
+        :param engine_params: Optional per-child-engine parameters, aligned with
+            ``engines``. Each entry is forwarded to the matching child's
+            ``batch_search`` / ``batch_query`` call (so different children can be
+            driven with different ``top_k``, reranking, etc.). When ``None``, all
+            children use their own defaults; individual entries may also be
+            ``None`` to default a single child.
         :param allow_partial_failures: Whether to tolerate failures from individual child engines.
                                        Failed engines are omitted from the result list.
         :param language: Default output language.
@@ -88,6 +112,8 @@ class MixSearchEngine(BaseEngine):
             ``None``, falls back to ``Settings.tokenizer_llm_backend``.
         :param tokenizer_model: Tokenizer model identifier for context truncation.
             When ``None``, falls back to ``Settings.tokenizer_llm_name``.
+        :raises ValueError: If ``engines`` is empty, or ``engine_params`` is
+            provided with a length that does not match ``engines``.
         """
         prompts = ["mix_search_context", "mix_search"]
         super().__init__(
@@ -104,130 +130,133 @@ class MixSearchEngine(BaseEngine):
         if not self.engines:
             raise ValueError("MixSearchEngine requires at least one child engine")
 
+        if engine_params is not None and len(engine_params) != len(engines):
+            raise ValueError(
+                f"engine_params length ({len(engine_params)}) must match engines length ({len(engines)})"
+            )
+        self.engine_params: List[EngineParams | None] = (
+            list(engine_params) if engine_params is not None else [None] * len(engines)
+        )
+
         self.allow_partial_failures = allow_partial_failures
         self.language = language if language else Settings.language
 
-    async def _search_all(
+    async def _child_batch(
         self,
-        query: str,
-        *args: Any,
-        **kwargs: Any,
-    ) -> list[SearchEngineRetrieve]:
+        engine: BaseEngine,
+        queries: List[str],
+        ensemble: bool,
+        params: EngineParams | None,
+    ) -> list:
         """
-        Execute ``a_search`` on each child engine.
+        Run a child engine's batch method over ``queries``, tolerating failure.
 
-        :param query: Input query string.
-        :return: Ordered list of successful per-engine search contexts. Failed
-                 engines are omitted when ``allow_partial_failures=True``.
-        :raises RuntimeError: If every child engine fails.
+        :param engine: Child engine to invoke.
+        :param queries: Input query strings.
+        :param ensemble: When ``True``, call the child's ``batch_query``;
+            otherwise ``batch_search``.
+        :param params: Parameters forwarded to the child engine (its own
+            defaults are used when ``None``).
+        :return: Per-query results aligned with ``queries``; on whole-engine
+            failure, a list of ``None`` when ``allow_partial_failures`` is set.
+        :raises Exception: The child failure when partial failures are disallowed.
         """
-        tasks = [
-            engine.a_search(query, *args, **kwargs)
-            for engine in self.engines
-        ]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        try:
+            if ensemble:
+                return await engine.batch_query(queries, params)
+            return await engine.batch_search(queries, params)
+        except Exception as error:
+            if not self.allow_partial_failures:
+                raise
+            logger.warning(
+                "MixSearchEngine child engine {} batch failed: {}: {}",
+                type(engine).__name__, type(error).__name__, error,
+            )
+            return [None] * len(queries)
 
-        contexts: list[SearchEngineRetrieve] = []
-        for result in results:
-            if isinstance(result, Exception):
-                if not self.allow_partial_failures:
-                    raise result
-                continue
-            contexts.append(result)
-
-        if not contexts:
-            raise RuntimeError("MixSearchEngine could not retrieve context from any child engine")
-
-        return contexts
-
-    async def _query_all(
+    async def _gather_child_results(
         self,
-        query: str,
-        *args: Any,
-        **kwargs: Any,
-    ) -> list[SearchEngineResponse]:
+        queries: List[str],
+        ensemble: bool,
+    ) -> list[list]:
         """
-        Execute ``a_query`` on each child engine.
+        Collect per-query child results, transposed to engine-order per query.
 
-        :param query: Input query string.
-        :return: Ordered list of successful per-engine answers. Failed engines
-                 are omitted when ``allow_partial_failures=True``.
-        :raises RuntimeError: If every child engine fails.
+        :param queries: Input query strings.
+        :param ensemble: Whether to ensemble child answers instead of contexts.
+        :return: One list per query, each holding the successful child results in
+                 engine order.
+        :raises RuntimeError: If, for any query, every child engine failed.
         """
-        tasks = [
-            engine.a_query(query, *args, **kwargs)
-            for engine in self.engines
-        ]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        per_engine = await asyncio.gather(*[
+            self._child_batch(engine, queries, ensemble, params)
+            for engine, params in zip(self.engines, self.engine_params)
+        ])
 
-        contexts: list[SearchEngineResponse] = []
-        for result in results:
-            if isinstance(result, Exception):
-                if not self.allow_partial_failures:
-                    raise result
-                continue
-            contexts.append(result)
-
-        if not contexts:
-            raise RuntimeError("MixSearchEngine could not retrieve context from any child engine")
-
-        return contexts
+        per_query: list[list] = []
+        for query_idx in range(len(queries)):
+            entries = [
+                per_engine[engine_idx][query_idx]
+                for engine_idx in range(len(self.engines))
+                if per_engine[engine_idx][query_idx] is not None
+            ]
+            if not entries:
+                raise RuntimeError("MixSearchEngine could not retrieve context from any child engine")
+            per_query.append(entries)
+        return per_query
 
     @override
-    async def a_search(self, query: str, *args: Any, **kwargs: Any) -> MixSearchRetrieve:
+    async def batch_search(
+        self,
+        queries: List[str],
+        params: MixQueryParams | None = None,
+    ) -> List[MixSearchRetrieve]:
         """
-        Retrieve raw contexts from all child engines.
+        Retrieve raw contexts from all child engines for a batch of queries.
 
-        :param query: Input query string.
-        :return: ``MixSearchRetrieve`` containing successful child retrieval
-                 contexts in engine order.
+        Each child engine's :meth:`batch_search` is invoked once with the whole
+        query list (so children batch internally), then results are transposed
+        per query.
+
+        :param queries: Input query strings.
+        :param params: Retrieval parameters (unused at the Mix level; children
+            use their own defaults).
+        :return: ``MixSearchRetrieve`` per query, aligned with ``queries``.
         """
-        results = await self._search_all(query, *args, **kwargs)
+        if not queries:
+            return []
+
+        per_query = await self._gather_child_results(queries, ensemble=False)
 
         # TODO: maybe it is good idea to pass every child engine metrics in 'metrics' field here.
-        return MixSearchRetrieve(
-            query=query,
-            result=MixSearchResult(results=results),
-            metrics={}
-        )
+        return [
+            MixSearchRetrieve(query=query, result=MixSearchResult(results=entries), metrics={})
+            for query, entries in zip(queries, per_query)
+        ]
 
-    @override
-    async def a_query(
+    def _render_synthesis(
         self,
         query: str,
-        *args: Any,
-        ensemble_responses: bool = False,
-        **kwargs: Any,
-    ) -> SearchEngineResponse:
+        entries: list,
+        ensemble_responses: bool,
+    ) -> ChatMessages:
         """
-        Execute an ensemble query across child engines.
-
-        When ``ensemble_responses=False``, this method retrieves raw contexts from each child
-        engine via ``a_search`` and synthesizes one final answer from the combined contexts.
-
-        When ``ensemble_responses=True``, this method first retrieves a full answer from each child
-        engine via ``a_query`` and then synthesizes one final answer from those per-engine answers.
+        Build the final synthesis conversation from child results for one query.
 
         :param query: Input query string.
-        :param ensemble_responses: Whether to ensemble child-engine answers instead of child-engine
-                                   search contexts.
-        :return: ``SearchEngineResponse`` containing the synthesized answer and
-                 the child contexts or responses used for synthesis.
+        :param entries: Successful child contexts or responses in engine order.
+        :param ensemble_responses: Whether ``entries`` are child answers (vs contexts).
+        :return: Rendered chat messages ready for ``chat_completion``.
+        :raises RuntimeError: If the synthesis input cannot be built.
         """
-        results = await (
-            self._query_all(query, *args, **kwargs)
-            if ensemble_responses
-            else self._search_all(query, *args, **kwargs)
-        )
         section_label = "Response" if ensemble_responses else "Context"
         context_instruction: RAGUInstruction = self.get_prompt("mix_search_context")
         rendered_context_list: list[ChatMessages] = render(
             context_instruction.messages,
-            payload={"entries": results},
+            payload={"entries": entries},
             section_label=section_label,
         )
-        rendered_context = rendered_context_list[0]
-        formatted_context = rendered_context.messages[0].content
+        formatted_context = rendered_context_list[0].messages[0].content
         if not formatted_context:
             raise RuntimeError("MixSearchEngine could not build synthesis input from child engines")
 
@@ -242,21 +271,59 @@ class MixSearchEngine(BaseEngine):
             ensemble_responses=ensemble_responses,
             section_label=section_label.lower(),
         )
-        rendered = rendered_list[0]
+        return rendered_list[0]
 
-        response = await self.llm.chat_completion(
-            conversation=rendered.to_openai(),
+    @override
+    async def batch_query(
+        self,
+        queries: List[str],
+        params: MixQueryParams | None = None,
+    ) -> List[SearchEngineResponse]:
+        """
+        Execute an ensemble query across child engines for a batch of queries.
+
+        With ``ensemble_responses=False`` (default), child retrieval contexts are
+        gathered via each child's ``batch_search`` and synthesized into one final
+        answer per query. With ``ensemble_responses=True``, child *answers* are
+        gathered via each child's ``batch_query`` and ensembled instead. Final
+        synthesis for all queries is issued through a single
+        :meth:`LLM.batch_chat_completion` call.
+
+        :param queries: Input query strings.
+        :param params: Query parameters (``ensemble_responses``). When ``None``,
+            defaults to :class:`MixQueryParams`.
+        :return: ``SearchEngineResponse`` objects aligned with ``queries``.
+        """
+        if not queries:
+            return []
+
+        params = params or MixQueryParams()
+        ensemble = params.ensemble_responses
+        per_query = await self._gather_child_results(queries, ensemble=ensemble)
+
+        conversations = [
+            self._render_synthesis(query, entries, ensemble).to_openai()
+            for query, entries in zip(queries, per_query)
+        ]
+
+        instruction: RAGUInstruction = self.get_prompt("mix_search")
+        answers = await self.llm.batch_chat_completion(
+            conversations,
             output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
-        )  # type: ignore[return-value]
+            desc="MixSearch batch query",
+        )
 
         # TODO: maybe it is good idea to pass every child engine metrics in 'metrics' field here.
-        return SearchEngineResponse(
-            query=query,
-            response=response,
-            retrieval=MixSearchRetrieve(
+        return [
+            SearchEngineResponse(
                 query=query,
-                result=MixSearchResult(results),
-                metrics={}
-            ),
-            payload={}
-        )
+                response=answer,
+                retrieval=MixSearchRetrieve(
+                    query=query,
+                    result=MixSearchResult(entries),
+                    metrics={},
+                ),
+                payload={},
+            )
+            for query, answer, entries in zip(queries, answers, per_query)
+        ]

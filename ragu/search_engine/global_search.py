@@ -1,11 +1,11 @@
-import asyncio
 from dataclasses import field, dataclass
 from textwrap import dedent
 from typing import Any, List, Literal
 
 from jinja2 import Template
+from typing_extensions import override
+
 from ragu.common.global_parameters import Settings
-from ragu.common.logger import logger
 from ragu.common.prompts.default_models import GlobalSearchContextModel
 from ragu.common.prompts.messages import ChatMessages, render
 from ragu.common.prompts.prompt_storage import RAGUInstruction
@@ -14,7 +14,8 @@ from ragu.models.llm import LLM
 from ragu.search_engine.base_engine import (
     BaseEngine,
     SearchEngineRetrieve,
-    SearchEngineResponse
+    SearchEngineResponse,
+    EngineParams,
 )
 
 # TODO: add the ability to use custom schemas instead of GlobalSearchContextModel
@@ -98,112 +99,140 @@ class GlobalSearchEngine(BaseEngine):
         self.knowledge_graph = knowledge_graph
         self.language = language if language else Settings.language
 
-    async def a_search(self, query: str, *args, **kwargs) -> GlobalSearchRetrieve:
+    @override
+    async def batch_search(
+        self,
+        queries: List[str],
+        params: EngineParams | None = None,
+    ) -> List[GlobalSearchRetrieve]:
         """
-        Perform a global semantic search across all communities in the knowledge graph.
+        Perform a global semantic search for a batch of queries.
 
-        This method retrieves all available community summaries, sends them to the LLM
-        for meta-evaluation, filters out low-rated responses, and returns a ranked
-        concatenation of the top relevant community insights.
+        Community summaries are query-independent, so they are fetched **once**
+        for the whole batch. Every query × community meta-evaluation is then
+        issued through a single :meth:`LLM.batch_chat_completion` call, after
+        which low-rated insights are filtered and the rest sorted per query.
 
-        :param query: The input natural language query.
-        :return: ``GlobalSearchRetrieve`` containing positively rated insights
-                 sorted by descending rating.
+        :param queries: The input natural language queries.
+        :param params: Retrieval parameters (unused by global search; accepted
+            for interface consistency).
+        :return: ``GlobalSearchRetrieve`` per query, aligned with ``queries``.
         """
+        if not queries:
+            return []
 
         communities_ids = await self.knowledge_graph.index.community_summary_kv_storage.all_keys()
         communities = await self.knowledge_graph.index.community_summary_kv_storage.get_by_ids(communities_ids)
         communities = [c for c in communities if c is not None]
 
-        responses = [r.model_dump() for r in await self.get_meta_responses(query, communities)]
+        retrieves: List[GlobalSearchRetrieve] = []
+        for query, meta_responses in zip(queries, await self.get_meta_responses(queries, communities)):
+            insights = [r.model_dump() for r in meta_responses]
+            insights = [r for r in insights if int(r.get("rating", 0)) > 0]
+            insights = sorted(insights, key=lambda x: int(x.get("rating", 0)), reverse=True)
+            retrieves.append(
+                GlobalSearchRetrieve(
+                    query=query,
+                    result=GlobalSearchResult(insights=insights),
+                    metrics={
+                        f"insight_{idx}_rating": r.get("rating", 0)
+                        for idx, r in enumerate(insights)
+                    },
+                )
+            )
+        return retrieves
 
-        responses = [r for r in responses if int(r.get("rating", 0)) > 0]
-        responses = sorted(responses, key=lambda x: int(x.get("rating", 0)), reverse=True)
-
-        return GlobalSearchRetrieve(
-            query=query,
-            result=GlobalSearchResult(
-                insights=responses,
-            ),
-            metrics={
-                f"insight_{idx}_rating": r.get("rating", 0)
-                for idx, r in enumerate(responses)
-            },
-        )
-
-    async def get_meta_responses(self, query: str, context: List[str]) -> List[GlobalSearchContextModel]:
+    async def get_meta_responses(
+        self,
+        queries: List[str],
+        context: List[Any],
+    ) -> List[List[GlobalSearchContextModel]]:
         """
-        Generate and evaluate meta-responses for each community summary.
+        Evaluate every (query, community) pair in a single batched LLM call.
 
-        The model receives the full list of community summaries and scores each
-        according to relevance to the given query. Only positively rated responses
-        are retained.
+        The model scores each community summary against each query. Failed
+        evaluations are skipped (via ``continue_on_error``) rather than aborting
+        the batch.
 
-        :param query: The user query used to assess community relevance.
-        :param context: A list of community summary texts to evaluate.
-        :return: List of structured response dictionaries with fields such as
-                 ``response`` and ``rating``.
+        :param queries: User queries used to assess community relevance.
+        :param context: Community summaries to evaluate against every query.
+        :return: Per-query lists of structured evaluations, aligned with ``queries``.
         """
+        if not queries or not context:
+            return [[] for _ in queries]
+
         instruction: RAGUInstruction = self.get_prompt("global_search_context")
 
+        expanded_queries: List[str] = []
+        expanded_context: List[Any] = []
+        for query in queries:
+            for community in context:
+                expanded_queries.append(query)
+                expanded_context.append(community)
+
         rendered_list: List[ChatMessages] = render(
             instruction.messages,
-            query=query,
-            context=context,
+            query=expanded_queries,
+            context=expanded_context,
             language=self.language,
         )
 
-        meta_results = await asyncio.gather(*[
-            self.llm.chat_completion(
-                conversation=rendered.to_openai(),
-                output_schema=instruction.pydantic_model or str, # type: ignore
-            )
-            for rendered in rendered_list
-        ], return_exceptions=True) # type: ignore
+        answers = await self.llm.batch_chat_completion(
+            [rendered.to_openai() for rendered in rendered_list],
+            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+            continue_on_error=True,
+            desc="GlobalSearch batch meta-eval",
+        )
 
-        meta_responses: List[GlobalSearchContextModel] = []
-        for i, result in enumerate(meta_results):
-            if isinstance(result, Exception):
-                logger.warning(
-                    "Global search meta-response failed for community {}: {}: {}",
-                    i, type(result).__name__, result,
-                )
-                continue
-            meta_responses.append(result)
+        community_count = len(context)
+        return [
+            [answer for answer in answers[i * community_count:(i + 1) * community_count] if answer is not None]
+            for i in range(len(queries))
+        ]
 
-        return meta_responses
-
-    async def a_query(self, query: str, *args, **kwargs) -> SearchEngineResponse:
+    @override
+    async def batch_query(
+        self,
+        queries: List[str],
+        params: EngineParams | None = None,
+    ) -> List[SearchEngineResponse]:
         """
-        Execute a full global retrieval-augmented generation query.
+        Execute global RAG for multiple queries, batching final synthesis.
 
-        - Retrieves all community-level insights.
-        - Generates a final global answer.
+        Retrieval (community fetch + cross-query meta-evaluation) is shared
+        across the batch via :meth:`batch_search`; the final answer synthesis for
+        all queries is issued through a single :meth:`LLM.batch_chat_completion`
+        call. The first failing query aborts the whole batch.
 
-        :param query: The natural language query from the user.
-        :return: ``SearchEngineResponse`` containing the generated answer and
-                 the ``GlobalSearchRetrieve`` used as context.
+        :param queries: The natural language queries from the user.
+        :param params: Query parameters (unused by global search; accepted for
+            interface consistency).
+        :return: ``SearchEngineResponse`` objects aligned with ``queries``.
         """
-        context = await self.a_search(query)
-        truncated_context: str = self.truncation(str(context))
+        if not queries:
+            return []
+
+        contexts = await self.batch_search(queries, params)
 
         instruction: RAGUInstruction = self.get_prompt("global_search")
-
-        rendered_list: List[ChatMessages] = render(
+        conversations: List[ChatMessages] = render(
             instruction.messages,
-            query=query,
-            context=truncated_context,
+            query=queries,
+            context=[self.truncation(str(context)) for context in contexts],
             language=self.language,
         )
-        rendered = rendered_list[0]
-        answer = await self.llm.chat_completion(
-            conversation=rendered.to_openai(),
+        answers = await self.llm.batch_chat_completion(
+            [conversation.to_openai() for conversation in conversations],
             output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
-        )  # type: ignore[assignment]
-
-        return SearchEngineResponse(
-            query=query,
-            response=answer,
-            retrieval=context,
-            payload={}
+            desc="GlobalSearch batch query",
         )
+
+        return [
+            SearchEngineResponse(
+                query=query,
+                response=answer,
+                retrieval=context,
+                payload={},
+            )
+            for query, answer, context in zip(queries, answers, contexts)
+        ]

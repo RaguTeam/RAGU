@@ -53,12 +53,13 @@ class BaseVectorStorage(BaseStorage, ABC):
     """
 
     @abstractmethod
-    async def query(self, point: Point, **kwargs) -> List[EmbeddingHit]:
+    async def query(self, points: List[Point], **kwargs) -> List[List[EmbeddingHit]]:
         """
-        Retrieve top-k nearest items for a batch of embedding vectors.
+        Retrieve top-k nearest items for a batch of query embeddings.
 
-        :param point: Query embedding.
-        :return: A list of query hits with distance score and metadata.
+        :param points: Query embeddings, one per search.
+        :return: Per-query lists of hits with distance score and metadata,
+            index-aligned with ``points``.
         """
         ...
 

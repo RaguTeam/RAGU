@@ -1,27 +1,32 @@
 # Partially based on https://github.com/gusye1234/nano-graphrag/blob/main/nano_graphrag/
+import asyncio
+
 from dataclasses import dataclass, field
-from typing_extensions import override
 from textwrap import dedent
 from typing import Any, List, Literal
+from typing_extensions import override
 
 from jinja2 import Template
 
 from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import Settings
-from ragu.common.logger import logger
 from ragu.common.prompts.messages import ChatMessages, render
 from ragu.common.prompts.prompt_storage import RAGUInstruction
+
 from ragu.graph.graph_retrieve_backend import GraphRetriever
 from ragu.graph.knowledge_graph import KnowledgeGraph
 from ragu.graph.types import Entity, Relation
+
 from ragu.models.embedder import Embedder
 from ragu.models.llm import LLM
 from ragu.models.scorer import Scorer
 from ragu.models.sparse_embedder import SparseEmbedder
+
 from ragu.search_engine.base_engine import (
     BaseEngine,
     SearchEngineRetrieve,
-    SearchEngineResponse
+    SearchEngineResponse,
+    EngineParams,
 )
 from ragu.search_engine.search_functional import (
     _find_most_related_edges_from_entities,
@@ -30,6 +35,26 @@ from ragu.search_engine.search_functional import (
     _find_most_related_community_from_entities,
     _rerank_items,
 )
+
+
+@dataclass
+class LocalParams(EngineParams):
+    """
+    Parameters for :class:`LocalSearchEngine`.
+
+    :param top_k: Maximum number of entities to retrieve. (Retrieval-time.)
+    :param rerank_top_k: After reranking the retrieved entities, keep only this
+        many most-relevant entities before deriving relations, summaries and
+        chunks. ``None`` keeps all entities. (Retrieval-time.)
+    :param use_summary: Whether community summaries are included in the generated
+        context. (Generation-time; ignored by :meth:`batch_search`.)
+    :param use_chunks: Whether source chunks are included in the generated
+        context. (Generation-time; ignored by :meth:`batch_search`.)
+    """
+    top_k: int = 20
+    rerank_top_k: int | None = None
+    use_summary: bool = False
+    use_chunks: bool = True
 
 
 @dataclass(slots=True)
@@ -160,60 +185,103 @@ class LocalSearchEngine(BaseEngine):
         self.language = language if language else Settings.language
 
     @override
-    async def a_search(self, query: str, top_k: int = 20, *args, **kwargs) -> LocalSearchRetrieve:
+    async def batch_search(
+        self,
+        queries: List[str],
+        params: LocalParams | None = None,
+    ) -> List[LocalSearchRetrieve]:
         """
-        Retrieve local graph context for the given query.
+        Retrieve local graph context for a batch of queries.
+
+        Entity retrieval is issued once for the whole batch through
+        :meth:`GraphRetriever.query_entities`; the per-query assembly (entity
+        reranking, related-item derivation and reranking) then runs concurrently.
+
+        :param queries: Input query strings.
+        :param params: Retrieval parameters (``top_k``, ``rerank_top_k``). When
+            ``None``, defaults to :class:`LocalParams`.
+        :return: ``LocalSearchRetrieve`` per query, aligned with ``queries``.
+        """
+        if not queries:
+            return []
+
+        params = params or LocalParams()
+        entity_results = await self.retriever.query_entities(queries, top_k=params.top_k)
+
+        return list(await asyncio.gather(*[
+            self._assemble(query, entities, entity_hits, params.rerank_top_k)
+            for query, (entities, entity_hits) in zip(queries, entity_results)
+        ]))
+
+    # TODO: make batch effective
+    async def _assemble(self, query, entities, entity_hits, rerank_top_k=None) -> LocalSearchRetrieve:
+        """
+        Build a :class:`LocalSearchRetrieve` from retrieved entities for one query.
+
+        Entities are reranked first and optionally truncated to the most
+        relevant; relations, summaries and chunks are then derived from that
+        reduced entity set and reranked in turn.
 
         :param query: Input query string.
-        :param top_k: Number of top entities to retrieve from the entity vector DB.
-        :return: ``LocalSearchRetrieve`` containing graph-local context and
-                 entity relevance metrics.
+        :param entities: Seed entities retrieved for ``query``.
+        :param entity_hits: Vector hits aligned with ``entities``.
+        :param rerank_top_k: Keep only this many top entities after reranking;
+            ``None`` keeps all.
+        :return: Retrieval container with graph-local context and entity metrics.
         """
-        entities, entity_hits = await self.retriever.query_entities(query, top_k=top_k)
         entity_scores_by_id = {
             entity.id: hit.distance
             for entity, hit in zip(entities, entity_hits)
             if entity and entity.id
         }
 
-        relations = await _find_most_related_edges_from_entities(entities, self.knowledge_graph)
-        relations = [relation for relation in relations if relation is not None]
-
-        relevant_chunks = await _find_most_related_text_unit_from_entities(entities, self.knowledge_graph)
-        relevant_chunks = [chunk for chunk in relevant_chunks if chunk is not None]
-
-        summaries = await _find_most_related_community_from_entities(entities, self.knowledge_graph)
-        summaries = [summary for summary in summaries if summary is not None]
-
+        # 1-2. Rerank the retrieved entities and keep only the most relevant.
+        # Truncation applies only when a reranker actually reordered them.
         entities = await _rerank_items(
             query,
             entities,
             lambda entity: f"{entity.entity_name}\n{entity.entity_type}\n{entity.description}",
             self.reranker,
         )
-        relations = await _rerank_items(
-            query,
-            relations,
-            lambda relation: (
-                f"{relation.subject_name}\n{relation.relation_type}\n"
-                f"{relation.object_name}\n{relation.description}"
-            ),
-            self.reranker,
-        )
-        summaries = await _rerank_items(
-            query,
-            summaries,
-            lambda community_summary: community_summary.summary,
-            self.reranker,
-        )
-        relevant_chunks = await _rerank_items(
-            query,
-            relevant_chunks,
-            lambda chunk: chunk.content,
-            self.reranker,
-        )
+        if self.reranker is not None and rerank_top_k is not None:
+            entities = entities[:rerank_top_k]
 
-        documents_id = await _find_documents_id(entities)
+        # 3. Derive related items from the reduced entity set (document ids are a
+        # set union, independent of entity order).
+        relations, relevant_chunks, summaries, documents_id = await asyncio.gather(
+            _find_most_related_edges_from_entities(entities, self.knowledge_graph),
+            _find_most_related_text_unit_from_entities(entities, self.knowledge_graph),
+            _find_most_related_community_from_entities(entities, self.knowledge_graph),
+            _find_documents_id(entities),
+        )
+        relations = [relation for relation in relations if relation is not None]
+        relevant_chunks = [chunk for chunk in relevant_chunks if chunk is not None]
+        summaries = [summary for summary in summaries if summary is not None]
+
+        # 4. Rerank the derived items.
+        relations, summaries, relevant_chunks = await asyncio.gather(
+            _rerank_items(
+                query,
+                relations,
+                lambda relation: (
+                    f"{relation.subject_name}\n{relation.relation_type}\n"
+                    f"{relation.object_name}\n{relation.description}"
+                ),
+                self.reranker,
+            ),
+            _rerank_items(
+                query,
+                summaries,
+                lambda community_summary: community_summary.summary,
+                self.reranker,
+            ),
+            _rerank_items(
+                query,
+                relevant_chunks,
+                lambda chunk: chunk.content,
+                self.reranker,
+            ),
+        )
 
         return LocalSearchRetrieve(
             query=query,
@@ -237,26 +305,25 @@ class LocalSearchEngine(BaseEngine):
             },
         )
 
-    @override
-    async def a_query(
-            self,
-            query: str,
-            top_k: int = 20,
-            use_summary: bool = False,
-            use_chunks: bool = False
-    ) -> SearchEngineResponse:
+    def _render_answer_messages(
+        self,
+        query: str,
+        context: LocalSearchRetrieve,
+        use_summary: bool,
+        use_chunks: bool,
+    ) -> ChatMessages:
         """
-        Execute a local RAG query.
+        Build the final-answer conversation from a retrieved local context.
+
+        Prunes summaries/chunks according to the flags, truncates the rendered
+        context to the engine token limit, and renders the ``local_search`` prompt.
 
         :param query: User query in natural language.
-        :param top_k: Number of entities to retrieve into context.
-        :param use_summary: Whether community summaries are included in the generated context.
-        :param use_chunks: Whether source chunks are included in the generated context.
-        :return: ``SearchEngineResponse`` containing the generated answer and
-                 the ``LocalSearchRetrieve`` used as context.
+        :param context: Retrieval container produced by :meth:`search`.
+        :param use_summary: Whether community summaries are kept in the context.
+        :param use_chunks: Whether source chunks are kept in the context.
+        :return: Rendered chat messages ready for ``chat_completion``.
         """
-        context: LocalSearchRetrieve = await self.a_search(query, top_k)
-
         if not use_summary:
             context.result.summaries = []
         if not use_chunks:
@@ -271,15 +338,51 @@ class LocalSearchEngine(BaseEngine):
             context=truncated_context,
             language=self.language,
         )
-        rendered: ChatMessages = rendered_conversations[0]
-        response = await self.llm.chat_completion(
-            conversation=rendered.to_openai(),
-            output_schema=instruction.pydantic_model or str, # type: ignore
-        ) # type: ignore
+        return rendered_conversations[0]
 
-        return SearchEngineResponse(
-            query=query,
-            response=response,
-            retrieval=context,
-            payload={}
+    @override
+    async def batch_query(
+        self,
+        queries: List[str],
+        params: LocalParams | None = None,
+    ) -> List[SearchEngineResponse]:
+        """
+        Execute local RAG for multiple queries, batching answer generation.
+
+        Retrieval is shared across the batch via :meth:`batch_search`; answer
+        generation for all queries is issued through a single
+        :meth:`LLM.batch_chat_completion` call. The first failing query aborts
+        the whole batch.
+
+        :param queries: User queries in natural language.
+        :param params: Query parameters (``top_k``, ``use_summary``,
+            ``use_chunks``). When ``None``, defaults to :class:`LocalParams`.
+        :return: ``SearchEngineResponse`` objects aligned with ``queries``.
+        """
+        if not queries:
+            return []
+
+        params = params or LocalParams()
+        contexts = await self.batch_search(queries, params)
+
+        conversations = [
+            self._render_answer_messages(query, context, params.use_summary, params.use_chunks).to_openai()
+            for query, context in zip(queries, contexts)
+        ]
+
+        instruction: RAGUInstruction = self.get_prompt("local_search")
+        answers = await self.llm.batch_chat_completion(
+            conversations,
+            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+            desc="LocalSearch batch query",
         )
+
+        return [
+            SearchEngineResponse(
+                query=query,
+                response=answer,
+                retrieval=context,
+                payload={},
+            )
+            for query, answer, context in zip(queries, answers, contexts)
+        ]
