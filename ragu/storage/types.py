@@ -41,13 +41,12 @@ class Edge:
     Base graph edge type for storage adapters.
 
     Subclasses are expected to be dataclasses and define ``id``,
-    ``subject_id``, ``object_id``, and ``source_chunk_id`` fields.
+    ``subject_id`` and ``object_id`` fields.
     """
 
     id: str
     subject_id: str
     object_id: str
-    source_chunk_id: List[str]
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -77,6 +76,14 @@ class SparseEmbedding:
 
 @dataclass(slots=True)
 class Point:
+    """
+    Represents embedding point.
+
+    :param id: Matched record identifier.
+    :param dense_embedding: Dense embedding.
+    :param sparse_embedding: Sparse embedding (TF-IFD, BM25 and so on).
+    :param metadata: Additional payload.
+    """
     id: str = "auto"
     dense_embedding: DenseEmbedding | None = None
     sparse_embedding: SparseEmbedding | None = None
