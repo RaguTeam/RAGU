@@ -12,7 +12,7 @@ KnowledgeGraph + query -> retrieval context -> LLM answer
 
 ## Overview
 
-The module separates retrieval strategy from indexing. All engines share `BaseEngine`, `a_search()` for retrieval-only calls, and `a_query()` for retrieval plus answer generation.
+The module separates retrieval strategy from indexing. All engines share `BaseEngine`, the async `search()` for retrieval-only calls, and the async `query()` for retrieval plus answer generation. For many queries at once, every engine also exposes async `batch_search()` / `batch_query()`, which run retrieval concurrently and — for the leaf engines (Local, Naive, Global) — route answer generation through a single `llm.batch_chat_completion` call. All four methods are coroutines (await them). The `a_search` / `a_query` names are kept as backward-compatible async aliases that delegate to `search` / `query`.
 
 ## Key Components
 
@@ -21,14 +21,22 @@ The module separates retrieval strategy from indexing. All engines share `BaseEn
 Abstract base for query engines.
 
 - Purpose: stores LLM and context truncation settings.
-- Important methods: `a_search`, `a_query`, sync wrappers `search`, `query`.
+- Important methods (all async): `search`, `query`.
+- Batch methods (all async): `batch_search`, `batch_query`.
+  They take a `list[str]` of queries and return a result list **aligned by position** with the
+  input. They are fail-fast: the first failing query aborts the whole batch and raises.
+- Backward-compatible async aliases: `a_search`, `a_query` delegate to `search` / `query`.
 
 ```python
 from ragu.search_engine.base_engine import BaseEngine
 from ragu.search_engine.naive_search import NaiveSearchEngine
 
 print(issubclass(NaiveSearchEngine, BaseEngine))  # True — every engine inherits BaseEngine
-print([m for m in ("a_search", "a_query", "search", "query") if hasattr(BaseEngine, m)])
+print([m for m in ("search", "query", "batch_search", "batch_query") if hasattr(BaseEngine, m)])
+print([m for m in ("a_search", "a_query") if hasattr(BaseEngine, m)])
+
+# answers[i] corresponds to queries[i]; failed queries are None
+# answers = await engine.batch_query(["q1", "q2", "q3"])
 ```
 
 ### SearchEngineRetrieve
@@ -200,8 +208,8 @@ Input: query string, `KnowledgeGraph`, dense embedder, optional sparse embedder 
 
 Output:
 
-- `SearchEngineRetrieve` from `a_search`
-- `SearchEngineResponse` from `a_query`
+- `SearchEngineRetrieve` from `search`
+- `SearchEngineResponse` from `query`
 
 Used by: applications that need GraphRAG answers, retrieval diagnostics, or mixed retrieval strategies.
 
@@ -237,7 +245,7 @@ async def main():
     await graph.build_from_docs(["Python is a programming language."])
 
     engine = NaiveSearchEngine(llm=llm, knowledge_graph=graph, embedder=embedder)
-    retrieval = await engine.a_search("What is Python?", top_k=1)
+    retrieval = await engine.search("What is Python?", top_k=1)
     print(retrieval.result.chunks[0].content)
 
 
@@ -291,7 +299,7 @@ async def main():
     global_ = GlobalSearchEngine(llm=llm, knowledge_graph=graph)
     mix = MixSearchEngine(llm=llm, engines=[local, global_])
 
-    response = await mix.a_query("Summarize the main people and organizations.")
+    response = await mix.query("Summarize the main people and organizations.")
     print(response.response)
 
 
@@ -316,7 +324,7 @@ single engine instance.
 
 ## Integration Points
 
-- LLMs: every `a_query()` renders a prompt and calls `llm.chat_completion`.
+- LLMs: every `query()` renders a prompt and calls `llm.chat_completion`; `batch_query()` on the leaf engines renders one prompt per query and issues a single `llm.batch_chat_completion`.
 - Embedders: local and naive search encode query text through `GraphRetriever`.
 - Sparse embedders: local and naive search can issue hybrid dense+sparse vector queries when storage supports sparse vectors.
 - Qdrant: hybrid search is handled by vector storage, including Qdrant prefetch/fusion in `QdrantVectorDBStorage`.
@@ -355,7 +363,7 @@ Retrieval parameters:
 
 - `top_k`: initial result count for local and naive search.
 - `rerank_top_k`: final chunk count for `NaiveSearchEngine` when a reranker is configured.
-- `use_summary` and `use_chunks`: toggles for `LocalSearchEngine.a_query`.
+- `use_summary` and `use_chunks`: toggles for `LocalSearchEngine.query`.
 - `allow_partial_failures`: controls `MixSearchEngine` child-engine failures.
 
 ## Dependencies
@@ -380,4 +388,4 @@ External:
 - `LocalSearchEngine` starts from entity vector search, so it needs entity vectors, not just chunk vectors.
 - `NaiveSearchEngine` works with `build_only_vector_context=True`.
 - `MixSearchEngine` requires at least one child engine.
-- `a_search()` is useful for debugging retrieval before involving the LLM.
+- `search()` is useful for debugging retrieval before involving the LLM.
