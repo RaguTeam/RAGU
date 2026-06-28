@@ -105,10 +105,15 @@ async def _find_most_related_text_unit_from_entities(
                 ):
                     relation_counts += 1
             all_text_units_lookup[c_id] = {
-                "data": await knowledge_graph.index.chunks_kv_storage.get_by_id(c_id),
                 "order": index,
                 "relation_counts": relation_counts,
             }
+
+    chunk_ids = list(all_text_units_lookup.keys())
+    chunk_payloads = await knowledge_graph.index.chunks_kv_storage.get_by_ids(chunk_ids)
+    for c_id, payload in zip(chunk_ids, chunk_payloads):
+        all_text_units_lookup[c_id]["data"] = payload
+
     all_text_units = [
         {"id": k, **v} for k, v in all_text_units_lookup.items() if v is not None
     ]
