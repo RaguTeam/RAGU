@@ -20,6 +20,7 @@ from qdrant_client.models import (
     PointIdsList,
     PointStruct,
     Prefetch,
+    QueryRequest,
     SparseVector,
     SparseVectorParams,
     VectorParams,
@@ -376,28 +377,61 @@ class QdrantVectorDBStorage(BaseVectorStorage):
             )
 
     @override
-    async def query(self, point: Point, **kwargs: Any) -> List[EmbeddingHit]:
+    async def query(self, points: List[Point], **kwargs: Any) -> List[List[EmbeddingHit]]:
         """
-        Query Qdrant using dense-only or dense+sparse reciprocal-rank fusion.
-        :param point: Qdrant point
+        Query Qdrant for a batch of points using a single batched request.
+
+        Each point is scored with dense-only or dense+sparse reciprocal-rank
+        fusion, mirroring the single-query behavior.
+
+        :param points: Query points, one per search.
         :param kwargs:
-            top_k: int Maximum number of results to return.
-            hybrid_search_query_type.
-        :returns: Ranked embedding hits.
+            top_k: int Maximum number of results to return per query.
+            hybrid_query_type: Fusion strategy for dense+sparse queries.
+        :returns: Per-query lists of ranked embedding hits, index-aligned with ``points``.
         """
 
         # Parameters from kwargs
         hybrid_query_type: BaseModel = kwargs.pop("hybrid_query_type", FusionQuery(fusion=Fusion.RRF))
         top_k: int = kwargs.pop("top_k", 20)
 
+        if not points:
+            return []
+
         await self._ensure_collection()
 
+        requests = [self._build_query_request(point, top_k, hybrid_query_type) for point in points]
+        responses: list[QueryResponse] = await self._get_client().query_batch_points(
+            collection_name=self.collection_name,
+            requests=requests,
+        )
+
+        return [
+            self._query_response_to_hits(point, response)
+            for point, response in zip(points, responses)
+        ]
+
+    def _build_query_request(
+        self,
+        point: Point,
+        top_k: int,
+        hybrid_query_type: BaseModel,
+    ) -> QueryRequest:
+        """
+        Build a single :class:`QueryRequest` for ``point``.
+
+        :param point: Query point carrying dense and optional sparse vectors.
+        :param top_k: Maximum number of results to return.
+        :param hybrid_query_type: Fusion strategy for dense+sparse queries.
+        :returns: Request describing how to score this point.
+        :raises NotImplementedError: If the point carries no dense embedding.
+        """
         prefetch: list[Prefetch] | None = None
         query: Any
         using: str | None = None
 
         if point.dense_embedding is not None and point.sparse_embedding is None:
-            query = point.dense_embedding
+            query = point.dense_embedding.tolist() if hasattr(point.dense_embedding, "tolist") else point.dense_embedding
             using = self.DENSE_VECTOR_NAME
 
         elif point.dense_embedding is not None and point.sparse_embedding is not None:
@@ -424,8 +458,7 @@ class QdrantVectorDBStorage(BaseVectorStorage):
         else:
             raise NotImplementedError("Only dense and dense+sparse queries are supported")
 
-        query_response: QueryResponse = await self._get_client().query_points(
-            collection_name=self.collection_name,
+        return QueryRequest(
             query=query,
             prefetch=prefetch,
             using=using,
@@ -433,8 +466,16 @@ class QdrantVectorDBStorage(BaseVectorStorage):
             limit=top_k,
         )
 
+    def _query_response_to_hits(self, point: Point, response: QueryResponse) -> List[EmbeddingHit]:
+        """
+        Convert a Qdrant query response into aligned embedding hits.
+
+        :param point: Originating query point (used as id fallback).
+        :param response: Qdrant response for this point.
+        :returns: Ranked embedding hits.
+        """
         hits: list[EmbeddingHit] = []
-        for retrieved_point in query_response.points:
+        for retrieved_point in response.points:
             payload = dict(retrieved_point.payload or {})
             record_id = str(payload.pop("__ragu_id__", point.id))
             hits.append(
