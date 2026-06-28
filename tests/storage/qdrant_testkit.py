@@ -61,6 +61,15 @@ class FakeFusionQuery:
     fusion: str
 
 
+@dataclass
+class FakeQueryRequest:
+    query: Any
+    prefetch: FakePrefetch | list[FakePrefetch] | None = None
+    using: str | None = None
+    limit: int = 10
+    with_payload: bool = True
+
+
 class FakeAsyncQdrantClient:
     registries: dict[str, dict[str, dict[str, object]]] = {}
     instances: list["FakeAsyncQdrantClient"] = []
@@ -155,6 +164,26 @@ class FakeAsyncQdrantClient:
             score_threshold=score_threshold,
         )
         return FakeQueryResponse(points=scored_points)
+
+    async def query_batch_points(
+        self,
+        collection_name: str,
+        requests: list[FakeQueryRequest],
+        **kwargs: Any,
+    ) -> list[FakeQueryResponse]:
+        responses: list[FakeQueryResponse] = []
+        for request in requests:
+            responses.append(
+                await self.query_points(
+                    collection_name=collection_name,
+                    query=request.query,
+                    limit=request.limit,
+                    with_payload=request.with_payload,
+                    using=request.using,
+                    prefetch=request.prefetch,
+                )
+            )
+        return responses
 
     async def delete(self, collection_name: str, points_selector, **kwargs: Any) -> None:
         collection = self.registry[collection_name]
@@ -304,6 +333,7 @@ def install_fake_qdrant(monkeypatch) -> None:
     models_module.PointIdsList = FakePointIdsList
     models_module.PointStruct = FakePointStruct
     models_module.Prefetch = FakePrefetch
+    models_module.QueryRequest = FakeQueryRequest
     models_module.SparseVector = FakeSparseVector
     models_module.SparseVectorParams = FakeSparseVectorParams
     models_module.VectorParams = FakeVectorParams

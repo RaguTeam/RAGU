@@ -156,6 +156,7 @@ def _install_fake_qdrant(monkeypatch: pytest.MonkeyPatch) -> None:
     models_module.PointIdsList = _FakePointIdsList
     models_module.PointStruct = _FakePointStruct
     models_module.Prefetch = object
+    models_module.QueryRequest = object
     models_module.SparseVector = _FakeSparseVector
     models_module.SparseVectorParams = _FakeSparseVectorParams
     models_module.VectorParams = _FakeVectorParams

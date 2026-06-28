@@ -148,12 +148,12 @@ async def test_build_query_vectors_returns_dense_and_sparse_payload(
     mock_embedder,
     mock_sparse_embedder,
 ):
-    point = await sparse_retriever.build_query_vectors("alpha beta")
+    point = (await sparse_retriever.build_query_vectors(["alpha beta"]))[0]
 
     assert np.array_equal(np.array(point.dense_embedding), np.array([0.1] * 128))
     assert point.sparse_embedding is not None
     assert point.sparse_embedding.indices == [9]
-    mock_embedder.embed_text.assert_awaited_once_with("alpha beta")
+    mock_embedder.batch_embed_text.assert_awaited_once_with(["alpha beta"])
     mock_sparse_embedder.embed_query.assert_called_once_with(["alpha beta"])
 
 
@@ -174,15 +174,15 @@ async def test_insert_entities_passes_sparse_embeddings_to_vector_db(sparse_inde
 async def test_query_entities_passes_sparse_query_to_vector_db(sparse_index, sparse_retriever, sample_entities, mock_sparse_embedder):
     await sparse_index.upsert_nodes(sample_entities)
     sparse_index.nodes_vector_db.query = AsyncMock(
-        return_value=[EmbeddingHit(id="ent-1", distance=0.9)]
+        return_value=[[EmbeddingHit(id="ent-1", distance=0.9)]]
     )
 
-    entities, hits = await sparse_retriever.query_entities("alice engineer", top_k=3)
+    entities, hits = (await sparse_retriever.query_entities(["alice engineer"], top_k=3))[0]
 
     assert [entity.id for entity in entities] == ["ent-1"]
     assert [hit.id for hit in hits] == ["ent-1"]
     args, kwargs = sparse_index.nodes_vector_db.query.await_args
-    point = args[0]
+    point = args[0][0]
     assert point.sparse_embedding is not None
     assert point.sparse_embedding.indices == [9]
     assert kwargs["top_k"] == 3
@@ -192,7 +192,7 @@ async def test_query_entities_passes_sparse_query_to_vector_db(sparse_index, spa
 @pytest.mark.asyncio
 async def test_query_chunk_hits_passes_sparse_query_to_vector_db(sparse_index, sparse_retriever, mock_sparse_embedder):
     sparse_index.chunks_vector_db.query = AsyncMock(
-        return_value=[EmbeddingHit(id="chunk-1", distance=0.8, metadata={"doc_id": "doc-1"})]
+        return_value=[[EmbeddingHit(id="chunk-1", distance=0.8, metadata={"doc_id": "doc-1"})]]
     )
     sparse_index.chunks_kv_storage.get_by_ids = AsyncMock(
         return_value=[
@@ -205,12 +205,12 @@ async def test_query_chunk_hits_passes_sparse_query_to_vector_db(sparse_index, s
         ]
     )
 
-    chunks, hits = await sparse_retriever.query_chunks("hybrid chunk query", top_k=2)
+    chunks, hits = (await sparse_retriever.query_chunks(["hybrid chunk query"], top_k=2))[0]
 
     assert [chunk.id for chunk in chunks] == ["chunk-1"]
     assert [hit.id for hit in hits] == ["chunk-1"]
-    _, kwargs = sparse_index.chunks_vector_db.query.await_args
-    point = kwargs["point"]
+    args, kwargs = sparse_index.chunks_vector_db.query.await_args
+    point = args[0][0]
     assert point.sparse_embedding is not None
     assert point.sparse_embedding.indices == [9]
     assert kwargs["top_k"] == 2
@@ -397,12 +397,12 @@ async def test_delete_relations_removes_relation_vector(index, sample_entities):
     )
 
     await index.upsert_edges([relation])
-    before_delete = await index.edges_vector_db.query(Point(dense_embedding=[0.1] * 128), top_k=10)
+    before_delete = (await index.edges_vector_db.query([Point(dense_embedding=[0.1] * 128)], top_k=10))[0]
     assert any(hit.id == "rel-custom" for hit in before_delete)
 
     await index.delete_edges([("ent-1", "ent-2", "rel-custom")])
 
-    after_delete = await index.edges_vector_db.query(Point(dense_embedding=[0.1] * 128), top_k=10)
+    after_delete = (await index.edges_vector_db.query([Point(dense_embedding=[0.1] * 128)], top_k=10))[0]
     assert all(hit.id != "rel-custom" for hit in after_delete)
 
 
@@ -411,7 +411,7 @@ async def test_query_relations_returns_vector_hits(sparse_retriever, sparse_inde
     await sparse_index.upsert_nodes(sample_entities)
     await sparse_index.upsert_edges(sample_relations)
 
-    relations, hits = await sparse_retriever.query_relations("Alice knows Bob", top_k=5)
+    relations, hits = (await sparse_retriever.query_relations(["Alice knows Bob"], top_k=5))[0]
 
     assert [relation.id for relation in relations] == ["rel-1"]
     assert [hit.id for hit in hits] == ["rel-1"]
@@ -424,10 +424,10 @@ async def test_query_relations_skips_hits_without_endpoint_metadata(index, sampl
 
     retriever = GraphRetriever(Mock(index=index), mock_embedder)
     index.edges_vector_db.query = AsyncMock(
-        return_value=[EmbeddingHit(id="rel-1", distance=0.9, metadata={"content": "Alice knows Bob"})]
+        return_value=[[EmbeddingHit(id="rel-1", distance=0.9, metadata={"content": "Alice knows Bob"})]]
     )
 
-    relations, hits = await retriever.query_relations("Alice knows Bob", top_k=5)
+    relations, hits = (await retriever.query_relations(["Alice knows Bob"], top_k=5))[0]
 
     assert relations == []
     assert hits == []

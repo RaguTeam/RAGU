@@ -280,14 +280,14 @@ async def test_vdb_delete(tmp_path):
 
     # Get initial count
     query_emb = Point(dense_embedding=np.array([0.15] * dim))
-    initial_results = await vdb.query(query_emb, top_k=10)
+    initial_results = (await vdb.query([query_emb], top_k=10))[0]
     assert len(initial_results) == 2
 
     # Delete id1
     await vdb.delete(["id1"])
 
     # Verify by querying
-    remaining_results = await vdb.query(query_emb, top_k=10)
+    remaining_results = (await vdb.query([query_emb], top_k=10))[0]
     remaining_ids = [r.id for r in remaining_results]
     assert "id1" not in remaining_ids
     assert "id2" in remaining_ids

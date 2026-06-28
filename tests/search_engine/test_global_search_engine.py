@@ -16,15 +16,15 @@ async def test_global_search_filters_and_sorts_by_rating(monkeypatch, real_kg):
         engine,
         "get_meta_responses",
         AsyncMock(
-            return_value=[
+            return_value=[[
                 GlobalSearchContextModel(**{"reasoning": "", "response": "low", "rating": "1"}),
                 GlobalSearchContextModel(**{"reasoning": "", "response": "drop", "rating": "0"}),
                 GlobalSearchContextModel(**{"reasoning": "", "response": "high", "rating": "5"}),
-            ]
+            ]]
         ),
     )
 
-    result = await engine.a_search("query")
+    result = await engine.search("query")
     assert isinstance(result, GlobalSearchRetrieve)
     assert [r["response"] for r in result.result.insights] == ["high", "low"]
     assert result.metrics == {
@@ -35,14 +35,14 @@ async def test_global_search_filters_and_sorts_by_rating(monkeypatch, real_kg):
 
 @pytest.mark.asyncio
 async def test_global_query_returns_llm_response(monkeypatch, real_kg):
-    llm = SimpleNamespace(chat_completion=AsyncMock(return_value="global-answer"))
+    llm = SimpleNamespace(batch_chat_completion=AsyncMock(return_value=["global-answer"]))
     engine = GlobalSearchEngine(llm=llm, knowledge_graph=real_kg)
     engine.truncation = lambda s: s
-    engine.a_search = AsyncMock(
-        return_value=GlobalSearchRetrieve(
+    engine.batch_search = AsyncMock(
+        return_value=[GlobalSearchRetrieve(
             query="question",
             result=GlobalSearchResult(insights=[{"response": "x", "rating": "1"}]),
-        )
+        )]
     )
 
     from ragu.search_engine import global_search as global_module
@@ -57,6 +57,6 @@ async def test_global_query_returns_llm_response(monkeypatch, real_kg):
         lambda _: SimpleNamespace(messages=[{"role": "user", "content": "{{query}}"}], pydantic_model=None),
     )
 
-    result = await engine.a_query("question")
+    result = await engine.query("question")
     assert isinstance(result, SearchEngineResponse)
     assert result.response == "global-answer"
