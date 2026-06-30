@@ -219,3 +219,78 @@ async def test_delete_nodes_cascade(neo4j_store):
     assert len(remaining_nodes) == 1
     assert remaining_nodes[0].id == "e2"
     assert len(remaining_edges) == 0
+
+
+@pytest.mark.asyncio
+async def test_upsert_node_with_clusters_roundtrip(neo4j_store):
+    entity = Entity(
+        id="cluster-test-1",
+        entity_name="TestEntity",
+        entity_type="TEST",
+        description="Entity with clusters",
+        source_chunk_id=["chunk-1"],
+        documents_id=[],
+        clusters=[
+            {"level": 0, "cluster_id": 1},
+            {"level": 1, "cluster_id": 5},
+        ],
+    )
+    await neo4j_store.upsert_nodes([entity])
+
+    got = await neo4j_store.get_nodes(["cluster-test-1"])
+    assert got[0] is not None
+    assert got[0].entity_name == "TestEntity"
+    assert got[0].clusters == [
+        {"level": 0, "cluster_id": 1},
+        {"level": 1, "cluster_id": 5},
+    ]
+
+
+@pytest.mark.asyncio
+async def test_upsert_node_with_clusters_in_get_all_nodes(neo4j_store):
+    entity = Entity(
+        id="cluster-test-2",
+        entity_name="AnotherEntity",
+        entity_type="TEST",
+        description="Another entity with clusters",
+        source_chunk_id=["chunk-1"],
+        documents_id=[],
+        clusters=[{"level": 0, "cluster_id": 99}],
+    )
+    await neo4j_store.upsert_nodes([entity])
+
+    all_nodes = await neo4j_store.get_all_nodes()
+    match = [n for n in all_nodes if n.id == "cluster-test-2"]
+    assert len(match) == 1
+    assert match[0].clusters == [{"level": 0, "cluster_id": 99}]
+
+
+@pytest.mark.asyncio
+async def test_get_label_returns_entity_type(neo4j_store):
+    entity = Entity(
+        id="label-test-1",
+        entity_name="LabelTest",
+        entity_type="PERSON",
+        description="Label test",
+        source_chunk_id=["chunk-1"],
+        documents_id=[],
+        clusters=[],
+    )
+    await neo4j_store.upsert_nodes([entity])
+
+    from neo4j import AsyncGraphDatabase
+    driver = AsyncGraphDatabase.driver(
+        NEO4J_URI,
+        auth=(NEO4J_USER, NEO4J_PASSWORD),
+    )
+    async with driver.session(database=neo4j_store._database) as session:
+        result = await session.run(
+            "MATCH (n {id: $id}) RETURN labels(n) AS labels",
+            id="label-test-1",
+        )
+        record = await result.single()
+        assert record is not None, "Node should exist"
+        labels = record["labels"]
+        assert "NODE" in labels, "Base label :NODE should be present"
+        assert "PERSON" in labels, f"Entity type label :PERSON should be present, got {labels}"
+    await driver.close()

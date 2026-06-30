@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import re
 from dataclasses import asdict
 from typing import (
     Any,
@@ -36,6 +38,47 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         self._database = database
         self._node_cls = node_cls
         self._edge_cls = edge_cls
+
+    @staticmethod
+    def _sanitize_label(label: str) -> str:
+        sanitized = re.sub(r"[^a-zA-Z0-9_]", "_", label)
+        if not sanitized or sanitized[0].isdigit():
+            sanitized = f"_{sanitized}"
+        return sanitized
+
+    @staticmethod
+    def _serialize_props(props: dict) -> dict:
+        primitive = (str, int, float, bool)
+        result = {}
+        for k, v in props.items():
+            if isinstance(v, primitive) or v is None:
+                result[k] = v
+            elif isinstance(v, list):
+                if all(isinstance(x, primitive) for x in v):
+                    result[k] = v
+                else:
+                    result[k] = json.dumps(v, ensure_ascii=False)
+            else:
+                result[k] = json.dumps(v, ensure_ascii=False)
+        return result
+
+    @staticmethod
+    def _get_json_fields(node_cls: type) -> tuple:
+        try:
+            return node_cls.__dataclass_fields__["_json_fields"].default
+        except (KeyError, AttributeError, TypeError):
+            return ()
+
+    @staticmethod
+    def _deserialize_props(props: dict, json_fields: tuple) -> dict:
+        for field in json_fields:
+            raw = props.get(field)
+            if isinstance(raw, str):
+                try:
+                    props[field] = json.loads(raw)
+                except (json.JSONDecodeError, TypeError):
+                    pass
+        return props
 
     async def _verify_connectivity(self) -> None:
         async with self._driver.session(database=self._database) as session:
@@ -101,10 +144,13 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
             for node in nodes:
                 attrs = asdict(node)
                 node_id = attrs.pop("id")
+                attrs.pop("_json_fields", None)
+                props = self._serialize_props(attrs)
+                label = self._sanitize_label(node.get_label())
                 await session.run(
-                    "MERGE (n:NODE {id: $id}) SET n += $props",
+                    f"MERGE (n:NODE:{label} {{id: $id}}) SET n += $props",
                     id=node_id,
-                    props=attrs,
+                    props=props,
                 )
 
     @override
@@ -122,6 +168,8 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                 else:
                     props = dict(record["n"])
                     node_id_val = props.pop("id")
+                    json_fields = self._get_json_fields(self._node_cls)
+                    props = self._deserialize_props(props, json_fields)
                     results.append(self._node_cls(id=node_id_val, **props))
         return results
 
@@ -185,6 +233,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                 subject_id = edge_data.pop("subject_id")
                 object_id = edge_data.pop("object_id")
                 edge_id = edge_data.pop("id", None)
+                props = self._serialize_props(edge_data)
                 if edge_id is not None:
                     await session.run(
                         """
@@ -196,7 +245,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                         sid=subject_id,
                         oid=object_id,
                         eid=edge_id,
-                        props=edge_data,
+                        props=props,
                     )
                 else:
                     await session.run(
@@ -208,7 +257,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                         """,
                         sid=subject_id,
                         oid=object_id,
-                        props=edge_data,
+                        props=props,
                     )
 
     @override
@@ -270,9 +319,11 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         nodes: List[NodeT] = []
         async with self._driver.session(database=self._database) as session:
             result = await session.run("MATCH (n:NODE) RETURN n")
+            json_fields = self._get_json_fields(self._node_cls)
             async for record in result:
                 props = dict(record["n"])
                 node_id = props.pop("id")
+                props = self._deserialize_props(props, json_fields)
                 nodes.append(self._node_cls(id=node_id, **props))
         return nodes
 
