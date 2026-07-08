@@ -425,6 +425,7 @@ To override an instruction, build a new `RAGUInstruction` and call
 edit `DEFAULT_PROMPT_TEMPLATES` directly — `update_prompt` scopes the change to a
 single module instance. Full examples (including custom messages and few-shot
 formatters) are in [`ragu/common/prompts/README.md`](ragu/common/prompts/README.md).
+
 ---
 
 ### Contributors
