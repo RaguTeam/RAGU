@@ -180,3 +180,7 @@ cython_debug/
 
 # OpenCode
 .opencode
+
+# Additional artifacts
+paper/
+slides/
