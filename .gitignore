@@ -184,3 +184,4 @@ cython_debug/
 # Additional artifacts
 paper/
 slides/
+paper*/
