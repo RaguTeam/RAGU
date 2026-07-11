@@ -9,7 +9,7 @@ embedder served via `vLLM <https://github.com/vllm-project/vllm>`_.
 Choosing an embedder for your language
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - **English only**: ``BAAI/bge-large-en-v1.5`` (512 tokens).
-- **Multilingual / Russian**: ``intfloat/multilingual-e5-large`` (512 tokens).
+- **Multilingual / Russian**: ``BAAI/bge-m3`` (512 tokens).
 
 Adjust ``Settings.embedder_token_limit`` to match the model's context window.
 A smaller or less capable embedder may require a larger ``top_k`` in
@@ -19,9 +19,9 @@ Usage
 -----
 1. Start the local embedder with vLLM.
    Use ``--enforce-eager`` to avoid CUDA assertion errors with some
-   models (e.g. ``intfloat/multilingual-e5-large``)::
+   models (e.g. ``BAAI/bge-m3``)::
 
-        vllm serve intfloat/multilingual-e5-large --port 8001 --enforce-eager
+        vllm serve BAAI/bge-m3 --port 8001 --enforce-eager
 
 2. Export environment variables::
 
@@ -29,13 +29,14 @@ Usage
        export OPENAI_API_KEY="sk-..."
        export LLM_MODEL_NAME="gpt-4o-mini"
        export LOCAL_EMBEDDER_URL="http://localhost:8001/v1"
-       export EMBEDDER_MODEL_NAME="intfloat/multilingual-e5-large"
+       export EMBEDDER_MODEL_NAME="BAAI/bge-m3"
 
 3. Run::
 
        python examples/local_embedder_with_short_context.py
 """
 
+from argparse import ArgumentParser
 import asyncio
 import os
 
@@ -55,24 +56,30 @@ from ragu.utils.ragu_utils import read_text_from_files
 
 
 async def main():
+    parser = ArgumentParser()
+    parser.add_argument("--lang", dest="language", type=str, required=False, default="ru",
+                        choices=["ru", "rus", "russian", "en", "eng", "english"],
+                        help="The language for demonstration.")
+    args = parser.parse_args()
+
     # ── Global settings ─────────────────────────────────────────────
-    Settings.storage_folder = "ragu_working_dir/local_embedder_example"
-    Settings.language = "russian"
+    Settings.language = "russian" if args.language.startswith("ru") else "english"
+    Settings.storage_folder = "ragu_working_dir/local_embedder_example_" + Settings.language
 
     # Configure token limits and tokenizer for the local embedder.
     # These defaults are used by EmbedderOpenAI unless overridden per-instance.
     #
     # IMPORTANT: choose an embedder that matches your language:
     #   English  → BAAI/bge-large-en-v1.5   (512 tokens)
-    #   Multilingual / Russian → intfloat/multilingual-e5-large (512 tokens)
+    #   Multilingual / Russian → BAAI/bge-m3 (512 tokens)
     #
-    # Set embedder_token_limit to match the model's context window.
-    Settings.embedder_token_limit = 512
+    # Set embedder_token_limit to match the model's context window (< 512).
+    Settings.embedder_token_limit = 510
     Settings.tokenizer_embedder_backend = "local"
     Settings.tokenizer_embedder_name = os.getenv("EMBEDDER_MODEL_NAME")
 
     # ── Load documents ──────────────────────────────────────────────
-    docs = read_text_from_files("examples/data/ru")
+    docs = read_text_from_files("examples/data/ru" if args.language.startswith("ru") else "examples/data/en")
 
     chunker = SimpleChunker(max_chunk_size=1000)
 
@@ -103,7 +110,7 @@ async def main():
     embedder = EmbedderOpenAI(
         client=embed_client,
         model_name=os.getenv("EMBEDDER_MODEL_NAME"),
-        embedder_token_limit=512,
+        embedder_token_limit=510,
         tokenizer_backend="local",
         tokenizer_name=os.getenv("EMBEDDER_MODEL_NAME"),
         batch_size=32,
@@ -145,17 +152,29 @@ async def main():
         embedder=embedder,
     )
 
-    questions = [
-        "Кто написал гимн Норвегии?",
-        "Шум, издаваемый ЭТИМИ ПАУКООБРАЗНЫМИ, слышен за пять километров. Отсюда и их название.",
-        "Как переводится название романа 'Ка́мо гряде́ши, Го́споди?' на русский языке"
-    ]
+    if args.language.startswith("ru"):
+        questions = [
+            "Кто написал гимн Норвегии?",
+            "Шум, издаваемый ЭТИМИ ПАУКООБРАЗНЫМИ, слышен за пять километров. Отсюда и их название.",
+            "Как переводится название романа 'Ка́мо гряде́ши, Го́споди?' на русский языке"
+        ]
 
-    for question in questions:
-        print(f"\nQ: {question}")
-        # top_k=40 compensates for lower retrieval precision of smaller embedders
-        answer = await search_engine.a_query(question, top_k=40)
-        print(f"A: {answer.response}")
+        for question in questions:
+            print(f'\nВопрос: {question}')
+            # top_k=40 compensates for lower retrieval precision of smaller embedders
+            answer = await search_engine.a_query(question, top_k=40)
+            print(f'Ответ: {answer.response}')
+    else:
+        questions = [
+            "Where did the father of the creator of the C programming language work?",
+            "What did the person who died on October 12, 2011, create in their lifetime?"
+        ]
+
+        for question in questions:
+            print(f'\nQuestion: {question}')
+            # top_k=40 compensates for lower retrieval precision of smaller embedders
+            answer = await search_engine.a_query(question, top_k=40)
+            print(f'Answer: {answer.response}')
 
 
 if __name__ == "__main__":
