@@ -39,15 +39,12 @@ class Node:
 class Edge:
     """
     Base graph edge type for storage adapters.
-
-    Subclasses are expected to be dataclasses and define ``id``,
-    ``subject_id``, ``object_id``, and ``source_chunk_id`` fields.
+    Subclasses are expected to be dataclasses and define ``id``, ``subject_id`` and ``object_id`` fields.
     """
 
     id: str
     subject_id: str
     object_id: str
-    source_chunk_id: List[str]
 
     def to_dict(self) -> Dict[str, Any]:
         """
