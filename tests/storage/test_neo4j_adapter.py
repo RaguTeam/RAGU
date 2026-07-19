@@ -14,14 +14,23 @@ NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "testpassword")
 
 @pytest.fixture
 async def neo4j_store():
-    store = Neo4jStorage(
-        uri=NEO4J_URI,
-        user=NEO4J_USER,
-        password=NEO4J_PASSWORD,
-        node_cls=Entity,
-        edge_cls=Relation,
-    )
-    await store._verify_connectivity()
+    try:
+        store = Neo4jStorage(
+            uri=NEO4J_URI,
+            user=NEO4J_USER,
+            password=NEO4J_PASSWORD,
+            node_cls=Entity,
+            edge_cls=Relation,
+        )
+    except ImportError as exc:  # optional driver not installed
+        pytest.skip(str(exc))
+
+    try:
+        await store._verify_connectivity()
+    except Exception as exc:  # server not running in this environment
+        await store.close()
+        pytest.skip(f"Neo4j is not reachable at {NEO4J_URI}: {type(exc).__name__}")
+
     leftovers = await store.get_all_nodes()
     if leftovers:
         await store.delete_nodes([n.id for n in leftovers])
