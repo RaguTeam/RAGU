@@ -33,6 +33,27 @@ class FakePointStruct:
 
 
 @dataclass
+class FakeBatch:
+    """Column-oriented upsert payload, mirroring ``qdrant_client.models.Batch``."""
+
+    ids: list[str]
+    vectors: dict[str, list] | list
+    payloads: list[dict] | None = None
+
+    def to_point_structs(self) -> list["FakePointStruct"]:
+        """Expand columns back into per-point records."""
+        points: list[FakePointStruct] = []
+        for index, point_id in enumerate(self.ids):
+            if isinstance(self.vectors, dict):
+                vector = {name: column[index] for name, column in self.vectors.items()}
+            else:
+                vector = self.vectors[index]
+            payload = self.payloads[index] if self.payloads is not None else {}
+            points.append(FakePointStruct(id=point_id, vector=vector, payload=payload))
+        return points
+
+
+@dataclass
 class FakePointIdsList:
     points: list[str]
 
@@ -121,9 +142,16 @@ class FakeAsyncQdrantClient:
             )
         )
 
-    async def upsert(self, collection_name: str, points: list[FakePointStruct], **kwargs: Any) -> None:
+    async def upsert(
+        self,
+        collection_name: str,
+        points: "list[FakePointStruct] | FakeBatch",
+        **kwargs: Any,
+    ) -> None:
         collection = self.registry[collection_name]
         stored_points = collection["points"]
+        if isinstance(points, FakeBatch):
+            points = points.to_point_structs()
         for point in points:
             stored_points[point.id] = point
 
@@ -330,6 +358,7 @@ def install_fake_qdrant(monkeypatch) -> None:
     models_module = ModuleType("qdrant_client.models")
     models_module.Distance = SimpleNamespace(COSINE="cosine")
     models_module.Modifier = SimpleNamespace(IDF="idf")
+    models_module.Batch = FakeBatch
     models_module.PointIdsList = FakePointIdsList
     models_module.PointStruct = FakePointStruct
     models_module.Prefetch = FakePrefetch
@@ -343,6 +372,7 @@ def install_fake_qdrant(monkeypatch) -> None:
     http_models_models_module.Fusion = SimpleNamespace(RRF="rrf")
     http_models_models_module.FusionQuery = FakeFusionQuery
     http_models_models_module.Modifier = models_module.Modifier
+    http_models_models_module.Batch = FakeBatch
     http_models_models_module.PointIdsList = FakePointIdsList
     http_models_models_module.Prefetch = FakePrefetch
     http_models_models_module.PointStruct = FakePointStruct

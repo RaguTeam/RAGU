@@ -36,6 +36,27 @@ class _FakePointStruct:
 
 
 @dataclass
+class _FakeBatch:
+    """Column-oriented upsert payload, mirroring ``qdrant_client.models.Batch``."""
+
+    ids: list[str]
+    vectors: dict[str, list] | list
+    payloads: list[dict] | None = None
+
+    def to_point_structs(self) -> list["_FakePointStruct"]:
+        """Expand columns back into per-point records."""
+        points: list[_FakePointStruct] = []
+        for index, point_id in enumerate(self.ids):
+            if isinstance(self.vectors, dict):
+                vector = {name: column[index] for name, column in self.vectors.items()}
+            else:
+                vector = self.vectors[index]
+            payload = self.payloads[index] if self.payloads is not None else {}
+            points.append(_FakePointStruct(id=point_id, vector=vector, payload=payload))
+        return points
+
+
+@dataclass
 class _FakePointIdsList:
     points: list[str]
 
@@ -83,7 +104,9 @@ class FakeAsyncQdrantClient:
             )
         )
 
-    async def upsert(self, collection_name: str, points: list[_FakePointStruct], **kwargs) -> None:
+    async def upsert(self, collection_name: str, points, **kwargs) -> None:
+        if isinstance(points, _FakeBatch):
+            points = points.to_point_structs()
         self.registry[collection_name]["points"].update({point.id: point for point in points})
 
     async def query_points(self, *args, **kwargs):
@@ -153,6 +176,7 @@ def _install_fake_qdrant(monkeypatch: pytest.MonkeyPatch) -> None:
     models_module = ModuleType("qdrant_client.models")
     models_module.Distance = SimpleNamespace(COSINE="cosine")
     models_module.Modifier = SimpleNamespace(IDF="idf")
+    models_module.Batch = _FakeBatch
     models_module.PointIdsList = _FakePointIdsList
     models_module.PointStruct = _FakePointStruct
     models_module.Prefetch = object
