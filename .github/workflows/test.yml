@@ -69,9 +69,9 @@ jobs:
       - name: Install uv
         run: pip install uv
 
-      - name: Install package with test and neo4j dependencies
+      - name: Install package with test dependencies
         run: |
-          uv pip install --system -e ".[test,neo4j]"
+          uv pip install --system -e ".[test]"
 
       - name: Run graph storage tests against a live Neo4j
         env:

@@ -25,19 +25,25 @@ Graph adapters implement `BaseGraphStorage` for different backends while preserv
 ### Neo4jStorage
 
 - Purpose: server-backed graph store for larger graphs and concurrent access.
-- Requires the optional driver: `pip install graph_ragu[neo4j]`.
-- Import it by its full path; it is deliberately not re-exported from this
-  package, so that the optional driver never becomes a hard requirement:
+- The `neo4j` driver is a regular dependency, installed with the package.
+- Import it by its full path; it is not re-exported from this package, so that
+  the driver stays swappable for a build that strips it out:
 
   ```python
   from ragu.storage.graph_storage_adapters.neo4j_adapter import Neo4jStorage
   ```
 
 - Important parameters: `uri`, `user`, `password`, `node_cls`, `edge_cls`, `database`.
-- Layout: every node carries the shared `:NODE` label plus a per-type label taken
-  from its `entity_type`; every edge is a `:RELATION`. On the first
-  `index_start_callback()` the adapter creates a uniqueness constraint on
-  `:NODE(id)` and an index on the node type's `label_field`.
+- Layout: every node carries the shared `:NODE` label plus a per-type label, and
+  every edge is written under its own relationship type — both taken from the
+  `label_field` the node and edge classes declare (`entity_type` and
+  `relation_type` for `Entity`/`Relation`). On the first `index_start_callback()`
+  the adapter creates a uniqueness constraint on `:NODE(id)` and an index on the
+  node type's `label_field`.
+- Relationship types vary per edge, so they cannot serve as a filter. Reads select
+  the edges RAGU owns by `r.id IS NOT NULL`; relationships created by other tools
+  in the same database are ignored, and unknown properties on an edge are dropped
+  rather than raising.
 
 ```python
 import asyncio
