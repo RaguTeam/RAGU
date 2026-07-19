@@ -43,7 +43,11 @@ class Entity(Node):
     source_chunk_id: list[str]
     documents_id: list[str] = field(default_factory=list[str])
     clusters: list[ClusterInfo] = field(default_factory=list[ClusterInfo])
+    _json_fields: tuple = ("clusters",)
     id: str = 'auto'
+
+    def get_label(self) -> str:
+        return self.entity_type
 
     def __post_init__(self):
         """
