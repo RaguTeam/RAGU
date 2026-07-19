@@ -95,6 +95,12 @@ class BaseVectorStorage(BaseStorage, ABC):
         """
         Fetch stored points by ID.
 
+        Returns each vector **as the backend stores it**, which is not
+        necessarily the vector that was written: backends using cosine
+        similarity L2-normalize on write, discarding the original magnitude.
+        Callers must therefore treat returned vectors as directions and compare
+        them up to a positive scale factor.
+
         :param ids: Record identifiers to retrieve in order.
         :return: Points aligned with ``ids``; missing IDs mapped to ``None``.
         """
