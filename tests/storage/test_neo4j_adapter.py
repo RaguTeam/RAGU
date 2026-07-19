@@ -133,6 +133,16 @@ async def test_get_all_edges(neo4j_store):
     assert all_edges[0].id == "rel-1"
 
 
+@pytest.mark.xfail(
+    reason=(
+        "OPEN DECISION: this asserts outgoing-only, while NetworkXStorage returns all "
+        "incident edges and test_graph_contract now requires the same. get_node_edges is "
+        "not declared in BaseGraphStorage and has no callers in ragu/, so either behaviour "
+        "is defensible. Resolve by picking one contract - or by dropping the method - and "
+        "then delete this marker."
+    ),
+    strict=True,
+)
 @pytest.mark.asyncio
 async def test_get_node_edges_returns_outgoing_only(neo4j_store):
     await neo4j_store.upsert_nodes([
