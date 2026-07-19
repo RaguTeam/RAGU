@@ -951,6 +951,28 @@ class Index(Generic[NodeT, EdgeT]):
         )
         return kwargs
 
+    async def close(self) -> None:
+        """
+        Release resources held by every backend this index owns.
+
+        Backends that keep a connection (Neo4j, remote Qdrant) hold it open
+        until closed; file-backed ones do nothing. Long-lived processes that
+        build indexes repeatedly should call this, otherwise each index leaks a
+        connection pool.
+
+        Safe to call more than once.
+        """
+        for storage in (
+            self.graph_backend,
+            self.nodes_vector_db,
+            self.edges_vector_db,
+            self.chunks_vector_db,
+            self.chunks_kv_storage,
+            self.community_summary_kv_storage,
+            self.community_kv_storage,
+        ):
+            await storage.close()
+
     async def check_consistency(self) -> ConsistencyReport:
         """
         Audit cross-storage graph consistency and collect invariant violations.

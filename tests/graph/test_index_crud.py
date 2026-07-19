@@ -1090,3 +1090,43 @@ def test_consistency_report_str():
     assert "Issues found: 1" in rendered
     assert "- relation_endpoints: Relations reference entity endpoints that do not exist in the graph." in rendered
     assert "missing_entity_ids: ent-missing" in rendered
+
+
+@pytest.mark.asyncio
+async def test_close_releases_every_backend(index):
+    """
+    Index.close() must reach all seven storages, and stay safe when repeated.
+
+    Backends holding a connection (Neo4j, remote Qdrant) leak a pool otherwise;
+    file-backed ones inherit a no-op from BaseStorage.
+    """
+    closed = []
+
+    for name in (
+        "graph_backend",
+        "nodes_vector_db",
+        "edges_vector_db",
+        "chunks_vector_db",
+        "chunks_kv_storage",
+        "community_summary_kv_storage",
+        "community_kv_storage",
+    ):
+        storage = getattr(index, name)
+
+        async def record(_name=name):
+            closed.append(_name)
+
+        storage.close = record
+
+    await index.close()
+    await index.close()
+
+    assert sorted(closed) == sorted([
+        "graph_backend",
+        "nodes_vector_db",
+        "edges_vector_db",
+        "chunks_vector_db",
+        "chunks_kv_storage",
+        "community_summary_kv_storage",
+        "community_kv_storage",
+    ] * 2)
