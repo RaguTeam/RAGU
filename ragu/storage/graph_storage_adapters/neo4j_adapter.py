@@ -192,6 +192,29 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                     pass
         return props
 
+    def _edge_from_record(self, record) -> EdgeT:
+        """
+        Build an edge from a record holding ``s`` (start), ``r`` and ``t`` (end).
+
+        Endpoints are taken from the relationship itself rather than from the
+        matched pattern, so an undirected match still reports the stored
+        direction instead of the direction it happened to be traversed in.
+
+        :param record: Neo4j record with ``s``, ``r`` and ``t`` keys.
+        :returns: Materialized edge.
+        :rtype: EdgeT
+        """
+        relationship = record["r"]
+        props = dict(relationship)
+        edge_id = props.pop("id", None) or relationship.element_id
+        props = self._deserialize_props(props, self._edge_json_fields)
+        return self._edge_cls(
+            subject_id=record["s"].get("id", record["s"].element_id),
+            object_id=record["t"].get("id", record["t"].element_id),
+            id=edge_id,
+            **props,
+        )
+
     async def _verify_connectivity(self) -> None:
         async with self._driver.session(database=self._database) as session:
             await session.run("RETURN 1")
@@ -206,30 +229,23 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         await self._verify_connectivity()
 
     async def get_node_edges(self, source_node_id: str) -> List[EdgeT]:
+        """
+        Retrieve all edges incident to a node, incoming and outgoing alike.
+
+        :param source_node_id: ID of the node whose edges to fetch.
+        :type source_node_id: str
+        :returns: Edges touching the node, with their stored direction.
+        :rtype: List[EdgeT]
+        """
         async with self._driver.session(database=self._database) as session:
             result = await session.run(
-                """
-                MATCH (n:NODE {id: $source_id})-[r]->(m:NODE)
-                RETURN n, r, m
+                f"""
+                MATCH (n:{_NODE_LABEL} {{id: $source_id}})-[r:{_EDGE_TYPE}]-(:{_NODE_LABEL})
+                RETURN startNode(r) AS s, r, endNode(r) AS t
                 """,
                 source_id=source_node_id,
             )
-            edges: List[EdgeT] = []
-            async for record in result:
-                rel = record["r"]
-                sn = record["n"]
-                mn = record["m"]
-                props = dict(rel)
-                edge_id = props.pop("id", None) or rel.element_id
-                edges.append(
-                    self._edge_cls(
-                        subject_id=sn.get("id", sn.element_id),
-                        object_id=mn.get("id", mn.element_id),
-                        id=edge_id,
-                        **props,
-                    )
-                )
-            return edges
+            return [self._edge_from_record(record) async for record in result]
 
     @override
     async def edges_degrees(self, edge_specs: List[EdgeSpec]) -> List[int]:
@@ -252,6 +268,18 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
 
     @override
     async def upsert_nodes(self, nodes: Iterable[NodeT]) -> None:
+        """
+        Insert or update nodes, keyed by ``id`` alone.
+
+        The per-type label is applied after the merge rather than being part of
+        the match: including it would make a node whose type changed fail to
+        match its stored counterpart, silently creating a second node with the
+        same ``id``. Type labels therefore accumulate if a node changes type;
+        ``:NODE`` plus the ``entity_type`` property remain authoritative.
+
+        :param nodes: Nodes to insert or update.
+        :type nodes: Iterable[NodeT]
+        """
         async with self._driver.session(database=self._database) as session:
             for node in nodes:
                 attrs = asdict(node)
@@ -259,7 +287,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                 props = self._serialize_props(attrs)
                 label = self._sanitize_label(self._label_for(node))
                 await session.run(
-                    f"MERGE (n:NODE:{label} {{id: $id}}) SET n += $props",
+                    f"MERGE (n:{_NODE_LABEL} {{id: $id}}) SET n += $props SET n:{label}",
                     id=node_id,
                     props=props,
                 )
@@ -317,22 +345,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                         oid=object_id,
                     )
                 record = await result.single()
-                if record is None:
-                    results.append(None)
-                else:
-                    rel = record["r"]
-                    sn = record["s"]
-                    tn = record["t"]
-                    props = dict(rel)
-                    rid = props.pop("id", None) or rel.element_id
-                    results.append(
-                        self._edge_cls(
-                            subject_id=sn.get("id", sn.element_id),
-                            object_id=tn.get("id", tn.element_id),
-                            id=rid,
-                            **props,
-                        )
-                    )
+                results.append(None if record is None else self._edge_from_record(record))
         return results
 
     @override
@@ -344,31 +357,18 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                 object_id = edge_data.pop("object_id")
                 edge_id = edge_data.pop("id", None)
                 props = self._serialize_props(edge_data)
-                if edge_id is not None:
-                    await session.run(
-                        """
-                        MATCH (s:NODE {id: $sid})
-                        MATCH (t:NODE {id: $oid})
-                        MERGE (s)-[r:RELATION {id: $eid}]->(t)
-                        SET r += $props
-                        """,
-                        sid=subject_id,
-                        oid=object_id,
-                        eid=edge_id,
-                        props=props,
-                    )
-                else:
-                    await session.run(
-                        """
-                        MATCH (s:NODE {id: $sid})
-                        MATCH (t:NODE {id: $oid})
-                        CREATE (s)-[r:RELATION]->(t)
-                        SET r += $props
-                        """,
-                        sid=subject_id,
-                        oid=object_id,
-                        props=props,
-                    )
+                await session.run(
+                    f"""
+                    MATCH (s:{_NODE_LABEL} {{id: $sid}})
+                    MATCH (t:{_NODE_LABEL} {{id: $oid}})
+                    MERGE (s)-[r:{_EDGE_TYPE} {{id: $eid}}]->(t)
+                    SET r += $props
+                    """,
+                    sid=subject_id,
+                    oid=object_id,
+                    eid=edge_id,
+                    props=props,
+                )
 
     @override
     async def delete_edges(self, edge_specs: List[EdgeSpec]) -> None:
@@ -400,28 +400,13 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         async with self._driver.session(database=self._database) as session:
             for node_id in node_ids:
                 result = await session.run(
-                    """
-                    MATCH (n:NODE {id: $id})-[r]-(m:NODE)
-                    RETURN n, r, m
+                    f"""
+                    MATCH (n:{_NODE_LABEL} {{id: $id}})-[r:{_EDGE_TYPE}]-(:{_NODE_LABEL})
+                    RETURN startNode(r) AS s, r, endNode(r) AS t
                     """,
                     id=node_id,
                 )
-                edges: List[EdgeT] = []
-                async for record in result:
-                    rel = record["r"]
-                    sn = record["n"]
-                    mn = record["m"]
-                    props = dict(rel)
-                    rid = props.pop("id", None) or rel.element_id
-                    edges.append(
-                        self._edge_cls(
-                            subject_id=sn.get("id", sn.element_id),
-                            object_id=mn.get("id", mn.element_id),
-                            id=rid,
-                            **props,
-                        )
-                    )
-                grouped.append(edges)
+                grouped.append([self._edge_from_record(record) async for record in result])
         return grouped
 
     @override
@@ -440,21 +425,10 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
     async def get_all_edges(self) -> List[EdgeT]:
         edges: List[EdgeT] = []
         async with self._driver.session(database=self._database) as session:
-            result = await session.run("MATCH (s)-[r:RELATION]->(t) RETURN s, r, t")
-            async for record in result:
-                rel = record["r"]
-                sn = record["s"]
-                tn = record["t"]
-                props = dict(rel)
-                rid = props.pop("id", None) or rel.element_id
-                edges.append(
-                    self._edge_cls(
-                        subject_id=sn.get("id", sn.element_id),
-                        object_id=tn.get("id", tn.element_id),
-                        id=rid,
-                        **props,
-                    )
-                )
+            result = await session.run(
+                f"MATCH (s:{_NODE_LABEL})-[r:{_EDGE_TYPE}]->(t:{_NODE_LABEL}) RETURN s, r, t"
+            )
+            edges = [self._edge_from_record(record) async for record in result]
         return edges
 
     async def close(self) -> None:
