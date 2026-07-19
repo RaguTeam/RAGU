@@ -153,7 +153,37 @@ class FakeAsyncQdrantClient:
         if isinstance(points, FakeBatch):
             points = points.to_point_structs()
         for point in points:
-            stored_points[point.id] = point
+            stored_points[point.id] = self._normalize_cosine_vectors(collection, point)
+
+    @staticmethod
+    def _normalize_cosine_vectors(
+        collection: dict[str, object],
+        point: FakePointStruct,
+    ) -> FakePointStruct:
+        """
+        L2-normalize dense vectors stored under a cosine-distance config.
+
+        Real Qdrant normalizes on upload for ``Distance.COSINE`` and returns the
+        normalized vector on retrieve, discarding the original magnitude. Storing
+        vectors verbatim here would let the fake accept behaviour the real engine
+        rejects, which is exactly the divergence this testkit must not hide.
+        """
+        vectors_config = collection["vectors_config"]
+        if not isinstance(point.vector, dict) or not isinstance(vectors_config, dict):
+            return point
+
+        normalized = dict(point.vector)
+        for name, value in point.vector.items():
+            params = vectors_config.get(name)
+            if getattr(params, "distance", None) != "cosine":
+                continue
+            if not isinstance(value, list):
+                continue
+            norm = math.sqrt(sum(component * component for component in value))
+            if norm:
+                normalized[name] = [component / norm for component in value]
+
+        return FakePointStruct(id=point.id, vector=normalized, payload=point.payload)
 
     async def query_points(
         self,
