@@ -670,6 +670,19 @@ class QdrantVectorDBStorage(BaseVectorStorage):
             )
         return [points_by_id.get(record_id) for record_id in ids]
 
+    @override
+    async def close(self) -> None:
+        """
+        Close the Qdrant client and release its connection pool.
+
+        Safe to call more than once: the client is recreated lazily by
+        :meth:`_get_client` if the storage is used again.
+        """
+        if self._client is not None:
+            await self._client.close()
+            self._client = None
+            self._collection_ready = False
+
     async def index_start_callback(self):
         """
         Ensure collection availability before indexing starts.

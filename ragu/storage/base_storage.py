@@ -45,6 +45,15 @@ class BaseStorage(ABC):
         """
         pass
 
+    async def close(self) -> None:
+        """
+        Release resources held by this backend.
+
+        Backends that keep a connection or a pool (Neo4j, remote Qdrant) must
+        override this; file-backed ones need nothing and inherit the no-op.
+        """
+        return None
+
 
 @dataclass
 class BaseVectorStorage(BaseStorage, ABC):

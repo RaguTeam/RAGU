@@ -19,6 +19,7 @@ Modules overview
 
 from typing import List
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 from ragu.storage.types import ClusterInfo, Edge, Node
 from ragu.utils.ragu_utils import compute_mdhash_id
@@ -44,11 +45,9 @@ class Entity(Node):
     source_chunk_id: list[str]
     documents_id: list[str] = field(default_factory=list[str])
     clusters: list[ClusterInfo] = field(default_factory=list[ClusterInfo])
-    _json_fields: tuple = ("clusters",)
     id: str = 'auto'
 
-    def get_label(self) -> str:
-        return self.entity_type
+    label_field: ClassVar[str] = "entity_type"
 
     def __post_init__(self):
         """
@@ -99,6 +98,8 @@ class Relation(Edge):
     description: str
     relation_strength: int | float = 1.0
     source_chunk_id: list[str] = field(default_factory=list[str])
+
+    label_field: ClassVar[str] = "relation_type"
     id: str = 'auto'
 
     def __post_init__(self):
