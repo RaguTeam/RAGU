@@ -38,12 +38,33 @@ class NetworkXStorage(BaseGraphStorage[NodeT, EdgeT]):
         :param filename: Path to a `.gml` file used for persistence.
         """
         loaded = nx.read_gml(filename) if os.path.exists(filename) else nx.MultiDiGraph() # type: ignore
-        self._graph: nx.MultiDiGraph[Any] = (
-            loaded if isinstance(loaded, nx.MultiDiGraph) else nx.MultiDiGraph(loaded) # type: ignore
+        self._graph: nx.MultiDiGraph = (
+            loaded if isinstance(loaded, nx.MultiDiGraph) else self._to_multi_di_graph(loaded) # type: ignore
         )
         self._where_to_save = filename
         self._node_cls = node_cls
         self._edge_cls = edge_cls
+
+    @staticmethod
+    def _to_multi_di_graph(graph: Any) -> "nx.MultiDiGraph":
+        """
+        Convert a legacy (non-multi) persisted graph, keying edges by their stored ``id``.
+
+        A plain ``nx.MultiDiGraph(graph)`` conversion assigns integer auto-keys
+        (losing stored relation identifiers) and duplicates undirected edges in
+        both directions. This helper preserves one edge per stored record and
+        restores the ``id`` attribute as the edge key.
+
+        :param graph: Graph loaded from persistence.
+        :return: Directed multigraph keyed by stored edge ids.
+        """
+        converted: "nx.MultiDiGraph" = nx.MultiDiGraph()
+        converted.add_nodes_from(graph.nodes(data=True))
+        for index, (u, v, data) in enumerate(graph.edges(data=True)):
+            attrs = dict(data)
+            key = attrs.pop("id", None) or f"edge-{index}"
+            converted.add_edge(u, v, key=key, **attrs)
+        return converted
 
     def _iter_incident_edges(self, node_id: str):
         """

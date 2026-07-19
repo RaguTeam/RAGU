@@ -172,7 +172,7 @@ class Index(Generic[NodeT, EdgeT]):
         self.community_summary_kv_storage = arguments.kv_storage_type(**summary_kv_kwargs)
         self.community_kv_storage = arguments.kv_storage_type(**community_kv_kwargs)
 
-        if self.embedder:
+        if embedder is not None:
             embedding_dim_from_embedder = embedder.dim
 
             dimensions_from_kwargs = [
@@ -208,6 +208,20 @@ class Index(Generic[NodeT, EdgeT]):
             **graph_kwargs
         )
 
+    def _require_embedder(self) -> Embedder:
+        """
+        Return the configured embedder or fail with an actionable error.
+
+        :return: The embedder used for vectorization.
+        :raises RuntimeError: If the index was created without an embedder.
+        """
+        if self.embedder is None:
+            raise RuntimeError(
+                "This Index was created without an embedder; write operations "
+                "require one to vectorize nodes, edges, and chunks."
+            )
+        return self.embedder
+
     async def upsert_nodes(self, nodes: List[NodeT]) -> "Index[NodeT, EdgeT]":
         """
         Insert or replace nodes in graph and vector DB by ID.
@@ -215,15 +229,15 @@ class Index(Generic[NodeT, EdgeT]):
         :param nodes: Nodes to insert.
         :return: Self for method chaining.
         :raises ValueError: If duplicate node IDs are provided in one request.
+        :raises RuntimeError: If the index has no embedder.
         """
-        assert self.embedder
+        embedder = self._require_embedder()
 
         if not nodes:
             return self
 
         incoming_by_id: Dict[str, List[NodeT]] = defaultdict(list)
         for node in nodes:
-            assert node.id
             incoming_by_id[node.id].append(node)
 
         duplicate_ids = [node_id for node_id, group in incoming_by_id.items() if len(group) > 1]
@@ -240,7 +254,7 @@ class Index(Generic[NodeT, EdgeT]):
 
         nodes_to_upsert = [group[0] for group in incoming_by_id.values()]
 
-        dense_embeddings = await self.embedder.batch_embed_text(
+        dense_embeddings = await embedder.batch_embed_text(
             [node.to_text() for node in nodes_to_upsert],
             desc="Nodes vectorization",
         )
@@ -277,16 +291,16 @@ class Index(Generic[NodeT, EdgeT]):
 
         :param nodes: Nodes to update.
         :return: Self for method chaining.
-        :raises ValueError: If node IDs are missing/duplicated in request or absent in storage.
+        :raises ValueError: If node IDs are duplicated in request or absent in storage.
+        :raises RuntimeError: If the index has no embedder.
         """
-        assert self.embedder
+        embedder = self._require_embedder()
 
         if not nodes:
             return self
 
         incoming_by_id: Dict[str, List[NodeT]] = defaultdict(list)
         for node in nodes:
-            assert node.id
             incoming_by_id[node.id].append(node)
 
         duplicate_ids = [node_id for node_id, group in incoming_by_id.items() if len(group) > 1]
@@ -301,7 +315,7 @@ class Index(Generic[NodeT, EdgeT]):
 
         nodes_to_update = [group[0] for group in incoming_by_id.values()]
 
-        dense_embeddings = await self.embedder.batch_embed_text(
+        dense_embeddings = await embedder.batch_embed_text(
             [node.to_text() for node in nodes_to_update],
             desc="Nodes vectorization",
         )
@@ -337,8 +351,9 @@ class Index(Generic[NodeT, EdgeT]):
         :return: Self for method chaining.
         :raises ValueError: If edge IDs are duplicated in request or
             referenced nodes don't exist.
+        :raises RuntimeError: If the index has no embedder.
         """
-        assert self.embedder
+        embedder = self._require_embedder()
 
         if not edges:
             return self
@@ -365,7 +380,7 @@ class Index(Generic[NodeT, EdgeT]):
             if edge is not None
         ]
 
-        dense_embeddings = await self.embedder.batch_embed_text(
+        dense_embeddings = await embedder.batch_embed_text(
             [edge.to_text() for edge in edges_to_upsert],
             desc="Edges vectorization",
         )
@@ -403,19 +418,18 @@ class Index(Generic[NodeT, EdgeT]):
 
         :param edges: Edges to update.
         :return: Self for method chaining.
-        :raises ValueError: If edge IDs are missing/duplicated in request,
+        :raises ValueError: If edge IDs are duplicated in request,
             matching edge specs are absent in storage, or referenced nodes
             don't exist.
+        :raises RuntimeError: If the index has no embedder.
         """
-        assert self.embedder
+        embedder = self._require_embedder()
 
         if not edges:
             return self
 
         incoming_by_id: Dict[str, List[EdgeT]] = defaultdict(list)
         for edge in edges:
-            if not edge.id:
-                raise ValueError("Cannot update edge without id")
             incoming_by_id[edge.id].append(edge)
 
         duplicate_ids = [edge_id for edge_id, group in incoming_by_id.items() if len(group) > 1]
@@ -438,7 +452,7 @@ class Index(Generic[NodeT, EdgeT]):
 
         await self._validate_edge_endpoints_exist(edges_to_update)
 
-        dense_embeddings = await self.embedder.batch_embed_text(
+        dense_embeddings = await embedder.batch_embed_text(
             [edge.to_text() for edge in edges_to_update],
             desc="Edges vectorization",
         )
@@ -472,8 +486,9 @@ class Index(Generic[NodeT, EdgeT]):
 
         :param chunks: Chunks to upsert.
         :return: Self for method chaining.
+        :raises RuntimeError: If the index has no embedder.
         """
-        assert self.embedder
+        embedder = self._require_embedder()
 
         if not chunks:
             return self
@@ -487,7 +502,7 @@ class Index(Generic[NodeT, EdgeT]):
 
         await self.chunks_kv_storage.upsert(kv_data)
 
-        dense_embeddings = await self.embedder.batch_embed_text(
+        dense_embeddings = await embedder.batch_embed_text(
             [c.content for c in chunks],
             desc="Chunks vectorization"
         )
@@ -773,8 +788,8 @@ class Index(Generic[NodeT, EdgeT]):
         all_edges = await self.graph_backend.get_all_edges()
         edge_specs: List[EdgeSpec] = []
         for edge in all_edges:
-            assert edge
-            assert edge.id
+            if edge is None or not edge.id:
+                continue
             if edge.id in edge_ids:
                 edge_specs.append((edge.subject_id, edge.object_id, edge.id))
         return edge_specs

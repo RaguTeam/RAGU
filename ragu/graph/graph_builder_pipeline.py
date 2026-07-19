@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
@@ -8,7 +9,6 @@ from graspologic_native import hierarchical_leiden
 from ragu.chunker.base_chunker import BaseChunker
 from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import Settings
-from ragu.common.logger import logger
 from ragu.graph.artifacts_summarizer import EntitySummarizer, RelationSummarizer
 from ragu.graph.community_summarizer import CommunitySummarizer
 from ragu.graph.types import CommunitySummary, Community, Entity, Relation
@@ -56,7 +56,7 @@ class BuilderArguments:
     random_seed: int = 42
 
 
-class GraphBuilderModule:
+class GraphBuilderModule(ABC):
     """
     Abstract interface for modules that extend the graph-building pipeline.
 
@@ -68,9 +68,11 @@ class GraphBuilderModule:
       - filtering noisy relations
       - post-processing after extraction
 
-    Subclasses should override `run` to apply module-specific logic.
+    Subclasses must override :meth:`run` and return the updated
+    ``(entities, relations)`` tuple.
     """
 
+    @abstractmethod
     async def run(
             self,
             entities: List[Entity],
@@ -85,7 +87,70 @@ class GraphBuilderModule:
         :param kwargs: optional additional parameters specific to the module.
         :return: updated or enriched entities/relations.
         """
-        ...
+
+
+@dataclass(slots=True)
+class BuildReport:
+    """
+    Summary of one graph-building run.
+
+    Collected by :meth:`InMemoryGraphBuilder.extract_graph` and exposed on
+    :class:`~ragu.graph.knowledge_graph.KnowledgeGraph` as
+    ``last_build_report`` so callers can detect degraded builds (e.g. an
+    extractor that produced nothing) without parsing logs.
+
+    :param chunks_processed: Number of chunks fed into extraction.
+    :param entities_extracted: Entities produced by the artifact extractor.
+    :param relations_extracted: Relations produced by the artifact extractor.
+    :param entities_final: Entities after summarization and modules.
+    :param relations_final: Relations after summarization and modules.
+    :param communities_detected: Communities found by clustering.
+    :param community_summaries_generated: Communities successfully summarized.
+    :param community_summaries_failed: Communities left without a summary.
+    """
+    chunks_processed: int = 0
+    entities_extracted: int = 0
+    relations_extracted: int = 0
+    entities_final: int = 0
+    relations_final: int = 0
+    communities_detected: int = 0
+    community_summaries_generated: int = 0
+    community_summaries_failed: int = 0
+
+    def to_text(self) -> str:
+        """
+        Render the report as a single human-readable line.
+
+        :return: Compact textual summary of the build.
+        """
+        return (
+            f"chunks: {self.chunks_processed}; "
+            f"entities: {self.entities_extracted} extracted -> {self.entities_final} final; "
+            f"relations: {self.relations_extracted} extracted -> {self.relations_final} final; "
+            f"communities: {self.communities_detected} "
+            f"(summaries: {self.community_summaries_generated} ok, "
+            f"{self.community_summaries_failed} failed)"
+        )
+
+
+@dataclass(slots=True)
+class BuildResult:
+    """
+    Full outcome of :meth:`InMemoryGraphBuilder.extract_graph`.
+
+    :param entities: Extracted and post-processed entities.
+    :param relations: Extracted and post-processed relations.
+    :param summaries: Generated community summaries.
+    :param communities: Detected graph communities.
+    :param chunks: Chunks that were processed.
+    :param report: Aggregated counters for this build.
+    """
+    entities: List[Entity]
+    relations: List[Relation]
+    summaries: List[CommunitySummary]
+    communities: List[Community]
+    chunks: List[Chunk]
+    report: BuildReport
 
 
 class InMemoryGraphBuilder:
@@ -133,30 +198,31 @@ class InMemoryGraphBuilder:
         self.language = language if language else Settings.language
         self.build_parameters = build_parameters
 
-        if self.build_parameters.build_only_vector_context:
-            # No need to create those instances => we are able not to think about its parameters
-            self.entity_summarizer, self.relation_summarizer, self.community_summarizer = None, None, None
-        else:
+        params = self.build_parameters
+        self.entity_summarizer: EntitySummarizer | None = None
+        self.relation_summarizer: RelationSummarizer | None = None
+        self.community_summarizer: CommunitySummarizer | None = None
+
+        if not params.build_only_vector_context:
             self.entity_summarizer = EntitySummarizer(
                 llm,
-                use_llm_summarization=self.build_parameters.use_llm_summarization,
-                use_clustering=self.build_parameters.use_clustering,
-                cluster_only_if_more_than=self.build_parameters.cluster_only_if_more_than,
-                summarize_only_if_more_than=self.build_parameters.summarize_only_if_more_than,
+                use_llm_summarization=params.use_llm_summarization,
+                use_clustering=params.use_clustering,
+                cluster_only_if_more_than=params.cluster_only_if_more_than,
+                summarize_only_if_more_than=params.summarize_only_if_more_than,
                 embedder=embedder,
                 language=self.language,
             )
             self.relation_summarizer = RelationSummarizer(
                 llm,
-                use_llm_summarization=self.build_parameters.use_llm_summarization,
-                summarize_only_if_more_than=self.build_parameters.summarize_only_if_more_than,
-                language=self.language
+                use_llm_summarization=params.use_llm_summarization,
+                summarize_only_if_more_than=params.summarize_only_if_more_than,
+                language=self.language,
             )
-            self.community_summarizer = CommunitySummarizer(self.llm, language=self.language)
 
-    async def extract_graph(
-            self, chunks: List[Chunk]
-    ) -> Tuple[List[Entity], List[Relation], List[CommunitySummary], List[Community], List[Chunk]]:
+            self.community_summarizer = CommunitySummarizer(llm, language=self.language) if llm else None
+
+    async def extract_graph(self, chunks: List[Chunk]) -> BuildResult:
         """
         Run the full extraction pipeline and produce entities, relations,
         community summaries, and communities.
@@ -167,69 +233,75 @@ class InMemoryGraphBuilder:
           2. Summarize or merge similar artifacts.
           3. Detect communities and generate summaries (optional).
 
-        :param chunks: list of input text documents.
-        :return:
-            A tuple ``(entities, relations, summaries, communities)`` where
-              - **entities** (:class:`list[Entity]`) — extracted and summarized entities (empty if build_only_vector_context=True).
-              - **relations** (:class:`list[Relation]`) — extracted and summarized relations (empty if build_only_vector_context=True).
-              - **summaries** (:class:`list[CommunitySummary]`) — generated summaries for detected communities.
-              - **communities** (:class:`list[Community]`) — graph communities detected via Leiden clustering.
-              - **chunks** (:class:`list[Chunk]`) - list of chunks extracted from input documents.
+        :param chunks: Chunks to process.
+        :return: :class:`BuildResult` with extracted items and a :class:`BuildReport`.
+        :raises ValueError: If no artifact extractor is configured while
+            ``build_only_vector_context`` is disabled.
+        :raises TypeError: If an additional module does not return an
+            ``(entities, relations)`` tuple.
         """
-
-        if self.chunker is None:
-            logger.info('There is no chunker. Process raw documents.')
+        report = BuildReport(chunks_processed=len(chunks))
 
         if self.build_parameters.build_only_vector_context:
-            return [], [], [], [], chunks
+            return BuildResult(
+                entities=[], relations=[], summaries=[], communities=[],
+                chunks=chunks, report=report,
+            )
+
+        if self.artifact_extractor is None:
+            raise ValueError(
+                "artifact_extractor is required to build a knowledge graph. "
+                "Provide one to InMemoryGraphBuilder/KnowledgeGraph, or set "
+                "BuilderArguments(build_only_vector_context=True) for "
+                "vector-only mode."
+            )
 
         # Step 1: extract entities and relations
-        try:
-            entities, relations = await self.artifact_extractor(chunks)
-        except Exception as e:
-            logger.warning("Extraction failed: {}: {}", type(e).__name__, e)
-            entities, relations = [], []
+        entities, relations = await self.artifact_extractor(chunks)
+        report.entities_extracted = len(entities)
+        report.relations_extracted = len(relations)
 
         # Step 2: summarize similar artifacts' descriptions
-        try:
-            entities = await self.entity_summarizer.run(entities)
-        except Exception as e:
-            logger.warning("Entity summarization failed: {}: {}", type(e).__name__, e)
-
-        try:
-            relations = await self.relation_summarizer.run(relations)
-        except Exception as e:
-            logger.warning("Relation summarization failed: {}: {}", type(e).__name__, e)
+        entities = await self.entity_summarizer.run(entities) # type: ignore[union-attr]
+        relations = await self.relation_summarizer.run(relations) # type: ignore[union-attr]
 
         # Step 3: use additional modules
-        if self.additional_pipeline:
-            for additional_module in self.additional_pipeline:
-                try:
-                   entities, relations = await additional_module.run(entities, relations)
-                except Exception as e:
-                    logger.warning(
-                        "Additional module {} failed: {}: {}",
-                        type(additional_module).__name__, type(e).__name__, e,
-                    )
+        for additional_module in self.additional_pipeline or []:
+            module_name = type(additional_module).__name__
+            module_output = await additional_module.run(entities, relations)
+            if not isinstance(module_output, tuple) or len(module_output) != 2:
+                raise TypeError(
+                    f"Graph builder module {module_name} must return an "
+                    f"(entities, relations) tuple, got "
+                    f"{type(module_output).__name__}."
+                )
+            entities, relations = module_output
+
+        report.entities_final = len(entities)
+        report.relations_final = len(relations)
 
         # Step 4. get community summary
         communities: List[Community] = []
         summaries: List[CommunitySummary] = []
         if self.build_parameters.make_community_summary:
-            try:
-                communities = await self.cluster_graph(entities, relations)
-            except Exception as e:
-                logger.warning("Community detection failed: {}: {}", type(e).__name__, e)
-                communities = []
-
+            if self.community_summarizer is None:
+                raise ValueError(
+                    "Community summarization requires an LLM client. Provide one to "
+                    "InMemoryGraphBuilder/KnowledgeGraph, or disable it with "
+                    "BuilderArguments(make_community_summary=False)."
+                )
+            communities = await self.cluster_graph(entities, relations)
             if communities:
-                try:
-                    summaries = await self.community_summarizer.summarize(communities)
-                except Exception as e:
-                    logger.warning("Community summarization failed: {}: {}", type(e).__name__, e)
-                    summaries = []
+                summaries = await self.community_summarizer.summarize(communities)
 
-        return entities, relations, summaries, communities, chunks
+        report.communities_detected = len(communities)
+        report.community_summaries_generated = len(summaries)
+        report.community_summaries_failed = len(communities) - len(summaries)
+
+        return BuildResult(
+            entities=entities, relations=relations, summaries=summaries,
+            communities=communities, chunks=chunks, report=report,
+        )
 
     async def cluster_graph(
         self,

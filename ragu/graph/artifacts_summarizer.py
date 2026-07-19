@@ -12,7 +12,7 @@ from ragu.common.logger import logger
 from ragu.common.prompts.default_models import RelationDescriptionModel, EntityDescriptionModel
 from ragu.graph.types import Entity, Relation
 
-from ragu.common.prompts.prompt_storage import RAGUInstruction
+from ragu.common.prompts.prompt_storage import RAGUInstruction, require_prompt_schema
 from ragu.common.prompts.messages import ChatMessages, render
 from ragu.models.embedder import Embedder
 from ragu.models.llm import LLM
@@ -130,6 +130,10 @@ class EntitySummarizer(RaguGenerativeModule):
 
         entities_to_summarize: List[Entity] = []
         if self.use_llm_summarization:
+            if self.llm is None:
+                raise RuntimeError(
+                    "LLM summarization is enabled but no LLM client is configured."
+                )
             entities_to_summarize = [Entity(**row) for _, row in entity_multi_desc.iterrows()]
 
             instruction: RAGUInstruction = self.get_prompt("entity_summarizer")
@@ -139,12 +143,11 @@ class EntitySummarizer(RaguGenerativeModule):
                 language=self.language,
             )
 
-            assert self.llm
+            require_prompt_schema(instruction, "entity_summarizer", EntityDescriptionModel)
             output_schema = instruction.pydantic_model
-            assert output_schema is EntityDescriptionModel
             response: Sequence[EntityDescriptionModel | None] = await self.llm.batch_chat_completion(
                 conversations=[c.to_openai() for c in rendered_list],
-                output_schema=output_schema,
+                output_schema=output_schema, # type: ignore
                 continue_on_error=True,
                 desc="Entity summarization",
             )
@@ -189,11 +192,13 @@ class EntitySummarizer(RaguGenerativeModule):
 
         :param descriptions: List of raw descriptions for one entity.
         :return: A single merged (and optionally cluster-summarized) description string.
+        :raises RuntimeError: If clustering is triggered without an embedder or LLM client.
         """
-        assert self.embedder
-        assert self.llm
-
         if len(descriptions) > self.cluster_only_if_more_than and self.use_clustering:
+            if self.embedder is None or self.llm is None:
+                raise RuntimeError(
+                    "Description clustering requires both an embedder and an LLM client."
+                )
             embeddings = np.array(await self.embedder.batch_embed_text(descriptions))
             cluster = DBSCAN(eps=0.5, min_samples=2).fit(embeddings)
             labels = cluster.labels_
@@ -220,12 +225,12 @@ class EntitySummarizer(RaguGenerativeModule):
             result_description: List[str] = []
             results = await self.llm.batch_chat_completion(
                 [c.to_openai() for c in rendered_list],
-                output_schema=instruction.pydantic_model,
+                output_schema=instruction.pydantic_model, # type: ignore
                 continue_on_error=True,
                 desc="Map reduce for clustering",
             )
             flat_results = [
-                r.content for r in results
+                r.content for r in results # type: ignore
                 if r is not None and getattr(r, 'content', None)
             ]
 
@@ -252,7 +257,7 @@ class RelationSummarizer(RaguGenerativeModule):
     ``subject_id``, ``object_id`` for relations), merges their attributes,
     and optionally generates concise descriptions through an LLM.
 
-    :param client: LLM client used for summarization. Required if
+    :param llm: LLM client used for summarization. Required if
                    ``use_llm_summarization=True``.
     :param use_llm_summarization: Whether to perform description summarization
                                   with a language model.
@@ -327,8 +332,6 @@ class RelationSummarizer(RaguGenerativeModule):
                                      a ``duplicate_count`` column.
         :return: A list of summarized :class:`Relation` objects.
         """
-        assert self.llm
-
         relation_mask = grouped_relations_df["duplicate_count"].to_numpy() > self.summarize_only_if_more_than
 
         relation_multi_desc = grouped_relations_df.loc[relation_mask]
@@ -342,6 +345,10 @@ class RelationSummarizer(RaguGenerativeModule):
 
         relations_to_summarize: List[Relation] = []
         if self.use_llm_summarization:
+            if self.llm is None:
+                raise RuntimeError(
+                    "LLM summarization is enabled but no LLM client is configured."
+                )
             relations_to_summarize = [Relation(**row) for _, row in relation_multi_desc.iterrows()]
 
             instruction: RAGUInstruction = self.get_prompt("relation_summarizer")
@@ -351,11 +358,11 @@ class RelationSummarizer(RaguGenerativeModule):
                 language=self.language,
             )
 
+            require_prompt_schema(instruction, "relation_summarizer", RelationDescriptionModel)
             output_schema = instruction.pydantic_model
-            assert output_schema is RelationDescriptionModel
             response: List[RelationDescriptionModel | None] = await self.llm.batch_chat_completion(
                 [c.to_openai() for c in rendered_list],
-                output_schema=output_schema,
+                output_schema=output_schema, # type: ignore
                 continue_on_error=True,
             )
 

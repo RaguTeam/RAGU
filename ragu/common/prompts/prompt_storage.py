@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Type
+from typing import Type
 
 from pydantic import BaseModel
 
@@ -55,6 +55,34 @@ class RAGUInstruction:
     pydantic_model: Type[BaseModel] | Type[str] = str
     description: str | None = None
     few_shot_formatter: FewShotFormatter | None = None
+
+
+def require_prompt_schema(
+    instruction: RAGUInstruction,
+    prompt_name: str,
+    expected_model: type,
+) -> None:
+    """
+    Validate that a prompt instruction uses the output schema a component expects.
+
+    :param instruction: Prompt instruction to check.
+    :type instruction: RAGUInstruction
+    :param prompt_name: Prompt name used in the error message.
+    :type prompt_name: str
+    :param expected_model: Output schema type the calling component requires.
+    :type expected_model: type
+    :raises ValueError: If the instruction's ``pydantic_model`` differs from
+        ``expected_model`` (e.g. the prompt was replaced with an incompatible one).
+    """
+    if instruction.pydantic_model is not expected_model:
+        actual = getattr(
+            instruction.pydantic_model, "__name__", repr(instruction.pydantic_model)
+        )
+        raise ValueError(
+            f"Prompt {prompt_name!r} must use output schema "
+            f"{expected_model.__name__}, got {actual}. The prompt template was "
+            f"likely replaced with an incompatible schema via update_prompt()."
+        )
 
 
 DEFAULT_PROMPT_TEMPLATES: dict[str, RAGUInstruction] = {

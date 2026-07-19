@@ -20,6 +20,7 @@ from ragu.common.global_parameters import Settings
 from ragu.graph.builder_modules import RemoveIsolatedNodes
 from ragu.graph.graph_builder_pipeline import (
     InMemoryGraphBuilder,
+    BuildReport,
     BuilderArguments,
     GraphBuilderModule
 )
@@ -253,6 +254,9 @@ class KnowledgeGraph:
         self.remove_isolated_nodes = self.builder_settings.remove_isolated_nodes
         self.vectorize_chunks = self.builder_settings.vectorize_chunks
 
+        # Report of the most recent build_from_docs() run, None before the first build.
+        self.last_build_report: Optional[BuildReport] = None
+
     async def build_from_docs(self, docs: List[str]) -> "KnowledgeGraph":
         """
         Build graph and vector context from a list of input documents.
@@ -271,11 +275,19 @@ class KnowledgeGraph:
             logger.warning("Nothing to build.")
             return self
 
-        entities, relations, summaries, communities, chunks = await self.pipeline.extract_graph(chunks)
-        logger.debug(f'Extracted {len(entities)} entities')
-        logger.debug(f'Extracted {len(relations)} relations')
-        logger.debug(f'Extracted {len(communities)} communities')
-        logger.debug(f'Extracted {len(chunks)} chunks')
+        build_result = await self.pipeline.extract_graph(chunks)
+        entities = build_result.entities
+        relations = build_result.relations
+        summaries = build_result.summaries
+        communities = build_result.communities
+        chunks = build_result.chunks
+
+        logger.debug(f"Extracted {len(entities)} entities")
+        logger.debug(f"Extracted {len(relations)} relations")
+        logger.debug(f"Extracted {len(communities)} communities")
+        logger.debug(f"Extracted {len(chunks)} chunks")
+        
+        self.last_build_report = build_result.report
 
         is_vector_only = self.builder_settings.build_only_vector_context
         should_store_communities = self.make_community_summary and not is_vector_only
@@ -296,6 +308,15 @@ class KnowledgeGraph:
         if should_store_communities:
             await self.index.upsert_communities(communities)
             await self.upsert_summaries(summaries)
+
+        if not is_vector_only and not entities and not relations:
+            logger.warning(
+                "Graph build produced no entities or relations "
+                "({}). Check the extractor configuration and LLM logs.",
+                build_result.report.to_text(),
+            )
+        else:
+            logger.info("Graph build finished: {}", build_result.report.to_text())
 
         return self
 
@@ -375,9 +396,6 @@ class KnowledgeGraph:
         :param relations: Relations to add.
         :return: Self for method chaining.
         """
-        for item in relations:
-            if not item.id:
-                raise ValueError("Cannot insert relation without id")
         duplicate_ids = _duplicate_ids(relations)
         if duplicate_ids:
             raise ValueError(f"Cannot insert duplicated relation IDs in one request: {duplicate_ids}")
@@ -405,9 +423,6 @@ class KnowledgeGraph:
         :param relations: Relations to replace.
         :return: Self for method chaining.
         """
-        for item in relations:
-            if not item.id:
-                raise ValueError("Cannot update relation without id")
         duplicate_ids = _duplicate_ids(relations)
         if duplicate_ids:
             raise ValueError(f"Cannot update duplicated relation IDs in one request: {duplicate_ids}")
@@ -618,7 +633,10 @@ class KnowledgeGraph:
         Run clusterization and community summarization in knowledge graph.
         """
         if not self.pipeline.community_summarizer:
-            raise ValueError()
+            raise ValueError(
+                "Community reindexing requires a community summarizer; it is "
+                "unavailable when BuilderArguments(build_only_vector_context=True)."
+            )
 
         entities = await self.index.graph_backend.get_all_nodes()
         relations = await self.index.graph_backend.get_all_edges()

@@ -2,6 +2,7 @@
 Tests for KnowledgeGraph high-level merge behavior.
 """
 
+from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
@@ -225,7 +226,10 @@ async def test_reindex_community_replaces_stale_records_and_persists_clusters_to
             for community in communities
         ]
 
-    kg.pipeline.community_summarizer.summarize = AsyncMock(side_effect=summarize)
+    # KnowledgeGraph(llm=None) wires no community summarizer, so stand one in.
+    kg.pipeline.community_summarizer = SimpleNamespace(
+        summarize=AsyncMock(side_effect=summarize)
+    )
 
     await kg.upsert_entities([alice, bob])
     await kg.upsert_relations([relation])
@@ -325,7 +329,9 @@ async def test_reindex_community_keeps_existing_communities_when_summarization_f
         CommunitySummary(id="com-existing", summary="Existing summary")
     ])
 
-    kg.pipeline.community_summarizer.summarize = AsyncMock(side_effect=RuntimeError("LLM failed"))
+    kg.pipeline.community_summarizer = SimpleNamespace(
+        summarize=AsyncMock(side_effect=RuntimeError("LLM failed"))
+    )
 
     with pytest.raises(RuntimeError, match="LLM failed"):
         await kg.reindex_community()
@@ -418,7 +424,15 @@ async def test_build_from_docs_uses_knowledge_graph_merge_path(kg):
     )
 
     async def fake_extract_graph(chunks):
-        return [extracted], [], [], [], chunks
+        from ragu.graph.graph_builder_pipeline import BuildReport, BuildResult
+        return BuildResult(
+            entities=[extracted],
+            relations=[],
+            summaries=[],
+            communities=[],
+            chunks=chunks,
+            report=BuildReport(chunks_processed=len(chunks)),
+        )
 
     kg.pipeline.extract_graph = fake_extract_graph
 

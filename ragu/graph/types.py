@@ -36,6 +36,7 @@ class Entity(Node):
     :param documents_id: Identifiers of documents containing this entity.
     :param clusters: List of cluster memberships from community detection.
     :param id: Unique identifier; auto-generated if not provided.
+    :raises ValueError: If an explicitly provided ``id`` is empty.
     """
     entity_name: str
     entity_type: str
@@ -49,16 +50,23 @@ class Entity(Node):
         """
         Generate a stable MD5-based identifier if not already set.
 
-        :return: None
+        :raises ValueError: If an explicitly provided ``id`` is empty.
         """
         if self.id == 'auto':
             self.id = compute_mdhash_id(
                 (self.entity_name + " - " + self.entity_type),
                 prefix="ent-"
             )
+        elif not self.id:
+            raise ValueError("Entity id must be a non-empty string")
 
     def __eq__(self, other):
+        if not isinstance(other, Entity):
+            return NotImplemented
         return self.id == other.id and self.description == other.description
+
+    def __hash__(self):
+        return hash(self.id)
 
     def to_text(self):
         return f"{self.entity_name} - {self.description}"
@@ -77,6 +85,7 @@ class Relation(Edge):
     :param relation_strength: Numerical weight of the relation (default: 1.0).
     :param source_chunk_id: Identifiers of chunks where this relation was extracted.
     :param id: Unique identifier; auto-generated if not provided.
+    :raises ValueError: If an explicitly provided ``id`` is empty.
     """
     subject_id: str
     object_id: str
@@ -91,14 +100,24 @@ class Relation(Edge):
     def __post_init__(self):
         """
         Generate a stable MD5-based identifier if not already set.
+
+        :raises ValueError: If an explicitly provided ``id`` is empty.
         """
         if self.id == 'auto':
             self.id = compute_mdhash_id(
                 (self.subject_id + " -> " + self.object_id + self.relation_type),
                 prefix="rel-"
             )
+        elif not self.id:
+            raise ValueError("Relation id must be a non-empty string")
+
     def __eq__(self, other):
+        if not isinstance(other, Relation):
+            return NotImplemented
         return self.id == other.id and self.description == other.description
+
+    def __hash__(self):
+        return hash(self.id)
 
     def to_text(self):
         return f"{self.description}"
@@ -124,15 +143,24 @@ class Community:
     def __post_init__(self):
         """
         Generate a stable MD5-based identifier if not already set.
+
+        :raises ValueError: If an explicitly provided ``id`` is empty.
         """
         if self.id == 'auto':
             self.id = compute_mdhash_id(
                 f"{self.level}:{self.cluster_id}",
                 prefix="com-"
             )
+        elif not self.id:
+            raise ValueError("Community id must be a non-empty string")
 
     def __eq__(self, other):
+        if not isinstance(other, Community):
+            return NotImplemented
         return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
 
 @dataclass(slots=True)
@@ -142,6 +170,16 @@ class CommunitySummary:
 
     :param id: Unique identifier of the community.
     :param summary: Generated textual summary of the community content.
+    :raises ValueError: If ``id`` is empty.
     """
     id: str
     summary: str
+
+    def __post_init__(self):
+        """
+        Validate the summary identifier.
+
+        :raises ValueError: If ``id`` is empty.
+        """
+        if not self.id:
+            raise ValueError("CommunitySummary id must be a non-empty string")
