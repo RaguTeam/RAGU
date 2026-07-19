@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from typing import Any, Literal, TypeVar, Generic
 
 from pydantic import BaseModel
+
 from ragu.common.base import RaguGenerativeModule
 from ragu.common.global_parameters import Settings
 from ragu.models.llm import LLM
@@ -65,6 +67,21 @@ class SearchEngineResponse:
         if isinstance(self.response, BaseModel):
             return self.response.model_dump_json(indent=4)
         return self.response
+
+
+@dataclass(slots=True)
+class SearchEngineStreamEvent:
+    """
+    Incremental text generation event from a search engine.
+
+    ``delta`` contains the next generated text chunk. ``retrieval`` is repeated
+    on each event so consumers can access the context even when they process the
+    stream one chunk at a time.
+    """
+    query: str
+    retrieval: SearchEngineRetrieve[Any]
+    delta: str
+    payload: dict[str, Any] = field(default_factory=dict)
 
 
 class BaseEngine(RaguGenerativeModule, ABC):
@@ -140,6 +157,28 @@ class BaseEngine(RaguGenerativeModule, ABC):
         :return: Structured search result containing the final answer and retrieval details.
         """
         return (await self.batch_query([query], params))[0]
+
+    async def stream_query(
+        self,
+        query: str,
+        params: EngineParams | None = None,
+    ) -> AsyncIterator[SearchEngineStreamEvent]:
+        """
+        Execute retrieval and stream plain-text answer generation.
+
+        Concrete engines that can render a final-answer prompt override this
+        method. The default keeps the base class backward-compatible for custom
+        engines that only implement ``query`` / ``batch_query``.
+
+        :param query: Input query string.
+        :param params: Engine-specific query parameters.
+        :returns: Async iterator of generated text deltas with retrieval context.
+        """
+
+        # Makes this method an async generator, so subclasses share the async-for contract.
+        if False: # pragma: no cover
+            yield SearchEngineStreamEvent(query=query, retrieval=None, delta="")  # type: ignore[arg-type]
+        raise NotImplementedError(f"{type(self).__name__} does not support streaming query")
 
     @abstractmethod
     async def batch_search(self, queries: list[str], params: EngineParams | None = None) -> list[SearchEngineRetrieve]:

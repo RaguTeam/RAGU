@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from textwrap import dedent
 from typing import Any, List, Literal
@@ -13,6 +14,7 @@ from ragu.search_engine.base_engine import (
     BaseEngine,
     SearchEngineRetrieve,
     SearchEngineResponse,
+    SearchEngineStreamEvent,
     EngineParams,
 )
 from ragu.common.prompts.prompt_storage import RAGUInstruction
@@ -327,3 +329,38 @@ class MixSearchEngine(BaseEngine):
             )
             for query, answer, entries in zip(queries, answers, per_query)
         ]
+
+    @override
+    async def stream_query(
+        self,
+        query: str,
+        params: MixQueryParams | None = None,
+    ) -> AsyncIterator[SearchEngineStreamEvent]:
+        """
+        Execute an ensemble query and stream the final plain-text synthesis.
+
+        Child engines still run through their existing batch methods; only the
+        MixSearchEngine final synthesis is streamed.
+
+        :param query: Input query string.
+        :param params: Query parameters. When ``None``, defaults to
+            :class:`MixQueryParams`.
+        :returns: Async iterator of text deltas with the mixed retrieval context.
+        """
+        params = params or MixQueryParams()
+        ensemble = params.ensemble_responses
+        entries = (await self._gather_child_results([query], ensemble=ensemble))[0]
+        conversation = self._render_synthesis(query, entries, ensemble).to_openai()
+        retrieval = MixSearchRetrieve(
+            query=query,
+            result=MixSearchResult(entries),
+            metrics={},
+        )
+
+        async for delta in self.llm.stream_chat_completion(conversation):
+            yield SearchEngineStreamEvent(
+                query=query,
+                retrieval=retrieval,
+                delta=delta,
+                payload={},
+            )

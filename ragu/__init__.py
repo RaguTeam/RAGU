@@ -19,7 +19,8 @@ from ragu.search_engine import (
     GlobalSearchEngine,
     MixSearchEngine,
     NaiveSearchEngine,
-    QueryPlanEngine
+    QueryPlanEngine,
+    SearchEngineStreamEvent,
 )
 
 # Default extractors
@@ -42,6 +43,7 @@ __all__ = [
     "MixSearchEngine",
     "NaiveSearchEngine",
     "QueryPlanEngine",
+    "SearchEngineStreamEvent",
     "ArtifactsExtractorLLM",
     "TwoStageArtifactsExtractorLLM",
     "RaguLmArtifactExtractor",

@@ -1,8 +1,8 @@
 import asyncio
 import logging
-from collections.abc import MutableMapping, Sequence
+from collections.abc import AsyncIterator, MutableMapping, Sequence
 from dataclasses import dataclass
-from contextlib import AbstractAsyncContextManager
+from contextlib import AbstractAsyncContextManager, AsyncExitStack
 from pathlib import Path
 from typing import Any, TypeVar, cast
 import httpx
@@ -187,6 +187,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             contexts.append(asyncio.Semaphore(rate_max_simultaneous))
         if rate_min_delay:
             contexts.append(AsyncLimiter(1, time_period=rate_min_delay))
+        self._rate_limit_contexts = contexts
         if contexts:
             self._uncached_chat_completion = attach_async_contexts(
                 self._uncached_chat_completion, *contexts)
@@ -236,6 +237,54 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             output_schema=output_schema,
             **kwargs
         )
+
+    async def stream_chat_completion(
+        self,
+        model_name: str,
+        conversation: list[ChatCompletionMessageParam],
+        **kwargs: Any,
+    ) -> AsyncIterator[str]:
+        """
+        Stream a plain-text chat completion response.
+
+        Streaming bypasses the response cache because cached chat completions
+        store complete responses, not incremental deltas. Rate limiting is
+        applied for the lifetime of the stream.
+
+        :param model_name: Provider model name.
+        :param conversation: OpenAI-format chat messages.
+        :param kwargs: Supported generation options.
+        :returns: Async iterator of text deltas.
+        """
+        logger.debug(f'Sending stream_chat_completion API request to {model_name}...')
+        recognized_kwargs = {
+            k: kwargs.pop(k, omit)
+            for k in ['temperature', 'top_p']
+        }
+        if kwargs:
+            raise TypeError(
+                f'Unsupported stream_chat_completion arguments: {sorted(kwargs)}. '
+                f'Supported extra arguments: temperature, top_p.'
+            )
+        if self.max_completion_tokens is not None:
+            recognized_kwargs['max_completion_tokens'] = self.max_completion_tokens
+
+        async with AsyncExitStack() as stack:
+            for manager in self._rate_limit_contexts:
+                await stack.enter_async_context(manager)
+
+            stream = await self.client.chat.completions.create(
+                model=model_name,
+                messages=conversation,
+                stream=True,
+                **recognized_kwargs,
+            )
+            async for event in stream:
+                if not event.choices:
+                    continue
+                delta = event.choices[0].delta.content
+                if delta:
+                    yield delta
     
     async def embed_text(  # with caching
         self,
@@ -329,7 +378,11 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             k: kwargs.pop(k, omit)
             for k in ['temperature', 'top_p']
         }
-        assert not kwargs, f'Guard triggered: add this to supported kwargs: {kwargs}'
+        if kwargs:
+            raise TypeError(
+                f'Unsupported chat_completion arguments: {sorted(kwargs)}. '
+                f'Supported extra arguments: temperature, top_p.'
+            )
         if self.max_completion_tokens is not None:
             recognized_kwargs['max_completion_tokens'] = self.max_completion_tokens
         if issubclass(output_schema, str):
@@ -407,7 +460,8 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         """
         debug_text = text[:20].replace("\n", "\\n")
         logger.debug(f'Sending embed_text API request with text {debug_text}...')
-        assert not kwargs, f'Guard triggered: add this to supported kwargs: {kwargs}'
+        if kwargs:
+            raise TypeError(f'Unsupported embed_text arguments: {sorted(kwargs)}')
         timeout_kwarg: dict[str, Any] = (
             {'timeout': self.embed_timeout} if self.embed_timeout is not None else {}
         )
@@ -437,7 +491,8 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         logger.debug(
             f'Sending embed_texts API request with {len(texts)} texts...'
         )
-        assert not kwargs, f'Guard triggered: add this to supported kwargs: {kwargs}'
+        if kwargs:
+            raise TypeError(f'Unsupported embed_texts arguments: {sorted(kwargs)}')
         timeout_kwarg: dict[str, Any] = (
             {'timeout': self.embed_timeout} if self.embed_timeout is not None else {}
         )
@@ -464,8 +519,9 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         :returns: ``(index, score)`` tuples sorted by score descending.
         """
         debug_text = text_1[:20].replace("\n", "\\n")
-        logger.debug(f'Sending embed_text API request with text {debug_text}...')
-        assert not kwargs, f'Guard triggered: add this to supported kwargs: {kwargs}'
+        logger.debug(f'Sending score API request with text {debug_text}...')
+        if kwargs:
+            raise TypeError(f'Unsupported score arguments: {sorted(kwargs)}')
         
         headers = {"Content-Type": "application/json"}
         if self.client.api_key:

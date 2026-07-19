@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from dataclasses import field, dataclass
 from textwrap import dedent
 from typing import Any, List, Literal
@@ -15,6 +16,7 @@ from ragu.search_engine.base_engine import (
     BaseEngine,
     SearchEngineRetrieve,
     SearchEngineResponse,
+    SearchEngineStreamEvent,
     EngineParams,
 )
 
@@ -236,3 +238,39 @@ class GlobalSearchEngine(BaseEngine):
             )
             for query, answer, context in zip(queries, answers, contexts)
         ]
+
+    @override
+    async def stream_query(
+        self,
+        query: str,
+        params: EngineParams | None = None,
+    ) -> AsyncIterator[SearchEngineStreamEvent]:
+        """
+        Execute global RAG and stream the final plain-text synthesis.
+
+        Community meta-evaluation is completed before streaming starts; only the
+        final answer synthesis is streamed.
+
+        :param query: The natural language query from the user.
+        :param params: Query parameters (unused by global search; accepted for
+            interface consistency).
+        :returns: Async iterator of text deltas with the retrieval context.
+        """
+        context = await self.search(query, params)
+
+        instruction: RAGUInstruction = self.get_prompt("global_search")
+        conversations: List[ChatMessages] = render(
+            instruction.messages,
+            query=query,
+            context=self.truncation(str(context)),
+            language=self.language,
+        )
+        conversation = conversations[0].to_openai()
+
+        async for delta in self.llm.stream_chat_completion(conversation):
+            yield SearchEngineStreamEvent(
+                query=query,
+                retrieval=context,
+                delta=delta,
+                payload={},
+            )

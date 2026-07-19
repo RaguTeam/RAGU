@@ -30,9 +30,10 @@ caching, retries, rate limiting, and the OpenAI-compatible HTTP calls. A single
 summarizers, and search engines. `LLMOpenAI` is the OpenAI-compatible
 implementation.
 
-- Purpose: render prompts to OpenAI messages and return text or Pydantic
-  structured output.
-- Important methods: `chat_completion`, `batch_chat_completion`.
+- Purpose: render prompts to OpenAI messages and return text, Pydantic
+  structured output, or streamed text deltas.
+- Important methods: `chat_completion`, `batch_chat_completion`,
+  `stream_chat_completion`.
 - Important parameters: `client` (`CachedAsyncOpenAI`), `model_name`.
 
 ```python
@@ -44,6 +45,16 @@ client = CachedAsyncOpenAI(
     api_key="dummy-api-token",
 )
 llm = LLMOpenAI(client=client, model_name="gpt-4o-mini")
+```
+
+Streaming is text-only and bypasses response caching. Use regular
+`chat_completion` / `batch_chat_completion` for structured Pydantic output.
+
+```python
+async for delta in llm.stream_chat_completion([
+    {"role": "user", "content": "Answer briefly: what is RAG?"},
+]):
+    print(delta, end="")
 ```
 
 ### Embedder and EmbedderOpenAI
@@ -81,9 +92,10 @@ await embedder.initialize()  # optional; auto-detects dim if not set
 ### CachedAsyncOpenAI
 
 Network-level client shared by `LLMOpenAI` and `EmbedderOpenAI`. Controls
-caching, retries, rate limiting, timeouts, and an optional debug store for
-failed requests. This is the canonical reference for client configuration; the
-main README and the docs link here instead of duplicating it.
+caching, retries, rate limiting, timeouts, streaming chat completions, and an
+optional debug store for failed requests. This is the canonical reference for
+client configuration; the main README and the docs link here instead of
+duplicating it.
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|

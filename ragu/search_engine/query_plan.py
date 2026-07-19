@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from typing import List, Dict
 
 from ragu.common.prompts.default_models import SubQuery, QueryPlan, RewriteQuery
@@ -6,6 +7,7 @@ from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.search_engine.base_engine import (
     BaseEngine,
     SearchEngineResponse,
+    SearchEngineStreamEvent,
     SearchEngineRetrieve,
     EngineParams,
 )
@@ -266,6 +268,74 @@ class QueryPlanEngine(BaseEngine):
             self._assemble_response(query, plan, plan_answers)
             for query, plan, plan_answers in zip(queries, plans, answers)
         ]
+
+    @override
+    async def stream_query(
+        self,
+        query: str,
+        params: EngineParams | None = None,
+    ) -> AsyncIterator[SearchEngineStreamEvent]:
+        """
+        Execute a planned query and stream the final sink subquery answer.
+
+        Dependency subqueries are executed normally because their complete
+        answers are needed to rewrite downstream subqueries. Once the sink
+        subquery is ready, it is rewritten and delegated to the wrapped engine's
+        ``stream_query`` method.
+
+        :param query: The complex natural-language query to answer.
+        :param params: Query parameters forwarded to the underlying engine.
+        :returns: Async iterator of final-answer text deltas.
+        :raises ValueError: If plan dependencies contain a cycle or reference an
+            unknown subquery id.
+        """
+        plan = await self.process_query(query)
+        if not plan:
+            return
+
+        sink = _topological_sort(plan)[-1]
+        answers: Dict[str, SearchEngineResponse] = {}
+        pending: List[SubQuery] = list(plan)
+
+        while pending:
+            frontier = [
+                subquery
+                for subquery in pending
+                if all(dep in answers for dep in subquery.depends_on)
+            ]
+            if not frontier:
+                raise ValueError("Query plan dependencies contain a cycle or an unknown id")
+
+            non_sink_frontier = [subquery for subquery in frontier if subquery.id != sink.id]
+            if non_sink_frontier:
+                rewritten = await self._rewrite_frontier(
+                    non_sink_frontier,
+                    [answers for _ in non_sink_frontier],
+                )
+                responses = await self.engine.batch_query(
+                    [subquery.query for subquery in rewritten],
+                    params,
+                )
+                for subquery, response in zip(non_sink_frontier, responses):
+                    answers[subquery.id] = response
+
+                pending = [subquery for subquery in pending if subquery.id not in answers]
+                continue
+
+            rewritten_sink = await self._rewrite_subquery(sink, answers) if sink.depends_on else sink
+            payload = {
+                "answers": dict(answers),
+                "plan": plan,
+                "sink_subquery": rewritten_sink,
+            }
+            async for event in self.engine.stream_query(rewritten_sink.query, params):
+                yield SearchEngineStreamEvent(
+                    query=query,
+                    retrieval=event.retrieval,
+                    delta=event.delta,
+                    payload=payload | event.payload,
+                )
+            return
 
     @override
     async def search(self, query: str, params: EngineParams | None = None) -> SearchEngineRetrieve:

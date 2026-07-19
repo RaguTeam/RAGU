@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from textwrap import dedent
 from typing import Any, Optional, List, Literal
@@ -18,6 +19,7 @@ from ragu.search_engine.base_engine import (
     BaseEngine,
     SearchEngineRetrieve,
     SearchEngineResponse,
+    SearchEngineStreamEvent,
     EngineParams,
 )
 from typing_extensions import override
@@ -288,3 +290,28 @@ class NaiveSearchEngine(BaseEngine):
             )
             for query, answer, context in zip(queries, answers, contexts)
         ]
+
+    @override
+    async def stream_query(
+        self,
+        query: str,
+        params: NaiveSearchParams | None = None,
+    ) -> AsyncIterator[SearchEngineStreamEvent]:
+        """
+        Execute naive vector RAG and stream the final plain-text answer.
+
+        :param query: User query in natural language.
+        :param params: Query parameters. When ``None``, defaults to
+            :class:`NaiveSearchParams`.
+        :returns: Async iterator of text deltas with the retrieval context.
+        """
+        context = await self.search(query, params or NaiveSearchParams())
+        conversation = self._render_answer_messages(query, context).to_openai()
+
+        async for delta in self.llm.stream_chat_completion(conversation):
+            yield SearchEngineStreamEvent(
+                query=query,
+                retrieval=context,
+                delta=delta,
+                payload={},
+            )

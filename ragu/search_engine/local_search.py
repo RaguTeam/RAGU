@@ -1,6 +1,7 @@
 # Partially based on https://github.com/gusye1234/nano-graphrag/blob/main/nano_graphrag/
 import asyncio
 
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from textwrap import dedent
 from typing import Any, List, Literal
@@ -26,6 +27,7 @@ from ragu.search_engine.base_engine import (
     BaseEngine,
     SearchEngineRetrieve,
     SearchEngineResponse,
+    SearchEngineStreamEvent,
     EngineParams,
 )
 from ragu.search_engine.search_functional import (
@@ -386,3 +388,34 @@ class LocalSearchEngine(BaseEngine):
             )
             for query, answer, context in zip(queries, answers, contexts)
         ]
+
+    @override
+    async def stream_query(
+        self,
+        query: str,
+        params: LocalParams | None = None,
+    ) -> AsyncIterator[SearchEngineStreamEvent]:
+        """
+        Execute local graph RAG and stream the final plain-text answer.
+
+        :param query: User query in natural language.
+        :param params: Query parameters. When ``None``, defaults to
+            :class:`LocalParams`.
+        :returns: Async iterator of text deltas with the retrieval context.
+        """
+        params = params or LocalParams()
+        context = await self.search(query, params)
+        conversation = self._render_answer_messages(
+            query,
+            context,
+            params.use_summary,
+            params.use_chunks,
+        ).to_openai()
+
+        async for delta in self.llm.stream_chat_completion(conversation):
+            yield SearchEngineStreamEvent(
+                query=query,
+                retrieval=context,
+                delta=delta,
+                payload={},
+            )

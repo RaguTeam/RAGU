@@ -12,7 +12,7 @@ KnowledgeGraph + query -> retrieval context -> LLM answer
 
 ## Overview
 
-The module separates retrieval strategy from indexing. All engines share `BaseEngine`, the async `search()` for retrieval-only calls, and the async `query()` for retrieval plus answer generation. For many queries at once, every engine also exposes async `batch_search()` / `batch_query()`, which run retrieval concurrently and — for the leaf engines (Local, Naive, Global) — route answer generation through a single `llm.batch_chat_completion` call. All four methods are coroutines (await them). The `a_search` / `a_query` names are kept as backward-compatible async aliases that delegate to `search` / `query`.
+The module separates retrieval strategy from indexing. All engines share `BaseEngine`, the async `search()` for retrieval-only calls, the async `query()` for retrieval plus complete answer generation, and `stream_query()` for retrieval plus streamed text generation where supported. For many queries at once, every engine also exposes async `batch_search()` / `batch_query()`, which run retrieval concurrently and — for the leaf engines (Local, Naive, Global) — route answer generation through a single `llm.batch_chat_completion` call. `search()`, `query()`, `batch_search()`, and `batch_query()` are coroutines (await them); `stream_query()` returns an async iterator. The `a_search` / `a_query` names are kept as backward-compatible async aliases that delegate to `search` / `query`.
 
 ## Key Components
 
@@ -21,23 +21,12 @@ The module separates retrieval strategy from indexing. All engines share `BaseEn
 Abstract base for query engines.
 
 - Purpose: stores LLM and context truncation settings.
-- Important methods (all async): `search`, `query`.
+- Important methods: `search`, `query`, `stream_query`.
 - Batch methods (all async): `batch_search`, `batch_query`.
   They take a `list[str]` of queries and return a result list **aligned by position** with the
   input. They are fail-fast: the first failing query aborts the whole batch and raises.
 - Backward-compatible async aliases: `a_search`, `a_query` delegate to `search` / `query`.
 
-```python
-from ragu.search_engine.base_engine import BaseEngine
-from ragu.search_engine.naive_search import NaiveSearchEngine
-
-print(issubclass(NaiveSearchEngine, BaseEngine))  # True — every engine inherits BaseEngine
-print([m for m in ("search", "query", "batch_search", "batch_query") if hasattr(BaseEngine, m)])
-print([m for m in ("a_search", "a_query") if hasattr(BaseEngine, m)])
-
-# answers[i] corresponds to queries[i]; failed queries are None
-# answers = await engine.batch_query(["q1", "q2", "q3"])
-```
 
 ### SearchEngineRetrieve
 
@@ -76,6 +65,22 @@ response = SearchEngineResponse(
 )
 
 print(str(response))
+```
+
+### SearchEngineStreamEvent
+
+Incremental generated-answer event returned by `stream_query()`.
+
+- Purpose: carries `query`, the already retrieved `retrieval` context, generated
+  text `delta`, and optional `payload`.
+- Streaming is text-only; use `query()` for structured Pydantic responses.
+
+```python
+from ragu import SearchEngineStreamEvent
+
+async for event in engine.stream_query("What is RAGU?"):
+    assert isinstance(event, SearchEngineStreamEvent)
+    print(event.delta, end="")
 ```
 
 ### NaiveSearchEngine
@@ -182,6 +187,10 @@ print(len(mix.engines))
 
 Wraps any search engine and decomposes a complex query into dependent subqueries: each subquery is executed via the wrapped engine, intermediate answers are fed into subsequent subqueries, and the partial answers are synthesized into a final response. Useful for multi-hop questions that no single retrieval strategy can answer directly.
 
+`stream_query()` is supported when the wrapped engine supports it. Dependency
+subqueries are executed normally so their complete answers can be used for
+rewriting; only the final sink subquery answer is streamed.
+
 ```python
 from ragu import BuilderArguments, KnowledgeGraph, NaiveSearchEngine, QueryPlanEngine
 from ragu.models.embedder import EmbedderOpenAI
@@ -210,6 +219,7 @@ Output:
 
 - `SearchEngineRetrieve` from `search`
 - `SearchEngineResponse` from `query`
+- `SearchEngineStreamEvent` deltas from `stream_query`
 
 Used by: applications that need GraphRAG answers, retrieval diagnostics, or mixed retrieval strategies.
 
@@ -245,7 +255,7 @@ async def main():
     await graph.build_from_docs(["Python is a programming language."])
 
     engine = NaiveSearchEngine(llm=llm, knowledge_graph=graph, embedder=embedder)
-    retrieval = await engine.search("What is Python?", top_k=1)
+    retrieval = await engine.search("What is Python?")
     print(retrieval.result.chunks[0].content)
 
 
@@ -302,6 +312,9 @@ async def main():
     response = await mix.query("Summarize the main people and organizations.")
     print(response.response)
 
+    async for event in mix.stream_query("Summarize the main people and organizations."):
+        print(event.delta, end="")
+
 
 asyncio.run(main())
 ```
@@ -324,7 +337,7 @@ single engine instance.
 
 ## Integration Points
 
-- LLMs: every `query()` renders a prompt and calls `llm.chat_completion`; `batch_query()` on the leaf engines renders one prompt per query and issues a single `llm.batch_chat_completion`.
+- LLMs: every `query()` delegates to `batch_query()`; leaf `batch_query()` implementations render one prompt per query and issue a single `llm.batch_chat_completion`. `stream_query()` renders one final-answer prompt and calls `llm.stream_chat_completion`.
 - Embedders: local and naive search encode query text through `GraphRetriever`.
 - Sparse embedders: local and naive search can issue hybrid dense+sparse vector queries when storage supports sparse vectors.
 - Qdrant: hybrid search is handled by vector storage, including Qdrant prefetch/fusion in `QdrantVectorDBStorage`.
