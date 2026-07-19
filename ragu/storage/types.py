@@ -1,6 +1,6 @@
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, TypedDict
+from typing import Any, ClassVar, Dict, List, Optional, TypedDict
 
 from ragu.utils.ragu_utils import FLOATS, compute_mdhash_id, serialize
 
@@ -22,6 +22,25 @@ class Node:
     """
 
     id: str
+
+    #: Name of the field whose value groups nodes of this type. Storage backends
+    #: may use it to build labels, indexes or partitions; ``None`` means this
+    #: node type has no grouping. Declared as ``ClassVar`` on purpose: a plain
+    #: annotation would become a dataclass field on subclasses and leak into
+    #: ``asdict()``, which several backends persist verbatim.
+    label_field: ClassVar[Optional[str]] = None
+
+    def get_label(self) -> Optional[str]:
+        """
+        Return the value this node is grouped by.
+
+        :returns: Value of :attr:`label_field`, or ``None`` if the type declares
+            no grouping field or the value is empty.
+        :rtype: Optional[str]
+        """
+        if self.label_field is None:
+            return None
+        return getattr(self, self.label_field, None) or None
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -47,6 +66,22 @@ class Edge:
     id: str
     subject_id: str
     object_id: str
+
+    #: Name of the field whose value groups edges of this type. Same contract as
+    #: :attr:`Node.label_field`; see there for why it is a ``ClassVar``.
+    label_field: ClassVar[Optional[str]] = None
+
+    def get_label(self) -> Optional[str]:
+        """
+        Return the value this edge is grouped by.
+
+        :returns: Value of :attr:`label_field`, or ``None`` if the type declares
+            no grouping field or the value is empty.
+        :rtype: Optional[str]
+        """
+        if self.label_field is None:
+            return None
+        return getattr(self, self.label_field, None) or None
 
     def to_dict(self) -> Dict[str, Any]:
         """

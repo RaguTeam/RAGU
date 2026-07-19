@@ -116,9 +116,9 @@ async def test_edges_and_degree_stub(storage, entities):
         ]
     )
 
-    node_edges = await storage.get_node_edges("ent-1")
+    node_edges = (await storage.get_all_edges_for_nodes(["ent-1"]))[0]
     assert len(node_edges) == 2
-    assert await storage.get_node_edges("ent-999") == []
+    assert (await storage.get_all_edges_for_nodes(["ent-999"]))[0] == []
 
     edge_degrees = await storage.edges_degrees(
         [("ent-1", "ent-2", "rel-1"), ("ent-1", "ent-3", "rel-2"), ("ent-404", "ent-405", None)]

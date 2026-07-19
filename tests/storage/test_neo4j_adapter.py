@@ -142,33 +142,6 @@ async def test_get_all_edges(neo4j_store):
     assert all_edges[0].id == "rel-1"
 
 
-@pytest.mark.xfail(
-    reason=(
-        "OPEN DECISION: this asserts outgoing-only, while NetworkXStorage returns all "
-        "incident edges and test_graph_contract now requires the same. get_node_edges is "
-        "not declared in BaseGraphStorage and has no callers in ragu/, so either behaviour "
-        "is defensible. Resolve by picking one contract - or by dropping the method - and "
-        "then delete this marker."
-    ),
-    strict=True,
-)
-@pytest.mark.asyncio
-async def test_get_node_edges_returns_outgoing_only(neo4j_store):
-    await neo4j_store.upsert_nodes([
-        _entity("Alice", id="e1"),
-        _entity("Bob", id="e2"),
-        _entity("Charlie", id="e3"),
-    ])
-    await neo4j_store.upsert_edges([
-        _relation(subject_id="e1", object_id="e2", id="rel-1"),
-        _relation(subject_id="e3", object_id="e1", id="rel-2"),
-    ])
-
-    incident = await neo4j_store.get_node_edges("e1")
-    assert len(incident) == 1
-    assert incident[0].id == "rel-1"
-
-
 @pytest.mark.asyncio
 async def test_edges_degrees(neo4j_store):
     await neo4j_store.upsert_nodes([
@@ -313,3 +286,94 @@ async def test_get_label_returns_entity_type(neo4j_store):
         assert "NODE" in labels, "Base label :NODE should be present"
         assert "PERSON" in labels, f"Entity type label :PERSON should be present, got {labels}"
     await driver.close()
+
+@pytest.mark.asyncio
+async def test_run_cypher_query_filters_by_type(neo4j_store):
+    """The escape hatch used the way type filtering is meant to work."""
+    await neo4j_store.upsert_nodes([
+        _entity("Alice", entity_type="PERSON", id="e1"),
+        _entity("Bob", entity_type="PERSON", id="e2"),
+        _entity("Acme", entity_type="ORGANIZATION", id="e3"),
+    ])
+
+    rows = await neo4j_store.run_cypher_query(
+        "MATCH (n:NODE) WHERE n.entity_type IN $types RETURN n.id AS id ORDER BY id",
+        {"types": ["PERSON"]},
+    )
+
+    assert [row["id"] for row in rows] == ["e1", "e2"]
+
+
+@pytest.mark.asyncio
+async def test_run_cypher_query_returns_empty_list_for_no_matches(neo4j_store):
+    rows = await neo4j_store.run_cypher_query(
+        "MATCH (n:NODE {entity_type: $type}) RETURN n.id AS id",
+        {"type": "NOTHING_LIKE_THIS"},
+    )
+
+    assert rows == []
+
+
+@pytest.mark.asyncio
+async def test_index_start_callback_creates_constraint_and_type_index(neo4j_store):
+    """The type index is derived from Entity.label_field, not hardcoded."""
+    await neo4j_store.index_start_callback()
+
+    rows = await neo4j_store.run_cypher_query(
+        "SHOW INDEXES YIELD name, properties WHERE name STARTS WITH 'ragu' "
+        "RETURN name, properties ORDER BY name"
+    )
+
+    indexed = {row["name"]: row["properties"] for row in rows}
+    assert indexed["ragu_node_id"] == ["id"]
+    assert indexed[f"ragu_node_{Entity.label_field}"] == [Entity.label_field]
+
+
+@pytest.mark.asyncio
+async def test_edges_are_written_under_their_relation_type(neo4j_store):
+    """Relationship type comes from Relation.label_field, not a fixed constant."""
+    await neo4j_store.upsert_nodes([_entity("Alice", id="e1"), _entity("Acme", id="e2")])
+    await neo4j_store.upsert_edges([
+        _relation("e1", "e2", relation_type="WORKS_AT", id="r1"),
+        _relation("e2", "e1", relation_type="EMPLOYS", id="r2"),
+    ])
+
+    rows = await neo4j_store.run_cypher_query(
+        "MATCH ()-[r]->() RETURN type(r) AS t ORDER BY t"
+    )
+
+    assert [row["t"] for row in rows] == ["EMPLOYS", "WORKS_AT"]
+
+
+@pytest.mark.asyncio
+async def test_reads_ignore_relationships_from_other_tools(neo4j_store):
+    """
+    Typed edges cost the ``:RELATION`` filter, so reads match any relationship
+    between our nodes. Only edges carrying an id are ours.
+    """
+    await neo4j_store.upsert_nodes([_entity("Alice", id="e1"), _entity("Acme", id="e2")])
+    await neo4j_store.upsert_edges([_relation("e1", "e2", id="r1")])
+    await neo4j_store.run_cypher_query(
+        "MATCH (a:NODE {id: 'e1'}), (b:NODE {id: 'e2'}) "
+        "CREATE (a)-[:SOME_OTHER_TOOL {note: 'not ours'}]->(b)"
+    )
+
+    edges = await neo4j_store.get_all_edges()
+
+    assert [edge.id for edge in edges] == ["r1"]
+
+
+@pytest.mark.asyncio
+async def test_unknown_edge_properties_are_dropped_not_raised(neo4j_store):
+    """A property added by hand must not take down the whole read."""
+    await neo4j_store.upsert_nodes([_entity("Alice", id="e1"), _entity("Acme", id="e2")])
+    await neo4j_store.upsert_edges([_relation("e1", "e2", id="r1")])
+    await neo4j_store.run_cypher_query(
+        "MATCH ()-[r {id: 'r1'}]->() SET r.added_by_hand = 'x'"
+    )
+
+    edge = (await neo4j_store.get_edges([("e1", "e2", "r1")]))[0]
+
+    assert edge is not None
+    assert edge.id == "r1"
+    assert not hasattr(edge, "added_by_hand")

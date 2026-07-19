@@ -109,26 +109,6 @@ class NetworkXStorage(BaseGraphStorage[NodeT, EdgeT]):
         """
         pass
 
-    async def get_node_edges(self, source_node_id: str) -> List[EdgeT]:
-        """
-        Retrieve all edges connected to a given node.
-
-        Each returned :class:`EdgeT` includes associated metadata
-        and node display names when available. Missing nodes are tolerated.
-
-        :param source_node_id: ID of the node whose edges to fetch.
-        :return: List of edges connected to the node.
-        """
-        if not self._graph.has_node(source_node_id):
-            return []
-
-        edges: List[EdgeT] = []
-        for u, v, key, metadata in self._iter_incident_edges(source_node_id):
-            edge = self._edge_cls(subject_id=u, object_id=v, id=key, **metadata)
-            edges.append(edge)
-
-        return edges
-
     @override
     async def edges_degrees(self, edge_specs: List[EdgeSpec]) -> List[int]:
         """

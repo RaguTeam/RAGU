@@ -84,16 +84,6 @@ async def test_graph_contract_edge_direction_is_preserved(graph_storage):
 
 
 @pytest.mark.asyncio
-async def test_graph_contract_get_node_edges_includes_incoming(graph_storage):
-    """A node's edges are the incident ones, not only those leaving it."""
-    await _alice_works_at_acme(graph_storage)
-
-    edges = await graph_storage.get_node_edges("Acme")
-
-    assert [(e.subject_id, e.object_id) for e in edges] == [("Alice", "Acme")]
-
-
-@pytest.mark.asyncio
 async def test_graph_contract_node_id_stays_unique_when_type_changes(graph_storage):
     """
     Re-upserting an id with a different entity type updates the node in place.
