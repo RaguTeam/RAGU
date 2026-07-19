@@ -6,7 +6,6 @@ import re
 from collections import defaultdict
 from dataclasses import asdict
 from typing import (
-    TYPE_CHECKING,
     Any,
     Dict,
     Iterable,
@@ -20,13 +19,11 @@ from typing import (
     get_type_hints,
 )
 
-from typing_extensions import LiteralString, override
-
+from neo4j import AsyncDriver
+from neo4j import AsyncGraphDatabase
 from ragu.storage.base_storage import BaseGraphStorage, EdgeSpec
 from ragu.storage.types import Node, Edge
-
-if TYPE_CHECKING:
-    from neo4j import AsyncDriver
+from typing_extensions import LiteralString, override
 
 NodeT = TypeVar("NodeT", bound=Node)
 EdgeT = TypeVar("EdgeT", bound=Edge)
@@ -78,7 +75,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
     derived from the node itself, so Cypher lookups stay uniform while the
     graph remains readable in Neo4j Browser.
 
-    Requires the optional ``neo4j`` driver: ``pip install graph_ragu[neo4j]``.
+    Uses the ``neo4j`` driver, which ships as a regular dependency.
 
     :param uri: Bolt URI of the Neo4j server.
     :type uri: str
@@ -92,7 +89,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
     :type edge_cls: Type[EdgeT]
     :param database: Target database name.
     :type database: str
-    :raises ImportError: If the ``neo4j`` driver is not installed.
+    :raises ImportError: If the ``neo4j`` driver is not importable.
     """
 
     def __init__(
@@ -124,15 +121,8 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         :param kwargs: Ignored; accepted so that the storage can be constructed
             from the same argument bag as the other graph backends, which take
             options this one has no use for.
-        :raises ImportError: If the optional ``neo4j`` driver is not installed.
+        :raises ImportError: If the ``neo4j`` driver is not importable.
         """
-        try:
-            from neo4j import AsyncGraphDatabase
-        except ImportError as exc:
-            raise ImportError(
-                "Neo4jStorage requires the optional 'neo4j' driver. "
-                "Install it with: pip install graph_ragu[neo4j]"
-            ) from exc
 
         self._driver: "AsyncDriver" = AsyncGraphDatabase.driver(uri, auth=(user, password))
         self._database = database
