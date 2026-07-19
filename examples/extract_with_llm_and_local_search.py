@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import asyncio
 import os
 
@@ -17,12 +18,18 @@ from ragu.utils.ragu_utils import read_text_from_files
 
 
 async def main():
+    parser = ArgumentParser()
+    parser.add_argument("--lang", dest="language", type=str, required=False, default="ru",
+                        choices=["ru", "rus", "russian", "en", "eng", "english"],
+                        help="The language for demonstration.")
+    args = parser.parse_args()
+
     # Configure working directory and language
-    Settings.storage_folder = "ragu_working_dir/example_knowledge_graph"
-    Settings.language = "russian"
+    Settings.language = "russian" if args.language.startswith("ru") else "english"
+    Settings.storage_folder = "ragu_working_dir/example_knowledge_graph_" + Settings.language
 
     # Load documents
-    docs = read_text_from_files("examples/data/ru")
+    docs = read_text_from_files("examples/data/ru" if args.language.startswith("ru") else "examples/data/en")
 
     # Initialize chunker
     chunker = SimpleChunker(max_chunk_size=1000)
@@ -89,16 +96,27 @@ async def main():
     )
 
     # Run local search
-    questions = [
-        "Кто написал гимн Норвегии?",
-        "Шум, издаваемый ЭТИМИ ПАУКООБРАЗНЫМИ, слышен за пять километров. Отсюда и их название.",
-        "Как переводится название романа 'Ка́мо гряде́ши, Го́споди?' на русский языке"
-    ]
+    if args.language.startswith("ru"):
+        questions = [
+            "Кто написал гимн Норвегии?",
+            "Шум, издаваемый ЭТИМИ ПАУКООБРАЗНЫМИ, слышен за пять километров. Отсюда и их название.",
+            "Как переводится название романа 'Ка́мо гряде́ши, Го́споди?' на русский языке"
+        ]
 
-    for question in questions:
-        print(f'\nВопрос: {question}')
-        answer = await search_engine.a_query(question)
-        print(f'Ответ: {answer.response}')
+        for question in questions:
+            print(f'\nВопрос: {question}')
+            answer = await search_engine.a_query(question)
+            print(f'Ответ: {answer.response}')
+    else:
+        questions = [
+            "Where did the father of the creator of the C programming language work?",
+            "What did the person who died on October 12, 2011, create in their lifetime?"
+        ]
+
+        for question in questions:
+            print(f'\nQuestion: {question}')
+            answer = await search_engine.a_query(question)
+            print(f'Answer: {answer.response}')
 
 
 if __name__ == "__main__":
