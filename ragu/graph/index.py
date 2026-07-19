@@ -175,20 +175,21 @@ class Index(Generic[NodeT, EdgeT]):
         if embedder is not None:
             embedding_dim_from_embedder = embedder.dim
 
-            dimensions_from_kwargs = [
-                storage_kwargs.get("embedding_dim") for storage_kwargs in [
-                    nodes_vdb_kwargs,
-                    edges_vdb_kwargs,
-                    chunks_vdb_kwargs
-                ] if storage_kwargs.get("embedding_dim")]
+            declared_dims = {
+                storage_kwargs["embedding_dim"]
+                for storage_kwargs in (nodes_vdb_kwargs, edges_vdb_kwargs, chunks_vdb_kwargs)
+                if storage_kwargs.get("embedding_dim")
+            }
 
-            number_of_dimensions = len(dimensions_from_kwargs)
-            if number_of_dimensions > 1:
-                raise ValueError(f"Dimension mismatch in vdb kwargs: {dimensions_from_kwargs}")
-            if number_of_dimensions == 1:
-                if dimensions_from_kwargs[0] != embedding_dim_from_embedder:
-                    raise ValueError(f"Dimension mismatch in vdb kwargs and embedder setup: "
-                                     f"{dimensions_from_kwargs[0]} and {embedding_dim_from_embedder}")
+            if len(declared_dims) > 1:
+                raise ValueError(
+                    f"Conflicting embedding_dim across vector storages: {sorted(declared_dims)}"
+                )
+            if declared_dims and declared_dims != {embedding_dim_from_embedder}:
+                raise ValueError(
+                    f"embedding_dim in vdb kwargs does not match the embedder: "
+                    f"{next(iter(declared_dims))} and {embedding_dim_from_embedder}"
+                )
 
             resolved_dim = embedding_dim_from_embedder
 
