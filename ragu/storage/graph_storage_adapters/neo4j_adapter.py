@@ -1,28 +1,68 @@
 from __future__ import annotations
 
+import dataclasses
 import json
 import re
 from dataclasses import asdict
 from typing import (
+    TYPE_CHECKING,
     Any,
     Iterable,
     List,
     Optional,
     Type,
     TypeVar,
+    get_args,
+    get_origin,
+    get_type_hints,
 )
 
-from neo4j import AsyncGraphDatabase, AsyncDriver
 from typing_extensions import override
 
 from ragu.storage.base_storage import BaseGraphStorage, EdgeSpec
 from ragu.storage.types import Node, Edge
 
+if TYPE_CHECKING:
+    from neo4j import AsyncDriver
+
 NodeT = TypeVar("NodeT", bound=Node)
 EdgeT = TypeVar("EdgeT", bound=Edge)
 
+#: Property types Neo4j stores natively; anything else is serialized to JSON.
+_PRIMITIVES = (str, int, float, bool)
+
+#: Label applied to every node this adapter writes, used for lookups.
+_NODE_LABEL = "NODE"
+
+#: Relationship type applied to every edge this adapter writes.
+_EDGE_TYPE = "RELATION"
+
 
 class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
+    """
+    Neo4j-backed implementation of :class:`BaseGraphStorage`.
+
+    Nodes are written with a shared ``:NODE`` label plus a per-type label
+    derived from the node itself, so Cypher lookups stay uniform while the
+    graph remains readable in Neo4j Browser.
+
+    Requires the optional ``neo4j`` driver: ``pip install graph_ragu[neo4j]``.
+
+    :param uri: Bolt URI of the Neo4j server.
+    :type uri: str
+    :param user: Username for authentication.
+    :type user: str
+    :param password: Password for authentication.
+    :type password: str
+    :param node_cls: Dataclass used to materialize nodes.
+    :type node_cls: Type[NodeT]
+    :param edge_cls: Dataclass used to materialize edges.
+    :type edge_cls: Type[EdgeT]
+    :param database: Target database name.
+    :type database: str
+    :raises ImportError: If the ``neo4j`` driver is not installed.
+    """
+
     def __init__(
         self,
         uri: str,
@@ -31,46 +71,118 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         node_cls: Type[NodeT],
         edge_cls: Type[EdgeT],
         database: str = "neo4j",
-        filename: str | None = None,
         **kwargs: Any,
     ):
-        self._driver: AsyncDriver = AsyncGraphDatabase.driver(uri, auth=(user, password))
+        try:
+            from neo4j import AsyncGraphDatabase
+        except ImportError as exc:
+            raise ImportError(
+                "Neo4jStorage requires the optional 'neo4j' driver. "
+                "Install it with: pip install graph_ragu[neo4j]"
+            ) from exc
+
+        self._driver: "AsyncDriver" = AsyncGraphDatabase.driver(uri, auth=(user, password))
         self._database = database
         self._node_cls = node_cls
         self._edge_cls = edge_cls
+        self._node_json_fields = self._json_fields_for(node_cls)
+        self._edge_json_fields = self._json_fields_for(edge_cls)
 
     @staticmethod
     def _sanitize_label(label: str) -> str:
+        """
+        Make an arbitrary string safe to interpolate as a Cypher label.
+
+        :param label: Raw label, typically a node type.
+        :type label: str
+        :returns: Label containing only word characters and not starting with a digit.
+        :rtype: str
+        """
         sanitized = re.sub(r"[^a-zA-Z0-9_]", "_", label)
         if not sanitized or sanitized[0].isdigit():
             sanitized = f"_{sanitized}"
         return sanitized
 
     @staticmethod
+    def _label_for(node: Node) -> str:
+        """
+        Choose the per-type Neo4j label for a node.
+
+        Deriving the label here keeps Neo4j's storage concerns out of the shared
+        domain types, which several other backends also persist.
+
+        :param node: Node about to be written.
+        :type node: Node
+        :returns: Label name, falling back to the generic node label.
+        :rtype: str
+        """
+        return getattr(node, "entity_type", None) or _NODE_LABEL
+
+    @staticmethod
     def _serialize_props(props: dict) -> dict:
-        primitive = (str, int, float, bool)
+        """
+        Convert dataclass attributes into Neo4j-storable property values.
+
+        Values Neo4j cannot hold natively (nested lists, dicts) become JSON strings.
+
+        :param props: Attribute mapping.
+        :type props: dict
+        :returns: Property mapping safe to pass to Cypher.
+        :rtype: dict
+        """
         result = {}
-        for k, v in props.items():
-            if isinstance(v, primitive) or v is None:
-                result[k] = v
-            elif isinstance(v, list):
-                if all(isinstance(x, primitive) for x in v):
-                    result[k] = v
-                else:
-                    result[k] = json.dumps(v, ensure_ascii=False)
+        for key, value in props.items():
+            if isinstance(value, _PRIMITIVES) or value is None:
+                result[key] = value
+            elif isinstance(value, list) and all(isinstance(x, _PRIMITIVES) for x in value):
+                result[key] = value
             else:
-                result[k] = json.dumps(v, ensure_ascii=False)
+                result[key] = json.dumps(value, ensure_ascii=False)
         return result
 
     @staticmethod
-    def _get_json_fields(node_cls: type) -> tuple:
+    def _json_fields_for(record_cls: type) -> tuple[str, ...]:
+        """
+        Determine which fields round-trip through JSON, from their declared types.
+
+        Reading this off the dataclass annotations avoids asking domain types to
+        describe how one particular backend stores them: a field is JSON-encoded
+        exactly when Neo4j cannot hold its value natively.
+
+        :param record_cls: Node or edge dataclass.
+        :type record_cls: type
+        :returns: Names of fields stored as JSON strings.
+        :rtype: tuple[str, ...]
+        """
+        if not dataclasses.is_dataclass(record_cls):
+            return ()
         try:
-            return node_cls.__dataclass_fields__["_json_fields"].default
-        except (KeyError, AttributeError, TypeError):
+            hints = get_type_hints(record_cls)
+        except Exception:  # unresolvable forward references
             return ()
 
+        fields: List[str] = []
+        for field in dataclasses.fields(record_cls):
+            hint = hints.get(field.name)
+            origin, args = get_origin(hint), get_args(hint)
+            if origin is dict:
+                fields.append(field.name)
+            elif origin in (list, set, tuple) and args and args[0] not in _PRIMITIVES:
+                fields.append(field.name)
+        return tuple(fields)
+
     @staticmethod
-    def _deserialize_props(props: dict, json_fields: tuple) -> dict:
+    def _deserialize_props(props: dict, json_fields: tuple[str, ...]) -> dict:
+        """
+        Decode JSON-encoded properties back into Python values.
+
+        :param props: Properties as read from Neo4j.
+        :type props: dict
+        :param json_fields: Fields written as JSON strings.
+        :type json_fields: tuple[str, ...]
+        :returns: Properties with structured fields restored.
+        :rtype: dict
+        """
         for field in json_fields:
             raw = props.get(field)
             if isinstance(raw, str):
@@ -144,9 +256,8 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
             for node in nodes:
                 attrs = asdict(node)
                 node_id = attrs.pop("id")
-                attrs.pop("_json_fields", None)
                 props = self._serialize_props(attrs)
-                label = self._sanitize_label(node.get_label())
+                label = self._sanitize_label(self._label_for(node))
                 await session.run(
                     f"MERGE (n:NODE:{label} {{id: $id}}) SET n += $props",
                     id=node_id,
@@ -168,8 +279,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                 else:
                     props = dict(record["n"])
                     node_id_val = props.pop("id")
-                    json_fields = self._get_json_fields(self._node_cls)
-                    props = self._deserialize_props(props, json_fields)
+                    props = self._deserialize_props(props, self._node_json_fields)
                     results.append(self._node_cls(id=node_id_val, **props))
         return results
 
@@ -319,11 +429,10 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         nodes: List[NodeT] = []
         async with self._driver.session(database=self._database) as session:
             result = await session.run("MATCH (n:NODE) RETURN n")
-            json_fields = self._get_json_fields(self._node_cls)
             async for record in result:
                 props = dict(record["n"])
                 node_id = props.pop("id")
-                props = self._deserialize_props(props, json_fields)
+                props = self._deserialize_props(props, self._node_json_fields)
                 nodes.append(self._node_cls(id=node_id, **props))
         return nodes
 

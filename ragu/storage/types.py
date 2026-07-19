@@ -22,7 +22,6 @@ class Node:
     """
 
     id: str
-    _json_fields: tuple = ()
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -35,9 +34,6 @@ class Node:
         Convert node to text representation.
         """
         return str(f"{self.id}")
-
-    def get_label(self) -> str:
-        return "NODE"
 
 
 class Edge:
