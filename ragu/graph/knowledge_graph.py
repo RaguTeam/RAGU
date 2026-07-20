@@ -667,8 +667,15 @@ class KnowledgeGraph:
         await self.index.community_kv_storage.drop()
         await self.index.community_summary_kv_storage.drop()
 
-        await self.upsert_communities(communities)
-        await self.upsert_summaries(summaries)
+        if communities:
+            await self.upsert_communities(communities)
+        else:
+            await self.index.community_kv_storage.index_done_callback()
+
+        if summaries:
+            await self.upsert_summaries(summaries)
+        else:
+            await self.index.community_summary_kv_storage.index_done_callback()
 
         return self
 
