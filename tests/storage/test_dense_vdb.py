@@ -333,3 +333,27 @@ class TestNanoVectorDBStorageMetric:
 
         assert [hit.id for hit in hits] == ["long", "short"]
         assert hits[0].distance == pytest.approx(5.0)
+
+
+def test_interrupted_save_leaves_the_previous_index_intact(tmp_path):
+    """
+    A vector index cannot be repaired, only rebuilt, so a truncated file is a
+    total loss. The write goes through a temporary neighbour for that reason.
+    """
+    from unittest.mock import patch
+
+    db = _make_db(tmp_path)
+    db.upsert([{"__id__": f"id-{i}", "__vector__": np.eye(3, dtype=np.float32)[i % 3]}
+               for i in range(3)])
+    db.save()
+    path = tmp_path / "dense.json"
+    before = path.read_bytes()
+
+    db.upsert([{"__id__": "id-later", "__vector__": np.array([1.0, 1.0, 1.0])}])
+    with patch("json.dump", side_effect=OSError("disk full")):
+        with pytest.raises(OSError):
+            db.save()
+
+    assert path.read_bytes() == before
+    assert not list(tmp_path.glob("*.tmp"))
+    assert len(_make_db(tmp_path)) == 3

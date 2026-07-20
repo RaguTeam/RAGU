@@ -3,7 +3,7 @@
 import json
 import os
 import tempfile
-from typing import Any, List, TypeVar, Union
+from typing import List, TypeVar, Union
 from typing_extensions import override
 
 from ragu.common.global_parameters import Settings

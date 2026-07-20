@@ -73,13 +73,13 @@ async def test_single_node_and_edge_crud(storage, entities, relation):
     await storage.upsert_edges([relation])
 
     edges = await storage.get_edges([("ent-1", "ent-2", "rel-1"), ("ent-2", "ent-3", None)])
-    assert edges[0] is not None
-    assert edges[0].relation_type == "KNOWS"
-    assert edges[1] is None
+    assert [e.id for e in edges[0]] == ["rel-1"]
+    assert edges[0][0].relation_type == "KNOWS"
+    assert edges[1] == []
 
     await storage.delete_edges([("ent-1", "ent-2", "rel-1")])
     deleted = await storage.get_edges([("ent-1", "ent-2", "rel-1")])
-    assert deleted[0] is None
+    assert deleted[0] == []
 
     await storage.delete_nodes(["ent-2"])
     after_delete = await storage.get_nodes(["ent-2"])
@@ -177,4 +177,4 @@ async def test_index_done_callback_persists_and_reloads(tmp_path, entities, rela
     edges = await reloaded.get_edges([("ent-1", "ent-2", "rel-1")])
     assert nodes[0] is not None
     assert nodes[0].entity_type == "Person"
-    assert edges[0] is not None
+    assert edges[0]

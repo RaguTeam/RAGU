@@ -406,10 +406,12 @@ class KnowledgeGraph:
         ]
         existing_relations = await self.index.get_edges(edge_specs)
 
+        # Specs are built from relation ids, so each group holds zero or one
+        # existing relation.
         merged_relations: List[Relation] = []
-        for item, existing_relation in zip(relations, existing_relations):
-            if existing_relation is not None:
-                merged_relations.append(default_merge_relations_policy([item, existing_relation]))
+        for item, existing_group in zip(relations, existing_relations):
+            if existing_group:
+                merged_relations.append(default_merge_relations_policy([item, existing_group[0]]))
             else:
                 merged_relations.append(item)
 
@@ -452,13 +454,17 @@ class KnowledgeGraph:
         """
         return await self.index.graph_backend.edges_degrees(edge_specs)
 
-    async def get_relations(self, edge_specs: List[EdgeSpec]) -> List[Relation | None]:
+    async def get_relations(self, edge_specs: List[EdgeSpec]) -> List[List[Relation]]:
         """
-        Retrieve one or more relations by edge spec in one batched operation.
+        Retrieve relations by edge spec, one result list per spec.
+
+        Graphs are multigraphs, so a spec may match several relations; a list
+        per spec keeps the result aligned with ``edge_specs``. A named spec
+        yields its relation or an empty list, ``relation_id=None`` yields every
+        relation between the pair.
 
         :param edge_specs: One edge spec or a list of edge specs.
-        :return: Matching relation or list of relations, preserving input order
-            and using ``None`` for missing edges.
+        :return: One list of relations per spec, in spec order.
         """
         return await self.index.get_edges(edge_specs)
 

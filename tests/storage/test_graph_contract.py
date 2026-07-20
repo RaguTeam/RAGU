@@ -138,3 +138,40 @@ async def test_graph_contract_upsert_edges_is_idempotent(graph_storage):
     await graph_storage.upsert_edges([_relation("Alice", "Acme")])
 
     assert len(await graph_storage.get_all_edges()) == 1
+
+
+@pytest.mark.asyncio
+async def test_graph_contract_get_edges_returns_one_list_per_spec(graph_storage):
+    """
+    RAGU graphs are multigraphs. get_edges returns a list per spec, so the
+    result stays aligned with edge_specs no matter how many edges each matches.
+    """
+    await graph_storage.upsert_nodes([_entity("Alice"), _entity("Acme", "ORGANIZATION")])
+    await graph_storage.upsert_edges([
+        _relation("Alice", "Acme", edge_id="rel-works"),
+        _relation("Alice", "Acme", edge_id="rel-owns"),
+    ])
+
+    # None asks for every edge of the pair; a named spec for one; a missing
+    # named spec for none. Order and length follow the specs.
+    groups = await graph_storage.get_edges([
+        ("Alice", "Acme", None),
+        ("Alice", "Acme", "rel-owns"),
+        ("Alice", "Acme", "missing"),
+    ])
+
+    assert len(groups) == 3
+    assert sorted(e.id for e in groups[0]) == ["rel-owns", "rel-works"]
+    assert [e.id for e in groups[1]] == ["rel-owns"]
+    assert groups[2] == []
+
+
+@pytest.mark.asyncio
+async def test_graph_contract_deleting_a_missing_edge_is_tolerated(graph_storage):
+    """Deletion is idempotent, as it already was for nodes."""
+    await graph_storage.upsert_nodes([_entity("Alice"), _entity("Acme", "ORGANIZATION")])
+
+    await graph_storage.delete_edges([("Alice", "Acme", "never-existed")])
+    await graph_storage.delete_edges([("Alice", "nobody", None)])
+
+    assert await graph_storage.get_all_edges() == []

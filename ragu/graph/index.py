@@ -375,11 +375,7 @@ class Index(Generic[NodeT, EdgeT]):
             for edge in edges_to_upsert
         ]
         existing_edges = await self.graph_backend.get_edges(edge_specs)
-        existing_edge_ids = [
-            edge.id
-            for edge in existing_edges
-            if edge is not None
-        ]
+        existing_edge_ids = [edge.id for group in existing_edges for edge in group]
 
         dense_embeddings = await embedder.batch_embed_text(
             [edge.to_text() for edge in edges_to_upsert],
@@ -445,8 +441,8 @@ class Index(Generic[NodeT, EdgeT]):
         existing_edges = await self.graph_backend.get_edges(edge_specs)
         missing_specs = [
             edge_spec
-            for edge_spec, existing_edge in zip(edge_specs, existing_edges)
-            if existing_edge is None
+            for edge_spec, existing_group in zip(edge_specs, existing_edges)
+            if not existing_group
         ]
         if missing_specs:
             raise ValueError(f"Cannot update non-existent edges: {missing_specs}")
@@ -601,7 +597,7 @@ class Index(Generic[NodeT, EdgeT]):
             return self
 
         existing_edges = await self.graph_backend.get_edges(edge_specs)
-        found_edge_ids = [edge.id for edge in existing_edges if edge is not None]
+        found_edge_ids = [edge.id for group in existing_edges for edge in group]
 
         await self.graph_backend.delete_edges(edge_specs)
 
@@ -690,12 +686,17 @@ class Index(Generic[NodeT, EdgeT]):
         """
         return await self.graph_backend.get_nodes(node_ids)
 
-    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[Optional[EdgeT]]:
+    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[List[EdgeT]]:
         """
-        Retrieve edges by edge specs.
+        Retrieve edges by specs, one result list per spec.
+
+        Passes :meth:`BaseGraphStorage.get_edges` through unchanged: a spec
+        naming an edge yields it or an empty list, a spec with
+        ``relation_id=None`` yields every edge of the pair. The result stays
+        aligned with ``edge_specs`` in every case.
 
         :param edge_specs: List of edge specs ``(subject_id, object_id, relation_id)``.
-        :return: List of edges (``None`` for missing).
+        :return: One list of edges per spec, in spec order.
         """
         return await self.graph_backend.get_edges(edge_specs)
 

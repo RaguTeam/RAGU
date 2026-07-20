@@ -2,6 +2,7 @@
 Tests for KnowledgeGraph high-level merge behavior.
 """
 
+import os
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -165,11 +166,11 @@ async def test_reindex_descriptions_summarizes_only_long_descriptions(tmp_path, 
         (long_relation.subject_id, long_relation.object_id, long_relation.id),
         (short_relation.subject_id, short_relation.object_id, short_relation.id),
     ])
-    assert stored_relations[0] is not None
-    assert stored_relations[1] is not None
-    assert stored_relations[0].description == "Summarized relation"
-    assert stored_relations[0].relation_strength == pytest.approx(0.8)
-    assert stored_relations[1].description == "Bob knows Alice."
+    assert stored_relations[0]
+    assert stored_relations[1]
+    assert stored_relations[0][0].description == "Summarized relation"
+    assert stored_relations[0][0].relation_strength == pytest.approx(0.8)
+    assert stored_relations[1][0].description == "Bob knows Alice."
 
     entity_payloads = await kg.index.nodes_vector_db.get_payloads_by_ids([
         long_entity.id,
@@ -395,11 +396,11 @@ async def test_insert_relations_merges_with_existing_relation(kg):
 
     stored = await kg.index.get_edges([("ent-1", "ent-2", "rel-1")])
 
-    assert stored[0] is not None
-    assert "Friends" in stored[0].description
-    assert "Work together" in stored[0].description
-    assert stored[0].relation_strength == pytest.approx(0.7)
-    assert set(stored[0].source_chunk_id) == {"chunk-1", "chunk-2"}
+    assert stored[0]
+    assert "Friends" in stored[0][0].description
+    assert "Work together" in stored[0][0].description
+    assert stored[0][0].relation_strength == pytest.approx(0.7)
+    assert set(stored[0][0].source_chunk_id) == {"chunk-1", "chunk-2"}
 
 
 @pytest.mark.asyncio
@@ -842,3 +843,30 @@ async def test_summary_crud_operations_are_exposed_on_knowledge_graph(kg):
 
     stored = await kg.get_summaries(["sum-1"])
     assert stored[0] is None
+
+
+@pytest.mark.asyncio
+async def test_reindex_community_with_no_clusters_persists_the_empty_state(kg, tmp_path):
+    """
+    An empty reclustering drops the stored communities and upserts nothing.
+    Both upserts return early on empty input, so unless reindex_community
+    persists explicitly the dropped records reappear on the next load.
+    """
+    from ragu.storage.kv_storage_adapters.json_storage import JsonKVStorage
+
+    await kg.index.upsert_communities([
+        Community(level=0, cluster_id=1, entities=[], relations=[], id="com-stale"),
+    ])
+    await kg.upsert_summaries([CommunitySummary(id="com-stale", summary="stale")])
+
+    kg.pipeline.cluster_graph = AsyncMock(return_value=[])
+    kg.pipeline.community_summarizer = SimpleNamespace(summarize=AsyncMock(return_value=[]))
+
+    await kg.reindex_community()
+
+    for storage in (kg.index.community_kv_storage, kg.index.community_summary_kv_storage):
+        reloaded = JsonKVStorage(
+            storage_folder=os.path.dirname(storage.filename),
+            filename=os.path.basename(storage.filename),
+        )
+        assert reloaded.data == {}

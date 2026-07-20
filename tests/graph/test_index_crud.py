@@ -268,12 +268,12 @@ async def test_insert_relations(index, sample_entities, sample_relations):
     relation = sample_relations[0]
     retrieved = await index.get_edges([(relation.subject_id, relation.object_id, relation.id)])
     assert len(retrieved) == 1
-    assert retrieved[0] is not None
-    assert retrieved[0].id == relation.id
-    assert retrieved[0].subject_id == "ent-1"
-    assert retrieved[0].object_id == "ent-2"
-    assert retrieved[0].relation_type == "KNOWS"
-    assert retrieved[0].description == "Alice knows Bob"
+    assert retrieved[0]
+    assert retrieved[0][0].id == relation.id
+    assert retrieved[0][0].subject_id == "ent-1"
+    assert retrieved[0][0].object_id == "ent-2"
+    assert retrieved[0][0].relation_type == "KNOWS"
+    assert retrieved[0][0].description == "Alice knows Bob"
 
     vector_points = await index.edges_vector_db.get_points_by_ids([relation.id])
     assert vector_points[0] is not None
@@ -308,7 +308,7 @@ async def test_insert_relations_does_not_touch_graph_when_vectorization_fails(
 
     relation = sample_relations[0]
     retrieved = await index.get_edges([(relation.subject_id, relation.object_id, relation.id)])
-    assert retrieved == [None]
+    assert retrieved == [[]]
 
 
 @pytest.mark.asyncio
@@ -336,7 +336,7 @@ async def test_delete_entities_cascade(index, sample_entities, sample_relations)
 
     relation = sample_relations[0]
     retrieved_relations = await index.get_edges([(relation.subject_id, relation.object_id, relation.id)])
-    assert retrieved_relations[0] is None
+    assert retrieved_relations[0] == []
 
 
 @pytest.mark.asyncio
@@ -351,7 +351,7 @@ async def test_delete_relations(index, sample_entities, sample_relations):
     await index.delete_edges([(relation.subject_id, relation.object_id, relation.id)])
 
     retrieved = await index.get_edges([(relation.subject_id, relation.object_id, relation.id)])
-    assert retrieved[0] is None
+    assert retrieved[0] == []
 
     entities = await index.get_nodes(["ent-1", "ent-2"])
     assert all(e is not None for e in entities)
@@ -376,8 +376,8 @@ async def test_get_relations_preserves_stored_relation_id(index, sample_entities
     await index.upsert_edges([relation])
 
     retrieved = await index.get_edges([("ent-1", "ent-2", "rel-custom")])
-    assert retrieved[0] is not None
-    assert retrieved[0].id == "rel-custom"
+    assert retrieved[0]
+    assert retrieved[0][0].id == "rel-custom"
 
 
 @pytest.mark.asyncio
@@ -481,13 +481,13 @@ async def test_upsert_relations_keeps_non_duplicate_when_duplicates_exist(index,
             ("ent-2", "ent-1", "rel-new"),
         ]
     )
-    assert got[0] is not None
-    assert got[1] is not None
-    assert got[0].description == "new"
-    assert got[0].source_chunk_id == ["chunk-2"]
-    assert got[1].description == "fresh"
-    assert got[1].subject_id == "ent-2"
-    assert got[1].object_id == "ent-1"
+    assert got[0]
+    assert got[1]
+    assert got[0][0].description == "new"
+    assert got[0][0].source_chunk_id == ["chunk-2"]
+    assert got[1][0].description == "fresh"
+    assert got[1][0].subject_id == "ent-2"
+    assert got[1][0].object_id == "ent-1"
 
 
 @pytest.mark.asyncio
@@ -576,10 +576,10 @@ async def test_update_relations_replaces_existing_payload(index):
 
     updated_edge = await index.get_edges([("ent-a", "ent-b", "rel-update")])
 
-    assert updated_edge[0] is not None
-    assert updated_edge[0].description == "new relation"
-    assert updated_edge[0].relation_strength == 7.0
-    assert updated_edge[0].source_chunk_id == ["chunk-new"]
+    assert updated_edge[0]
+    assert updated_edge[0][0].description == "new relation"
+    assert updated_edge[0][0].relation_strength == 7.0
+    assert updated_edge[0][0].source_chunk_id == ["chunk-new"]
 
 
 @pytest.mark.asyncio
@@ -714,7 +714,7 @@ async def test_delete_chunks_cascade(index):
             ("ent-2", "ent-3", "rel-2"),
         ]
     )
-    assert relations_after_delete[0] is None
+    assert relations_after_delete[0] == []
     assert relations_after_delete[1] is not None
 
 
@@ -767,7 +767,7 @@ async def test_delete_chunks_removes_relations_tied_only_to_deleted_chunk(index)
     assert entities_after_delete[1] is not None
 
     relations_after_delete = await index.get_edges([("ent-1", "ent-2", "rel-1")])
-    assert relations_after_delete[0] is None
+    assert relations_after_delete[0] == []
 
 
 @pytest.mark.asyncio
@@ -1130,3 +1130,33 @@ async def test_close_releases_every_backend(index):
         "community_summary_kv_storage",
         "community_kv_storage",
     ] * 2)
+
+
+def test_embedding_dim_may_be_declared_alongside_the_embedder(tmp_path, monkeypatch, mock_embedder):
+    """
+    A consistent embedding_dim in vdb kwargs must be accepted.
+
+    All three vector storages are configured from one vdb_storage_kwargs, so the
+    declared value necessarily appears three times; counting those occurrences
+    instead of comparing them rejected every consistent setup.
+    """
+    from ragu.common.global_parameters import Settings
+    monkeypatch.setattr(Settings, "storage_folder", str(tmp_path / "storage"))
+
+    index = Index(
+        arguments=StorageArguments(vdb_storage_kwargs={"embedding_dim": mock_embedder.dim}),
+        embedder=mock_embedder,
+    )
+
+    assert index.nodes_vector_db.embedding_dim == mock_embedder.dim
+
+
+def test_embedding_dim_conflicting_with_the_embedder_is_rejected(tmp_path, monkeypatch, mock_embedder):
+    from ragu.common.global_parameters import Settings
+    monkeypatch.setattr(Settings, "storage_folder", str(tmp_path / "storage"))
+
+    with pytest.raises(ValueError, match="does not match the embedder"):
+        Index(
+            arguments=StorageArguments(vdb_storage_kwargs={"embedding_dim": mock_embedder.dim + 1}),
+            embedder=mock_embedder,
+        )
