@@ -1,16 +1,18 @@
-import os
-
 import pytest
 
 from ragu.graph.types import Entity, Relation
 from ragu.storage.graph_storage_adapters.neo4j_adapter import Neo4jStorage
 
+from tests.storage.conftest import (
+    NEO4J_DATABASE,
+    NEO4J_PASSWORD,
+    NEO4J_URI,
+    NEO4J_USER,
+    prepare_neo4j_store,
+    wipe_neo4j_store,
+)
+
 pytestmark = pytest.mark.integration
-
-NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "testpassword")
-
 
 @pytest.fixture
 async def neo4j_store():
@@ -19,27 +21,18 @@ async def neo4j_store():
             uri=NEO4J_URI,
             user=NEO4J_USER,
             password=NEO4J_PASSWORD,
+            database=NEO4J_DATABASE,
             node_cls=Entity,
             edge_cls=Relation,
         )
-    except ImportError as exc:  # optional driver not installed
+    except ImportError as exc:  # driver stripped from the build
         pytest.skip(str(exc))
 
-    try:
-        await store._verify_connectivity()
-    except Exception as exc:  # server not running in this environment
-        await store.close()
-        pytest.skip(f"Neo4j is not reachable at {NEO4J_URI}: {type(exc).__name__}")
+    await prepare_neo4j_store(store)
 
-    leftovers = await store.get_all_nodes()
-    if leftovers:
-        await store.delete_nodes([n.id for n in leftovers])
-
+    await wipe_neo4j_store(store)
     yield store
-
-    remaining = await store.get_all_nodes()
-    if remaining:
-        await store.delete_nodes([n.id for n in remaining])
+    await wipe_neo4j_store(store)
     await store.close()
 
 
@@ -120,12 +113,13 @@ async def test_upsert_and_get_edges(neo4j_store):
     rel = _relation(subject_id="e1", object_id="e2", id="rel-1")
     await neo4j_store.upsert_edges([rel])
 
-    got = await neo4j_store.get_edges([("e1", "e2", "rel-1"), ("e1", "e9", None)])
-    assert got[0] is not None
-    assert got[0].subject_id == "e1"
-    assert got[0].object_id == "e2"
-    assert got[0].relation_type == "KNOWS"
-    assert got[1] is None
+    # One list per spec: the first names an existing edge, the second a missing one.
+    got = await neo4j_store.get_edges([("e1", "e2", "rel-1"), ("e1", "e9", "rel-404")])
+    assert [e.id for e in got[0]] == ["rel-1"]
+    assert got[0][0].subject_id == "e1"
+    assert got[0][0].object_id == "e2"
+    assert got[0][0].relation_type == "KNOWS"
+    assert got[1] == []
 
 
 @pytest.mark.asyncio
@@ -372,8 +366,7 @@ async def test_unknown_edge_properties_are_dropped_not_raised(neo4j_store):
         "MATCH ()-[r {id: 'r1'}]->() SET r.added_by_hand = 'x'"
     )
 
-    edge = (await neo4j_store.get_edges([("e1", "e2", "r1")]))[0]
+    edge = (await neo4j_store.get_edges([("e1", "e2", "r1")]))[0][0]
 
-    assert edge is not None
     assert edge.id == "r1"
     assert not hasattr(edge, "added_by_hand")

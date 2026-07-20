@@ -100,6 +100,57 @@ def vdb_storage(vdb_backend_case, tmp_path, monkeypatch):
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "testpassword")
+NEO4J_DATABASE = os.getenv("NEO4J_DATABASE", "neo4j")
+
+#: Set to run the graph tests against a database that already holds data.
+#: They wipe it, so the default is to skip rather than destroy someone's graph.
+ALLOW_WIPE_VAR = "RAGU_TEST_ALLOW_NEO4J_WIPE"
+
+
+async def prepare_neo4j_store(store):
+    """
+    Make a Neo4j-backed store usable for a test, or skip.
+
+    Skips when the driver is missing or the server is unreachable, so the shared
+    suites still run without one. Also skips when the target database already
+    holds data: these tests wipe it, and Neo4j Community offers no second
+    database to isolate into, so the working graph of whoever runs pytest is at
+    stake. Set ``RAGU_TEST_ALLOW_NEO4J_WIPE=1`` to proceed anyway.
+
+    :param store: Neo4jStorage instance to prepare.
+    :raises pytest.skip.Exception: When the store cannot be used safely.
+    """
+    try:
+        await store._verify_connectivity()
+    except Exception as exc:
+        await store.close()
+        pytest.skip(f"Neo4j is not reachable at {NEO4J_URI}: {type(exc).__name__}")
+
+    # Count rather than list: get_all_nodes() materializes typed objects and
+    # would fail on any node that does not fit the node class, which is exactly
+    # the foreign data this guard exists to notice.
+    rows = await store.run_cypher_query("MATCH (n) RETURN count(n) AS total")
+    existing = rows[0]["total"] if rows else 0
+    if existing and not os.getenv(ALLOW_WIPE_VAR):
+        await store.close()
+        pytest.skip(
+            f"database '{NEO4J_DATABASE}' at {NEO4J_URI} already holds "
+            f"{existing} nodes; these tests would delete them. Point "
+            f"NEO4J_URI at a scratch server, or set {ALLOW_WIPE_VAR}=1."
+        )
+
+
+async def wipe_neo4j_store(store):
+    """
+    Remove everything from the store's database.
+
+    Deletes through Cypher rather than ``get_all_nodes`` + ``delete_nodes``:
+    materializing typed nodes fails on anything that does not fit the node
+    class, and a test fixture must be able to clean up regardless.
+
+    :param store: Neo4jStorage instance to clear.
+    """
+    await store.run_cypher_query("MATCH (n) DETACH DELETE n")
 
 
 @dataclass(frozen=True)
@@ -149,21 +200,13 @@ async def graph_storage(graph_backend_case, tmp_path):
         uri=NEO4J_URI,
         user=NEO4J_USER,
         password=NEO4J_PASSWORD,
+        database=NEO4J_DATABASE,
         node_cls=Entity,
         edge_cls=Relation,
     )
-    try:
-        await store._verify_connectivity()
-    except Exception as exc:  # server not running in this environment
-        await store.close()
-        pytest.skip(f"Neo4j is not reachable at {NEO4J_URI}: {type(exc).__name__}")
+    await prepare_neo4j_store(store)
 
-    async def wipe():
-        nodes = await store.get_all_nodes()
-        if nodes:
-            await store.delete_nodes([node.id for node in nodes])
-
-    await wipe()
+    await wipe_neo4j_store(store)
     yield store
-    await wipe()
+    await wipe_neo4j_store(store)
     await store.close()
