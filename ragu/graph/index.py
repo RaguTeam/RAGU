@@ -175,20 +175,21 @@ class Index(Generic[NodeT, EdgeT]):
         if embedder is not None:
             embedding_dim_from_embedder = embedder.dim
 
-            dimensions_from_kwargs = [
-                storage_kwargs.get("embedding_dim") for storage_kwargs in [
-                    nodes_vdb_kwargs,
-                    edges_vdb_kwargs,
-                    chunks_vdb_kwargs
-                ] if storage_kwargs.get("embedding_dim")]
+            declared_dims = {
+                storage_kwargs["embedding_dim"]
+                for storage_kwargs in (nodes_vdb_kwargs, edges_vdb_kwargs, chunks_vdb_kwargs)
+                if storage_kwargs.get("embedding_dim")
+            }
 
-            number_of_dimensions = len(dimensions_from_kwargs)
-            if number_of_dimensions > 1:
-                raise ValueError(f"Dimension mismatch in vdb kwargs: {dimensions_from_kwargs}")
-            if number_of_dimensions == 1:
-                if dimensions_from_kwargs[0] != embedding_dim_from_embedder:
-                    raise ValueError(f"Dimension mismatch in vdb kwargs and embedder setup: "
-                                     f"{dimensions_from_kwargs[0]} and {embedding_dim_from_embedder}")
+            if len(declared_dims) > 1:
+                raise ValueError(
+                    f"Conflicting embedding_dim across vector storages: {sorted(declared_dims)}"
+                )
+            if declared_dims and declared_dims != {embedding_dim_from_embedder}:
+                raise ValueError(
+                    f"embedding_dim in vdb kwargs does not match the embedder: "
+                    f"{next(iter(declared_dims))} and {embedding_dim_from_embedder}"
+                )
 
             resolved_dim = embedding_dim_from_embedder
 
@@ -374,11 +375,7 @@ class Index(Generic[NodeT, EdgeT]):
             for edge in edges_to_upsert
         ]
         existing_edges = await self.graph_backend.get_edges(edge_specs)
-        existing_edge_ids = [
-            edge.id
-            for edge in existing_edges
-            if edge is not None
-        ]
+        existing_edge_ids = [edge.id for group in existing_edges for edge in group]
 
         dense_embeddings = await embedder.batch_embed_text(
             [edge.to_text() for edge in edges_to_upsert],
@@ -444,8 +441,8 @@ class Index(Generic[NodeT, EdgeT]):
         existing_edges = await self.graph_backend.get_edges(edge_specs)
         missing_specs = [
             edge_spec
-            for edge_spec, existing_edge in zip(edge_specs, existing_edges)
-            if existing_edge is None
+            for edge_spec, existing_group in zip(edge_specs, existing_edges)
+            if not existing_group
         ]
         if missing_specs:
             raise ValueError(f"Cannot update non-existent edges: {missing_specs}")
@@ -600,7 +597,7 @@ class Index(Generic[NodeT, EdgeT]):
             return self
 
         existing_edges = await self.graph_backend.get_edges(edge_specs)
-        found_edge_ids = [edge.id for edge in existing_edges if edge is not None]
+        found_edge_ids = [edge.id for group in existing_edges for edge in group]
 
         await self.graph_backend.delete_edges(edge_specs)
 
@@ -689,12 +686,17 @@ class Index(Generic[NodeT, EdgeT]):
         """
         return await self.graph_backend.get_nodes(node_ids)
 
-    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[Optional[EdgeT]]:
+    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[List[EdgeT]]:
         """
-        Retrieve edges by edge specs.
+        Retrieve edges by specs, one result list per spec.
+
+        Passes :meth:`BaseGraphStorage.get_edges` through unchanged: a spec
+        naming an edge yields it or an empty list, a spec with
+        ``relation_id=None`` yields every edge of the pair. The result stays
+        aligned with ``edge_specs`` in every case.
 
         :param edge_specs: List of edge specs ``(subject_id, object_id, relation_id)``.
-        :return: List of edges (``None`` for missing).
+        :return: One list of edges per spec, in spec order.
         """
         return await self.graph_backend.get_edges(edge_specs)
 

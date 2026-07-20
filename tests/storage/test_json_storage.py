@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 
 import pytest
 
@@ -81,3 +82,42 @@ async def test_index_done_callback_persists_data(tmp_path):
     reloaded = JsonKVStorage(filename=str(storage_file))
 
     assert await reloaded.get_by_id("k1") == {"text": "Привет"}
+
+
+@pytest.mark.asyncio
+async def test_drop_clears_memory_and_is_persisted_by_the_caller(tmp_path):
+    """
+    drop() stays memory-only, like upsert() and delete(): persistence is the
+    caller's job. What must hold is that persisting after a drop actually
+    empties the file - that is the path reindex_community relies on.
+    """
+    storage = JsonKVStorage(storage_folder=str(tmp_path), filename="kv.json")
+    await storage.upsert({"com-1": {"summary": "old"}, "com-2": {"summary": "old"}})
+    await storage.index_done_callback()
+
+    await storage.drop()
+    assert storage.data == {}
+    assert json.loads((tmp_path / "kv.json").read_text(encoding="utf-8")) != {}
+
+    await storage.index_done_callback()
+
+    reloaded = JsonKVStorage(storage_folder=str(tmp_path), filename="kv.json")
+    assert reloaded.data == {}
+
+
+@pytest.mark.asyncio
+async def test_interrupted_write_leaves_the_previous_file_intact(tmp_path):
+    """A crash mid-write must not truncate the store."""
+    storage = JsonKVStorage(storage_folder=str(tmp_path), filename="kv.json")
+    await storage.upsert({"a": {"v": 1}})
+    await storage.index_done_callback()
+    path = tmp_path / "kv.json"
+    before = path.read_text(encoding="utf-8")
+
+    await storage.upsert({"b": {"v": 2}})
+    with patch("json.dump", side_effect=OSError("disk full")):
+        with pytest.raises(OSError):
+            await storage.index_done_callback()
+
+    assert path.read_text(encoding="utf-8") == before
+    assert not list(tmp_path.glob("*.tmp"))

@@ -159,9 +159,9 @@ async def test_upsert_edges_batch(temp_graph_storage, sample_entities, sample_re
     # Verify edges exist
     edge_specs = [(r.subject_id, r.object_id, r.id) for r in sample_relations]
     edges = await temp_graph_storage.get_edges(edge_specs)
-    assert all(e is not None for e in edges)
-    for edge, relation in zip(edges, sample_relations):
-        assert edge.relation_type == relation.relation_type
+    assert all(len(group) == 1 for group in edges)
+    for group, relation in zip(edges, sample_relations):
+        assert group[0].relation_type == relation.relation_type
 
 
 @pytest.mark.asyncio
@@ -176,7 +176,7 @@ async def test_get_edges_batch(temp_graph_storage, sample_entities, sample_relat
     retrieved = await temp_graph_storage.get_edges(edge_specs)
 
     assert len(retrieved) == 2
-    assert all(e is not None for e in retrieved)
+    assert all(len(group) == 1 for group in retrieved)
 
 
 @pytest.mark.asyncio
@@ -194,7 +194,7 @@ async def test_delete_edges_batch(temp_graph_storage, sample_entities, sample_re
     edge_specs = [(r.subject_id, r.object_id, r.id) for r in sample_relations]
     deleted = await temp_graph_storage.get_edges(edge_specs)
 
-    assert all(edge is None for edge in deleted)
+    assert all(group == [] for group in deleted)
 
 
 @pytest.mark.asyncio

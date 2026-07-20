@@ -156,13 +156,14 @@ class GraphRetriever:
         relation_by_id: Dict[str, Relation] = {}
         if unique_specs:
             spec_ids = list(unique_specs.keys())
-            relations = await self.knowledge_graph.index.get_edges(
+            relation_groups = await self.knowledge_graph.index.get_edges(
                 [unique_specs[spec_id] for spec_id in spec_ids]
             )
+            # Specs come from edge ids, so each group holds at most one relation.
             relation_by_id = {
-                spec_id: relation
-                for spec_id, relation in zip(spec_ids, relations)
-                if relation is not None
+                spec_id: group[0]
+                for spec_id, group in zip(spec_ids, relation_groups)
+                if group
             }
 
         results: List[RelationHits] = []

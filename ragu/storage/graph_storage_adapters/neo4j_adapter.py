@@ -479,17 +479,22 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
             )
 
     @override
-    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[Optional[EdgeT]]:
+    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[List[EdgeT]]:
         """
         Fetch edges by spec in one round trip, preserving input order.
 
         Each spec is tagged with its position so results can be realigned: a
         batched query returns rows in storage order, and specs may repeat.
 
+        One list per spec keeps the result aligned with ``edge_specs`` even
+        though a spec without an ``edge_id`` may match several edges of a
+        multigraph pair.
+
         :param edge_specs: Specs of ``(subject_id, object_id, edge_id)``.
         :type edge_specs: List[EdgeSpec]
-        :returns: Edges aligned with ``edge_specs``; missing ones mapped to ``None``.
-        :rtype: List[Optional[EdgeT]]
+        :returns: One list of edges per spec, in spec order; empty where nothing
+            matched.
+        :rtype: List[List[EdgeT]]
         """
         if not edge_specs:
             return []
@@ -498,7 +503,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
             {"i": index, "sid": subject_id, "oid": object_id, "eid": edge_id}
             for index, (subject_id, object_id, edge_id) in enumerate(edge_specs)
         ]
-        results: List[Optional[EdgeT]] = [None] * len(edge_specs)
+        found: Dict[int, List[EdgeT]] = defaultdict(list)
 
         async with self._driver.session(database=self._database) as session:
             result = await session.run(
@@ -513,8 +518,9 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                 rows=rows,
             )
             async for record in result:
-                results[record["i"]] = self._edge_from_record(record)
-        return results
+                found[record["i"]].append(self._edge_from_record(record))
+
+        return [found.get(index, []) for index in range(len(edge_specs))]
 
     @override
     async def upsert_edges(self, edges: Iterable[EdgeT]) -> None:
