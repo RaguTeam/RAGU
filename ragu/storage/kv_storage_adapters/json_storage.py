@@ -2,7 +2,8 @@
 
 import json
 import os
-from typing import List, TypeVar, Union
+import tempfile
+from typing import Any, List, TypeVar, Union
 from typing_extensions import override
 
 from ragu.common.global_parameters import Settings
@@ -131,5 +132,23 @@ class JsonKVStorage(BaseKVStorage[dict[str, T]]):
         """
         Persist the current in-memory data to disk.
         """
-        with open(self.filename, "w", encoding="utf-8") as f:
-            json.dump(self.data, f, indent=2, ensure_ascii=False)
+        directory = os.path.dirname(self.filename) or "."
+        os.makedirs(directory, exist_ok=True)
+        handle = tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=directory,
+            prefix=os.path.basename(self.filename) + ".",
+            suffix=".tmp",
+            delete=False,
+        )
+        try:
+            with handle as file:
+                json.dump(self.data, file, indent=2, ensure_ascii=False)
+                file.flush()
+                os.fsync(file.fileno())
+            os.replace(handle.name, self.filename)
+        except BaseException:
+            if os.path.exists(handle.name):
+                os.unlink(handle.name)
+            raise

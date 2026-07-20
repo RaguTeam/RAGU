@@ -11,6 +11,7 @@
 import base64
 import json
 import os
+import tempfile
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
@@ -240,11 +241,28 @@ class DenseVectorDB:
             "data": self._rows,
             "matrix": _encode_matrix(self._matrix),
         }
-        storage_dir = os.path.dirname(self.storage_file)
-        if storage_dir:
-            os.makedirs(storage_dir, exist_ok=True)
-        with open(self.storage_file, "w", encoding="utf-8") as handle:
-            json.dump(storage, handle, ensure_ascii=False)
+        storage_dir = os.path.dirname(self.storage_file) or "."
+        os.makedirs(storage_dir, exist_ok=True)
+
+        handle = tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=storage_dir,
+            prefix=os.path.basename(self.storage_file) + ".",
+            suffix=".tmp",
+            delete=False,
+        )
+        try:
+            with handle as file:
+                json.dump(storage, file, ensure_ascii=False)
+                file.flush()
+                os.fsync(file.fileno())
+            os.replace(handle.name, self.storage_file)
+        except BaseException:
+            if os.path.exists(handle.name):
+                os.unlink(handle.name)
+            raise
+
         logger.info(f"Saved {len(self._rows)} points to vector store '{self.storage_file}'.")
 
     def _rebuild_index(self) -> None:
