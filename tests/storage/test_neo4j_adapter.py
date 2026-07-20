@@ -21,12 +21,21 @@ async def neo4j_store():
             uri=NEO4J_URI,
             user=NEO4J_USER,
             password=NEO4J_PASSWORD,
-            database=NEO4J_DATABASE,
             node_cls=Entity,
             edge_cls=Relation,
         )
-    except ImportError as exc:  # driver stripped from the build
+    except ImportError as exc:  # optional driver not installed
         pytest.skip(str(exc))
+
+    try:
+        await store._verify_connectivity()
+    except Exception as exc:  # server not running in this environment
+        await store.close()
+        pytest.skip(f"Neo4j is not reachable at {NEO4J_URI}: {type(exc).__name__}")
+
+    leftovers = await store.get_all_nodes()
+    if leftovers:
+        await store.delete_nodes([n.id for n in leftovers])
 
     await prepare_neo4j_store(store)
 
