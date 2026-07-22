@@ -448,6 +448,12 @@ formatters) are in [`ragu/common/prompts/README.md`](ragu/common/prompts/README.
 - Matvey Solovyev
 - Ilya Myznikov
 
+## Star History
+
+<p align="left">
+<img src="assets/star-history-2026722.png" alt="RAGU star history" width="600" />
+</p>
+
 ## Citation
 
 If you find this work useful, please consider citing our paper:
