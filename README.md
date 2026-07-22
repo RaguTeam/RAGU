@@ -448,6 +448,16 @@ formatters) are in [`ragu/common/prompts/README.md`](ragu/common/prompts/README.
 - Matvey Solovyev
 - Ilya Myznikov
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=RaguTeam%2FRAGU&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=RaguTeam/RAGU&type=date&theme=dark&legend=top-left&sealed_token=_t-w5IbHrW4WoRTZSI6a7ygk5T0hptMbKlrLFfBHZwkE4qfDOJKqew6Wmw2h1Nos1wzb9RTiuKPQXoP3FZ_7X0dSDJyhTYHSvfbZFGqfVYm4YZ_owNrP6A" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=RaguTeam/RAGU&type=date&legend=top-left&sealed_token=_t-w5IbHrW4WoRTZSI6a7ygk5T0hptMbKlrLFfBHZwkE4qfDOJKqew6Wmw2h1Nos1wzb9RTiuKPQXoP3FZ_7X0dSDJyhTYHSvfbZFGqfVYm4YZ_owNrP6A" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=RaguTeam/RAGU&type=date&legend=top-left&sealed_token=_t-w5IbHrW4WoRTZSI6a7ygk5T0hptMbKlrLFfBHZwkE4qfDOJKqew6Wmw2h1Nos1wzb9RTiuKPQXoP3FZ_7X0dSDJyhTYHSvfbZFGqfVYm4YZ_owNrP6A" />
+ </picture>
+</a>
+
 ## Citation
 
 If you find this work useful, please consider citing our paper:
