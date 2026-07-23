@@ -2,6 +2,7 @@
 <h1 align="center">RAGU: Retrieval-Augmented Graph Utility</h1>
 
 <h3 align="center">Turn text into a knowledge graph and query it.
+
 ---
 
 <p align="center">
