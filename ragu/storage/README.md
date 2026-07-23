@@ -13,7 +13,7 @@ query vector -> vector storage -> EmbeddingHit -> graph/KV resolution
 
 ## Overview
 
-The module exists to keep `KnowledgeGraph` independent from a specific backend. RAGU can use local NetworkX/GML and JSON/Nano vector files for development, or Qdrant for dense and hybrid retrieval.
+The module exists to keep `KnowledgeGraph` independent from a specific backend. RAGU ships local file backends for development — NetworkX/GML for the graph, JSON for key-value, Nano for vectors — and server-backed alternatives for scale: Neo4j for the graph, Qdrant for dense and hybrid retrieval.
 
 ## Key Components
 
@@ -109,7 +109,7 @@ Directed multigraph storage contract.
   - `EdgeT`: a subclass of `ragu.storage.types.Edge`.
 - Important read methods:
   - `get_nodes(node_ids)`: ordered node lookup with `None` for misses.
-  - `get_edges(edge_specs)`: ordered edge lookup by `(subject_id, object_id, relation_id)`.
+  - `get_edges(edge_specs)`: edge lookup by `(subject_id, object_id, relation_id)`, returning one list per spec (`List[List[Edge]]`). A spec naming an edge yields it or an empty list; a spec with `relation_id=None` yields every edge between the pair, since graphs are directed multigraphs.
   - `get_all_nodes()`, `get_all_edges()`: full graph scans.
   - `get_all_edges_for_nodes(node_ids)`: incident-edge lookup for local search and cascade deletion.
   - `edges_degrees(edge_specs)`: degree signal for relation ranking.
@@ -410,11 +410,12 @@ async def main():
         await storage.upsert_edges([created])
 
         nodes = await storage.get_nodes([python.id, guido.id])
+        # get_edges returns one list per spec; take [0] for a named lookup.
         edges = await storage.get_edges([(guido.id, python.id, created.id)])
         degrees = await storage.edges_degrees([(guido.id, python.id, created.id)])
 
         print(nodes)
-        print(edges)
+        print(edges[0])
         print(degrees)
 
 

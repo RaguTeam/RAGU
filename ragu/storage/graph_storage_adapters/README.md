@@ -144,7 +144,8 @@ async def main():
     await storage.upsert_edges([relation])
 
     print(await storage.get_nodes([python.id, guido.id]))
-    print(await storage.get_edges([(guido.id, python.id, relation.id)]))
+    # get_edges returns one list per spec; [0] is the match for a named lookup.
+    print((await storage.get_edges([(guido.id, python.id, relation.id)]))[0])
     print(await storage.get_all_edges_for_nodes([python.id]))
 
 
