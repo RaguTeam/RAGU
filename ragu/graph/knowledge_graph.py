@@ -225,7 +225,7 @@ class KnowledgeGraph:
         self.embedder = embedder
         self.sparse_embedder = sparse_embedder
 
-        what_to_add = additional_modules if additional_modules else []
+        what_to_add = list(additional_modules) if additional_modules else []
 
         if self.builder_settings.remove_isolated_nodes:
             what_to_add.append(RemoveIsolatedNodes())

@@ -73,7 +73,7 @@ async def _find_most_related_text_unit_from_entities(
     neighbor_ids: List[str] = []
     for seed_id, relations_group in zip(seed_ids, grouped_relations):
         for relation in relations_group:
-            if relation is None:
+            if not relation:
                 continue
             if relation.subject_id == seed_id:
                 neighbor_ids.append(relation.object_id)
@@ -93,6 +93,8 @@ async def _find_most_related_text_unit_from_entities(
                 continue
             relation_counts = 0
             for e in this_edges:
+                if not e:
+                    continue
                 if e.subject_id == seed_id:
                     neighbor_id = e.object_id
                 elif e.object_id == seed_id:
