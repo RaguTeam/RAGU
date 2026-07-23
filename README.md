@@ -1,8 +1,7 @@
 
 <h1 align="center">RAGU: Retrieval-Augmented Graph Utility</h1>
 
-<h3 align="center">Turn text into a knowledge graph and query it — from a local file to Neo4j and Qdrant, without changing your code.</h3>
-
+<h3 align="center">Turn text into a knowledge graph and query it.
 ---
 
 <p align="center">
@@ -30,9 +29,6 @@ RAGU builds a knowledge graph from raw text and answers questions over it. It is
 built to move from a laptop to a server without rewrites, and to give you more
 than one way to retrieve.
 
-- **Swappable backends, dev to prod.** Start on local files (NetworkX, JSON,
-  Nano); switch to Neo4j for the graph and Qdrant for dense + hybrid vectors by
-  changing configuration, not code.
 - **Retrieval that fits the question.** Local graph neighborhoods, global
   community summaries, naive chunk-vector RAG, and a mix engine — with query
   planning and optional token-by-token streaming.
@@ -42,6 +38,7 @@ than one way to retrieve.
   questions, not only nearest-neighbor lookups.
 - **Async by design.** Batched embeddings, batched vector queries, and
   rate-limited LLM clients throughout.
+
 
 Partially based on [nano-graphrag](https://github.com/gusye1234/nano-graphrag/tree/main)
 
