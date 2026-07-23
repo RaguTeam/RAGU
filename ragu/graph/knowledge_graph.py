@@ -20,7 +20,6 @@ from ragu.common.global_parameters import Settings
 from ragu.graph.builder_modules import RemoveIsolatedNodes
 from ragu.graph.graph_builder_pipeline import (
     InMemoryGraphBuilder,
-    BuildReport,
     BuilderArguments,
     GraphBuilderModule
 )
@@ -255,7 +254,6 @@ class KnowledgeGraph:
         self.vectorize_chunks = self.builder_settings.vectorize_chunks
 
         # Report of the most recent build_from_docs() run, None before the first build.
-        self.last_build_report: Optional[BuildReport] = None
 
     async def build_from_docs(self, docs: List[str]) -> "KnowledgeGraph":
         """
@@ -275,19 +273,15 @@ class KnowledgeGraph:
             logger.warning("Nothing to build.")
             return self
 
-        build_result = await self.pipeline.extract_graph(chunks)
-        entities = build_result.entities
-        relations = build_result.relations
-        summaries = build_result.summaries
-        communities = build_result.communities
-        chunks = build_result.chunks
+        entities, relations, summaries, communities, chunks = (
+            await self.pipeline.extract_graph(chunks)
+        )
 
         logger.debug(f"Extracted {len(entities)} entities")
         logger.debug(f"Extracted {len(relations)} relations")
         logger.debug(f"Extracted {len(communities)} communities")
         logger.debug(f"Extracted {len(chunks)} chunks")
         
-        self.last_build_report = build_result.report
 
         is_vector_only = self.builder_settings.build_only_vector_context
         should_store_communities = self.make_community_summary and not is_vector_only
@@ -309,14 +303,18 @@ class KnowledgeGraph:
             await self.index.upsert_communities(communities)
             await self.upsert_summaries(summaries)
 
+        build_summary = (
+            f"entities: {len(entities)}, relations: {len(relations)}, "
+            f"communities: {len(communities)}, chunks: {len(chunks)}"
+        )
         if not is_vector_only and not entities and not relations:
             logger.warning(
-                "Graph build produced no entities or relations "
-                "({}). Check the extractor configuration and LLM logs.",
-                build_result.report.to_text(),
+                "Graph build produced no entities or relations ({}). "
+                "Check the extractor configuration and LLM logs.",
+                build_summary,
             )
         else:
-            logger.info("Graph build finished: {}", build_result.report.to_text())
+            logger.info("Graph build finished: {}", build_summary)
 
         return self
 

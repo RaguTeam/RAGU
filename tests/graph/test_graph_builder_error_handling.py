@@ -4,7 +4,6 @@ import pytest
 
 from ragu.chunker.types import Chunk
 from ragu.graph.graph_builder_pipeline import (
-    BuildResult,
     BuilderArguments,
     GraphBuilderModule,
     InMemoryGraphBuilder,
@@ -138,13 +137,11 @@ async def test_extract_graph_vector_only_needs_no_extractor(tmp_path):
     )
 
     chunks = [_make_chunk()]
-    result = await builder.extract_graph(chunks)
+    entities, relations, summaries, communities, out_chunks = await builder.extract_graph(chunks)
 
-    assert isinstance(result, BuildResult)
-    assert result.entities == []
-    assert result.relations == []
-    assert result.chunks == chunks
-    assert result.report.chunks_processed == 1
+    assert entities == []
+    assert relations == []
+    assert out_chunks == chunks
 
 
 async def test_extract_graph_module_returning_none_raises_type_error(tmp_path):
@@ -165,7 +162,7 @@ def test_graph_builder_module_is_abstract():
         GraphBuilderModule()
 
 
-async def test_extract_graph_all_succeed_returns_report(tmp_path):
+async def test_extract_graph_all_succeed_returns_result(tmp_path):
     entities = [_make_entity(), _make_entity("Bob", "Person")]
     relations = [_make_relation()]
 
@@ -179,20 +176,12 @@ async def test_extract_graph_all_succeed_returns_report(tmp_path):
         level=1, cluster_id=1, entities=entities, relations=relations,
     )
     with patch.object(builder, 'cluster_graph', return_value=[mock_community]):
-        result = await builder.extract_graph([_make_chunk()])
+        entities_out, relations_out, summaries, communities, out_chunks = (
+            await builder.extract_graph([_make_chunk()])
+        )
 
-    assert len(result.entities) == 2
-    assert len(result.relations) == 1
-    assert len(result.summaries) == 1
-    assert len(result.communities) == 1
-
-    report = result.report
-    assert report.chunks_processed == 1
-    assert report.entities_extracted == 2
-    assert report.relations_extracted == 1
-    assert report.entities_final == 2
-    assert report.relations_final == 1
-    assert report.communities_detected == 1
-    assert report.community_summaries_generated == 1
-    assert report.community_summaries_failed == 0
-    assert "entities: 2 extracted -> 2 final" in report.to_text()
+    assert len(entities_out) == 2
+    assert len(relations_out) == 1
+    assert len(summaries) == 1
+    assert len(communities) == 1
+    assert len(out_chunks) == 1

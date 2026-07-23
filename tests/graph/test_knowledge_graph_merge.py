@@ -425,15 +425,7 @@ async def test_build_from_docs_uses_knowledge_graph_merge_path(kg):
     )
 
     async def fake_extract_graph(chunks):
-        from ragu.graph.graph_builder_pipeline import BuildReport, BuildResult
-        return BuildResult(
-            entities=[extracted],
-            relations=[],
-            summaries=[],
-            communities=[],
-            chunks=chunks,
-            report=BuildReport(chunks_processed=len(chunks)),
-        )
+        return [extracted], [], [], [], chunks
 
     kg.pipeline.extract_graph = fake_extract_graph
 

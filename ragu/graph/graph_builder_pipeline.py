@@ -89,70 +89,6 @@ class GraphBuilderModule(ABC):
         """
 
 
-@dataclass(slots=True)
-class BuildReport:
-    """
-    Summary of one graph-building run.
-
-    Collected by :meth:`InMemoryGraphBuilder.extract_graph` and exposed on
-    :class:`~ragu.graph.knowledge_graph.KnowledgeGraph` as
-    ``last_build_report`` so callers can detect degraded builds (e.g. an
-    extractor that produced nothing) without parsing logs.
-
-    :param chunks_processed: Number of chunks fed into extraction.
-    :param entities_extracted: Entities produced by the artifact extractor.
-    :param relations_extracted: Relations produced by the artifact extractor.
-    :param entities_final: Entities after summarization and modules.
-    :param relations_final: Relations after summarization and modules.
-    :param communities_detected: Communities found by clustering.
-    :param community_summaries_generated: Communities successfully summarized.
-    :param community_summaries_failed: Communities left without a summary.
-    """
-    chunks_processed: int = 0
-    entities_extracted: int = 0
-    relations_extracted: int = 0
-    entities_final: int = 0
-    relations_final: int = 0
-    communities_detected: int = 0
-    community_summaries_generated: int = 0
-    community_summaries_failed: int = 0
-
-    def to_text(self) -> str:
-        """
-        Render the report as a single human-readable line.
-
-        :return: Compact textual summary of the build.
-        """
-        return (
-            f"chunks: {self.chunks_processed}; "
-            f"entities: {self.entities_extracted} extracted -> {self.entities_final} final; "
-            f"relations: {self.relations_extracted} extracted -> {self.relations_final} final; "
-            f"communities: {self.communities_detected} "
-            f"(summaries: {self.community_summaries_generated} ok, "
-            f"{self.community_summaries_failed} failed)"
-        )
-
-
-@dataclass(slots=True)
-class BuildResult:
-    """
-    Full outcome of :meth:`InMemoryGraphBuilder.extract_graph`.
-
-    :param entities: Extracted and post-processed entities.
-    :param relations: Extracted and post-processed relations.
-    :param summaries: Generated community summaries.
-    :param communities: Detected graph communities.
-    :param chunks: Chunks that were processed.
-    :param report: Aggregated counters for this build.
-    """
-    entities: List[Entity]
-    relations: List[Relation]
-    summaries: List[CommunitySummary]
-    communities: List[Community]
-    chunks: List[Chunk]
-    report: BuildReport
-
-
 class InMemoryGraphBuilder:
     """
     High-level orchestrator for extracting and summarizing entities and relations
@@ -222,7 +158,13 @@ class InMemoryGraphBuilder:
 
             self.community_summarizer = CommunitySummarizer(llm, language=self.language) if llm else None
 
-    async def extract_graph(self, chunks: List[Chunk]) -> BuildResult:
+    async def extract_graph(self, chunks: List[Chunk]) -> Tuple[
+        List[Entity],
+        List[Relation],
+        List[CommunitySummary],
+        List[Community],
+        List[Chunk],
+    ]:
         """
         Run the full extraction pipeline and produce entities, relations,
         community summaries, and communities.
@@ -234,19 +176,14 @@ class InMemoryGraphBuilder:
           3. Detect communities and generate summaries (optional).
 
         :param chunks: Chunks to process.
-        :return: :class:`BuildResult` with extracted items and a :class:`BuildReport`.
+        :return: ``(entities, relations, summaries, communities, chunks)``.
         :raises ValueError: If no artifact extractor is configured while
             ``build_only_vector_context`` is disabled.
         :raises TypeError: If an additional module does not return an
             ``(entities, relations)`` tuple.
         """
-        report = BuildReport(chunks_processed=len(chunks))
-
         if self.build_parameters.build_only_vector_context:
-            return BuildResult(
-                entities=[], relations=[], summaries=[], communities=[],
-                chunks=chunks, report=report,
-            )
+            return [], [], [], [], chunks
 
         if self.artifact_extractor is None:
             raise ValueError(
@@ -258,8 +195,6 @@ class InMemoryGraphBuilder:
 
         # Step 1: extract entities and relations
         entities, relations = await self.artifact_extractor(chunks)
-        report.entities_extracted = len(entities)
-        report.relations_extracted = len(relations)
 
         # Step 2: summarize similar artifacts' descriptions
         entities = await self.entity_summarizer.run(entities) # type: ignore[union-attr]
@@ -277,9 +212,6 @@ class InMemoryGraphBuilder:
                 )
             entities, relations = module_output
 
-        report.entities_final = len(entities)
-        report.relations_final = len(relations)
-
         # Step 4. get community summary
         communities: List[Community] = []
         summaries: List[CommunitySummary] = []
@@ -294,14 +226,7 @@ class InMemoryGraphBuilder:
             if communities:
                 summaries = await self.community_summarizer.summarize(communities)
 
-        report.communities_detected = len(communities)
-        report.community_summaries_generated = len(summaries)
-        report.community_summaries_failed = len(communities) - len(summaries)
-
-        return BuildResult(
-            entities=entities, relations=relations, summaries=summaries,
-            communities=communities, chunks=chunks, report=report,
-        )
+        return entities, relations, summaries, communities, chunks
 
     async def cluster_graph(
         self,
