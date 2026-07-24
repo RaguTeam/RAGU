@@ -609,26 +609,37 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         endpoint was queried, and no deduplication happens across nodes: an
         edge between two requested nodes appears in both lists.
 
+        Every id is expanded in one round trip, tagged with its position so a
+        repeated id still yields its own list, matching what a per-id query
+        would have returned for that position.
+
         :param node_ids: Identifiers whose edges to fetch.
         :type node_ids: List[str]
         :returns: Edge lists aligned with ``node_ids``; unknown nodes yield ``[]``.
         :rtype: List[List[EdgeT]]
         """
-        grouped: List[List[EdgeT]] = []
+        if not node_ids:
+            return []
+
+        rows = [{"i": index, "id": node_id} for index, node_id in enumerate(node_ids)]
+        found: Dict[int, List[EdgeT]] = defaultdict(list)
+
         async with self._driver.session(database=self._database) as session:
-            for node_id in node_ids:
-                result = await session.run(
-                    _cypher(
-                        f"""
-                        MATCH (n:{_NODE_LABEL} {{id: $id}})-[r]-(:{_NODE_LABEL})
-                        WHERE {_OURS}
-                        RETURN startNode(r) AS s, r, endNode(r) AS t
-                        """,
-                    ),
-                    id=node_id,
-                )
-                grouped.append([self._edge_from_record(record) async for record in result])
-        return grouped
+            result = await session.run(
+                _cypher(
+                    f"""
+                    UNWIND $rows AS row
+                    MATCH (n:{_NODE_LABEL} {{id: row.id}})-[r]-(:{_NODE_LABEL})
+                    WHERE {_OURS}
+                    RETURN row.i AS i, startNode(r) AS s, r, endNode(r) AS t
+                    """,
+                ),
+                rows=rows,
+            )
+            async for record in result:
+                found[record["i"]].append(self._edge_from_record(record))
+
+        return [found.get(index, []) for index in range(len(node_ids))]
 
     @override
     async def get_all_nodes(self) -> List[NodeT]:
