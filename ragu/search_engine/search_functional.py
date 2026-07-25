@@ -1,6 +1,6 @@
 # Based on https://github.com/gusye1234/nano-graphrag/blob/main/nano_graphrag/
 
-from typing import Callable, List, TypeVar
+from typing import Callable, Dict, List, Sequence, TypeVar
 
 from ragu.chunker.types import Chunk
 from ragu.common.prompts.default_models import SubQuery
@@ -12,21 +12,62 @@ from ragu.models.scorer import Scorer
 T = TypeVar("T")
 
 
+async def _prefetch_entity_edges(
+    entity_ids: Sequence[str],
+    knowledge_graph: KnowledgeGraph,
+) -> tuple[Dict[str, List[Relation]], Dict[str, List[str]]]:
+    """
+    Read the graph once for a whole batch of queries.
+
+    Ids are deduplicated first, so entity sets overlapping between queries cost
+    nothing extra.
+
+    :param entity_ids: Seed entity ids, any order, duplicates allowed.
+    :type entity_ids: Sequence[str]
+    :param knowledge_graph: Graph to read from.
+    :type knowledge_graph: KnowledgeGraph
+    :returns: Incident edges per entity id, and source chunk ids per one-hop
+        neighbor id.
+    :rtype: tuple[Dict[str, List[Relation]], Dict[str, List[str]]]
+    """
+    unique_ids = list(dict.fromkeys(entity_id for entity_id in entity_ids if entity_id))
+    if not unique_ids:
+        return {}, {}
+
+    grouped_edges = await knowledge_graph.index.graph_backend.get_all_edges_for_nodes(unique_ids)
+    edges_by_entity = dict(zip(unique_ids, grouped_edges))
+
+    neighbor_ids = list(dict.fromkeys(
+        edge.object_id if edge.subject_id == entity_id else edge.subject_id
+        for entity_id, edges in edges_by_entity.items()
+        for edge in edges
+        if edge and entity_id in (edge.subject_id, edge.object_id)
+    ))
+    neighbors = await knowledge_graph.index.get_nodes(neighbor_ids)
+
+    return edges_by_entity, {
+        neighbor.id: neighbor.source_chunk_id for neighbor in neighbors if neighbor is not None
+    }
+
+
 async def _find_most_related_edges_from_entities(
     entities: list[Entity],
-    knowledge_graph: KnowledgeGraph,
+    edges_by_entity: Dict[str, List[Relation]],
 ) -> list[Relation]:
     """
     Return unique graph edges adjacent to the seed entities.
 
     Edges are deduplicated by stored relation ID and sorted by descending ``relation_strength``.
+
+    :param edges_by_entity: Edges per entity id, from :func:`prefetch_entity_edges`.
     """
     entity_ids = [entity.id for entity in entities if entity and entity.id]
     if not entity_ids:
         return []
 
-    grouped_edges = await knowledge_graph.index.graph_backend.get_all_edges_for_nodes(entity_ids)
-    all_related_edges = [edge for edges in grouped_edges for edge in edges if edge]
+    all_related_edges = [
+        edge for entity_id in entity_ids for edge in edges_by_entity.get(entity_id, []) if edge
+    ]
 
     if not all_related_edges:
         return []
@@ -54,13 +95,20 @@ async def _find_most_related_edges_from_entities(
 
 async def _find_most_related_text_unit_from_entities(
         entities: List[Entity],
-        knowledge_graph: KnowledgeGraph
+        knowledge_graph: KnowledgeGraph,
+        edges_by_entity: Dict[str, List[Relation]],
+        neighbor_chunks: Dict[str, List[str]],
 ) -> list[Chunk]:
     """
     Return source chunks associated with seed entities.
 
     Chunks are ordered first by the seed entity order, then by how many one-hop
     neighboring entities share the same chunk.
+
+    :param edges_by_entity: Edges per entity id, from :func:`prefetch_entity_edges`.
+    :param neighbor_chunks: Source chunk ids per neighbor id, from the same call.
+        It covers the whole batch; entries for other queries are never consulted,
+        since lookups go through the edges of these seeds only.
     """
     seed_entities = [entity for entity in entities if entity and entity.id]
     if not seed_entities:
@@ -69,22 +117,8 @@ async def _find_most_related_text_unit_from_entities(
     chunks_id = [entity.source_chunk_id for entity in seed_entities]
     seed_ids = [entity.id for entity in seed_entities]
 
-    grouped_relations = await knowledge_graph.index.graph_backend.get_all_edges_for_nodes(seed_ids)
-    neighbor_ids: List[str] = []
-    for seed_id, relations_group in zip(seed_ids, grouped_relations):
-        for relation in relations_group:
-            if not relation:
-                continue
-            if relation.subject_id == seed_id:
-                neighbor_ids.append(relation.object_id)
-            elif relation.object_id == seed_id:
-                neighbor_ids.append(relation.subject_id)
-    neighbor_ids = list(dict.fromkeys(neighbor_ids))
-    neighbors = await knowledge_graph.index.get_nodes(neighbor_ids)
-
-    all_one_hop_text_units_lookup = {
-        neighbor.id : neighbor.source_chunk_id for neighbor in neighbors if neighbor is not None
-    }
+    grouped_relations = [edges_by_entity.get(seed_id, []) for seed_id in seed_ids]
+    all_one_hop_text_units_lookup = neighbor_chunks
 
     all_text_units_lookup = {}
     for index, (seed_id, this_text_units, this_edges) in enumerate(zip(seed_ids, chunks_id, grouped_relations)):

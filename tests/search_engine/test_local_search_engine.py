@@ -161,7 +161,7 @@ async def test_local_search_rerank_top_k_truncates_entities_before_derivation(mo
 
     seen = {}
 
-    async def fake_edges(entities, knowledge_graph):
+    async def fake_edges(entities, edges_by_entity):
         seen["edges"] = list(entities)
         return []
 
@@ -221,8 +221,9 @@ async def test_find_text_units_fetches_chunks_in_a_single_batched_call():
         )
     )
 
+    # Neither entity has edges, so the prefetched maps are empty.
     chunks = await search_functional._find_most_related_text_unit_from_entities(
-        [entity_a, entity_b], kg
+        [entity_a, entity_b], kg, {}, {}
     )
 
     # One batched fetch over all unique chunk ids; the per-chunk path is gone.

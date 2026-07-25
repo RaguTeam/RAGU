@@ -36,6 +36,7 @@ from ragu.search_engine.search_functional import (
     _find_documents_id,
     _find_most_related_community_from_entities,
     _rerank_items,
+    _prefetch_entity_edges,
 )
 
 
@@ -195,10 +196,6 @@ class LocalSearchEngine(BaseEngine):
         """
         Retrieve local graph context for a batch of queries.
 
-        Entity retrieval is issued once for the whole batch through
-        :meth:`GraphRetriever.query_entities`; the per-query assembly (entity
-        reranking, related-item derivation and reranking) then runs concurrently.
-
         :param queries: Input query strings.
         :param params: Retrieval parameters (``top_k``, ``rerank_top_k``). When
             ``None``, defaults to :class:`LocalParams`.
@@ -210,35 +207,34 @@ class LocalSearchEngine(BaseEngine):
         params = params or LocalParams()
         entity_results = await self.retriever.query_entities(queries, top_k=params.top_k)
 
+        ranked_entities = await asyncio.gather(*[
+            self._rank_entities(query, entities, params.rerank_top_k)
+            for query, (entities, _) in zip(queries, entity_results)
+        ])
+
+        edges_by_entity, neighbor_chunks = await _prefetch_entity_edges(
+            [entity.id for entities in ranked_entities for entity in entities if entity and entity.id],
+            self.knowledge_graph,
+        )
+
         return list(await asyncio.gather(*[
-            self._assemble(query, entities, entity_hits, params.rerank_top_k)
-            for query, (entities, entity_hits) in zip(queries, entity_results)
+            self._assemble(query, entities, entity_hits, ranked, edges_by_entity, neighbor_chunks)
+            for query, (entities, entity_hits), ranked
+            in zip(queries, entity_results, ranked_entities)
         ]))
 
-    # TODO: make batch effective
-    async def _assemble(self, query, entities, entity_hits, rerank_top_k=None) -> LocalSearchRetrieve:
+    async def _rank_entities(self, query, entities, rerank_top_k=None) -> List[Entity]:
         """
-        Build a :class:`LocalSearchRetrieve` from retrieved entities for one query.
+        Rerank the entities retrieved for one query and keep the most relevant.
 
-        Entities are reranked first and optionally truncated to the most
-        relevant; relations, summaries and chunks are then derived from that
-        reduced entity set and reranked in turn.
+        Truncation applies only when a reranker actually reordered them.
 
         :param query: Input query string.
         :param entities: Seed entities retrieved for ``query``.
-        :param entity_hits: Vector hits aligned with ``entities``.
         :param rerank_top_k: Keep only this many top entities after reranking;
             ``None`` keeps all.
-        :return: Retrieval container with graph-local context and entity metrics.
+        :return: Entities in the order the rest of the assembly consumes them.
         """
-        entity_scores_by_id = {
-            entity.id: hit.distance
-            for entity, hit in zip(entities, entity_hits)
-            if entity and entity.id
-        }
-
-        # 1-2. Rerank the retrieved entities and keep only the most relevant.
-        # Truncation applies only when a reranker actually reordered them.
         entities = await _rerank_items(
             query,
             entities,
@@ -247,12 +243,46 @@ class LocalSearchEngine(BaseEngine):
         )
         if self.reranker is not None and rerank_top_k is not None:
             entities = entities[:rerank_top_k]
+        return entities
 
-        # 3. Derive related items from the reduced entity set (document ids are a
+    async def _assemble(
+        self,
+        query,
+        entities,
+        entity_hits,
+        ranked_entities,
+        edges_by_entity,
+        neighbor_chunks,
+    ) -> LocalSearchRetrieve:
+        """
+        Build a :class:`LocalSearchRetrieve` from retrieved entities for one query.
+
+        Relations, summaries and chunks are derived from the already reranked
+        entity set and reranked in turn.
+
+        :param query: Input query string.
+        :param entities: Seed entities as retrieved, before reranking; used for
+            the relevance scores reported in the metrics.
+        :param entity_hits: Vector hits aligned with ``entities``.
+        :param ranked_entities: Entities after reranking and truncation.
+        :param edges_by_entity: Edges prefetched for the whole batch.
+        :param neighbor_chunks: Neighbor source chunks prefetched for the whole batch.
+        :return: Retrieval container with graph-local context and entity metrics.
+        """
+        entity_scores_by_id = {
+            entity.id: hit.distance
+            for entity, hit in zip(entities, entity_hits)
+            if entity and entity.id
+        }
+        entities = ranked_entities
+
+        # Derive related items from the reduced entity set (document ids are a
         # set union, independent of entity order).
         relations, relevant_chunks, summaries, documents_id = await asyncio.gather(
-            _find_most_related_edges_from_entities(entities, self.knowledge_graph),
-            _find_most_related_text_unit_from_entities(entities, self.knowledge_graph),
+            _find_most_related_edges_from_entities(entities, edges_by_entity),
+            _find_most_related_text_unit_from_entities(
+                entities, self.knowledge_graph, edges_by_entity, neighbor_chunks
+            ),
             _find_most_related_community_from_entities(entities, self.knowledge_graph),
             _find_documents_id(entities),
         )
