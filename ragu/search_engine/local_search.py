@@ -194,12 +194,16 @@ class LocalSearchEngine(BaseEngine):
         params: LocalParams | None = None,
     ) -> List[LocalSearchRetrieve]:
         """
-        Retrieve local graph context for a batch of queries.
+        Find the entities most relevant to each query and gather the graph context around them.
+
+        For every query, locates the knowledge-graph entities closest in meaning to it and
+        collects their local neighborhood — the relations they take part in, the text chunks
+        they were extracted from, the summaries of the communities they belong to, and the
+        documents they originate from.
 
         :param queries: Input query strings.
-        :param params: Retrieval parameters (``top_k``, ``rerank_top_k``). When
-            ``None``, defaults to :class:`LocalParams`.
-        :return: ``LocalSearchRetrieve`` per query, aligned with ``queries``.
+        :param params: Retrieval parameters. When ``None``, defaults to :class:`LocalParams`.
+        :return: One :class:`LocalSearchRetrieve` per query, aligned with ``queries``.
         """
         if not queries:
             return []
@@ -225,15 +229,15 @@ class LocalSearchEngine(BaseEngine):
 
     async def _rank_entities(self, query, entities, rerank_top_k=None) -> List[Entity]:
         """
-        Rerank the entities retrieved for one query and keep the most relevant.
+        Select the entities most relevant to the query from those retrieved.
 
-        Truncation applies only when a reranker actually reordered them.
+        The chosen entities become the anchors around which the rest of the local
+        context is gathered.
 
         :param query: Input query string.
-        :param entities: Seed entities retrieved for ``query``.
-        :param rerank_top_k: Keep only this many top entities after reranking;
-            ``None`` keeps all.
-        :return: Entities in the order the rest of the assembly consumes them.
+        :param entities: Candidate entities retrieved for the query.
+        :param rerank_top_k: Keep at most this many; ``None`` keeps all.
+        :return: The relevant entities, most relevant first.
         """
         entities = await _rerank_items(
             query,
@@ -255,19 +259,20 @@ class LocalSearchEngine(BaseEngine):
         neighbor_chunks,
     ) -> LocalSearchRetrieve:
         """
-        Build a :class:`LocalSearchRetrieve` from retrieved entities for one query.
+        Gather the local context connected to a query's anchor entities.
 
-        Relations, summaries and chunks are derived from the already reranked
-        entity set and reranked in turn.
+        Collects the relations those entities participate in, the text chunks they
+        were extracted from, the summaries of the communities they belong to, and
+        the documents they originate from — each ordered by relevance to the query —
+        and reports the entities' relevance scores.
 
         :param query: Input query string.
-        :param entities: Seed entities as retrieved, before reranking; used for
-            the relevance scores reported in the metrics.
-        :param entity_hits: Vector hits aligned with ``entities``.
-        :param ranked_entities: Entities after reranking and truncation.
-        :param edges_by_entity: Edges prefetched for the whole batch.
-        :param neighbor_chunks: Neighbor source chunks prefetched for the whole batch.
-        :return: Retrieval container with graph-local context and entity metrics.
+        :param entities: Retrieved entities carrying the reported relevance scores.
+        :param entity_hits: Relevance scores aligned with ``entities``.
+        :param ranked_entities: The anchor entities selected for this query.
+        :param edges_by_entity: Incident edges available for these entities.
+        :param neighbor_chunks: Neighbor source chunks available for these entities.
+        :return: A :class:`LocalSearchRetrieve` with the query's local context and metrics.
         """
         entity_scores_by_id = {
             entity.id: hit.distance
@@ -379,16 +384,14 @@ class LocalSearchEngine(BaseEngine):
         params: LocalParams | None = None,
     ) -> List[SearchEngineResponse]:
         """
-        Execute local RAG for multiple queries, batching answer generation.
+        Answer each query from its local knowledge-graph context.
 
-        Retrieval is shared across the batch via :meth:`batch_search`; answer
-        generation for all queries is issued through a single
-        :meth:`LLM.batch_chat_completion` call. The first failing query aborts
-        the whole batch.
+        For every query, retrieves the entities most relevant to it together with
+        their surrounding relations, chunks and community summaries, and produces a
+        natural-language answer grounded in that context.
 
         :param queries: User queries in natural language.
-        :param params: Query parameters (``top_k``, ``use_summary``,
-            ``use_chunks``). When ``None``, defaults to :class:`LocalParams`.
+        :param params: Query parameters. When ``None``, defaults to :class:`LocalParams`.
         :return: ``SearchEngineResponse`` objects aligned with ``queries``.
         """
         if not queries:
