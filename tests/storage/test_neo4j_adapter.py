@@ -33,10 +33,10 @@ async def neo4j_store():
         await store.close()
         pytest.skip(f"Neo4j is not reachable at {NEO4J_URI}: {type(exc).__name__}")
 
-    leftovers = await store.get_all_nodes()
-    if leftovers:
-        await store.delete_nodes([n.id for n in leftovers])
-
+    # prepare_neo4j_store is the sole safety gate: it skips when the database
+    # already holds data, so we must not delete anything before it runs. Wiping
+    # here (e.g. clearing "leftovers") would empty a real graph and let the guard
+    # see an empty database, defeating its protection.
     await prepare_neo4j_store(store)
 
     await wipe_neo4j_store(store)
