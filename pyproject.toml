@@ -1,12 +1,27 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "graph_ragu"
-version = "0.0.3"
-description = "GraphRAG system"
+version = "0.0.4"
+description = "A GraphRAG toolkit for building and querying knowledge graphs from text."
+readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+]
 dependencies = [
     "aiolimiter>=1.2.1",
     "lingua-language-detector>=2.1.1",
@@ -32,6 +47,11 @@ dependencies = [
     "requests>=2.33.1",
     "neo4j>=5.26.0,<7",
 ]
+
+[project.urls]
+Homepage = "https://github.com/RaguTeam/RAGU"
+Repository = "https://github.com/RaguTeam/RAGU"
+Changelog = "https://github.com/RaguTeam/RAGU/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 local = [
