@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any, List, Dict, Literal
 from typing_extensions import override
 
+import numpy as np
+
 from qdrant_client.conversions.common_types import CollectionInfo, QueryResponse
 from qdrant_client.http.models import FusionQuery, Fusion
 
@@ -13,19 +15,33 @@ from ragu.storage.base_storage import BaseVectorStorage
 from ragu.storage.types import EmbeddingHit, Point, SparseEmbedding
 from ragu.common.logger import logger
 
+from ragu.utils.ragu_utils import serialized_size, split_on_batches_by_size
+
 from qdrant_client import AsyncQdrantClient, models
 from qdrant_client.models import (
     Distance,
     Modifier,
     PointIdsList,
-    PointStruct,
     Prefetch,
+    QueryRequest,
     SparseVector,
     SparseVectorParams,
     VectorParams,
 )
 
-from ragu.utils.ragu_utils import split_on_batches_by_size
+#: Approximate JSON size of one float in a serialized dense vector, used to
+#: derive an upsert batch size without serializing points to measure them.
+_JSON_BYTES_PER_FLOAT = 20
+
+#: Flat per-point allowance for the id and JSON structure around it.
+_JSON_BYTES_PER_POINT_OVERHEAD = 256
+
+#: Approximate JSON size of one (index, value) pair in a sparse vector.
+_JSON_BYTES_PER_SPARSE_ENTRY = 28
+
+#: Qdrant rejects request bodies above its own limit (32 MB by default) by
+#: dropping the connection, which surfaces as an opaque transport error.
+_MAX_SUPPORTED_PAYLOAD_MB = 32
 
 
 class QdrantVectorDBStorage(BaseVectorStorage):
@@ -194,6 +210,12 @@ class QdrantVectorDBStorage(BaseVectorStorage):
         )
 
         self._sparse_mode = sparse_type
+        if max_payload_size_in_mb > _MAX_SUPPORTED_PAYLOAD_MB:
+            raise ValueError(
+                f"max_payload_size_in_mb={max_payload_size_in_mb} exceeds the "
+                f"{_MAX_SUPPORTED_PAYLOAD_MB} MB request limit Qdrant accepts by default; "
+                f"larger bodies are dropped mid-transfer and surface as a transport error."
+            )
         self._max_payload_size_in_bytes = max_payload_size_in_mb * 1024 * 1024
 
         remote_kwargs = {
@@ -233,6 +255,27 @@ class QdrantVectorDBStorage(BaseVectorStorage):
         Convert arbitrary RAGU record IDs into a Qdrant-compatible point ID.
         """
         return str(uuid.uuid5(uuid.NAMESPACE_URL, f"{self.collection_name}:{record_id}"))
+
+    def _point_request_size(self, point: Point) -> int:
+        """
+        Estimate the serialized request size contributed by one point.
+
+        The dense vector is sized arithmetically, since every point carries the
+        same dimensionality, while the payload is measured: RAGU stores whole
+        chunk texts in it, so payloads routinely outweigh the vector and cannot
+        be approximated by a constant.
+
+        :param point: Point about to be upserted.
+        :type point: Point
+        :returns: Estimated size in bytes.
+        :rtype: int
+        """
+        size = _JSON_BYTES_PER_POINT_OVERHEAD + serialized_size(point.metadata)
+        if point.dense_embedding is not None:
+            size += self.embedding_dim * _JSON_BYTES_PER_FLOAT
+        if point.sparse_embedding is not None:
+            size += len(point.sparse_embedding.indices) * _JSON_BYTES_PER_SPARSE_ENTRY
+        return size
 
     async def _ensure_collection(self) -> None:
         """
@@ -336,74 +379,116 @@ class QdrantVectorDBStorage(BaseVectorStorage):
             raise ValueError("All points in this batch must either have sparse embeddings or not have them.")
 
         if not self._sparse_mode and any(has_sparse):
-            raise ValueError(f"Try to insert sparse embeddings, but `sparse_type` parameter is set to None. "
-                             f"Please, set `sparse_type` parameter. Possible values: bm25, bm42, splade, custom")
+            raise ValueError("Try to insert sparse embeddings, but `sparse_type` parameter is set to None. "
+                             "Please, set `sparse_type` parameter. Possible values: bm25, bm42, splade, custom")
 
-        points: list[PointStruct] = []
-        for point in data:
-            dense_embedding = point.dense_embedding
-            sparse_embedding = point.sparse_embedding
+        batches = split_on_batches_by_size(
+            data,
+            self._max_payload_size_in_bytes,
+            size_of=self._point_request_size,
+        )
+        for chunk in batches:
+            ids: List[str] = []
+            payloads: List[Dict[str, Any]] = []
+            dense_vectors: List[List[float]] = []
+            sparse_vectors: List[SparseVector] = []
 
-            payload = dict(point.metadata)
-            payload["__ragu_id__"] = point.id
+            for point in chunk:
+                ids.append(self._to_qdrant_point_id(point.id))
+                payload = dict(point.metadata)
+                payload["__ragu_id__"] = point.id
+                payloads.append(payload)
 
-            vector_payload: Dict[str, list[float] | models.SparseVector] = {}
-            if dense_embedding is not None:
-                vector_payload[self.DENSE_VECTOR_NAME] = dense_embedding.tolist()
+                if point.dense_embedding is not None:
+                    dense_vectors.append(point.dense_embedding)
 
-            if sparse_embedding is not None and self._sparse_mode:
-                vector_payload[self._sparse_mode] = models.SparseVector(
-                    indices=sparse_embedding.indices,
-                    values=sparse_embedding.values
-                )
+                if point.sparse_embedding is not None and self._sparse_mode:
+                    sparse_vectors.append(
+                        SparseVector(
+                            indices=point.sparse_embedding.indices,
+                            values=point.sparse_embedding.values,
+                        )
+                    )
 
-            points.append(
-                PointStruct(
-                    id=self._to_qdrant_point_id(point.id),
-                    vector=vector_payload,
-                    payload=payload,
-                )
-            )
+            vectors: Dict[str, Any] = {}
+            if dense_vectors:
+                # np.asarray(...).tolist() converts the whole chunk in one pass,
+                # which is markedly cheaper than calling tolist() per vector.
+                vectors[self.DENSE_VECTOR_NAME] = np.asarray(dense_vectors).tolist()
+            if sparse_vectors:
+                vectors[self._sparse_mode] = sparse_vectors
 
-        if not points:
-            return
+            if not vectors:
+                continue
 
-        for batch in split_on_batches_by_size(points, self._max_payload_size_in_bytes):
             await self._get_client().upsert(
                 collection_name=self.collection_name,
-                points=batch,
+                points=models.Batch(ids=ids, vectors=vectors, payloads=payloads),
                 wait=True,
             )
 
     @override
-    async def query(self, point: Point, **kwargs: Any) -> List[EmbeddingHit]:
+    async def query(self, points: List[Point], **kwargs: Any) -> List[List[EmbeddingHit]]:
         """
-        Query Qdrant using dense-only or dense+sparse reciprocal-rank fusion.
-        :param point: Qdrant point
+        Query Qdrant for a batch of points using a single batched request.
+
+        Each point is scored with dense-only or dense+sparse reciprocal-rank
+        fusion, mirroring the single-query behavior.
+
+        :param points: Query points, one per search.
         :param kwargs:
-            top_k: int Maximum number of results to return.
-            hybrid_search_query_type.
-        :returns: Ranked embedding hits.
+            top_k: int Maximum number of results to return per query.
+            hybrid_query_type: Fusion strategy for dense+sparse queries.
+        :returns: Per-query lists of ranked embedding hits, index-aligned with ``points``.
         """
 
         # Parameters from kwargs
         hybrid_query_type: BaseModel = kwargs.pop("hybrid_query_type", FusionQuery(fusion=Fusion.RRF))
         top_k: int = kwargs.pop("top_k", 20)
 
+        if not points:
+            return []
+
         await self._ensure_collection()
 
+        requests = [self._build_query_request(point, top_k, hybrid_query_type) for point in points]
+        responses: list[QueryResponse] = await self._get_client().query_batch_points(
+            collection_name=self.collection_name,
+            requests=requests,
+        )
+
+        return [
+            self._query_response_to_hits(point, response)
+            for point, response in zip(points, responses)
+        ]
+
+    def _build_query_request(
+        self,
+        point: Point,
+        top_k: int,
+        hybrid_query_type: BaseModel,
+    ) -> QueryRequest:
+        """
+        Build a single :class:`QueryRequest` for ``point``.
+
+        :param point: Query point carrying dense and optional sparse vectors.
+        :param top_k: Maximum number of results to return.
+        :param hybrid_query_type: Fusion strategy for dense+sparse queries.
+        :returns: Request describing how to score this point.
+        :raises NotImplementedError: If the point carries no dense embedding.
+        """
         prefetch: list[Prefetch] | None = None
         query: Any
         using: str | None = None
 
         if point.dense_embedding is not None and point.sparse_embedding is None:
-            query = point.dense_embedding
+            query = point.dense_embedding.tolist() if hasattr(point.dense_embedding, "tolist") else point.dense_embedding
             using = self.DENSE_VECTOR_NAME
 
         elif point.dense_embedding is not None and point.sparse_embedding is not None:
             if not self._sparse_mode:
-                logger.warning(f"Try to use sparse embeddings, but `sparse_type` parameter is set to None. "
-                               f"This can lead to unexpected results.")
+                logger.warning("Try to use sparse embeddings, but `sparse_type` parameter is set to None. "
+                               "This can lead to unexpected results.")
             prefetch = [
                 Prefetch(
                     query=point.dense_embedding.tolist(),
@@ -424,8 +509,7 @@ class QdrantVectorDBStorage(BaseVectorStorage):
         else:
             raise NotImplementedError("Only dense and dense+sparse queries are supported")
 
-        query_response: QueryResponse = await self._get_client().query_points(
-            collection_name=self.collection_name,
+        return QueryRequest(
             query=query,
             prefetch=prefetch,
             using=using,
@@ -433,8 +517,17 @@ class QdrantVectorDBStorage(BaseVectorStorage):
             limit=top_k,
         )
 
+    @staticmethod
+    def _query_response_to_hits(point: Point, response: QueryResponse) -> List[EmbeddingHit]:
+        """
+        Convert a Qdrant query response into aligned embedding hits.
+
+        :param point: Originating query point (used as id fallback).
+        :param response: Qdrant response for this point.
+        :returns: Ranked embedding hits.
+        """
         hits: list[EmbeddingHit] = []
-        for retrieved_point in query_response.points:
+        for retrieved_point in response.points:
             payload = dict(retrieved_point.payload or {})
             record_id = str(payload.pop("__ragu_id__", point.id))
             hits.append(
@@ -564,18 +657,10 @@ class QdrantVectorDBStorage(BaseVectorStorage):
             if self._sparse_mode is not None and isinstance(vector, dict):
                 sparse_vector = vector.get(self._sparse_mode)
                 if sparse_vector is not None:
-                    if isinstance(sparse_vector, dict):
-                        indices = sparse_vector.get("indices")
-                        values = sparse_vector.get("values")
-                    else:
-                        indices = getattr(sparse_vector, "indices", None)
-                        values = getattr(sparse_vector, "values", None)
-
-                    if indices is not None and values is not None:
-                        sparse_embedding = SparseEmbedding(
-                            indices=list(indices),
-                            values=list(values),
-                        )
+                    sparse_embedding = SparseEmbedding(
+                        indices=list(sparse_vector.indices),
+                        values=list(sparse_vector.values),
+                    )
 
             points_by_id[record_id] = Point(
                 id=record_id,
@@ -584,6 +669,19 @@ class QdrantVectorDBStorage(BaseVectorStorage):
                 metadata=payload,
             )
         return [points_by_id.get(record_id) for record_id in ids]
+
+    @override
+    async def close(self) -> None:
+        """
+        Close the Qdrant client and release its connection pool.
+
+        Safe to call more than once: the client is recreated lazily by
+        :meth:`_get_client` if the storage is used again.
+        """
+        if self._client is not None:
+            await self._client.close()
+            self._client = None
+            self._collection_ready = False
 
     async def index_start_callback(self):
         """

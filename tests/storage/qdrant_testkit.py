@@ -33,6 +33,27 @@ class FakePointStruct:
 
 
 @dataclass
+class FakeBatch:
+    """Column-oriented upsert payload, mirroring ``qdrant_client.models.Batch``."""
+
+    ids: list[str]
+    vectors: dict[str, list] | list
+    payloads: list[dict] | None = None
+
+    def to_point_structs(self) -> list["FakePointStruct"]:
+        """Expand columns back into per-point records."""
+        points: list[FakePointStruct] = []
+        for index, point_id in enumerate(self.ids):
+            if isinstance(self.vectors, dict):
+                vector = {name: column[index] for name, column in self.vectors.items()}
+            else:
+                vector = self.vectors[index]
+            payload = self.payloads[index] if self.payloads is not None else {}
+            points.append(FakePointStruct(id=point_id, vector=vector, payload=payload))
+        return points
+
+
+@dataclass
 class FakePointIdsList:
     points: list[str]
 
@@ -59,6 +80,15 @@ class FakePrefetch:
 @dataclass
 class FakeFusionQuery:
     fusion: str
+
+
+@dataclass
+class FakeQueryRequest:
+    query: Any
+    prefetch: FakePrefetch | list[FakePrefetch] | None = None
+    using: str | None = None
+    limit: int = 10
+    with_payload: bool = True
 
 
 class FakeAsyncQdrantClient:
@@ -112,11 +142,48 @@ class FakeAsyncQdrantClient:
             )
         )
 
-    async def upsert(self, collection_name: str, points: list[FakePointStruct], **kwargs: Any) -> None:
+    async def upsert(
+        self,
+        collection_name: str,
+        points: "list[FakePointStruct] | FakeBatch",
+        **kwargs: Any,
+    ) -> None:
         collection = self.registry[collection_name]
         stored_points = collection["points"]
+        if isinstance(points, FakeBatch):
+            points = points.to_point_structs()
         for point in points:
-            stored_points[point.id] = point
+            stored_points[point.id] = self._normalize_cosine_vectors(collection, point)
+
+    @staticmethod
+    def _normalize_cosine_vectors(
+        collection: dict[str, object],
+        point: FakePointStruct,
+    ) -> FakePointStruct:
+        """
+        L2-normalize dense vectors stored under a cosine-distance config.
+
+        Real Qdrant normalizes on upload for ``Distance.COSINE`` and returns the
+        normalized vector on retrieve, discarding the original magnitude. Storing
+        vectors verbatim here would let the fake accept behaviour the real engine
+        rejects, which is exactly the divergence this testkit must not hide.
+        """
+        vectors_config = collection["vectors_config"]
+        if not isinstance(point.vector, dict) or not isinstance(vectors_config, dict):
+            return point
+
+        normalized = dict(point.vector)
+        for name, value in point.vector.items():
+            params = vectors_config.get(name)
+            if getattr(params, "distance", None) != "cosine":
+                continue
+            if not isinstance(value, list):
+                continue
+            norm = math.sqrt(sum(component * component for component in value))
+            if norm:
+                normalized[name] = [component / norm for component in value]
+
+        return FakePointStruct(id=point.id, vector=normalized, payload=point.payload)
 
     async def query_points(
         self,
@@ -155,6 +222,26 @@ class FakeAsyncQdrantClient:
             score_threshold=score_threshold,
         )
         return FakeQueryResponse(points=scored_points)
+
+    async def query_batch_points(
+        self,
+        collection_name: str,
+        requests: list[FakeQueryRequest],
+        **kwargs: Any,
+    ) -> list[FakeQueryResponse]:
+        responses: list[FakeQueryResponse] = []
+        for request in requests:
+            responses.append(
+                await self.query_points(
+                    collection_name=collection_name,
+                    query=request.query,
+                    limit=request.limit,
+                    with_payload=request.with_payload,
+                    using=request.using,
+                    prefetch=request.prefetch,
+                )
+            )
+        return responses
 
     async def delete(self, collection_name: str, points_selector, **kwargs: Any) -> None:
         collection = self.registry[collection_name]
@@ -301,9 +388,11 @@ def install_fake_qdrant(monkeypatch) -> None:
     models_module = ModuleType("qdrant_client.models")
     models_module.Distance = SimpleNamespace(COSINE="cosine")
     models_module.Modifier = SimpleNamespace(IDF="idf")
+    models_module.Batch = FakeBatch
     models_module.PointIdsList = FakePointIdsList
     models_module.PointStruct = FakePointStruct
     models_module.Prefetch = FakePrefetch
+    models_module.QueryRequest = FakeQueryRequest
     models_module.SparseVector = FakeSparseVector
     models_module.SparseVectorParams = FakeSparseVectorParams
     models_module.VectorParams = FakeVectorParams
@@ -313,6 +402,7 @@ def install_fake_qdrant(monkeypatch) -> None:
     http_models_models_module.Fusion = SimpleNamespace(RRF="rrf")
     http_models_models_module.FusionQuery = FakeFusionQuery
     http_models_models_module.Modifier = models_module.Modifier
+    http_models_models_module.Batch = FakeBatch
     http_models_models_module.PointIdsList = FakePointIdsList
     http_models_models_module.Prefetch = FakePrefetch
     http_models_models_module.PointStruct = FakePointStruct

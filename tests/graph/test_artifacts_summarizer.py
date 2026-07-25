@@ -286,3 +286,49 @@ async def test_relation_summarizer_llm_path_updates_description(monkeypatch):
     assert len(result) == 1
     assert result[0].description == "LLM relation summary"
     client.batch_chat_completion.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_entity_summarizer_without_llm_client_at_all():
+    """Regression: llm=None with disabled summarization must not raise."""
+    summarizer = EntitySummarizer(llm=None, use_llm_summarization=False)
+    entities = [
+        Entity(
+            entity_name="Alice",
+            entity_type="Person",
+            description=f"Description {i}",
+            source_chunk_id=[f"chunk-{i}"],
+            documents_id=[],
+            clusters=[],
+        )
+        for i in range(3)
+    ]
+
+    result = await summarizer.run(entities)
+
+    assert len(result) == 1
+    assert "Description 0" in result[0].description
+    assert "Description 2" in result[0].description
+
+
+@pytest.mark.asyncio
+async def test_relation_summarizer_without_llm_client_at_all():
+    """Regression: llm=None with disabled summarization must not raise."""
+    summarizer = RelationSummarizer(llm=None, use_llm_summarization=False)
+    relations = [
+        Relation(
+            subject_id="ent-s",
+            object_id="ent-o",
+            subject_name="S",
+            object_name="O",
+            relation_type="KNOWS",
+            description=f"Description {i}",
+            source_chunk_id=[f"chunk-{i}"],
+        )
+        for i in range(3)
+    ]
+
+    result = await summarizer.run(relations)
+
+    assert len(result) == 1
+    assert "Description 0" in result[0].description

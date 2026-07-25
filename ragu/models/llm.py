@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from typing import Any, Sequence, TypeVar
 from tqdm import tqdm
 from tqdm.asyncio import tqdm_asyncio
@@ -103,6 +104,26 @@ class LLM(ABC):
 
         pbar.close()
         return results
+
+    async def stream_chat_completion(
+        self,
+        conversation: list[ChatCompletionMessageParam],
+        **kwargs: Any,
+    ) -> AsyncIterator[str]:
+        """
+        Stream a plain-text chat completion response.
+
+        Streaming is intentionally text-only. Structured output callers should
+        use :meth:`chat_completion`, because schema validation requires the
+        complete model response.
+
+        :param conversation: OpenAI-format conversation messages.
+        :param kwargs: Backend-specific generation options.
+        :returns: Async iterator of text deltas.
+        """
+        if False:
+            yield ""
+        raise NotImplementedError(f"{type(self).__name__} does not support streaming chat completion")
         
 
 
@@ -155,3 +176,23 @@ class LLMOpenAI(LLM):
             output_schema=output_schema,
             **(self.kwargs | kwargs),
         )
+
+    @override
+    async def stream_chat_completion(
+        self,
+        conversation: list[ChatCompletionMessageParam],
+        **kwargs: Any,
+    ) -> AsyncIterator[str]:
+        """
+        Forward a streaming chat completion request.
+
+        :param conversation: OpenAI-format conversation messages.
+        :param kwargs: Per-call kwargs merged with constructor kwargs.
+        :returns: Async iterator of text deltas.
+        """
+        async for chunk in self.client.stream_chat_completion(
+            model_name=self.model_name,
+            conversation=conversation,
+            **(self.kwargs | kwargs),
+        ):
+            yield chunk

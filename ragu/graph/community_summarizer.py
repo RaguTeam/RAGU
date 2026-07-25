@@ -6,7 +6,7 @@ from ragu.common.base import RaguGenerativeModule
 from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
 from ragu.common.prompts.default_models import CommunityReportModel
-from ragu.common.prompts.prompt_storage import RAGUInstruction
+from ragu.common.prompts.prompt_storage import RAGUInstruction, require_prompt_schema
 from ragu.common.prompts.messages import ChatMessages, render
 from ragu.graph.types import Community, CommunitySummary
 from ragu.models.llm import LLM
@@ -19,7 +19,7 @@ class CommunitySummarizer(RaguGenerativeModule):
     The summarization process converts a group of entities or
     relations belonging to the same community into a human-readable report.
 
-    :param client: LLM client used for generating community reports.
+    :param llm: LLM client used for generating community reports.
     :param language: Language of generated summaries. Defaults to ``Settings.language``.
     """
 
@@ -27,7 +27,7 @@ class CommunitySummarizer(RaguGenerativeModule):
         """
         Initialize community summarizer.
 
-        :param client: LLM client used for summarization.
+        :param llm: LLM client used for summarization.
         :param language: Optional language override.
         """
         _PROMPTS = ["community_report"]
@@ -61,11 +61,11 @@ class CommunitySummarizer(RaguGenerativeModule):
             language=self.language,
         )
 
+        require_prompt_schema(instruction, "community_report", CommunityReportModel)
         output_schema = instruction.pydantic_model
-        assert output_schema is CommunityReportModel
         summaries: List[CommunityReportModel | None] = await self.llm.batch_chat_completion(
             [c.to_openai() for c in rendered_list],
-            output_schema=output_schema,
+            output_schema=output_schema, # type: ignore
             continue_on_error=True,
             desc="Summarized communities",
         )

@@ -225,7 +225,7 @@ class KnowledgeGraph:
         self.embedder = embedder
         self.sparse_embedder = sparse_embedder
 
-        what_to_add = additional_modules if additional_modules else []
+        what_to_add = list(additional_modules) if additional_modules else []
 
         if self.builder_settings.remove_isolated_nodes:
             what_to_add.append(RemoveIsolatedNodes())
@@ -253,6 +253,8 @@ class KnowledgeGraph:
         self.remove_isolated_nodes = self.builder_settings.remove_isolated_nodes
         self.vectorize_chunks = self.builder_settings.vectorize_chunks
 
+        # Report of the most recent build_from_docs() run, None before the first build.
+
     async def build_from_docs(self, docs: List[str]) -> "KnowledgeGraph":
         """
         Build graph and vector context from a list of input documents.
@@ -271,11 +273,15 @@ class KnowledgeGraph:
             logger.warning("Nothing to build.")
             return self
 
-        entities, relations, summaries, communities, chunks = await self.pipeline.extract_graph(chunks)
-        logger.debug(f'Extracted {len(entities)} entities')
-        logger.debug(f'Extracted {len(relations)} relations')
-        logger.debug(f'Extracted {len(communities)} communities')
-        logger.debug(f'Extracted {len(chunks)} chunks')
+        entities, relations, summaries, communities, chunks = (
+            await self.pipeline.extract_graph(chunks)
+        )
+
+        logger.debug(f"Extracted {len(entities)} entities")
+        logger.debug(f"Extracted {len(relations)} relations")
+        logger.debug(f"Extracted {len(communities)} communities")
+        logger.debug(f"Extracted {len(chunks)} chunks")
+        
 
         is_vector_only = self.builder_settings.build_only_vector_context
         should_store_communities = self.make_community_summary and not is_vector_only
@@ -296,6 +302,19 @@ class KnowledgeGraph:
         if should_store_communities:
             await self.index.upsert_communities(communities)
             await self.upsert_summaries(summaries)
+
+        build_summary = (
+            f"entities: {len(entities)}, relations: {len(relations)}, "
+            f"communities: {len(communities)}, chunks: {len(chunks)}"
+        )
+        if not is_vector_only and not entities and not relations:
+            logger.warning(
+                "Graph build produced no entities or relations ({}). "
+                "Check the extractor configuration and LLM logs.",
+                build_summary,
+            )
+        else:
+            logger.info("Graph build finished: {}", build_summary)
 
         return self
 
@@ -375,9 +394,6 @@ class KnowledgeGraph:
         :param relations: Relations to add.
         :return: Self for method chaining.
         """
-        for item in relations:
-            if not item.id:
-                raise ValueError("Cannot insert relation without id")
         duplicate_ids = _duplicate_ids(relations)
         if duplicate_ids:
             raise ValueError(f"Cannot insert duplicated relation IDs in one request: {duplicate_ids}")
@@ -388,10 +404,12 @@ class KnowledgeGraph:
         ]
         existing_relations = await self.index.get_edges(edge_specs)
 
+        # Specs are built from relation ids, so each group holds zero or one
+        # existing relation.
         merged_relations: List[Relation] = []
-        for item, existing_relation in zip(relations, existing_relations):
-            if existing_relation is not None:
-                merged_relations.append(default_merge_relations_policy([item, existing_relation]))
+        for item, existing_group in zip(relations, existing_relations):
+            if existing_group:
+                merged_relations.append(default_merge_relations_policy([item, existing_group[0]]))
             else:
                 merged_relations.append(item)
 
@@ -405,9 +423,6 @@ class KnowledgeGraph:
         :param relations: Relations to replace.
         :return: Self for method chaining.
         """
-        for item in relations:
-            if not item.id:
-                raise ValueError("Cannot update relation without id")
         duplicate_ids = _duplicate_ids(relations)
         if duplicate_ids:
             raise ValueError(f"Cannot update duplicated relation IDs in one request: {duplicate_ids}")
@@ -437,13 +452,17 @@ class KnowledgeGraph:
         """
         return await self.index.graph_backend.edges_degrees(edge_specs)
 
-    async def get_relations(self, edge_specs: List[EdgeSpec]) -> List[Relation | None]:
+    async def get_relations(self, edge_specs: List[EdgeSpec]) -> List[List[Relation]]:
         """
-        Retrieve one or more relations by edge spec in one batched operation.
+        Retrieve relations by edge spec, one result list per spec.
+
+        Graphs are multigraphs, so a spec may match several relations; a list
+        per spec keeps the result aligned with ``edge_specs``. A named spec
+        yields its relation or an empty list, ``relation_id=None`` yields every
+        relation between the pair.
 
         :param edge_specs: One edge spec or a list of edge specs.
-        :return: Matching relation or list of relations, preserving input order
-            and using ``None`` for missing edges.
+        :return: One list of relations per spec, in spec order.
         """
         return await self.index.get_edges(edge_specs)
 
@@ -618,7 +637,10 @@ class KnowledgeGraph:
         Run clusterization and community summarization in knowledge graph.
         """
         if not self.pipeline.community_summarizer:
-            raise ValueError()
+            raise ValueError(
+                "Community reindexing requires a community summarizer; it is "
+                "unavailable when BuilderArguments(build_only_vector_context=True)."
+            )
 
         entities = await self.index.graph_backend.get_all_nodes()
         relations = await self.index.graph_backend.get_all_edges()
@@ -649,8 +671,15 @@ class KnowledgeGraph:
         await self.index.community_kv_storage.drop()
         await self.index.community_summary_kv_storage.drop()
 
-        await self.upsert_communities(communities)
-        await self.upsert_summaries(summaries)
+        if communities:
+            await self.upsert_communities(communities)
+        else:
+            await self.index.community_kv_storage.index_done_callback()
+
+        if summaries:
+            await self.upsert_summaries(summaries)
+        else:
+            await self.index.community_summary_kv_storage.index_done_callback()
 
         return self
 

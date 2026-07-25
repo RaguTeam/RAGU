@@ -45,6 +45,15 @@ class BaseStorage(ABC):
         """
         pass
 
+    async def close(self) -> None:
+        """
+        Release resources held by this backend.
+
+        Backends that keep a connection or a pool (Neo4j, remote Qdrant) must
+        override this; file-backed ones need nothing and inherit the no-op.
+        """
+        return None
+
 
 @dataclass
 class BaseVectorStorage(BaseStorage, ABC):
@@ -53,12 +62,13 @@ class BaseVectorStorage(BaseStorage, ABC):
     """
 
     @abstractmethod
-    async def query(self, point: Point, **kwargs) -> List[EmbeddingHit]:
+    async def query(self, points: List[Point], **kwargs) -> List[List[EmbeddingHit]]:
         """
-        Retrieve top-k nearest items for a batch of embedding vectors.
+        Retrieve top-k nearest items for a batch of query embeddings.
 
-        :param point: Query embedding.
-        :return: A list of query hits with distance score and metadata.
+        :param points: Query embeddings, one per search.
+        :return: Per-query lists of hits with distance score and metadata,
+            index-aligned with ``points``.
         """
         ...
 
@@ -93,6 +103,12 @@ class BaseVectorStorage(BaseStorage, ABC):
     async def get_points_by_ids(self, ids: List[str]) -> List[Point | None]:
         """
         Fetch stored points by ID.
+
+        Returns each vector **as the backend stores it**, which is not
+        necessarily the vector that was written: backends using cosine
+        similarity L2-normalize on write, discarding the original magnitude.
+        Callers must therefore treat returned vectors as directions and compare
+        them up to a positive scale factor.
 
         :param ids: Record identifiers to retrieve in order.
         :return: Points aligned with ``ids``; missing IDs mapped to ``None``.
@@ -234,12 +250,23 @@ class BaseGraphStorage(Generic[NodeT, EdgeT], BaseStorage, ABC):
         ...
 
     @abstractmethod
-    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[Optional[EdgeT]]:
+    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[List[EdgeT]]:
         """
-        Fetch edges by specifications.
+        Fetch edges by specifications, one result list per spec.
+
+        RAGU graphs are directed multigraphs, so a pair of nodes may hold
+        several edges. Returning a list per spec keeps the result aligned with
+        ``edge_specs`` regardless of how many edges each one matches, so callers
+        can safely ``zip`` the two together.
+
+        For a spec ``(subject, object, relation_id)`` the matching list holds:
+
+        * the one named edge, or an empty list, when ``relation_id`` is given;
+        * every edge between the pair when ``relation_id`` is ``None``.
 
         :param edge_specs: Tuples ``(subject_id, object_id, relation_id)``.
-        :return: Edges aligned with input specs; missing specs mapped to ``None``.
+        :return: One list of edges per spec, in spec order; empty where nothing
+            matched.
         """
         ...
 
@@ -255,7 +282,10 @@ class BaseGraphStorage(Generic[NodeT, EdgeT], BaseStorage, ABC):
     @abstractmethod
     async def delete_edges(self, edge_specs: List[EdgeSpec]) -> None:
         """
-        Delete edges by specifications.
+        Delete edges by specifications. Missing edges are tolerated.
+
+        A spec whose ``relation_id`` is ``None`` removes every edge between the
+        pair, mirroring :meth:`get_edges`.
 
         :param edge_specs: Tuples ``(subject_id, object_id, relation_id)`` to delete.
         """

@@ -1,10 +1,12 @@
 
 <h1 align="center">RAGU: Retrieval-Augmented Graph Utility</h1>
 
+<h3 align="center">Turn text into a knowledge graph and query it.
+
 ---
 
 <p align="center">
-<img src="assets/ragu_image.jpg" alt="RAGU logo" width="600" />
+<img src="https://raw.githubusercontent.com/RaguTeam/RAGU/main/assets/ragu_image.jpg" alt="RAGU logo" width="600" />
 </p>
 
 <h4 align="center">
@@ -23,13 +25,21 @@
 
 
 ## Overview
-RAGU is a modular GraphRAG engine for building, storing, and querying knowledge graphs from text. It combines:
 
-- chunking of raw documents into stable `Chunk` objects;
-- LLM-based extraction of `Entity` and `Relation` graph artifacts;
-- graph construction, deduplication, optional description summarization, and Leiden community detection;
-- graph, key-value, and vector storage backends;
-- retrieval strategies for local graph neighborhoods, global community summaries, naive chunk-vector RAG, and mixed search.
+RAGU builds a knowledge graph from raw text and answers questions over it. It is
+built to move from a laptop to a server without rewrites, and to give you more
+than one way to retrieve.
+
+- **Retrieval that fits the question.** Local graph neighborhoods, global
+  community summaries, naive chunk-vector RAG, and a mix engine — with query
+  planning and optional token-by-token streaming.
+- **Reason over structure, not just chunks.** Extraction yields `Entity` and
+  `Relation` typed by the NEREL ontology (29 entity, 49 relation types), then
+  Leiden community detection clusters the graph — so you can ask broad, thematic
+  questions, not only nearest-neighbor lookups.
+- **Async by design.** Batched embeddings, batched vector queries, and
+  rate-limited LLM clients throughout.
+
 
 Partially based on [nano-graphrag](https://github.com/gusye1234/nano-graphrag/tree/main)
 

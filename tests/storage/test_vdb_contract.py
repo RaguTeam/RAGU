@@ -21,7 +21,7 @@ async def test_vdb_contract_upsert_and_query_round_trip(vdb_storage):
         _point("id-beta", [0.0, 1.0, 0.0], tag="B"),
     ])
 
-    results = await vdb_storage.query(Point(dense_embedding=np.array([1.0, 0.0, 0.0])), top_k=10)
+    results = (await vdb_storage.query([Point(dense_embedding=np.array([1.0, 0.0, 0.0]))], top_k=10))[0]
 
     assert len(results) >= 1
     assert isinstance(results[0], EmbeddingHit)
@@ -76,6 +76,41 @@ async def test_vdb_contract_get_points_by_ids_preserves_input_order(vdb_storage)
 
 
 @pytest.mark.asyncio
+async def test_vdb_contract_get_points_by_ids_handles_strict_subset(vdb_storage):
+    """Fetching a subset that does not start at the first stored record."""
+    await vdb_storage.upsert([
+        _point("id-alpha", [1.0, 0.0, 0.0], tag="A"),
+        _point("id-beta", [0.0, 1.0, 0.0], tag="B"),
+        _point("id-gamma", [0.0, 0.0, 1.0], tag="C"),
+    ])
+
+    points = await vdb_storage.get_points_by_ids(["id-gamma"])
+
+    assert points[0] is not None
+    assert points[0].id == "id-gamma"
+    assert points[0].metadata["tag"] == "C"
+    assert list(points[0].dense_embedding) == [0.0, 0.0, 1.0]
+
+
+@pytest.mark.asyncio
+async def test_vdb_contract_returned_vector_matches_written_direction(vdb_storage):
+    """
+    Backends may normalize on write, so vectors round-trip only up to a
+    positive scale factor. Direction, however, must be preserved exactly.
+    """
+    await vdb_storage.upsert([_point("id-scaled", [3.0, 4.0, 0.0], tag="S")])
+
+    point = (await vdb_storage.get_points_by_ids(["id-scaled"]))[0]
+
+    assert point is not None
+    returned = np.asarray(point.dense_embedding, dtype=float)
+    written = np.array([3.0, 4.0, 0.0])
+    scale = np.linalg.norm(returned) / np.linalg.norm(written)
+    assert scale > 0
+    assert np.allclose(returned, written * scale)
+
+
+@pytest.mark.asyncio
 async def test_vdb_contract_delete_existing_and_missing_ids(vdb_storage):
     await vdb_storage.upsert([
         _point("id-alpha", [1.0, 0.0, 0.0], tag="A"),
@@ -111,7 +146,7 @@ async def test_vdb_contract_persistence_round_trip(vdb_backend_case, vdb_storage
         reloaded = type(vdb_storage)(**reload_kwargs)
     else:
         reloaded = vdb_backend_case.factory(tmp_path, monkeypatch)
-    results = await reloaded.query(Point(dense_embedding=np.array([1.0, 0.0, 0.0])), top_k=10)
+    results = (await reloaded.query([Point(dense_embedding=np.array([1.0, 0.0, 0.0]))], top_k=10))[0]
 
     assert any(result.id == "id-persist" for result in results)
 
@@ -136,13 +171,13 @@ async def test_vdb_contract_sparse_round_trip(vdb_backend_case, vdb_storage):
         ),
     ])
 
-    results = await vdb_storage.query(
-        Point(
+    results = (await vdb_storage.query(
+        [Point(
             dense_embedding=np.array([1.0, 0.0, 0.0]),
             sparse_embedding=SparseEmbedding(indices=[7], values=[1.0]),
-        ),
+        )],
         top_k=10,
-    )
+    ))[0]
     points = await vdb_storage.get_points_by_ids(["id-hybrid"])
 
     assert results[0].id == "id-hybrid"

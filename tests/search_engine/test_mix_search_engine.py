@@ -6,8 +6,13 @@ import pytest
 from ragu.common.prompts.messages import ChatMessages, UserMessage
 from ragu.search_engine.base_engine import BaseEngine, SearchEngineResponse
 from ragu.search_engine.global_search import GlobalSearchResult, GlobalSearchRetrieve
-from ragu.search_engine.mix_search import MixSearchRetrieve, MixSearchResult, MixSearchEngine
-from ragu.search_engine.naive_search import NaiveSearchResult, NaiveSearchRetrieve
+from ragu.search_engine.mix_search import (
+    MixQueryParams,
+    MixSearchRetrieve,
+    MixSearchResult,
+    MixSearchEngine,
+)
+from ragu.search_engine.naive_search import NaiveSearchParams, NaiveSearchResult, NaiveSearchRetrieve
 
 
 class DummyEngine(BaseEngine):
@@ -16,17 +21,16 @@ class DummyEngine(BaseEngine):
         self._result = result
         self._error = error
 
-    async def a_search(self, query, *args, **kwargs):
+    async def batch_search(self, queries, params=None):
         if self._error is not None:
             raise self._error
-        return self._result
+        return [self._result for _ in queries]
 
-    async def a_query(self, query: str):
-        return SearchEngineResponse(
-            query=query,
-            response="unused",
-            retrieval=self._result,
-        )
+    async def batch_query(self, queries, params=None):
+        return [
+            SearchEngineResponse(query=query, response="unused", retrieval=self._result)
+            for query in queries
+        ]
 
 
 @pytest.mark.asyncio
@@ -47,7 +51,7 @@ async def test_mix_search_collects_contexts_in_engine_order():
         ],
     )
 
-    result = await engine.a_search("query")
+    result = await engine.search("query")
 
     assert isinstance(result, MixSearchRetrieve)
     assert result.result.results == [naive_result, global_result]
@@ -66,7 +70,7 @@ async def test_mix_search_records_partial_failures():
         allow_partial_failures=True,
     )
 
-    result = await engine.a_search("query")
+    result = await engine.search("query")
 
     assert isinstance(result, MixSearchRetrieve)
     assert result.result.results == [ok_result]
@@ -84,19 +88,17 @@ async def test_mix_search_raises_when_all_engines_fail():
     )
 
     with pytest.raises(RuntimeError, match="could not retrieve context"):
-        await engine.a_search("query")
+        await engine.search("query")
 
 
 @pytest.mark.asyncio
 async def test_mix_query_returns_llm_response(monkeypatch):
-    llm = SimpleNamespace(chat_completion=AsyncMock(return_value="mix-answer"))
-    engine = MixSearchEngine(
-        llm=llm,
-        engines=[DummyEngine(result=NaiveSearchRetrieve(query="question", result=NaiveSearchResult()))],
-    )
+    llm = SimpleNamespace(batch_chat_completion=AsyncMock(return_value=["mix-answer"]))
+    child = DummyEngine(result=NaiveSearchRetrieve(query="question", result=NaiveSearchResult()))
+    child.batch_search = AsyncMock(wraps=child.batch_search)
+    child.batch_query = AsyncMock(wraps=child.batch_query)
+    engine = MixSearchEngine(llm=llm, engines=[child])
     engine.truncation = lambda s: s
-    engine._search_all = AsyncMock(return_value=[NaiveSearchRetrieve(query="question", result=NaiveSearchResult())])
-    engine._query_all = AsyncMock()
 
     from ragu.search_engine import mix_search as mix_module
     monkeypatch.setattr(
@@ -115,31 +117,27 @@ async def test_mix_query_returns_llm_response(monkeypatch):
         ),
     )
 
-    result = await engine.a_query("question")
+    result = await engine.query("question")
     assert isinstance(result, SearchEngineResponse)
     assert result.response == "mix-answer"
-    engine._search_all.assert_awaited_once_with("question")
-    engine._query_all.assert_not_awaited()
+    child.batch_search.assert_awaited_once_with(["question"], None)
+    child.batch_query.assert_not_awaited()
 
 
 @pytest.mark.asyncio
 async def test_mix_query_can_ensemble_engine_responses(monkeypatch):
-    llm = SimpleNamespace(chat_completion=AsyncMock(return_value="ensemble-answer"))
-    engine = MixSearchEngine(
-        llm=llm,
-        engines=[DummyEngine(result=NaiveSearchRetrieve(query="question", result=NaiveSearchResult()))],
+    llm = SimpleNamespace(batch_chat_completion=AsyncMock(return_value=["ensemble-answer"]))
+    child = DummyEngine(
+        result=SearchEngineResponse(
+            query="question",
+            response="engine-answer",
+            retrieval=NaiveSearchRetrieve(query="question", result=NaiveSearchResult()),
+        )
     )
+    child.batch_search = AsyncMock(wraps=child.batch_search)
+    child.batch_query = AsyncMock(wraps=child.batch_query)
+    engine = MixSearchEngine(llm=llm, engines=[child])
     engine.truncation = lambda s: s
-    engine._search_all = AsyncMock()
-    engine._query_all = AsyncMock(
-        return_value=[
-            SearchEngineResponse(
-                query="question",
-                response="engine-answer",
-                retrieval=NaiveSearchRetrieve(query="question", result=NaiveSearchResult()),
-            )
-        ]
-    )
 
     from ragu.search_engine import mix_search as mix_module
     monkeypatch.setattr(
@@ -158,8 +156,39 @@ async def test_mix_query_can_ensemble_engine_responses(monkeypatch):
         ),
     )
 
-    result = await engine.a_query("question", ensemble_responses=True)
+    result = await engine.query("question", MixQueryParams(ensemble_responses=True))
     assert isinstance(result, SearchEngineResponse)
     assert result.response == "ensemble-answer"
-    engine._query_all.assert_awaited_once_with("question")
-    engine._search_all.assert_not_awaited()
+    child.batch_query.assert_awaited_once_with(["question"], None)
+    child.batch_search.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_mix_forwards_per_child_engine_params():
+    child_a = DummyEngine(result=NaiveSearchRetrieve(query="query", result=NaiveSearchResult()))
+    child_b = DummyEngine(result=NaiveSearchRetrieve(query="query", result=NaiveSearchResult()))
+    child_a.batch_search = AsyncMock(wraps=child_a.batch_search)
+    child_b.batch_search = AsyncMock(wraps=child_b.batch_search)
+    params_a = NaiveSearchParams(top_k=3)
+    params_b = NaiveSearchParams(top_k=9)
+
+    engine = MixSearchEngine(
+        llm=SimpleNamespace(chat_completion=AsyncMock()),
+        engines=[child_a, child_b],
+        engine_params=[params_a, params_b],
+    )
+
+    await engine.search("query")
+
+    child_a.batch_search.assert_awaited_once_with(["query"], params_a)
+    child_b.batch_search.assert_awaited_once_with(["query"], params_b)
+
+
+@pytest.mark.asyncio
+async def test_mix_engine_params_length_mismatch_raises():
+    with pytest.raises(ValueError, match="engine_params length"):
+        MixSearchEngine(
+            llm=SimpleNamespace(chat_completion=AsyncMock()),
+            engines=[DummyEngine(result=NaiveSearchRetrieve(query="q", result=NaiveSearchResult()))],
+            engine_params=[NaiveSearchParams(), NaiveSearchParams()],
+        )

@@ -66,6 +66,7 @@ ragu/
 │   ├── README.md
 │   ├── graph_storage_adapters/
 │   │   ├── README.md
+│   │   ├── neo4j_adapter.py
 │   │   └── networkx_adapter.py
 │   ├── kv_storage_adapters/
 │   │   ├── README.md

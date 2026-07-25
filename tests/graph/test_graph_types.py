@@ -1,3 +1,5 @@
+import pytest
+
 from ragu.graph.types import (
     Entity,
     Relation,
@@ -335,3 +337,70 @@ class TestDataclassInteractions:
 
         assert relation.subject_id == entity1.id
         assert relation.object_id == entity2.id
+
+
+class TestTypeContracts:
+    """Equality and hashing contracts for graph types."""
+
+    def _entity(self, name="Alice", description="desc"):
+        return Entity(
+            entity_name=name,
+            entity_type="PERSON",
+            description=description,
+            source_chunk_id=["chunk-1"],
+        )
+
+    def test_entity_eq_against_foreign_type_is_false(self):
+        assert self._entity() != "not an entity"
+        assert (self._entity() == 42) is False
+
+    def test_entity_is_hashable_and_consistent_with_eq(self):
+        e1 = self._entity()
+        e2 = self._entity()
+        assert e1 == e2
+        assert hash(e1) == hash(e2)
+        assert len({e1, e2}) == 1
+
+    def test_relation_eq_against_foreign_type_is_false(self):
+        e1, e2 = self._entity("A"), self._entity("B")
+        relation = Relation(
+            subject_id=e1.id,
+            object_id=e2.id,
+            subject_name="A",
+            object_name="B",
+            relation_type="KNOWS",
+            description="A knows B",
+        )
+        assert relation != "not a relation"
+        assert len({relation, relation}) == 1
+
+    def test_community_is_hashable(self):
+        community = Community(level=0, cluster_id=1, entities=[], relations=[])
+        same = Community(level=0, cluster_id=1, entities=[], relations=[])
+        assert community == same
+        assert len({community, same}) == 1
+        assert community != "not a community"
+
+    def test_explicit_empty_id_rejected_by_contract(self):
+        with pytest.raises(ValueError, match="Entity id"):
+            Entity(
+                entity_name="X",
+                entity_type="PERSON",
+                description="d",
+                source_chunk_id=[],
+                id="",
+            )
+        with pytest.raises(ValueError, match="Relation id"):
+            Relation(
+                subject_id="s",
+                object_id="o",
+                subject_name="S",
+                object_name="O",
+                relation_type="KNOWS",
+                description="d",
+                id="",
+            )
+        with pytest.raises(ValueError, match="Community id"):
+            Community(level=0, cluster_id=1, entities=[], relations=[], id="")
+        with pytest.raises(ValueError, match="CommunitySummary id"):
+            CommunitySummary(id="", summary="s")

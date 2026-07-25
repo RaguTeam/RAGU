@@ -38,12 +38,33 @@ class NetworkXStorage(BaseGraphStorage[NodeT, EdgeT]):
         :param filename: Path to a `.gml` file used for persistence.
         """
         loaded = nx.read_gml(filename) if os.path.exists(filename) else nx.MultiDiGraph() # type: ignore
-        self._graph: nx.MultiDiGraph[Any] = (
-            loaded if isinstance(loaded, nx.MultiDiGraph) else nx.MultiDiGraph(loaded) # type: ignore
+        self._graph: nx.MultiDiGraph = (
+            loaded if isinstance(loaded, nx.MultiDiGraph) else self._to_multi_di_graph(loaded) # type: ignore
         )
         self._where_to_save = filename
         self._node_cls = node_cls
         self._edge_cls = edge_cls
+
+    @staticmethod
+    def _to_multi_di_graph(graph: Any) -> "nx.MultiDiGraph":
+        """
+        Convert a legacy (non-multi) persisted graph, keying edges by their stored ``id``.
+
+        A plain ``nx.MultiDiGraph(graph)`` conversion assigns integer auto-keys
+        (losing stored relation identifiers) and duplicates undirected edges in
+        both directions. This helper preserves one edge per stored record and
+        restores the ``id`` attribute as the edge key.
+
+        :param graph: Graph loaded from persistence.
+        :return: Directed multigraph keyed by stored edge ids.
+        """
+        converted: "nx.MultiDiGraph" = nx.MultiDiGraph()
+        converted.add_nodes_from(graph.nodes(data=True))
+        for index, (u, v, data) in enumerate(graph.edges(data=True)):
+            attrs = dict(data)
+            key = attrs.pop("id", None) or f"edge-{index}"
+            converted.add_edge(u, v, key=key, **attrs)
+        return converted
 
     def _iter_incident_edges(self, node_id: str):
         """
@@ -87,26 +108,6 @@ class NetworkXStorage(BaseGraphStorage[NodeT, EdgeT]):
         Reserved for potential setup hooks.
         """
         pass
-
-    async def get_node_edges(self, source_node_id: str) -> List[EdgeT]:
-        """
-        Retrieve all edges connected to a given node.
-
-        Each returned :class:`EdgeT` includes associated metadata
-        and node display names when available. Missing nodes are tolerated.
-
-        :param source_node_id: ID of the node whose edges to fetch.
-        :return: List of edges connected to the node.
-        """
-        if not self._graph.has_node(source_node_id):
-            return []
-
-        edges: List[EdgeT] = []
-        for u, v, key, metadata in self._iter_incident_edges(source_node_id):
-            edge = self._edge_cls(subject_id=u, object_id=v, id=key, **metadata)
-            edges.append(edge)
-
-        return edges
 
     @override
     async def edges_degrees(self, edge_specs: List[EdgeSpec]) -> List[int]:
@@ -171,39 +172,36 @@ class NetworkXStorage(BaseGraphStorage[NodeT, EdgeT]):
                 self._graph.remove_node(node_id)
 
     @override
-    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[Optional[EdgeT]]:
+    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[List[EdgeT]]:
         """
-        Retrieve multiple edges by specs.
+        Retrieve edges by specs, one result list per spec.
+
+        A spec naming an edge yields that edge or an empty list; a spec with
+        ``key=None`` yields every edge between the pair, since the graph is a
+        multigraph. Results stay aligned with ``edge_specs``.
 
         :param edge_specs: List of edge specs ``(subject_id, object_id, Edge_id)``.
-        :return: List of Edges (``None`` for missing edges).
+        :return: One list of edges per spec, in spec order.
         """
-        results: List[Optional[EdgeT]] = []
-        for spec in edge_specs:
-            u, v, key = spec
+        results: List[List[EdgeT]] = []
+        for u, v, key in edge_specs:
+            matches = self._graph.get_edge_data(u, v, default={}) if self._graph.has_edge(u, v) else {}
 
-            if not self._graph.has_edge(u, v):
-                results.append(None)
-                continue
-
-            matches = self._graph.get_edge_data(u, v, default={})
+            group: List[EdgeT] = []
             if key is not None:
                 edge_data = matches.get(key)
-                if edge_data is None:
-                    results.append(None)
-                    continue
-
-                payload = dict(edge_data) # type: ignore
-                payload.pop("id", None)
-                results.append(self._edge_cls(subject_id=u, object_id=v, id=key, **payload))
-                continue
-
-            for match_key, edge_data in matches.items():
-                if not edge_data:
-                    continue
-                payload = dict(edge_data)
-                payload.pop("id", None)
-                results.append(self._edge_cls(subject_id=u, object_id=v, id=match_key, **payload))
+                if edge_data is not None:
+                    payload = dict(edge_data)
+                    payload.pop("id", None)
+                    group.append(self._edge_cls(subject_id=u, object_id=v, id=key, **payload))
+            else:
+                for match_key, edge_data in matches.items():
+                    if not edge_data:
+                        continue
+                    payload = dict(edge_data)
+                    payload.pop("id", None)
+                    group.append(self._edge_cls(subject_id=u, object_id=v, id=match_key, **payload))
+            results.append(group)
         return results
 
     @override
@@ -225,15 +223,20 @@ class NetworkXStorage(BaseGraphStorage[NodeT, EdgeT]):
         """
         Delete multiple edges from the graph.
 
+        Missing edges are tolerated, as in :meth:`delete_nodes`: deletion is
+        idempotent, and raising here made this the only removal in the storage
+        layer that objected to being asked twice.
+
         :param edge_specs: List of edge specs (subject_id, object_id, Edge_id).
         """
         for spec in edge_specs:
             u, v, key = spec
             if not self._graph.has_edge(u, v):
-                raise ValueError(f"There's no edge between {u} and {v}")
+                continue
 
             if key is not None:
-                self._graph.remove_edge(u, v, key=key)
+                if self._graph.has_edge(u, v, key=key):
+                    self._graph.remove_edge(u, v, key=key)
                 continue
 
             edge_dict = self._graph.get_edge_data(u, v, default={})

@@ -1,3 +1,5 @@
+import asyncio
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from textwrap import dedent
 from typing import Any, Optional, List, Literal
@@ -5,6 +7,8 @@ from typing import Any, Optional, List, Literal
 from jinja2 import Template
 from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import Settings
+from ragu.common.prompts.messages import ChatMessages, render
+from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.graph.graph_retrieve_backend import GraphRetriever
 from ragu.graph.knowledge_graph import KnowledgeGraph
 from ragu.models.embedder import Embedder
@@ -14,10 +18,24 @@ from ragu.models.sparse_embedder import SparseEmbedder
 from ragu.search_engine.base_engine import (
     BaseEngine,
     SearchEngineRetrieve,
-    SearchEngineResponse
+    SearchEngineResponse,
+    SearchEngineStreamEvent,
+    EngineParams,
 )
-from ragu.common.prompts.prompt_storage import RAGUInstruction
-from ragu.common.prompts.messages import ChatMessages, render
+from typing_extensions import override
+
+
+@dataclass
+class NaiveSearchParams(EngineParams):
+    """
+    Retrieval/query parameters for :class:`NaiveSearchEngine`.
+
+    :param top_k: Number of chunks to retrieve.
+    :param rerank_top_k: Number of chunks to keep after reranking. ``None`` keeps
+        all reranked chunks. Used only when a reranker is configured.
+    """
+    top_k: int = 20
+    rerank_top_k: Optional[int] = None
 
 
 @dataclass(slots=True)
@@ -117,34 +135,56 @@ class NaiveSearchEngine(BaseEngine):
         self.reranker = reranker
         self.language = language if language else Settings.language
 
-    async def a_search(
+    @override
+    async def batch_search(
         self,
-        query: str,
-        top_k: int = 20,
-        rerank_top_k: Optional[int] = None,
-        *args: Any,
-        **kwargs: Any,
-    ) -> NaiveSearchRetrieve:
+        queries: List[str],
+        params: NaiveSearchParams | None = None,
+    ) -> List[NaiveSearchRetrieve]:
         """
-        Perform a naive vector search over chunks.
+        Perform a naive vector search over chunks for a batch of queries.
+
+        Chunk retrieval is issued once for the whole batch through
+        :meth:`GraphRetriever.query_chunks`; per-query reranking then runs
+        concurrently.
+
+        :param queries: Input query strings.
+        :param params: Retrieval parameters (``top_k``, and ``rerank_top_k`` when
+            a :class:`NaiveSearchParams` is passed). When ``None``, defaults to
+            :class:`NaiveSearchParams`.
+        :return: ``NaiveSearchRetrieve`` per query, aligned with ``queries``.
+        """
+        if not queries:
+            return []
+
+        params = params or NaiveSearchParams()
+        chunk_results = await self.retriever.query_chunks(queries, top_k=params.top_k)
+
+        return list(await asyncio.gather(*[
+            self._assemble(query, chunks, hits, params.rerank_top_k)
+            for query, (chunks, hits) in zip(queries, chunk_results)
+        ]))
+
+    async def _assemble(self, query, chunks, hits, rerank_top_k) -> NaiveSearchRetrieve:
+        """
+        Build a :class:`NaiveSearchRetrieve` from retrieved chunks for one query.
+
+        Applies optional reranking and ``rerank_top_k`` truncation.
 
         :param query: Input query string.
-        :param top_k: Number of top chunks to retrieve initially.
-        :param rerank_top_k: Number of chunks to keep after reranking.
-                             If None, keeps all reranked chunks. Used only when reranker is set.
-        :return: ``NaiveSearchRetrieve`` with retrieved chunks, aligned scores,
-                 document IDs, and chunk rank metrics.
+        :param chunks: Retrieved chunks for ``query``.
+        :param hits: Vector hits aligned with ``chunks``.
+        :param rerank_top_k: Number of chunks to keep after reranking, or ``None``.
+        :return: Retrieval container with ranked chunks, scores, document ids and metrics.
         """
-        chunks, scores = await self.retriever.query_chunks(query, top_k=top_k)
-
-        if not scores:
+        if not hits:
             return NaiveSearchRetrieve(
                 query=query,
                 result=NaiveSearchResult(),
                 metrics={}
             )
 
-        scores = [r.distance for r in scores]
+        scores = [r.distance for r in hits]
         if self.reranker is not None and chunks:
             chunk_contents = [c.content for c in chunks]
             rerank_results = await self.reranker.score(query, chunk_contents)
@@ -182,19 +222,18 @@ class NaiveSearchEngine(BaseEngine):
             },
         )
 
-    async def a_query(self, query: str, top_k: int = 20, rerank_top_k: Optional[int] = None) -> SearchEngineResponse:
+    def _render_answer_messages(self, query: str, context: NaiveSearchRetrieve) -> ChatMessages:
         """
-        Execute a retrieval-augmented query using naive vector search.
+        Build the final-answer conversation from a retrieved chunk context.
+
+        Truncates the rendered context to the engine token limit and renders the
+        ``naive_search`` prompt.
 
         :param query: User query in natural language.
-        :param top_k: Number of chunks to search initially (default: 20).
-        :param rerank_top_k: Number of chunks to use after reranking (default: None = use all).
-        :return: ``SearchEngineResponse`` containing the generated answer and
-                 the ``NaiveSearchRetrieve`` used as context.
+        :param context: Retrieval container produced by :meth:`search`.
+        :return: Rendered chat messages ready for ``chat_completion``.
         """
-        context: NaiveSearchRetrieve = await self.a_search(query, top_k, rerank_top_k)
         truncated_context: str = self.truncation(str(context))
-
         instruction: RAGUInstruction = self.get_prompt("naive_search")
 
         rendered_list: List[ChatMessages] = render(
@@ -203,16 +242,76 @@ class NaiveSearchEngine(BaseEngine):
             context=truncated_context,
             language=self.language,
         )
-        rendered: ChatMessages = rendered_list[0]
+        return rendered_list[0]
 
-        answer = await self.llm.chat_completion(
-            conversation=rendered.to_openai(),
-            output_schema=instruction.pydantic_model
-        ) # type: ignore
+    @override
+    async def batch_query(
+        self,
+        queries: List[str],
+        params: NaiveSearchParams | None = None,
+    ) -> List[SearchEngineResponse]:
+        """
+        Execute naive vector RAG for multiple queries, batching answer generation.
 
-        return SearchEngineResponse(
-            query=query,
-            response=answer,
-            retrieval=context,
-            payload={}
+        Retrieval is shared across the batch via :meth:`batch_search`; answer
+        generation for all queries is issued through a single
+        :meth:`LLM.batch_chat_completion` call. The first failing query aborts
+        the whole batch.
+
+        :param queries: User queries in natural language.
+        :param params: Query parameters (``top_k``, ``rerank_top_k``). When
+            ``None``, defaults to :class:`NaiveSearchParams`.
+        :return: ``SearchEngineResponse`` objects aligned with ``queries``.
+        """
+        if not queries:
+            return []
+
+        params = params or NaiveSearchParams()
+        contexts = await self.batch_search(queries, params)
+
+        conversations = [
+            self._render_answer_messages(query, context).to_openai()
+            for query, context in zip(queries, contexts)
+        ]
+
+        instruction: RAGUInstruction = self.get_prompt("naive_search")
+        answers = await self.llm.batch_chat_completion(
+            conversations,
+            output_schema=instruction.pydantic_model,  # type: ignore[arg-type]
+            desc="NaiveSearch batch query",
         )
+
+        return [
+            SearchEngineResponse(
+                query=query,
+                response=answer,
+                retrieval=context,
+                payload={},
+            )
+            for query, answer, context in zip(queries, answers, contexts)
+        ]
+
+    @override
+    async def stream_query(
+        self,
+        query: str,
+        params: NaiveSearchParams | None = None,
+    ) -> AsyncIterator[SearchEngineStreamEvent]:
+        """
+        Execute naive vector RAG and stream the final plain-text answer.
+
+        :param query: User query in natural language.
+        :param params: Query parameters. When ``None``, defaults to
+            :class:`NaiveSearchParams`.
+        :returns: Async iterator of text deltas with the retrieval context.
+        """
+        context = await self.search(query, params or NaiveSearchParams())
+        conversation = self._render_answer_messages(query, context).to_openai()
+
+        async for delta in self.llm.stream_chat_completion(conversation):
+            yield SearchEngineStreamEvent(
+                query=query,
+                retrieval=context,
+                delta=delta,
+                payload={},
+            )

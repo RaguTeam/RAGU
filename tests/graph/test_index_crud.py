@@ -148,12 +148,12 @@ async def test_build_query_vectors_returns_dense_and_sparse_payload(
     mock_embedder,
     mock_sparse_embedder,
 ):
-    point = await sparse_retriever.build_query_vectors("alpha beta")
+    point = (await sparse_retriever.build_query_vectors(["alpha beta"]))[0]
 
     assert np.array_equal(np.array(point.dense_embedding), np.array([0.1] * 128))
     assert point.sparse_embedding is not None
     assert point.sparse_embedding.indices == [9]
-    mock_embedder.embed_text.assert_awaited_once_with("alpha beta")
+    mock_embedder.batch_embed_text.assert_awaited_once_with(["alpha beta"])
     mock_sparse_embedder.embed_query.assert_called_once_with(["alpha beta"])
 
 
@@ -174,15 +174,15 @@ async def test_insert_entities_passes_sparse_embeddings_to_vector_db(sparse_inde
 async def test_query_entities_passes_sparse_query_to_vector_db(sparse_index, sparse_retriever, sample_entities, mock_sparse_embedder):
     await sparse_index.upsert_nodes(sample_entities)
     sparse_index.nodes_vector_db.query = AsyncMock(
-        return_value=[EmbeddingHit(id="ent-1", distance=0.9)]
+        return_value=[[EmbeddingHit(id="ent-1", distance=0.9)]]
     )
 
-    entities, hits = await sparse_retriever.query_entities("alice engineer", top_k=3)
+    entities, hits = (await sparse_retriever.query_entities(["alice engineer"], top_k=3))[0]
 
     assert [entity.id for entity in entities] == ["ent-1"]
     assert [hit.id for hit in hits] == ["ent-1"]
     args, kwargs = sparse_index.nodes_vector_db.query.await_args
-    point = args[0]
+    point = args[0][0]
     assert point.sparse_embedding is not None
     assert point.sparse_embedding.indices == [9]
     assert kwargs["top_k"] == 3
@@ -192,7 +192,7 @@ async def test_query_entities_passes_sparse_query_to_vector_db(sparse_index, spa
 @pytest.mark.asyncio
 async def test_query_chunk_hits_passes_sparse_query_to_vector_db(sparse_index, sparse_retriever, mock_sparse_embedder):
     sparse_index.chunks_vector_db.query = AsyncMock(
-        return_value=[EmbeddingHit(id="chunk-1", distance=0.8, metadata={"doc_id": "doc-1"})]
+        return_value=[[EmbeddingHit(id="chunk-1", distance=0.8, metadata={"doc_id": "doc-1"})]]
     )
     sparse_index.chunks_kv_storage.get_by_ids = AsyncMock(
         return_value=[
@@ -205,12 +205,12 @@ async def test_query_chunk_hits_passes_sparse_query_to_vector_db(sparse_index, s
         ]
     )
 
-    chunks, hits = await sparse_retriever.query_chunks("hybrid chunk query", top_k=2)
+    chunks, hits = (await sparse_retriever.query_chunks(["hybrid chunk query"], top_k=2))[0]
 
     assert [chunk.id for chunk in chunks] == ["chunk-1"]
     assert [hit.id for hit in hits] == ["chunk-1"]
-    _, kwargs = sparse_index.chunks_vector_db.query.await_args
-    point = kwargs["point"]
+    args, kwargs = sparse_index.chunks_vector_db.query.await_args
+    point = args[0][0]
     assert point.sparse_embedding is not None
     assert point.sparse_embedding.indices == [9]
     assert kwargs["top_k"] == 2
@@ -268,12 +268,12 @@ async def test_insert_relations(index, sample_entities, sample_relations):
     relation = sample_relations[0]
     retrieved = await index.get_edges([(relation.subject_id, relation.object_id, relation.id)])
     assert len(retrieved) == 1
-    assert retrieved[0] is not None
-    assert retrieved[0].id == relation.id
-    assert retrieved[0].subject_id == "ent-1"
-    assert retrieved[0].object_id == "ent-2"
-    assert retrieved[0].relation_type == "KNOWS"
-    assert retrieved[0].description == "Alice knows Bob"
+    assert retrieved[0]
+    assert retrieved[0][0].id == relation.id
+    assert retrieved[0][0].subject_id == "ent-1"
+    assert retrieved[0][0].object_id == "ent-2"
+    assert retrieved[0][0].relation_type == "KNOWS"
+    assert retrieved[0][0].description == "Alice knows Bob"
 
     vector_points = await index.edges_vector_db.get_points_by_ids([relation.id])
     assert vector_points[0] is not None
@@ -308,7 +308,7 @@ async def test_insert_relations_does_not_touch_graph_when_vectorization_fails(
 
     relation = sample_relations[0]
     retrieved = await index.get_edges([(relation.subject_id, relation.object_id, relation.id)])
-    assert retrieved == [None]
+    assert retrieved == [[]]
 
 
 @pytest.mark.asyncio
@@ -336,7 +336,7 @@ async def test_delete_entities_cascade(index, sample_entities, sample_relations)
 
     relation = sample_relations[0]
     retrieved_relations = await index.get_edges([(relation.subject_id, relation.object_id, relation.id)])
-    assert retrieved_relations[0] is None
+    assert retrieved_relations[0] == []
 
 
 @pytest.mark.asyncio
@@ -351,7 +351,7 @@ async def test_delete_relations(index, sample_entities, sample_relations):
     await index.delete_edges([(relation.subject_id, relation.object_id, relation.id)])
 
     retrieved = await index.get_edges([(relation.subject_id, relation.object_id, relation.id)])
-    assert retrieved[0] is None
+    assert retrieved[0] == []
 
     entities = await index.get_nodes(["ent-1", "ent-2"])
     assert all(e is not None for e in entities)
@@ -376,8 +376,8 @@ async def test_get_relations_preserves_stored_relation_id(index, sample_entities
     await index.upsert_edges([relation])
 
     retrieved = await index.get_edges([("ent-1", "ent-2", "rel-custom")])
-    assert retrieved[0] is not None
-    assert retrieved[0].id == "rel-custom"
+    assert retrieved[0]
+    assert retrieved[0][0].id == "rel-custom"
 
 
 @pytest.mark.asyncio
@@ -397,12 +397,12 @@ async def test_delete_relations_removes_relation_vector(index, sample_entities):
     )
 
     await index.upsert_edges([relation])
-    before_delete = await index.edges_vector_db.query(Point(dense_embedding=[0.1] * 128), top_k=10)
+    before_delete = (await index.edges_vector_db.query([Point(dense_embedding=[0.1] * 128)], top_k=10))[0]
     assert any(hit.id == "rel-custom" for hit in before_delete)
 
     await index.delete_edges([("ent-1", "ent-2", "rel-custom")])
 
-    after_delete = await index.edges_vector_db.query(Point(dense_embedding=[0.1] * 128), top_k=10)
+    after_delete = (await index.edges_vector_db.query([Point(dense_embedding=[0.1] * 128)], top_k=10))[0]
     assert all(hit.id != "rel-custom" for hit in after_delete)
 
 
@@ -411,7 +411,7 @@ async def test_query_relations_returns_vector_hits(sparse_retriever, sparse_inde
     await sparse_index.upsert_nodes(sample_entities)
     await sparse_index.upsert_edges(sample_relations)
 
-    relations, hits = await sparse_retriever.query_relations("Alice knows Bob", top_k=5)
+    relations, hits = (await sparse_retriever.query_relations(["Alice knows Bob"], top_k=5))[0]
 
     assert [relation.id for relation in relations] == ["rel-1"]
     assert [hit.id for hit in hits] == ["rel-1"]
@@ -424,10 +424,10 @@ async def test_query_relations_skips_hits_without_endpoint_metadata(index, sampl
 
     retriever = GraphRetriever(Mock(index=index), mock_embedder)
     index.edges_vector_db.query = AsyncMock(
-        return_value=[EmbeddingHit(id="rel-1", distance=0.9, metadata={"content": "Alice knows Bob"})]
+        return_value=[[EmbeddingHit(id="rel-1", distance=0.9, metadata={"content": "Alice knows Bob"})]]
     )
 
-    relations, hits = await retriever.query_relations("Alice knows Bob", top_k=5)
+    relations, hits = (await retriever.query_relations(["Alice knows Bob"], top_k=5))[0]
 
     assert relations == []
     assert hits == []
@@ -481,13 +481,13 @@ async def test_upsert_relations_keeps_non_duplicate_when_duplicates_exist(index,
             ("ent-2", "ent-1", "rel-new"),
         ]
     )
-    assert got[0] is not None
-    assert got[1] is not None
-    assert got[0].description == "new"
-    assert got[0].source_chunk_id == ["chunk-2"]
-    assert got[1].description == "fresh"
-    assert got[1].subject_id == "ent-2"
-    assert got[1].object_id == "ent-1"
+    assert got[0]
+    assert got[1]
+    assert got[0][0].description == "new"
+    assert got[0][0].source_chunk_id == ["chunk-2"]
+    assert got[1][0].description == "fresh"
+    assert got[1][0].subject_id == "ent-2"
+    assert got[1][0].object_id == "ent-1"
 
 
 @pytest.mark.asyncio
@@ -576,10 +576,10 @@ async def test_update_relations_replaces_existing_payload(index):
 
     updated_edge = await index.get_edges([("ent-a", "ent-b", "rel-update")])
 
-    assert updated_edge[0] is not None
-    assert updated_edge[0].description == "new relation"
-    assert updated_edge[0].relation_strength == 7.0
-    assert updated_edge[0].source_chunk_id == ["chunk-new"]
+    assert updated_edge[0]
+    assert updated_edge[0][0].description == "new relation"
+    assert updated_edge[0][0].relation_strength == 7.0
+    assert updated_edge[0][0].source_chunk_id == ["chunk-new"]
 
 
 @pytest.mark.asyncio
@@ -714,7 +714,7 @@ async def test_delete_chunks_cascade(index):
             ("ent-2", "ent-3", "rel-2"),
         ]
     )
-    assert relations_after_delete[0] is None
+    assert relations_after_delete[0] == []
     assert relations_after_delete[1] is not None
 
 
@@ -767,7 +767,7 @@ async def test_delete_chunks_removes_relations_tied_only_to_deleted_chunk(index)
     assert entities_after_delete[1] is not None
 
     relations_after_delete = await index.get_edges([("ent-1", "ent-2", "rel-1")])
-    assert relations_after_delete[0] is None
+    assert relations_after_delete[0] == []
 
 
 @pytest.mark.asyncio
@@ -1090,3 +1090,73 @@ def test_consistency_report_str():
     assert "Issues found: 1" in rendered
     assert "- relation_endpoints: Relations reference entity endpoints that do not exist in the graph." in rendered
     assert "missing_entity_ids: ent-missing" in rendered
+
+
+@pytest.mark.asyncio
+async def test_close_releases_every_backend(index):
+    """
+    Index.close() must reach all seven storages, and stay safe when repeated.
+
+    Backends holding a connection (Neo4j, remote Qdrant) leak a pool otherwise;
+    file-backed ones inherit a no-op from BaseStorage.
+    """
+    closed = []
+
+    for name in (
+        "graph_backend",
+        "nodes_vector_db",
+        "edges_vector_db",
+        "chunks_vector_db",
+        "chunks_kv_storage",
+        "community_summary_kv_storage",
+        "community_kv_storage",
+    ):
+        storage = getattr(index, name)
+
+        async def record(_name=name):
+            closed.append(_name)
+
+        storage.close = record
+
+    await index.close()
+    await index.close()
+
+    assert sorted(closed) == sorted([
+        "graph_backend",
+        "nodes_vector_db",
+        "edges_vector_db",
+        "chunks_vector_db",
+        "chunks_kv_storage",
+        "community_summary_kv_storage",
+        "community_kv_storage",
+    ] * 2)
+
+
+def test_embedding_dim_may_be_declared_alongside_the_embedder(tmp_path, monkeypatch, mock_embedder):
+    """
+    A consistent embedding_dim in vdb kwargs must be accepted.
+
+    All three vector storages are configured from one vdb_storage_kwargs, so the
+    declared value necessarily appears three times; counting those occurrences
+    instead of comparing them rejected every consistent setup.
+    """
+    from ragu.common.global_parameters import Settings
+    monkeypatch.setattr(Settings, "storage_folder", str(tmp_path / "storage"))
+
+    index = Index(
+        arguments=StorageArguments(vdb_storage_kwargs={"embedding_dim": mock_embedder.dim}),
+        embedder=mock_embedder,
+    )
+
+    assert index.nodes_vector_db.embedding_dim == mock_embedder.dim
+
+
+def test_embedding_dim_conflicting_with_the_embedder_is_rejected(tmp_path, monkeypatch, mock_embedder):
+    from ragu.common.global_parameters import Settings
+    monkeypatch.setattr(Settings, "storage_folder", str(tmp_path / "storage"))
+
+    with pytest.raises(ValueError, match="does not match the embedder"):
+        Index(
+            arguments=StorageArguments(vdb_storage_kwargs={"embedding_dim": mock_embedder.dim + 1}),
+            embedder=mock_embedder,
+        )

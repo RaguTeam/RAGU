@@ -3,6 +3,7 @@ import functools
 import json
 import logging
 import time
+import warnings
 from collections.abc import Awaitable, Collection, MutableMapping
 from contextlib import AbstractAsyncContextManager, AsyncExitStack
 from dataclasses import is_dataclass, asdict
@@ -16,6 +17,7 @@ import loguru
 import numpy as np
 import numpy.typing as npt
 from diskcache import Index  # pyright: ignore[reportMissingTypeStubs]
+from pydantic import BaseModel
 
 from ragu.common.logger import logger
 
@@ -39,6 +41,39 @@ def get_disk_cache(dir: str | Path) -> MutableMapping[str, Any]:
 
 
 T_fn = TypeVar('T_fn', bound=Callable[..., Awaitable[Any]])
+F = TypeVar('F', bound=Callable[..., Any])
+
+
+def deprecated(replacement: str | None = None) -> Callable[[F], F]:
+    """
+    Decorate a deprecated callable and emit a warning when it is used.
+
+    :param replacement: Optional replacement callable name shown in the warning.
+    :return: Decorator preserving the wrapped callable.
+    """
+    def _warn(func: Callable[..., Any]) -> None:
+        message = f"{func.__qualname__} is deprecated."
+        if replacement:
+            message += f" Use {replacement} instead."
+        warnings.warn(message, DeprecationWarning, stacklevel=3)
+
+    def decorator(func: F) -> F:
+        if asyncio.iscoroutinefunction(func):
+            @functools.wraps(func)
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                _warn(func)
+                return await func(*args, **kwargs)
+
+            return cast(F, async_wrapper)
+
+        @functools.wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            _warn(func)
+            return func(*args, **kwargs)
+
+        return cast(F, wrapper)
+
+    return decorator
 
 def attach_async_contexts(
     func: T_fn,
@@ -174,8 +209,18 @@ def serialize(obj: Any) -> Any:
 
 def serialized_size(obj) -> int:
     """
-    Estimate size of object after JSON serialization (bytes).
+    Estimate size of an object after JSON serialization, in bytes.
+
+    Pydantic models are dumped to plain data first; without that step they
+    always raise :class:`TypeError` and fall through to the ``str()`` estimate,
+    which is both slower and less accurate.
+
+    :param obj: Object to measure.
+    :returns: Estimated size in bytes.
+    :rtype: int
     """
+    if isinstance(obj, BaseModel):
+        obj = obj.model_dump()
     try:
         return len(json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
     except TypeError:
@@ -185,12 +230,25 @@ T = TypeVar("T")
 def split_on_batches_by_size(
     objects: Iterable[T],
     max_size_in_bytes: int,
+    size_of: Callable[[T], int] | None = None,
 ) -> Iterator[List[T]]:
+    """
+    Group objects into batches that stay under a serialized size budget.
+
+    :param objects: Objects to group, consumed lazily.
+    :param max_size_in_bytes: Size budget per batch. An object larger than the
+        budget is yielded alone.
+    :param size_of: Optional sizing function. Defaults to :func:`serialized_size`;
+        pass a cheaper one when an object's size is partly known up front.
+    :returns: Batches of objects.
+    :rtype: Iterator[List[T]]
+    """
+    measure = size_of or serialized_size
     current_batch: list[T] = []
     current_size = 0
 
     for obj in objects:
-        size = serialized_size(obj)
+        size = measure(obj)
         if size > max_size_in_bytes:
             if current_batch:
                 yield current_batch

@@ -20,10 +20,10 @@ from ragu.search_engine.base_engine import BaseEngine, SearchEngineRetrieve
 class _DummyEngine(BaseEngine):
     """Minimal concrete engine so BaseEngine.__init__ can be instantiated."""
 
-    async def a_search(self, query, *args: Any, **kwargs: Any) -> SearchEngineRetrieve:
+    async def batch_search(self, queries, params=None) -> list[SearchEngineRetrieve]:
         ...
 
-    async def a_query(self, query: str, *args: Any, **kwargs: Any):
+    async def batch_query(self, queries, params=None):
         ...
 
 

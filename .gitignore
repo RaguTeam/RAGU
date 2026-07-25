@@ -185,3 +185,6 @@ cython_debug/
 paper/
 slides/
 paper*/
+
+# Local LLM/embedding cache
+cache/
