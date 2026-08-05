@@ -62,7 +62,7 @@ async def test_global_search_filters_and_sorts_by_rating(monkeypatch, real_kg):
 
     result = await engine.search("query")
     assert isinstance(result, GlobalSearchRetrieve)
-    assert [r["response"] for r in result.result.insights] == ["high", "low"]
+    assert [r.response for r in result.result.insights] == ["high", "low"]
     assert result.metrics == {
         "insight_0_rating": 5.0,
         "insight_1_rating": 1.0,
@@ -77,7 +77,9 @@ async def test_global_query_returns_llm_response(monkeypatch, real_kg):
     engine.batch_search = AsyncMock(
         return_value=[GlobalSearchRetrieve(
             query="question",
-            result=GlobalSearchResult(insights=[{"response": "x", "rating": "1"}]),
+            result=GlobalSearchResult(insights=[
+                GlobalSearchContextModel(reasoning="", response="x", rating=1),
+            ]),
         )]
     )
 

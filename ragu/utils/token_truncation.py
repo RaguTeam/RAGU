@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, cast
 
 from ragu.common.logger import logger
 
@@ -79,7 +79,7 @@ class TokenTruncation:
 
         max_text_tokens = max(0, self.max_tokens - num_special)
         truncated_tokens = tokens_without_special[:max_text_tokens] # type: ignore
-        decoded = self.local_tokenizer.decode(truncated_tokens, skip_special_tokens=True) # type: ignore
+        decoded = cast(str, self.local_tokenizer.decode(truncated_tokens, skip_special_tokens=True))
 
         return decoded, original_len, len(truncated_tokens) + num_special
 

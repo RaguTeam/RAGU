@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, List, Optional, Tuple, cast
+from typing import Any, List, Optional, Tuple, TypeVar, cast
 from typing_extensions import override
 
 from pydantic import BaseModel
@@ -27,6 +25,9 @@ from ragu.triplet.prompts import (
     TWO_STAGE_RELATION_VALIDATION_INSTRUCTION,
 )
 from ragu.triplet.types import NEREL_ENTITY_TYPES, NEREL_RELATION_TYPES
+
+#: Stage model produced by one extraction/validation step.
+ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
 class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
@@ -215,7 +216,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
 
         return entities_result, relations_result
 
-    async def _extract_entities(self, context: List[str]) -> List[EntitiesExtractionModel]:
+    async def _extract_entities(self, context: List[str]) -> List[EntitiesExtractionModel | None]:
         """
         Run stage-1 entity extraction for each chunk.
 
@@ -227,11 +228,11 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
             await self.icl_manager.initialize()
-            examples_list = await self.icl_manager.batch_select_examples(
+            examples_list = list(await self.icl_manager.batch_select_examples(
                 query_texts=context,
                 task="entity_extraction",
                 num_examples=self.icl_manager.config.num_examples
-            )
+            ))
         else:
             examples_list = [None] * len(context)
 
@@ -247,27 +248,25 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             entity_types=self.entity_types,
         )
 
-        results = await self.llm.batch_chat_completion(  # type: ignore
+        results = await self.llm.batch_chat_completion(
             [conversation.to_openai() for conversation in conversations],
-            output_schema=instruction.pydantic_model or str,  # type: ignore
+            output_schema=instruction.pydantic_model,
             continue_on_error=True,
             desc="Extracting entities from chunks",
         )
-        typed_results = cast(list[EntitiesExtractionModel | None], results)
-
-        for i, entities_model in enumerate(typed_results):
+        for i, entities_model in enumerate(results):
             if entities_model is not None:
                 logger.debug(f"Got {len(entities_model.entities)} entities")
             else:
                 logger.warning("LLM call failed for entity extraction chunk at index {}", i)
 
-        return typed_results
+        return results
 
     async def _validate_entities(
         self,
         context: List[str],
-        entities: List[EntitiesExtractionModel],
-    ) -> List[EntitiesExtractionModel]:
+        entities: List[EntitiesExtractionModel | None],
+    ) -> List[EntitiesExtractionModel | None]:
         """
         Run stage-1 validation for entity outputs.
 
@@ -279,11 +278,11 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         # Select ICL examples for entity validation if manager is initialized
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
-            examples_list = await self.icl_manager.batch_select_examples(
+            examples_list = list(await self.icl_manager.batch_select_examples(
                 query_texts=context,
                 task="entity_validation",
                 num_examples=self.icl_manager.config.num_examples
-            )
+            ))
         else:
             examples_list = [None] * len(context)
 
@@ -300,27 +299,25 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             entity_types=self.entity_types,
         )
 
-        results = await self.llm.batch_chat_completion(  # type: ignore
+        results = await self.llm.batch_chat_completion(
             [conversation.to_openai() for conversation in conversations],
-            output_schema=instruction.pydantic_model or str,  # type: ignore
+            output_schema=instruction.pydantic_model,
             continue_on_error=True,
             desc="Validating extracted entities",
         )
-        typed_results = cast(list[EntitiesExtractionModel | None], results)
-
-        for i, entities_model in enumerate(typed_results):
+        for i, entities_model in enumerate(results):
             if entities_model is not None:
                 logger.debug(f"After validation got {len(entities_model.entities)} entities")
             else:
                 logger.warning("LLM call failed for entity validation chunk at index {}", i)
 
-        return typed_results
+        return results
 
     async def _extract_relations(
         self,
         context: List[str],
         entities_payload: List[List[dict[str, Any]]],
-    ) -> List[RelationsExtractionModel]:
+    ) -> List[RelationsExtractionModel | None]:
         """
         Run stage-2 relation extraction constrained by extracted entities.
 
@@ -332,11 +329,11 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         # Select ICL examples for relation extraction if manager is initialized
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
-            examples_list = await self.icl_manager.batch_select_examples(
+            examples_list = list(await self.icl_manager.batch_select_examples(
                 query_texts=context,
                 task="relation_extraction",
                 num_examples=self.icl_manager.config.num_examples
-            )
+            ))
         else:
             examples_list = [None] * len(context)
 
@@ -353,28 +350,26 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             relation_types=self.relation_types,
         )
 
-        results = await self.llm.batch_chat_completion(  # type: ignore
+        results = await self.llm.batch_chat_completion(
             [conversation.to_openai() for conversation in conversations],
-            output_schema=instruction.pydantic_model or str,  # type: ignore
+            output_schema=instruction.pydantic_model,
             continue_on_error=True,
             desc="Extracting relations from chunks",
         )
-        typed_results = cast(list[RelationsExtractionModel | None], results)
-
-        for i, relations_model in enumerate(typed_results):
+        for i, relations_model in enumerate(results):
             if relations_model is not None:
                 logger.debug(f"Got {len(relations_model.relations)} relations")
             else:
                 logger.warning("LLM call failed for relation extraction chunk at index {}", i)
 
-        return typed_results
+        return results
 
     async def _validate_relations(
         self,
         context: List[str],
         entities_payload: List[List[dict[str, Any]]],
-        relations: List[RelationsExtractionModel],
-    ) -> List[RelationsExtractionModel]:
+        relations: List[RelationsExtractionModel | None],
+    ) -> List[RelationsExtractionModel | None]:
         """
         Run stage-2 validation for relation outputs.
 
@@ -387,11 +382,11 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         # Select ICL examples for relation validation if manager is initialized
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
-            examples_list = await self.icl_manager.batch_select_examples(
+            examples_list = list(await self.icl_manager.batch_select_examples(
                 query_texts=context,
                 task="relation_validation",
                 num_examples=self.icl_manager.config.num_examples
-            )
+            ))
         else:
             examples_list = [None] * len(context)
 
@@ -409,24 +404,22 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             relation_types=self.relation_types,
         )
 
-        results = await self.llm.batch_chat_completion(  # type: ignore
+        results = await self.llm.batch_chat_completion(
             [conversation.to_openai() for conversation in conversations],
-            output_schema=instruction.pydantic_model or str,  # type: ignore
+            output_schema=instruction.pydantic_model,
             continue_on_error=True,
             desc="Validating extracted relations",
         )
-        typed_results = cast(list[RelationsExtractionModel | None], results)
-
-        for i, relations_model in enumerate(typed_results):
+        for i, relations_model in enumerate(results):
             if relations_model is not None:
                 logger.debug(f"After validation got {len(relations_model.relations)} relations")
             else:
                 logger.warning("LLM call failed for relation validation chunk at index {}", i)
 
-        return typed_results
+        return results
 
     @staticmethod
-    def _models_to_payload(models: List[BaseModel | None]) -> List[List[dict[str, Any]]]:
+    def _models_to_payload(models: List[ModelT | None]) -> List[List[dict[str, Any]]]:
         """
         Convert stage models to JSON-like payloads expected by Jinja templates.
 
@@ -440,6 +433,6 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                 payload.append([])
                 continue
             data = model.model_dump()
-            first_value = next(iter(data.values()), [])
+            first_value: Any = next(iter(data.values()), [])
             payload.append(cast(List[dict[str, Any]], first_value))
         return payload

@@ -182,7 +182,7 @@ def serialize(obj: Any) -> Any:
     if obj is None or isinstance(obj, (int, float, str, bool)):
         return obj
 
-    if is_dataclass(obj):
+    if is_dataclass(obj) and not isinstance(obj, type):
         return {k: serialize(v) for k, v in asdict(obj).items()}
 
     if isinstance(obj, dict):
@@ -207,7 +207,7 @@ def serialize(obj: Any) -> Any:
 
     return str(obj)
 
-def serialized_size(obj) -> int:
+def serialized_size(obj: Any) -> int:
     """
     Estimate size of an object after JSON serialization, in bytes.
 

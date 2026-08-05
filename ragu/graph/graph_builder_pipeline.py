@@ -302,7 +302,7 @@ class InMemoryGraphBuilder:
 
             raise TypeError(f"Unsupported hierarchical_leiden output item: {item!r}")
 
-        clusters = defaultdict(
+        clusters: Dict[int, Dict[int, Dict[str, Set[str]]]] = defaultdict(
             lambda: defaultdict(lambda: {"entity_ids": set(), "relation_ids": set()})
         )
         node_membership = defaultdict(set)

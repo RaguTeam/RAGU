@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from ragu.common.base import RaguGenerativeModule
 from ragu.common.global_parameters import Settings
+from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.models.llm import LLM
 from ragu.utils.ragu_utils import deprecated
 from ragu.utils.token_truncation import TokenTruncation
@@ -50,6 +51,10 @@ class SearchEngineRetrieve(ABC, Generic[ResultT]):
         return self.to_text()
 
 
+ParamsT = TypeVar("ParamsT", bound=EngineParams)
+RetrieveT = TypeVar("RetrieveT", bound=SearchEngineRetrieve[Any])
+
+
 @dataclass(slots=True)
 class SearchEngineResponse:
     """
@@ -84,7 +89,7 @@ class SearchEngineStreamEvent:
     payload: dict[str, Any] = field(default_factory=dict)
 
 
-class BaseEngine(RaguGenerativeModule, ABC):
+class BaseEngine(RaguGenerativeModule, ABC, Generic[ParamsT, RetrieveT]):
     """
     Base interface for RAGU query/search engines.
 
@@ -95,11 +100,11 @@ class BaseEngine(RaguGenerativeModule, ABC):
     def __init__(
         self,
         llm: LLM,
-        *args: Any,
+        prompts: list[str] | dict[str, RAGUInstruction],
+        *,
         max_context_length: int | None = None,
         tokenizer_backend: Literal["tiktoken", "local"] | None = None,
         tokenizer_model: str | None = None,
-        **kwargs: Any,
     ):
         """
         Initialize an engine with an LLM and context truncation settings.
@@ -112,6 +117,9 @@ class BaseEngine(RaguGenerativeModule, ABC):
         windows in the same process).
 
         :param llm: LLM used by concrete engines for answer generation.
+        :param prompts: Prompt names to load from the default registry, or ready
+            instructions keyed by name. Forwarded to
+            :class:`~ragu.common.base.RaguGenerativeModule`.
         :param max_context_length: Maximum number of tokens the assembled
             context is truncated to. When ``None``, falls back to
             ``Settings.llm_context_token_limit``.
@@ -122,7 +130,7 @@ class BaseEngine(RaguGenerativeModule, ABC):
             ``"gpt-4o"``). When ``None``, falls back to
             ``Settings.tokenizer_llm_name``.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(prompts)
         self.llm = llm
         self.truncation = TokenTruncation(
             tokenizer_model or Settings.tokenizer_llm_name,
@@ -130,7 +138,7 @@ class BaseEngine(RaguGenerativeModule, ABC):
             max_context_length if max_context_length is not None else Settings.llm_context_token_limit,
         )
 
-    async def search(self, query: str, params: EngineParams | None = None) -> SearchEngineRetrieve:
+    async def search(self, query: str, params: ParamsT | None = None) -> RetrieveT:
         """
         Retrieve context relevant to a query without generating an answer.
 
@@ -144,7 +152,7 @@ class BaseEngine(RaguGenerativeModule, ABC):
         """
         return (await self.batch_search([query], params))[0]
 
-    async def query(self, query: str, params: EngineParams | None = None) -> SearchEngineResponse:
+    async def query(self, query: str, params: ParamsT | None = None) -> SearchEngineResponse:
         """
         Execute retrieval and answer generation for a query.
 
@@ -161,7 +169,7 @@ class BaseEngine(RaguGenerativeModule, ABC):
     async def stream_query(
         self,
         query: str,
-        params: EngineParams | None = None,
+        params: ParamsT | None = None,
     ) -> AsyncIterator[SearchEngineStreamEvent]:
         """
         Execute retrieval and stream plain-text answer generation.
@@ -181,7 +189,7 @@ class BaseEngine(RaguGenerativeModule, ABC):
         raise NotImplementedError(f"{type(self).__name__} does not support streaming query")
 
     @abstractmethod
-    async def batch_search(self, queries: list[str], params: EngineParams | None = None) -> list[SearchEngineRetrieve]:
+    async def batch_search(self, queries: list[str], params: ParamsT | None = None) -> list[RetrieveT]:
         """
         Retrieve context for multiple queries.
 
@@ -195,7 +203,7 @@ class BaseEngine(RaguGenerativeModule, ABC):
         """
 
     @abstractmethod
-    async def batch_query(self, queries: list[str], params: EngineParams | None = None) -> list[SearchEngineResponse]:
+    async def batch_query(self, queries: list[str], params: ParamsT | None = None) -> list[SearchEngineResponse]:
         """
         Execute retrieval and answer generation for multiple queries.
 
@@ -210,7 +218,7 @@ class BaseEngine(RaguGenerativeModule, ABC):
         """
 
     @deprecated(replacement="search")
-    async def a_search(self, query: str, params: EngineParams | None = None) -> SearchEngineRetrieve:
+    async def a_search(self, query: str, params: ParamsT | None = None) -> RetrieveT:
         """
         Deprecated async alias for :meth:`search`.
 
@@ -221,7 +229,7 @@ class BaseEngine(RaguGenerativeModule, ABC):
         return await self.search(query, params)
 
     @deprecated(replacement="query")
-    async def a_query(self, query: str, params: EngineParams | None = None) -> SearchEngineResponse:
+    async def a_query(self, query: str, params: ParamsT | None = None) -> SearchEngineResponse:
         """
         Deprecated async alias for :meth:`query`.
 

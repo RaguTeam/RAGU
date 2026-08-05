@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import os
 from dataclasses import asdict
+from collections.abc import Iterator
 from typing import (
     Any,
-    Iterable,
+    Dict,
     List,
     Optional,
     Type,
@@ -66,7 +67,7 @@ class NetworkXStorage(BaseGraphStorage[NodeT, EdgeT]):
             converted.add_edge(u, v, key=key, **attrs)
         return converted
 
-    def _iter_incident_edges(self, node_id: str):
+    def _iter_incident_edges(self, node_id: str) -> Iterator[tuple[Any, Any, Any, Dict[str, Any]]]:
         """
         Iterate all incoming and outgoing edges for a node.
 
@@ -130,11 +131,11 @@ class NetworkXStorage(BaseGraphStorage[NodeT, EdgeT]):
         return degrees
 
     @override
-    async def upsert_nodes(self, nodes: Iterable[NodeT]) -> None:
+    async def upsert_nodes(self, nodes: List[NodeT]) -> None:
         """
         Insert or update multiple nodes in the graph.
 
-        :param nodes: Iterable of entities to process.
+        :param nodes: Entities to process.
         """
         for node in nodes:
             attrs = asdict(node)
@@ -209,7 +210,7 @@ class NetworkXStorage(BaseGraphStorage[NodeT, EdgeT]):
         """
         Insert or update multiple edges in the graph.
 
-        :param edges: List of EdgeT to upsert.
+        :param edges: Edges to upsert.
         """
         for edge in edges:
             edge_data = asdict(edge)

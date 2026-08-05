@@ -1,7 +1,7 @@
 import json
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, TypeVar, cast
+from typing import Any, TypeVar, Union
 
 from pydantic import BaseModel
 from openai.types.chat import ChatCompletionMessageParam
@@ -10,7 +10,12 @@ from ragu.common.logger import logger
 from ragu.utils.ragu_utils import FLOATS, get_disk_cache
 
 
-T = TypeVar('T', BaseModel, str)
+#: Schema a chat completion can be asked for: ``str`` for plain text, or a
+#: ``BaseModel`` subclass for structured output.
+OutputSchema = Union[type[BaseModel], type[str]]
+
+#: Used by overloads to carry the concrete model class through to the return type.
+ModelT = TypeVar('ModelT', bound=BaseModel)
 
 class ResponseCachingMixin:
     """
@@ -55,9 +60,9 @@ class ResponseCachingMixin:
         self,
         model_name: str,
         conversation: list[ChatCompletionMessageParam],
-        output_schema: type[T] = str,
+        output_schema: OutputSchema = str,
         **kwargs: Any,
-    ) -> T:
+    ) -> Any:
         """Caching wrapper for _uncached_chat_completion"""
         if self.cache is None:
             return await self._uncached_chat_completion(
@@ -67,13 +72,14 @@ class ResponseCachingMixin:
                 **kwargs,
             )
 
-        is_str = issubclass(output_schema, str)
         args: dict[str, Any] = {
             'cache_prefix': self.cache_prefix,
             'model_name': model_name,
             'method': 'chat_completion',
             'conversation': conversation,
-            'output_schema': 'str' if is_str else output_schema.model_json_schema(),
+            'output_schema': (
+                'str' if issubclass(output_schema, str) else output_schema.model_json_schema()
+            ),
             'kwargs': kwargs,
         }
         key = json.dumps(args, sort_keys=True)
@@ -82,8 +88,9 @@ class ResponseCachingMixin:
             logger.debug(f'Cache hit for {model_name}!')
             cached: str | dict[str, Any]
             _args, cached = value
-            result = cached if is_str else output_schema.model_validate(cached)
-            return cast(T, result)
+            if issubclass(output_schema, str):
+                return cached
+            return output_schema.model_validate(cached)
 
         response = await self._uncached_chat_completion(
             model_name=model_name,
@@ -92,7 +99,7 @@ class ResponseCachingMixin:
             **kwargs,
         )
 
-        cached = response if is_str else response.model_dump() # type: ignore
+        cached = response if issubclass(output_schema, str) else response.model_dump()
 
         self.cache[key] = args, cached
 
@@ -102,9 +109,9 @@ class ResponseCachingMixin:
         self,
         model_name: str,
         conversation: list[ChatCompletionMessageParam],
-        output_schema: type[T] = str,
+        output_schema: OutputSchema = str,
         **kwargs: Any,
-    ) -> T:
+    ) -> Any:
         """Abstract method to cache.
 
         kwargs are here to add custom arguments that will also be cached

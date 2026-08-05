@@ -245,6 +245,8 @@ class InContextLearningManager:
 
         texts = [ex.input_text for ex in self.examples]
 
+        assert self.embedder is not None
+
         logger.debug("Computing embeddings for examples...")
         embeddings = await self.embedder.batch_embed_text(
             texts=texts,
@@ -297,6 +299,8 @@ class InContextLearningManager:
         query_key = hash(tuple(query_texts))
         if self._cached_query_key == query_key and self._cached_query_matrix is not None:
             return self._cached_query_matrix
+
+        assert self.embedder is not None
 
         query_embeddings = await self.embedder.batch_embed_text(
             texts=query_texts,
@@ -406,7 +410,8 @@ class InContextLearningManager:
         num_examples: int,
     ) -> List[List[Dict[str, Any]]]:
         candidate_indices = self._get_candidate_indices(task)
-        if not candidate_indices or self._example_matrix is None:
+        if (not candidate_indices or self._example_matrix is None
+                or self._example_norms is None):
             return [[] for _ in query_texts]
 
         query_matrix = await self._get_query_matrix(query_texts)
@@ -499,7 +504,7 @@ class InContextLearningManager:
         if not candidate_indices:
             return [[] for _ in query_texts]
 
-        output: List[List[Dict[str, Any]]] = []
+        output = []
         for i, query_emb in enumerate(query_embeddings):
             scored = sorted(
                 (
@@ -531,7 +536,7 @@ class InContextLearningManager:
         assert self.embedder is not None
 
         if (self._bm25_embedder is None or self._bm25_doc_embeddings is None
-                or self._example_matrix is None):
+                or self._example_matrix is None or self._example_norms is None):
             return [[] for _ in query_texts]
 
         candidate_indices = self._get_candidate_indices(task)
@@ -556,11 +561,15 @@ class InContextLearningManager:
 
         query_embeddings = self._bm25_embedder.embed_query(query_texts)
 
-        use_per_task = (
-            task is not None
-            and self._bm25_task_embeddings
-            and task in self._bm25_task_embeddings
+        # Looked up once instead of tested as a flag: holding the entry itself is
+        # what lets the type checker see that the per-task branch below has a
+        # task name and an index to work with.
+        per_task_entry = (
+            self._bm25_task_embeddings.get(task)
+            if task is not None and self._bm25_task_embeddings
+            else None
         )
+        use_per_task = per_task_entry is not None
 
         rrf_k = max(len(candidate_indices) // 2, 1)
 
@@ -574,8 +583,8 @@ class InContextLearningManager:
                 global_idx = int(idx_arr[local_idx])
                 rrf_scores[global_idx] = 1.0 / (rrf_k + rank + 1)
 
-            if use_per_task:
-                task_embs, task_bm25_indices = self._bm25_task_embeddings[task]
+            if per_task_entry is not None:
+                task_embs, task_bm25_indices = per_task_entry
                 bm25_scored = sorted(
                     (
                         (self._sparse_dot_product(query_emb, doc_emb), local_idx)

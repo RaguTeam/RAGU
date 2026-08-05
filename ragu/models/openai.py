@@ -4,7 +4,7 @@ from collections.abc import AsyncIterator, MutableMapping, Sequence
 from dataclasses import dataclass
 from contextlib import AbstractAsyncContextManager, AsyncExitStack
 from pathlib import Path
-from typing import Any, TypeVar, cast
+from typing import Any, cast, overload
 import httpx
 from pydantic import BaseModel
 from typing_extensions import override
@@ -19,13 +19,11 @@ from openai.types.chat import (
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_chain, wait_fixed, before_sleep_log
 from aiolimiter import AsyncLimiter
 
-from ragu.models.caching import ResponseCachingMixin
+from ragu.models.caching import ModelT, OutputSchema, ResponseCachingMixin
 from ragu.utils.ragu_utils import FLOATS, LoguruAdapter, attach_async_contexts, get_disk_cache, save_args_on_exception
 from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
 
-
-T = TypeVar('T', BaseModel, str)
 
 DEFAULT_RETRY_TIMES_SEC: Sequence[float] = (2, 4, 8)
 
@@ -214,13 +212,40 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             self._uncached_embed_texts = retrying_decorator(self._uncached_embed_texts)
             self._uncached_score = retrying_decorator(self._uncached_score)
     
+    @overload
     async def chat_completion(
         self,
         model_name: str,
         conversation: list[ChatCompletionMessageParam],
-        output_schema: type[T] = str,
+        output_schema: type[str] = ...,
         **kwargs: Any,
-    ) -> T:
+    ) -> str: ...
+
+    @overload
+    async def chat_completion(
+        self,
+        model_name: str,
+        conversation: list[ChatCompletionMessageParam],
+        output_schema: type[ModelT],
+        **kwargs: Any,
+    ) -> ModelT: ...
+
+    @overload
+    async def chat_completion(
+        self,
+        model_name: str,
+        conversation: list[ChatCompletionMessageParam],
+        output_schema: OutputSchema,
+        **kwargs: Any,
+    ) -> BaseModel | str: ...
+
+    async def chat_completion(
+        self,
+        model_name: str,
+        conversation: list[ChatCompletionMessageParam],
+        output_schema: OutputSchema = str,
+        **kwargs: Any,
+    ) -> Any:
         """
         Returns chat completion result with caching.
 
@@ -358,10 +383,10 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         self,
         model_name: str,
         conversation: list[ChatCompletionMessageParam],
-        output_schema: type[T] = str,
+        output_schema: OutputSchema = str,
         as_tool: bool = False,
         **kwargs: Any,
-    ) -> T:
+    ) -> Any:
         """
         Performs uncached chat completion call.
 
@@ -392,7 +417,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
                 **recognized_kwargs,
             ))
             content = response.choices[0].message.content
-            return cast(T, content if content is not None else '')
+            return content if content is not None else ''
 
         model_schema = output_schema
         
@@ -412,7 +437,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             
             if parsed_result is None:
                 raise ValueError('OpenAI refused to output structured data.')
-            return cast(T, parsed_result)
+            return parsed_result
 
         else:
             # use tool calling to define schema, as in pydantic_ai
@@ -441,7 +466,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             
             # Parse the arguments from the tool call back into the Pydantic model
             arguments_json = cast(str, message.tool_calls[0].function.arguments) # type: ignore
-            return cast(T, model_schema.model_validate_json(arguments_json))
+            return model_schema.model_validate_json(arguments_json)
 
     @override
     async def _uncached_embed_text(
