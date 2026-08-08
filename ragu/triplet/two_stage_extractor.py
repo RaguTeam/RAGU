@@ -157,6 +157,10 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                 "Relation extraction failed for {} chunks: {}: {}",
                 len(context), type(e).__name__, e,
             )
+            for entities_model, chunk in zip(entity_results, chunks):
+                if entities_model is None:
+                    continue
+                entities_result.extend(self._to_entities(entities_model, chunk))
             return entities_result, []
 
         if self.do_relation_validation:
@@ -173,23 +177,15 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                 )
 
         for entities_model, relations_model, chunk in zip(entity_results, relation_results, chunks):
-            if entities_model is None or relations_model is None:
+            if entities_model is None:
                 continue
 
-            current_chunk_entities: List[Entity] = []
-
-            for entity_model in entities_model.entities:
-                entity = Entity(
-                    entity_name=entity_model.entity_name,
-                    entity_type=entity_model.entity_type,
-                    description=entity_model.description,
-                    source_chunk_id=[chunk.id],
-                    documents_id=[],
-                    clusters=[],
-                )
-                current_chunk_entities.append(entity)
-
+            current_chunk_entities = self._to_entities(entities_model, chunk)
             entities_result.extend(current_chunk_entities)
+
+            if relations_model is None:
+                continue
+
             entity_by_name = {entity.entity_name: entity for entity in current_chunk_entities}
 
             for relation_model in relations_model.relations:
@@ -417,6 +413,27 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                 logger.warning("LLM call failed for relation validation chunk at index {}", i)
 
         return results
+
+    @staticmethod
+    def _to_entities(entities_model: EntitiesExtractionModel, chunk: Chunk) -> List[Entity]:
+        """
+        Convert stage-1 entity models of a single chunk into graph entities.
+
+        :param entities_model: Extracted entities for one chunk.
+        :param chunk: Source chunk the entities were extracted from.
+        :return: Graph entities referencing the source chunk.
+        """
+        return [
+            Entity(
+                entity_name=entity_model.entity_name,
+                entity_type=entity_model.entity_type,
+                description=entity_model.description,
+                source_chunk_id=[chunk.id],
+                documents_id=[],
+                clusters=[],
+            )
+            for entity_model in entities_model.entities
+        ]
 
     @staticmethod
     def _models_to_payload(models: List[ModelT | None]) -> List[List[dict[str, Any]]]:

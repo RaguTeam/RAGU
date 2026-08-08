@@ -49,6 +49,9 @@ Validate correctness and completeness of entities and relationships against the 
 {% if entity_types -%}
 The entity type must be one of the following: {{ entity_types }}
 {% endif %}
+{% if relation_types -%}
+The relation type must be one of the following: {{ relation_types }}
+{% endif %}
 
 Provide the answer in the following language: {{ language }}
 Return the result as valid JSON matching the provided schema.
