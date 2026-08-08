@@ -12,6 +12,7 @@ from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.graph.types import Entity, Relation
 from ragu.models.llm import LLM
 from ragu.triplet.base_artifact_extractor import BaseArtifactExtractor
+from ragu.utils.ragu_utils import deprecated
 
 
 @dataclass
@@ -26,6 +27,10 @@ class ChunkContext:
     relations: List[Relation] = field(default_factory=list[Relation])
 
 
+@deprecated(
+    "RaguLmArtifactExtractor is deprecated and will be removed in future"
+    "use TwoStageArtifactsExtractorLLM or ArtifactsExtractorLLM"
+)
 class RaguLmArtifactExtractor(BaseArtifactExtractor):
     """
     RAGU-LM artifact extractor with stage-by-stage batch processing.
