@@ -24,6 +24,13 @@ It is necessary to identify all entities of the specified types in the text, as 
     {% if relation_types -%}
         The relation type must be one of the following: {{ relation_types }}
     {% endif %}
+    {% if type_signatures is defined and type_signatures -%}
+    Some types are shown as `TYPE [SUBJECT -> OBJECT] (meaning)`. 
+    The brackets state which entity types the relation may connect: `WORKPLACE [PERSON -> ORGANIZATION|FACILITY]` may only go from a PERSON to an ORGANIZATION or a FACILITY. 
+    `|` separates alternatives, `<->` marks a relation that holds in both directions, and a type shown without brackets accepts any pair.
+    Pick a type whose signature matches the types of the two entities you are linking, and order **source_entity** and **target_entity** to follow the arrow. 
+    A relation whose endpoints do not match its signature will be discarded.
+    {% endif %}
     - **description**: A description of the relationship between the two entities.
     - **relationship_strength**: A numeric value representing the strength of the relationship between the entities, ranging from 0 to 5,
     where 0 = weak connection and 5 = strong connection.
@@ -52,6 +59,15 @@ The entity type must be one of the following: {{ entity_types }}
 {% if relation_types -%}
 The relation type must be one of the following: {{ relation_types }}
 {% endif %}
+{% if type_signatures is defined and type_signatures -%}
+- Some types are shown as `TYPE [SUBJECT -> OBJECT] (meaning)`. 
+  The brackets state which entity types the relation may connect: 
+  `WORKPLACE [PERSON -> ORGANIZATION|FACILITY]` may only go from a PERSON to an ORGANIZATION or a FACILITY. 
+  `|` separates alternatives, `<->` marks a relation that holds in both directions, and a type shown without brackets accepts any pair.
+- Pick a type whose signature matches the types of the two entities you are linking, and order **source_entity** and **target_entity** to follow the arrow. 
+  A relation whose endpoints do not match its signature will be discarded.
+{% endif -%}
+
 
 Provide the answer in the following language: {{ language }}
 Return the result as valid JSON matching the provided schema.
@@ -99,7 +115,6 @@ Provide the answer in the following language: {{ language }}
 Return the result as valid JSON matching the provided schema.
 """
 
-# "Entity" -> "Entity name" to better match schema, and reduce json validation errors
 DEFAULT_ENTITY_SUMMARIZER_PROMPT = """
 **Goal**
 From the given entity and multiple phrases, produce one concise, consistent entity description.

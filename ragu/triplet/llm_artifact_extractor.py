@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Tuple, Optional
+from typing import Any, List, Tuple
 
 from ragu.common.logger import logger
 from ragu.chunker.types import Chunk
@@ -14,7 +14,12 @@ from ragu.graph.types import Entity, Relation
 from ragu.models.llm import LLM
 from ragu.models.embedder import Embedder
 from ragu.triplet.base_artifact_extractor import BaseArtifactExtractor
-from ragu.triplet.types import NEREL_ENTITY_TYPES, NEREL_RELATION_TYPES
+from ragu.triplet.ontology import (
+    Ontology,
+    OntologyValidator,
+    ValidationPolicies,
+    resolve_ontology,
+)
 
 
 class ArtifactsExtractorLLM(BaseArtifactExtractor):
@@ -37,8 +42,9 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         icl_config: ICLConfig | None = None,
         do_validation: bool = False,
         language: str | None = None,
-        entity_types: Optional[List[str]] = NEREL_ENTITY_TYPES,
-        relation_types: Optional[List[str]] = NEREL_RELATION_TYPES,
+        ontology: Ontology | str | None = "nerel",
+        validation: ValidationPolicies = ValidationPolicies(),
+        show_type_signatures: bool = False,
     ):
         """
         Initialize a new :class:`ArtifactsExtractorLLM`.
@@ -48,18 +54,37 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         :param icl_config: ICL configuration (optional).
         :param do_validation: Whether to perform additional LLM-based validation of artifacts.
         :param language: Output text language.
-        :param entity_types: List of entity types to guide extraction prompts.
-        :param relation_types: List of relation types to guide extraction prompts.
+        :param ontology: Vocabulary the extraction is restricted to: an
+            :class:`~ragu.triplet.ontology.Ontology`, the name of a built-in one, or
+            ``None`` to let the model invent its own type labels. The same object
+            drives both the prompt and the validation of what comes back, so the two
+            cannot drift apart.
+        :param validation: What to do about artifacts that violate the ontology.
+            Ignored when ``ontology`` is ``None``.
+        :param show_type_signatures: Render each predicate in the prompt with its
+            ``[DOMAIN -> RANGE]`` signature. Without it the model cannot know which
+            endpoint types a predicate accepts, and produces relations the validator
+            then has to discard.
         """
         _PROMPTS = ["artifact_extraction", "artifact_validation"]
-        super().__init__(prompts=_PROMPTS)
+        resolved = resolve_ontology(ontology)
+        super().__init__(
+            prompts=_PROMPTS,
+            validator=OntologyValidator(resolved, validation) if resolved else None,
+        )
 
         self.llm = llm
         self.embedder = embedder
         self.do_validation = do_validation
         self.language = language if language else Settings.language
-        self.entity_types = ", ".join(entity_types) if entity_types else None
-        self.relation_types = ", ".join(relation_types) if relation_types else None
+        self.ontology = resolved
+        self.show_type_signatures = show_type_signatures
+        self.entity_types = resolved.render_entity_types() if resolved else None
+        self.relation_types = (
+            resolved.render_relation_types(with_signatures=show_type_signatures)
+            if resolved
+            else None
+        )
 
         self.icl_manager: InContextLearningManager | None = None
         if icl_config and icl_config.enabled:
@@ -109,6 +134,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             language=self.language,
             entity_types=self.entity_types,
             relation_types=self.relation_types,
+            type_signatures=self.show_type_signatures,
         )
 
         result_list = await self.llm.batch_chat_completion(
@@ -162,6 +188,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             context=context,
             entity_types=self.entity_types,
             relation_types=self.relation_types,
+            type_signatures=self.show_type_signatures,
             language=self.language,
         )
 
@@ -228,16 +255,21 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                     type(e).__name__, e,
                 )
 
+        entities_per_chunk, relations_per_chunk = self._apply_ontology(
+            [artifacts.entities if artifacts else [] for artifacts in result_list],
+            [artifacts.relations if artifacts else [] for artifacts in result_list],
+            stage="artifacts",
+        )
+
         entities_result: List[Entity] = []
         relations_result: List[Relation] = []
 
-        for artifacts, chunk in zip(result_list, chunks):
-            if artifacts is None:
-                continue
-
+        for chunk_entities, chunk_relations, chunk in zip(
+            entities_per_chunk, relations_per_chunk, chunks
+        ):
             current_chunk_entities: List[Entity] = []
 
-            for entity_model in artifacts.entities:
+            for entity_model in chunk_entities:
                 entity = Entity(
                     entity_name=entity_model.entity_name,
                     entity_type=entity_model.entity_type or "UNKNOWN",
@@ -251,7 +283,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             entities_result.extend(current_chunk_entities)
             entity_by_name = {e.entity_name: e for e in current_chunk_entities}
 
-            for relation in artifacts.relations:
+            for relation in chunk_relations:
                 subject_name = relation.source_entity
                 object_name = relation.target_entity
                 if not (subject_name and object_name):
