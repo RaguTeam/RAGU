@@ -17,14 +17,16 @@ Asked directly, in library terms, because it is the one decision that dominates 
 because most people setting up RAGU already have a view on it. Give the price in the
 question so the answer is an informed one.
 
-> **Строить граф знаний или ограничиться векторным индексом по чанкам?**
-> Граф — это прогон LLM по всему корпусу на извлечение сущностей и связей: дороже и
-> дольше на сборке, зато отвечает на вопросы, которые надо склеивать из разных мест.
-> Векторный индекс — только эмбеддинги чанков: минуты вместо часов, но каждый ответ
-> ограничен тем, что нашлось в одном фрагменте.
-> - Граф
-> - Векторный индекс
-> - Не знаю — спроси иначе
+> **Build a knowledge graph or stick with a vector index over chunks?**
+>
+> A graph requires running an LLM over the entire corpus to extract entities and relationships. It is more expensive and takes longer to build, but it can answer questions that require connecting information from different parts of the corpus.
+>
+> A vector index only requires computing embeddings for chunks. It takes minutes rather than hours to build, but each answer is limited to the information contained in the retrieved chunks.
+>
+> * Knowledge graph
+> * Vector index
+> * Not sure — ask me another way
+
 
 | Answer | Choice | Consequences |
 |---|---|---|
@@ -257,7 +259,7 @@ them if phase 0 found none.
 ## Extractors
 
 ```python
-from ragu import ArtifactsExtractorLLM, TwoStageArtifactsExtractorLLM, RaguLmArtifactExtractor
+from ragu import ArtifactsExtractorLLM, TwoStageArtifactsExtractorLLM
 from ragu.common.prompts import ICLConfig
 
 extractor = ArtifactsExtractorLLM(
@@ -274,7 +276,6 @@ extractor = TwoStageArtifactsExtractorLLM(
     do_entity_validation=True, do_relation_validation=True,
 )
 
-extractor = RaguLmArtifactExtractor(llm=llm, temperature=0.0, top_p=0.95)
 ```
 
 Custom entity/relation types go through `entity_types=` / `relation_types=`; the defaults
