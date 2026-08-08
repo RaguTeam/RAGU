@@ -6,7 +6,7 @@ YAML document, so a malformed file is rejected at load time with a field-level
 message instead of failing later during extraction.
 """
 
-from typing import Any, NamedTuple, Union
+from typing import Any, NamedTuple
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
