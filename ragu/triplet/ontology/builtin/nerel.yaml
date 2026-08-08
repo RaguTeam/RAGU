@@ -1,0 +1,439 @@
+# NEREL ontology: 29 entity types and 49 relation types.
+#
+# Format
+#   NAME: description                 -- shorthand, no constraints
+#   NAME:                             -- full form
+#     description: ...
+#     aliases: [...]                  -- spellings coerced to this type
+#     parent: ...                     -- supertype; a subtype satisfies any
+#                                        constraint that accepts its ancestors
+#     domain / range: [...]           -- allowed subject / object types,
+#                                        omit for "any type"
+#     symmetric / functional: bool
+#     inverse_of: ...
+#     inverse_aliases: [...]          -- spellings meaning this predicate REVERSED;
+#                                        resolving one also swaps the endpoints
+#     retype_when: [...]              -- rewrite this predicate into another one
+#                                        for specific endpoint types; add
+#                                        `swap: true` to also exchange the endpoints
+#
+# Validation policies (drop / coerce / raise) are NOT part of this file:
+# they are passed to the validator's constructor, so the same ontology can be
+# enforced strictly in CI and leniently in production.
+
+version: 1
+name: nerel
+
+entity_types:
+  PERSON:
+    description: a human being, including full names and nicknames
+    aliases: [PER, HUMAN, INDIVIDUAL]
+
+  ORGANIZATION:
+    description: a company, agency, political party, or other organized group
+    aliases: [ORG, COMPANY, INSTITUTION, GROUP, TEAM, SPORTS_TEAM, BAND,
+              POLITICAL_PARTY, EDUCATIONAL_INSTITUTION, GOVERNMENT, GOVERNMENT_AGENCY,
+              GOVERNMENT_BODY, LEGISLATIVE_BODY, MILITARY_UNIT, LABEL, PUBLISHER]
+
+  LOCATION:
+    description: a geographic location, natural or physical, not otherwise classified
+    aliases: [LOC, GPE, PLACE, RIVER, MOUNTAIN, LAKE, ISLAND, SEA,
+              GEOGRAPHIC_FEATURE, FEATURE]
+
+  CITY:
+    description: a city or town
+    parent: LOCATION
+    aliases: [TOWN, VILLAGE, MUNICIPALITY, SETTLEMENT]
+
+  COUNTRY:
+    description: a sovereign state or country
+    parent: LOCATION
+    aliases: [NATION]
+
+  STATE_OR_PROV:
+    description: a state, province, or other first-level administrative division
+    parent: LOCATION
+    aliases: [PROVINCE, REGION, OBLAST, STATE, COUNTY, PREFECTURE, CANTON,
+              ADMINISTRATIVE_DIVISION, ADMINISTRATIVE_DISTRICT, ADMIN_DIVISION]
+
+  DISTRICT:
+    description: a district, borough, or other sub-city administrative unit
+    parent: LOCATION
+    aliases: [BOROUGH]
+
+  FACILITY:
+    description: a man-made structure or installation, e.g. airport, stadium
+    parent: LOCATION
+    aliases: [FAC, BUILDING, ROAD, STADIUM, AIRPORT, STATION, BRIDGE]
+
+  FAMILY: a family name or a family as a social unit
+
+  PROFESSION:
+    description: a job title or occupation
+    aliases: [JOB, OCCUPATION, TITLE, ROLE]
+
+  NATIONALITY:
+    description: a person's nationality or ethnic affiliation
+    aliases: [ETHNICITY, ETHNIC_GROUP, PEOPLE]
+
+  RELIGION: a religious belief system or denomination
+
+  IDEOLOGY: a political or philosophical belief system
+
+  LANGUAGE: a natural language name
+
+  AWARD:
+    description: a prize, honor, or recognition
+    aliases: [PRIZE]
+
+  EVENT: a named event or a concrete news event occurrence
+
+  WORK_OF_ART:
+    description: a creative work such as a book, film, painting, etc.
+    aliases: [ARTWORK, CREATIVE_WORK, FILM, MOVIE, TV_SERIES, TV_SHOW, SERIES,
+              ALBUM, SONG, BOOK, NOVEL, PROGRAM, GAME, PAINTING, COMPOSITION]
+
+  PRODUCT:
+    description: a commercial product, including model names
+    aliases: [BRAND, DEVICE, VEHICLE, SHIP, AIRCRAFT]
+
+  LAW:
+    description: a legal act, regulation, or code
+    aliases: [LEGAL_ACT]
+
+  CRIME:
+    description: an illegal act or offense
+    aliases: [OFFENSE]
+
+  PENALTY:
+    description: a legal punishment or sanction
+    aliases: [PUNISHMENT, SANCTION]
+
+  DISEASE:
+    description: a medical condition or illness
+    aliases: [ILLNESS]
+
+  DATE: a calendar date, absolute or relative
+
+  TIME: a time expression, e.g. "10:30 AM", "19:58"
+
+  AGE: a person's age or the age of an entity
+
+  MONEY:
+    description: a monetary amount or currency
+    aliases: [CURRENCY, AMOUNT]
+
+  NUMBER:
+    description: a numeric value not covered by other numeric types
+    aliases: [NUM, QUANTITY]
+
+  PERCENT:
+    description: a percentage value
+    parent: NUMBER
+    aliases: [PERCENTAGE]
+
+  ORDINAL:
+    description: an ordinal number, e.g. "first", "2nd"
+    parent: NUMBER
+
+relation_types:
+  ABBREVIATION: connects an abbreviation to its full form
+
+  ALTERNATIVE_NAME:
+    description: connects different names or aliases for the same entity
+    symmetric: true
+    aliases: [SYNONYM, ALSO_KNOWN_AS]
+
+  AGE_DIED_AT:
+    description: the age at which a person died
+    domain: [PERSON]
+    range: [AGE]
+    functional: true
+
+  AGE_IS:
+    description: assigns an age value to a person
+    domain: [PERSON]
+    range: [AGE]
+    functional: true
+
+  AGENT:
+    description: links an event to its active agent or performer
+    domain: [EVENT]
+    range: [PERSON, ORGANIZATION, COUNTRY]
+    retype_when:
+      # A work is not an event with an agent; its "agent" is its creator.
+      - domain: [WORK_OF_ART, PRODUCT]
+        to: PRODUCES
+        swap: true
+
+  AWARDED_WITH:
+    description: links a person, organization, or work to an award it received
+    domain: [PERSON, ORGANIZATION, WORK_OF_ART]
+    range: [AWARD]
+    aliases: [WINNER_OF, WINNER, WON, RECEIVED_AWARD]
+
+  CAUSE_OF_DEATH:
+    description: the cause of a person's death
+    domain: [PERSON]
+    range: [DISEASE, EVENT, CRIME]
+
+  CONVICTED_OF:
+    description: connects a person to a crime they were convicted of
+    domain: [PERSON, ORGANIZATION]
+    range: [CRIME]
+
+  DATE_DEFUNCT_IN:
+    description: the date when an organization or entity ceased to exist
+    domain: [ORGANIZATION, FACILITY, PRODUCT]
+    range: [DATE]
+    functional: true
+
+  DATE_FOUNDED_IN:
+    description: the date when an organization or entity was founded
+    domain: [ORGANIZATION, FACILITY, LOCATION]
+    range: [DATE]
+    functional: true
+
+  DATE_OF_BIRTH:
+    description: the birth date of a person
+    domain: [PERSON]
+    range: [DATE]
+    functional: true
+
+  DATE_OF_CREATION:
+    description: the creation date of a product or work of art
+    domain: [PRODUCT, WORK_OF_ART, LAW]
+    range: [DATE]
+    functional: true
+    aliases: [RELEASE_DATE, DATE_OF_RELEASE, PUBLICATION_DATE]
+    retype_when:
+      # People are not created, they are born.
+      - domain: [PERSON]
+        range: [DATE]
+        to: DATE_OF_BIRTH
+
+  DATE_OF_DEATH:
+    description: the death date of a person
+    domain: [PERSON]
+    range: [DATE]
+    functional: true
+
+  START_TIME:
+    description: the start time of an event or state
+    domain: [EVENT]
+    range: [DATE, TIME]
+
+  END_TIME:
+    description: the end time of an event or state
+    domain: [EVENT]
+    range: [DATE, TIME]
+
+  POINT_IN_TIME:
+    description: links an event or state to a specific timestamp
+    domain: [EVENT]
+    range: [DATE, TIME]
+    aliases: [DATE_OF_EVENT]
+
+  EXPENDITURE:
+    description: the amount of money spent by an entity
+    domain: [PERSON, ORGANIZATION, COUNTRY]
+    range: [MONEY]
+
+  INCOME:
+    description: the amount of money earned by an entity
+    domain: [PERSON, ORGANIZATION, COUNTRY]
+    range: [MONEY]
+
+  PRICE_OF:
+    description: the price of a product or service
+    domain: [PRODUCT, WORK_OF_ART, FACILITY]
+    range: [MONEY]
+
+  FOUNDED_BY:
+    description: links an organization to its founder
+    domain: [ORGANIZATION, FACILITY, LOCATION]
+    range: [PERSON, ORGANIZATION]
+    aliases: [FOUNDER, ESTABLISHED_BY]
+    inverse_aliases: [FOUNDER_OF]
+
+  HAS_CAUSE:
+    description: links an event or state to its cause
+    domain: [EVENT, DISEASE, CRIME]
+    range: [EVENT, DISEASE, CRIME, PERSON, ORGANIZATION]
+
+  HEADQUARTERED_IN:
+    description: links an organization to its headquarters location
+    domain: [ORGANIZATION]
+    range: [LOCATION]
+    aliases: [BASED_IN]
+
+  IDEOLOGY_OF:
+    description: links an organization or person to their ideology
+    domain: [PERSON, ORGANIZATION]
+    range: [IDEOLOGY]
+
+  INANIMATE_INVOLVED:
+    description: links an event to an inanimate object involved
+    domain: [EVENT]
+    range: [PRODUCT, FACILITY, WORK_OF_ART, MONEY, LAW]
+
+  KNOWS:
+    description: links a person to another person they know
+    domain: [PERSON]
+    range: [PERSON]
+    symmetric: true
+
+  LOCATED_IN:
+    description: links a physical entity to its containing location
+    domain: [LOCATION, ORGANIZATION, EVENT]
+    range: [LOCATION]
+    aliases: [SITUATED_IN]
+    retype_when:
+      # A person is not "located in" a place, they reside there.
+      - domain: [PERSON]
+        range: [LOCATION]
+        to: PLACE_RESIDES_IN
+
+  MEDICAL_CONDITION:
+    description: links a person to a disease or medical condition
+    domain: [PERSON]
+    range: [DISEASE]
+
+  MEMBER_OF:
+    description: links a person, organization, or country to a group it belongs to
+    domain: [PERSON, ORGANIZATION, COUNTRY]
+    range: [ORGANIZATION, FAMILY, FACILITY]
+    aliases: [BELONGS_TO, SUBSIDIARY_OF]
+    inverse_aliases: [HAS_MEMBER]
+    retype_when:
+      # "member of <a country>" is citizenship or origin, not membership.
+      - range: [COUNTRY]
+        to: ORIGINS_FROM
+
+  ORGANIZES:
+    description: links an organizer to the event they organize
+    domain: [PERSON, ORGANIZATION, COUNTRY]
+    range: [EVENT]
+
+  ORIGINS_FROM:
+    description: links an entity to its country or place of origin
+    domain: [PERSON, PRODUCT, ORGANIZATION, WORK_OF_ART]
+    range: [LOCATION, NATIONALITY]
+    aliases: [NATIONALITY_OF, CITIZENSHIP]
+
+  OWNER_OF:
+    description: links an owner to an asset or product they own
+    domain: [PERSON, ORGANIZATION, COUNTRY]
+    range: [PRODUCT, ORGANIZATION, FACILITY, WORK_OF_ART]
+    aliases: [OWNS]
+    inverse_aliases: [OWNED_BY]
+
+  PARENT_OF:
+    description: links a parent to their child
+    domain: [PERSON]
+    range: [PERSON]
+    inverse_aliases: [CHILD_OF, SON_OF, DAUGHTER_OF]
+    retype_when:
+      # A parent company owns a subsidiary; the subsidiary is the member.
+      - domain: [ORGANIZATION]
+        range: [ORGANIZATION]
+        to: MEMBER_OF
+        swap: true
+
+  SIBLING:
+    description: links two persons as siblings
+    domain: [PERSON]
+    range: [PERSON]
+    symmetric: true
+
+  SPOUSE:
+    description: links two persons as married partners
+    domain: [PERSON]
+    range: [PERSON]
+    symmetric: true
+
+  RELATIVE:
+    description: a generic family relation between two persons
+    domain: [PERSON]
+    range: [PERSON]
+    symmetric: true
+
+  PART_OF:
+    description: links a component entity to the larger whole it belongs to
+    inverse_aliases: [HAS_PART, CONTAINS, INCLUDES, COMPRISES]
+
+  PARTICIPANT_IN:
+    description: links a person or organization to an event or production they took part in
+    domain: [PERSON, ORGANIZATION, COUNTRY]
+    range: [EVENT, WORK_OF_ART]
+
+  PENALIZED_AS:
+    description: links a convicted person to the penalty imposed
+    domain: [PERSON, ORGANIZATION]
+    range: [PENALTY]
+
+  PLACE_OF_BIRTH:
+    description: the location where a person was born
+    domain: [PERSON]
+    range: [LOCATION]
+    functional: true
+
+  PLACE_OF_DEATH:
+    description: the location where a person died
+    domain: [PERSON]
+    range: [LOCATION]
+    functional: true
+
+  PLACE_RESIDES_IN:
+    description: the location where a person lives
+    domain: [PERSON]
+    range: [LOCATION]
+
+  PRODUCES:
+    description: links a creator to a product or work it produces
+    domain: [ORGANIZATION, COUNTRY, PERSON]
+    range: [PRODUCT, WORK_OF_ART]
+    aliases: [AUTHOR_OF, CREATOR_OF, MANUFACTURES]
+    inverse_aliases: [WRITTEN_BY, DIRECTED_BY, PRODUCED_BY, PERFORMED_BY, CREATED_BY,
+                      RELEASED_BY, PUBLISHED_BY, COMPOSED_BY, DEVELOPED_BY,
+                      MANUFACTURED_BY, AUTHOR, CREATOR]
+
+  RELIGION_OF:
+    description: links a person to their religion
+    domain: [PERSON, ORGANIZATION]
+    range: [RELIGION]
+
+  SCHOOLS_ATTENDED:
+    description: links a person to an educational institution they attended
+    domain: [PERSON]
+    range: [ORGANIZATION, FACILITY]
+
+  SUBEVENT_OF:
+    description: links a sub-event to a larger encompassing event
+    domain: [EVENT]
+    range: [EVENT]
+
+  SUBORDINATE_OF:
+    description: links a subordinate person to their superior
+    domain: [PERSON, ORGANIZATION]
+    range: [PERSON, ORGANIZATION]
+
+  TAKES_PLACE_IN:
+    description: links an event to the location where it occurs
+    domain: [EVENT]
+    range: [LOCATION]
+
+  WORKPLACE:
+    description: links a person to the organization they work for
+    domain: [PERSON]
+    range: [ORGANIZATION, FACILITY]
+
+  WORKS_AS:
+    description: links a person to their profession or job title
+    domain: [PERSON]
+    range: [PROFESSION]
+    aliases: [PROFESSION_OF, OCCUPATION_OF]
+    retype_when:
+      # "works as <an organization>" means the place of work, not the job title.
+      - range: [ORGANIZATION, FACILITY]
+        to: WORKPLACE
