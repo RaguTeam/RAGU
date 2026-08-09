@@ -9,6 +9,7 @@ from graspologic_native import hierarchical_leiden
 from ragu.chunker.base_chunker import BaseChunker
 from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import Settings
+from ragu.common.logger import logger
 from ragu.graph.artifacts_summarizer import EntitySummarizer, RelationSummarizer
 from ragu.graph.community_summarizer import CommunitySummarizer
 from ragu.graph.types import CommunitySummary, Community, Entity, Relation
