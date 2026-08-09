@@ -1,7 +1,7 @@
 from collections.abc import AsyncIterator
 from dataclasses import field, dataclass
 from textwrap import dedent
-from typing import Any, List, Literal
+from typing import List, Literal
 
 from jinja2 import Template
 from typing_extensions import override
@@ -10,7 +10,7 @@ from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
 from ragu.common.prompts.default_models import GlobalSearchContextModel
 from ragu.common.prompts.messages import ChatMessages, render
-from ragu.common.prompts.prompt_storage import RAGUInstruction
+from ragu.common.prompts.prompt_storage import RAGUInstruction, require_prompt_schema
 from ragu.graph.knowledge_graph import KnowledgeGraph
 from ragu.models.llm import LLM
 from ragu.search_engine.base_engine import (
@@ -39,9 +39,6 @@ class GlobalSearchParams(EngineParams):
 class GlobalSearchResult:
     """
     Ranked community-level insights selected for a global query.
-
-    Each insight is expected to contain at least a ``response`` and ``rating``
-    field as produced by the global-search context prompt.
     """
     insights: list[GlobalSearchContextModel] = field(default_factory=list)
 
@@ -68,7 +65,7 @@ class GlobalSearchRetrieve(SearchEngineRetrieve[GlobalSearchResult]):
         return self._TO_TEXT_TEMPLATE.render(result=self.result)
 
 
-class GlobalSearchEngine(BaseEngine):
+class GlobalSearchEngine(BaseEngine[GlobalSearchParams, GlobalSearchRetrieve]):
     """
     Executes global retrieval-augmented search (RAG) across the entire knowledge graph.
 
@@ -85,8 +82,6 @@ class GlobalSearchEngine(BaseEngine):
         max_context_length: int | None = None,
         tokenizer_backend: Literal["tiktoken", "local"] | None = None,
         tokenizer_model: str | None = None,
-        *args: Any,
-        **kwargs: Any,
     ):
         """
         Initialize a new `GlobalSearchEngine`.
@@ -103,13 +98,11 @@ class GlobalSearchEngine(BaseEngine):
         """
         _PROMPTS = ["global_search_context", "global_search"]
         super().__init__(
-            llm=llm,
+            llm,
             prompts=_PROMPTS,
             max_context_length=max_context_length,
             tokenizer_backend=tokenizer_backend,
             tokenizer_model=tokenizer_model,
-            *args,
-            **kwargs,
         )
 
         self.knowledge_graph = knowledge_graph
@@ -119,7 +112,7 @@ class GlobalSearchEngine(BaseEngine):
     async def batch_search(
         self,
         queries: List[str],
-        params: EngineParams | None = None,
+        params: GlobalSearchParams | None = None,
     ) -> List[GlobalSearchRetrieve]:
         """
         Perform a global semantic search for a batch of queries.
@@ -143,16 +136,15 @@ class GlobalSearchEngine(BaseEngine):
 
         retrieves: List[GlobalSearchRetrieve] = []
         for query, meta_responses in zip(queries, await self.get_meta_responses(queries, communities)):
-            insights = [r.model_dump() for r in meta_responses]
-            insights = [r for r in insights if int(r.get("rating", 0)) > 0]
-            insights = sorted(insights, key=lambda x: int(x.get("rating", 0)), reverse=True)
+            rated = [insight for insight in meta_responses if insight.rating > 0]
+            insights = sorted(rated, key=lambda insight: insight.rating, reverse=True)
             retrieves.append(
                 GlobalSearchRetrieve(
                     query=query,
                     result=GlobalSearchResult(insights=insights),
                     metrics={
-                        f"insight_{idx}_rating": r.get("rating", 0)
-                        for idx, r in enumerate(insights)
+                        f"insight_{idx}_rating": insight.rating
+                        for idx, insight in enumerate(insights)
                     },
                 )
             )
@@ -205,7 +197,7 @@ class GlobalSearchEngine(BaseEngine):
     async def get_meta_responses(
         self,
         queries: List[str],
-        context: List[Any],
+        context: List[str],
     ) -> List[List[GlobalSearchContextModel]]:
         """
         Evaluate every (query, community) pair in a single batched LLM call.
@@ -224,7 +216,7 @@ class GlobalSearchEngine(BaseEngine):
         instruction: RAGUInstruction = self.get_prompt("global_search_context")
 
         expanded_queries: List[str] = []
-        expanded_context: List[Any] = []
+        expanded_context: List[str] = []
         for query in queries:
             for community in context:
                 expanded_queries.append(query)
@@ -239,7 +231,9 @@ class GlobalSearchEngine(BaseEngine):
 
         answers = await self.llm.batch_chat_completion(
             [rendered.to_openai() for rendered in rendered_list],
-            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+            output_schema=require_prompt_schema(
+                instruction, "global_search_context", GlobalSearchContextModel
+            ),
             continue_on_error=True,
             desc="GlobalSearch batch meta-eval",
         )
@@ -254,7 +248,7 @@ class GlobalSearchEngine(BaseEngine):
     async def batch_query(
         self,
         queries: List[str],
-        params: EngineParams | None = None,
+        params: GlobalSearchParams | None = None,
     ) -> List[SearchEngineResponse]:
         """
         Execute global RAG for multiple queries, batching final synthesis.
@@ -283,7 +277,7 @@ class GlobalSearchEngine(BaseEngine):
         )
         answers = await self.llm.batch_chat_completion(
             [conversation.to_openai() for conversation in conversations],
-            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+            output_schema=instruction.pydantic_model,
             desc="GlobalSearch batch query",
         )
 
@@ -301,7 +295,7 @@ class GlobalSearchEngine(BaseEngine):
     async def stream_query(
         self,
         query: str,
-        params: EngineParams | None = None,
+        params: GlobalSearchParams | None = None,
     ) -> AsyncIterator[SearchEngineStreamEvent]:
         """
         Execute global RAG and stream the final plain-text synthesis.

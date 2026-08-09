@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Tuple, List, Iterable
+from typing import Any, Tuple, List
 
 
 from ragu.chunker.types import Chunk
@@ -28,7 +28,7 @@ class BaseArtifactExtractor(RaguGenerativeModule, ABC):
     @abstractmethod
     async def extract(
         self,
-        chunks: Iterable[Chunk],
+        chunks: List[Chunk],
         *args: Any,
         **kwargs: Any
     ) -> Tuple[List[Entity], List[Relation]]:
@@ -38,7 +38,7 @@ class BaseArtifactExtractor(RaguGenerativeModule, ABC):
         Subclasses must implement this method and return all extracted entities
         and relations corresponding to the provided text inputs.
 
-        :param chunks: Iterable of :class:`Chunk` objects containing text content.
+        :param chunks: List of :class:`Chunk` objects containing text content.
         :param args: Additional positional arguments.
         :param kwargs: Additional keyword arguments.
         :return: A tuple ``(entities, relations)`` with lists of extracted objects.
@@ -47,7 +47,7 @@ class BaseArtifactExtractor(RaguGenerativeModule, ABC):
 
     async def __call__(
         self,
-        chunks: Iterable[Chunk],
+        chunks: List[Chunk],
         *args: Any,
         **kwargs: Any,
     ) -> Tuple[List[Entity], List[Relation]]:
@@ -57,7 +57,7 @@ class BaseArtifactExtractor(RaguGenerativeModule, ABC):
         This convenience wrapper calls :meth:`extract` directly, allowing
         the extractor to be used in functional or pipeline-style workflows.
 
-        :param chunks: Iterable of :class:`Chunk` objects to process.
+        :param chunks: List of :class:`Chunk` objects to process.
         :param args: Additional positional arguments.
         :param kwargs: Additional keyword arguments.
         :return: Extracted entities and relations.

@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, Generic, List, Optional, Set, Type, TypeVar, cast
+from typing import Any, Dict, List, Optional, Set, Type, cast
 
 import numpy as np
 from ragu.chunker.types import Chunk
@@ -99,12 +99,17 @@ class ConsistencyReport:
         return self.to_text()
 
 
-NodeT = TypeVar("NodeT", bound=Entity)
-EdgeT = TypeVar("EdgeT", bound=Relation)
-
-class Index(Generic[NodeT, EdgeT]):
+class Index:
     """
-    Coordinates graph, vector, and KV storage for generic nodes and edges.
+    Coordinates graph, vector, and KV storage for graph nodes and edges.
+
+    Bound to :class:`Entity` and :class:`Relation` rather than generic over
+    them: the storage backends stay parameterized (they materialize records
+    through ``node_cls``/``edge_cls``), so a subclass of ``Entity`` still
+    round-trips, but the index itself does not carry the type through. Making
+    it generic again means threading the parameters up through
+    ``KnowledgeGraph`` and ``Community`` as well - see the notes in
+    :class:`~ragu.graph.types.Community`.
     """
 
     def __init__(
@@ -112,8 +117,8 @@ class Index(Generic[NodeT, EdgeT]):
             arguments: StorageArguments,
             embedder: Embedder | None = None,
             sparse_embedder: SparseEmbedder | None = None,
-            node_t: Type[NodeT] = Entity,
-            edge_t: Type[EdgeT] = Relation,
+            node_t: Type[Entity] = Entity,
+            edge_t: Type[Relation] = Relation,
     ):
         """
         Initialize storage backends and in-memory reverse indexes.
@@ -203,7 +208,7 @@ class Index(Generic[NodeT, EdgeT]):
         self.chunks_vector_db = arguments.vdb_storage_type(**chunks_vdb_kwargs)
 
         # Graph storage
-        self.graph_backend: BaseGraphStorage[NodeT, EdgeT] = arguments.graph_backend_storage(
+        self.graph_backend: BaseGraphStorage[Entity, Relation] = arguments.graph_backend_storage(
             node_cls=node_t,
             edge_cls=edge_t,
             **graph_kwargs
@@ -223,7 +228,7 @@ class Index(Generic[NodeT, EdgeT]):
             )
         return self.embedder
 
-    async def upsert_nodes(self, nodes: List[NodeT]) -> "Index[NodeT, EdgeT]":
+    async def upsert_nodes(self, nodes: List[Entity]) -> "Index":
         """
         Insert or replace nodes in graph and vector DB by ID.
 
@@ -237,7 +242,7 @@ class Index(Generic[NodeT, EdgeT]):
         if not nodes:
             return self
 
-        incoming_by_id: Dict[str, List[NodeT]] = defaultdict(list)
+        incoming_by_id: Dict[str, List[Entity]] = defaultdict(list)
         for node in nodes:
             incoming_by_id[node.id].append(node)
 
@@ -283,7 +288,7 @@ class Index(Generic[NodeT, EdgeT]):
         )
         return self
 
-    async def update_nodes(self, nodes: List[NodeT]) -> "Index[NodeT, EdgeT]":
+    async def update_nodes(self, nodes: List[Entity]) -> "Index":
         """
         Update nodes by ID using replace semantics.
 
@@ -300,7 +305,7 @@ class Index(Generic[NodeT, EdgeT]):
         if not nodes:
             return self
 
-        incoming_by_id: Dict[str, List[NodeT]] = defaultdict(list)
+        incoming_by_id: Dict[str, List[Entity]] = defaultdict(list)
         for node in nodes:
             incoming_by_id[node.id].append(node)
 
@@ -344,7 +349,7 @@ class Index(Generic[NodeT, EdgeT]):
         )
         return self
 
-    async def upsert_edges(self, edges: List[EdgeT]) -> "Index[NodeT, EdgeT]":
+    async def upsert_edges(self, edges: List[Relation]) -> "Index":
         """
         Insert edges in graph and vector DB.
 
@@ -361,7 +366,7 @@ class Index(Generic[NodeT, EdgeT]):
 
         await self._validate_edge_endpoints_exist(edges)
 
-        incoming_by_id: Dict[str, List[EdgeT]] = defaultdict(list)
+        incoming_by_id: Dict[str, List[Relation]] = defaultdict(list)
         for edge in edges:
             incoming_by_id[edge.id].append(edge)
 
@@ -370,7 +375,7 @@ class Index(Generic[NodeT, EdgeT]):
             raise ValueError(f"Cannot insert duplicated edge IDs in one request: {duplicate_ids}")
 
         edges_to_upsert = [group[0] for group in incoming_by_id.values()]
-        edge_specs = [
+        edge_specs: List[EdgeSpec] = [
             (edge.subject_id, edge.object_id, edge.id)
             for edge in edges_to_upsert
         ]
@@ -405,7 +410,7 @@ class Index(Generic[NodeT, EdgeT]):
         )
         return self
 
-    async def update_edges(self, edges: List[EdgeT]) -> "Index[NodeT, EdgeT]":
+    async def update_edges(self, edges: List[Relation]) -> "Index":
         """
         Update edges by exact edge spec using replace semantics.
 
@@ -425,7 +430,7 @@ class Index(Generic[NodeT, EdgeT]):
         if not edges:
             return self
 
-        incoming_by_id: Dict[str, List[EdgeT]] = defaultdict(list)
+        incoming_by_id: Dict[str, List[Relation]] = defaultdict(list)
         for edge in edges:
             incoming_by_id[edge.id].append(edge)
 
@@ -434,7 +439,7 @@ class Index(Generic[NodeT, EdgeT]):
             raise ValueError(f"Cannot update duplicated edge IDs in one request: {duplicate_ids}")
 
         edges_to_update = [group[0] for group in incoming_by_id.values()]
-        edge_specs = [
+        edge_specs: List[EdgeSpec] = [
             (edge.subject_id, edge.object_id, edge.id)
             for edge in edges_to_update
         ]
@@ -477,7 +482,7 @@ class Index(Generic[NodeT, EdgeT]):
         )
         return self
 
-    async def upsert_chunks(self, chunks: List[Chunk]) -> "Index[NodeT, EdgeT]":
+    async def upsert_chunks(self, chunks: List[Chunk]) -> "Index":
         """
         Insert or update chunks into KV storage (and optionally vector DB).
 
@@ -519,7 +524,7 @@ class Index(Generic[NodeT, EdgeT]):
         await self.chunks_kv_storage.index_done_callback()
         return self
 
-    async def upsert_communities(self, communities: List[Community]) -> "Index[NodeT, EdgeT]":
+    async def upsert_communities(self, communities: List[Community]) -> "Index":
         """
         Insert or update communities into KV storage.
 
@@ -542,7 +547,7 @@ class Index(Generic[NodeT, EdgeT]):
         await self.community_kv_storage.index_done_callback()
         return self
 
-    async def upsert_summaries(self, summaries: List[CommunitySummary]) -> "Index[NodeT, EdgeT]":
+    async def upsert_summaries(self, summaries: List[CommunitySummary]) -> "Index":
         """
         Insert or update community summaries into KV storage.
 
@@ -557,7 +562,7 @@ class Index(Generic[NodeT, EdgeT]):
         await self.community_summary_kv_storage.index_done_callback()
         return self
 
-    async def delete_nodes(self, node_ids: List[str]) -> "Index[NodeT, EdgeT]":
+    async def delete_nodes(self, node_ids: List[str]) -> "Index":
         """
         Delete nodes from graph and vector DB.
 
@@ -586,7 +591,7 @@ class Index(Generic[NodeT, EdgeT]):
         )
         return self
 
-    async def delete_edges(self, edge_specs: List[EdgeSpec]) -> "Index[NodeT, EdgeT]":
+    async def delete_edges(self, edge_specs: List[EdgeSpec]) -> "Index":
         """
         Delete edges from graph and vector DB.
 
@@ -609,7 +614,7 @@ class Index(Generic[NodeT, EdgeT]):
         await self._update_reverse_indexes(deleted_edge_ids=found_edge_ids)
         return self
 
-    async def delete_chunks(self, chunk_ids: List[str]) -> "Index[NodeT, EdgeT]":
+    async def delete_chunks(self, chunk_ids: List[str]) -> "Index":
         """
         Delete chunks from KV and vector storage.
 
@@ -660,7 +665,7 @@ class Index(Generic[NodeT, EdgeT]):
         )
         return self
 
-    async def delete_communities(self, community_ids: List[str]) -> "Index[NodeT, EdgeT]":
+    async def delete_communities(self, community_ids: List[str]) -> "Index":
         """
         Delete communities and their summaries from KV storage.
 
@@ -677,7 +682,7 @@ class Index(Generic[NodeT, EdgeT]):
         await self.community_summary_kv_storage.index_done_callback()
         return self
 
-    async def get_nodes(self, node_ids: List[str]) -> List[Optional[NodeT]]:
+    async def get_nodes(self, node_ids: List[str]) -> List[Optional[Entity]]:
         """
         Retrieve nodes by their IDs.
 
@@ -686,7 +691,7 @@ class Index(Generic[NodeT, EdgeT]):
         """
         return await self.graph_backend.get_nodes(node_ids)
 
-    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[List[EdgeT]]:
+    async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[List[Relation]]:
         """
         Retrieve edges by specs, one result list per spec.
 
@@ -740,8 +745,8 @@ class Index(Generic[NodeT, EdgeT]):
             all_edges = await self.graph_backend.get_all_edges()
             edges = [edge for edge in all_edges if edge and edge.id in relation_id_set]
 
-            entities: List[NodeT] = [entity for entity in nodes if entity is not None]
-            relations: List[EdgeT] = [relation for relation in edges if relation is not None]
+            entities: List[Entity] = [entity for entity in nodes if entity is not None]
+            relations: List[Relation] = [relation for relation in edges if relation is not None]
 
             communities.append(Community(
                 id=community_id,
@@ -753,7 +758,7 @@ class Index(Generic[NodeT, EdgeT]):
 
         return communities
 
-    async def _validate_edge_endpoints_exist(self, edges: List[EdgeT]) -> None:
+    async def _validate_edge_endpoints_exist(self, edges: List[Relation]) -> None:
         """
         Validate that all edge endpoints exist as nodes.
 
@@ -798,8 +803,8 @@ class Index(Generic[NodeT, EdgeT]):
 
     async def _update_reverse_indexes(
         self,
-        nodes: Optional[List[NodeT]] = None,
-        edges: Optional[List[EdgeT]] = None,
+        nodes: Optional[List[Entity]] = None,
+        edges: Optional[List[Relation]] = None,
         deleted_node_ids: Optional[List[str]] = None,
         deleted_edge_ids: Optional[List[str]] = None,
         deleted_chunk_ids: Optional[List[str]] = None,
@@ -834,13 +839,13 @@ class Index(Generic[NodeT, EdgeT]):
 
         if nodes:
             nodes_map = self._get_items_map(nodes)
-            for chunk_id, node_ids in nodes_map.items():
-                self._chunk_to_nodes[chunk_id].update(node_ids)
+            for chunk_id, added_node_ids in nodes_map.items():
+                self._chunk_to_nodes[chunk_id].update(added_node_ids)
 
         if edges:
             edges_map = self._get_items_map(edges)
-            for chunk_id, edge_ids in edges_map.items():
-                self._chunk_to_edges[chunk_id].update(edge_ids)
+            for chunk_id, added_edge_ids in edges_map.items():
+                self._chunk_to_edges[chunk_id].update(added_edge_ids)
 
     async def _rebuild_reverse_indexes(self) -> None:
         """
@@ -851,15 +856,15 @@ class Index(Generic[NodeT, EdgeT]):
         self._chunk_to_nodes.clear()
         self._chunk_to_edges.clear()
 
-        all_nodes: List[NodeT] = await self.graph_backend.get_all_nodes()
-        all_edges: List[EdgeT] = await self.graph_backend.get_all_edges()
+        all_nodes: List[Entity] = await self.graph_backend.get_all_nodes()
+        all_edges: List[Relation] = await self.graph_backend.get_all_edges()
 
         await self._update_reverse_indexes(
             nodes=all_nodes,
             edges=all_edges,
         )
 
-    async def _find_nodes_by_chunk_ids(self, chunk_ids: List[str]) -> List[NodeT]:
+    async def _find_nodes_by_chunk_ids(self, chunk_ids: List[str]) -> List[Entity]:
         """
         Find all nodes referencing any of the given chunk IDs.
 
@@ -898,7 +903,7 @@ class Index(Generic[NodeT, EdgeT]):
         return edge_ids
 
     @staticmethod
-    def _get_items_map(items: List[NodeT] | List[EdgeT]) -> Dict[str, List[str]]:
+    def _get_items_map(items: List[Entity] | List[Relation]) -> Dict[str, List[str]]:
         """
         Build reverse mapping chunk_id -> list of item IDs using source_chunk_id.
 
@@ -914,7 +919,7 @@ class Index(Generic[NodeT, EdgeT]):
         return dict(chunks_map)
 
     @staticmethod
-    def _unique_edge_ids_from_grouped(edges_by_node: List[List[EdgeT]]) -> List[str]:
+    def _unique_edge_ids_from_grouped(edges_by_node: List[List[Relation]]) -> List[str]:
         """
         Flatten grouped edges and return unique edge IDs (first-seen order).
 

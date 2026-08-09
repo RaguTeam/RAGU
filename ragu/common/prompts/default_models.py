@@ -40,8 +40,6 @@ from typing import List, Optional, Literal
 from pydantic import (
     BaseModel,
     Field,
-    conint,
-    confloat,
     field_validator,
     model_validator,
 )
@@ -63,8 +61,8 @@ class RelationModel(BaseModel):
     target_entity: str = Field(..., description="Name of the target entity (matches an Entity.entity_name)")
     relation_type: str = Field(..., description="Type of relation")
     description: str = Field(..., description="Description of the relationship")
-    relationship_strength: conint(ge=0, le=5) = Field(
-        ..., description="Relationship strength 0–5 (0 = weak, 5 = strong)"
+    relationship_strength: int = Field(
+        ..., ge=0, le=5, description="Relationship strength 0–5 (0 = weak, 5 = strong)"
     )
 
     @field_validator("relation_type")
@@ -84,7 +82,7 @@ class ArtifactsModel(BaseModel):
     )
 
     @model_validator(mode="after")
-    def _validate_relationship_endpoints(self):
+    def _validate_relationship_endpoints(self) -> "ArtifactsModel":
         names = {e.entity_name for e in self.entities}
         bad = []
         for r in self.relations:
@@ -120,7 +118,7 @@ class CommunityFindingModel(BaseModel):
 class CommunityReportModel(BaseModel):
     title: str = Field(..., description="Report title")
     summary: str = Field(..., description="Short summary of the community")
-    rating: confloat(ge=0, le=10) = Field(..., description="Impact rating 0–10")
+    rating: float = Field(..., ge=0, le=10, description="Impact rating 0–10")
     rating_explanation: str = Field(..., description="Explanation of the rating")
     findings: List[CommunityFindingModel] = Field(
         default_factory=list,
@@ -131,7 +129,7 @@ class CommunityReportModel(BaseModel):
 class GlobalSearchContextModel(BaseModel):
     reasoning: str = Field(..., description="Reasoning about the relevance of the context")
     response: str = Field(..., description="Answer to the query")
-    rating: confloat(ge=0, le=10) = Field(..., description="Relevance rating of the context 0–10")
+    rating: float = Field(..., ge=0, le=10, description="Relevance rating of the context 0–10")
 
 
 class EntityDescriptionModel(BaseModel):

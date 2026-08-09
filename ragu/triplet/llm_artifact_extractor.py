@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Tuple, Optional, cast
+from typing import Any, List, Tuple, Optional
 
 from ragu.common.logger import logger
 from ragu.chunker.types import Chunk
@@ -81,21 +81,21 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
     async def _extract_artifacts(
         self,
         context: List[str],
-    ) -> List[ArtifactsModel]:
+    ) -> List[ArtifactsModel | None]:
         """
         Run artifact extraction for a batch of texts.
 
         :param context: Chunk texts.
-        :return: Per-chunk extracted artifacts.
+        :return: Per-chunk extracted artifacts, ``None`` where the LLM call failed.
         """
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
             await self.icl_manager.initialize()
-            examples_list = await self.icl_manager.batch_select_examples(
+            examples_list = list(await self.icl_manager.batch_select_examples(
                 query_texts=context,
                 task="artifact_extraction",
                 num_examples=self.icl_manager.config.num_examples
-            )
+            ))
         else:
             examples_list = [None] * len(context)
 
@@ -113,11 +113,10 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
 
         result_list = await self.llm.batch_chat_completion(
             [c.to_openai() for c in conversations],
-            output_schema=instruction.pydantic_model or str,
+            output_schema=instruction.pydantic_model,
             continue_on_error=True,
             desc="Extracting a knowledge graph from chunks",
         )
-        result_list = cast(list[ArtifactsModel | None], result_list)
 
         for i, artifacts in enumerate(result_list):
             if artifacts is not None:
@@ -133,22 +132,22 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
     async def _validate_artifacts(
         self,
         context: List[str],
-        artifacts: List[ArtifactsModel],
-    ) -> List[ArtifactsModel]:
+        artifacts: List[ArtifactsModel | None],
+    ) -> List[ArtifactsModel | None]:
         """
         Run artifact validation for a batch of texts and their extracted artifacts.
 
         :param context: Chunk texts.
         :param artifacts: Per-chunk extracted artifacts from extraction stage.
-        :return: Per-chunk validated artifacts.
+        :return: Per-chunk validated artifacts, ``None`` where the LLM call failed.
         """
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
-            examples_list = await self.icl_manager.batch_select_examples(
+            examples_list = list(await self.icl_manager.batch_select_examples(
                 query_texts=context,
                 task="artifact_validation",
                 num_examples=self.icl_manager.config.num_examples
-            )
+            ))
         else:
             examples_list = [None] * len(context)
 
@@ -168,11 +167,10 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
 
         result_list = await self.llm.batch_chat_completion(
             [c.to_openai() for c in conversations],
-            output_schema=instruction.pydantic_model or str,
+            output_schema=instruction.pydantic_model,
             continue_on_error=True,
             desc="Validation of extracted artifacts",
         )
-        result_list = cast(list[ArtifactsModel | None], result_list)
 
         for i, artifacts_validated in enumerate(result_list):
             if artifacts_validated is not None:
@@ -234,7 +232,6 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         relations_result: List[Relation] = []
 
         for artifacts, chunk in zip(result_list, chunks):
-
             if artifacts is None:
                 continue
 
@@ -263,16 +260,17 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                 object_entity = entity_by_name.get(object_name)
 
                 if subject_entity and object_entity:
-                    relation = Relation(
-                        subject_name=subject_name,
-                        object_name=object_name,
-                        subject_id=subject_entity.id,
-                        object_id=object_entity.id,
-                        relation_type=relation.relation_type or "UNKNOWN",
-                        description=relation.description,
-                        relation_strength=float(relation.relationship_strength),
-                        source_chunk_id=[chunk.id],
+                    relations_result.append(
+                        Relation(
+                            subject_name=subject_name,
+                            object_name=object_name,
+                            subject_id=subject_entity.id,
+                            object_id=object_entity.id,
+                            relation_type=relation.relation_type or "UNKNOWN",
+                            description=relation.description,
+                            relation_strength=float(relation.relationship_strength),
+                            source_chunk_id=[chunk.id],
+                        )
                     )
-                    relations_result.append(relation)
 
         return entities_result, relations_result

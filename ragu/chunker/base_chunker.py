@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Sequence
+from typing import List
 from ragu.chunker.types import Chunk
 
 
@@ -13,7 +13,7 @@ class BaseChunker(ABC):
         pass
 
     @abstractmethod
-    def split(self, documents: str | Sequence[str]) -> List[Chunk]:
+    def split(self, documents: str | List[str]) -> List[Chunk]:
         """
         Abstract method for splitting documents into smaller chunks.
         Must be implemented in subclasses.

@@ -3,12 +3,14 @@ from __future__ import annotations
 import re
 from collections import Counter, defaultdict
 from typing import (
+    Any,
     Dict,
     Iterable,
     List,
     Optional,
     Set,
-    Tuple
+    Tuple,
+    cast
 )
 
 import pandas as pd
@@ -118,11 +120,12 @@ def default_merge_entities_policy(entities: List[Entity]) -> Entity:
             continue
 
         seen_cluster_keys.add(cluster_key)
-        normalized_cluster: ClusterInfo = {"level": level, "cluster_id": cluster_id}
+
+        normalized_cluster: Dict[str, Any] = {"level": level, "cluster_id": cluster_id}
         for key, value in cluster.items():
             if key not in normalized_cluster:
                 normalized_cluster[key] = value
-        deduplicated_clusters.append(normalized_cluster)
+        deduplicated_clusters.append(cast(ClusterInfo, normalized_cluster))
 
     return Entity(
         id=primary.id,
@@ -241,7 +244,7 @@ class KnowledgeGraph:
             language=self.language,
         )
         # Store graph
-        self.index: Index[Entity, Relation] = Index(
+        self.index: Index = Index(
             embedder=embedder,
             sparse_embedder=sparse_embedder,
             arguments=self.storage_settings,
@@ -398,7 +401,7 @@ class KnowledgeGraph:
         if duplicate_ids:
             raise ValueError(f"Cannot insert duplicated relation IDs in one request: {duplicate_ids}")
 
-        edge_specs = [
+        edge_specs: List[EdgeSpec] = [
             (relation.subject_id, relation.object_id, relation.id)
             for relation in relations
         ]

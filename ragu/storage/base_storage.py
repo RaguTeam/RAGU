@@ -3,11 +3,11 @@ from abc import ABC, abstractmethod
 from typing import (
     Dict,
     Generic,
-    Iterable,
     List,
     Optional,
     Set,
     Tuple,
+    Type,
     TypeVar,
     Union,
     Any
@@ -25,21 +25,21 @@ class BaseStorage(ABC):
     """
 
     @abstractmethod
-    async def index_start_callback(self):
+    async def index_start_callback(self) -> None:
         """
         Execute pre-indexing initialization hook.
         """
         pass
 
     @abstractmethod
-    async def index_done_callback(self):
+    async def index_done_callback(self) -> None:
         """
         Execute post-indexing finalization hook.
         """
         pass
 
     @abstractmethod
-    async def query_done_callback(self):
+    async def query_done_callback(self) -> None:
         """
         Execute post-query cleanup hook.
         """
@@ -62,7 +62,7 @@ class BaseVectorStorage(BaseStorage, ABC):
     """
 
     @abstractmethod
-    async def query(self, points: List[Point], **kwargs) -> List[List[EmbeddingHit]]:
+    async def query(self, points: List[Point], **kwargs: Any) -> List[List[EmbeddingHit]]:
         """
         Retrieve top-k nearest items for a batch of query embeddings.
 
@@ -82,7 +82,7 @@ class BaseVectorStorage(BaseStorage, ABC):
         ...
 
     @abstractmethod
-    async def delete(self, ids: List[str], **kwargs) -> None:
+    async def delete(self, ids: List[str], **kwargs: Any) -> None:
         """
         Delete records by IDs.
 
@@ -175,7 +175,7 @@ class BaseKVStorage(Generic[T], BaseStorage, ABC):
         ...
 
     @abstractmethod
-    async def upsert(self, data: Dict[str, T]):
+    async def upsert(self, data: Dict[str, T]) -> None:
         """
         Insert or update key-value entries.
 
@@ -193,7 +193,7 @@ class BaseKVStorage(Generic[T], BaseStorage, ABC):
         ...
 
     @abstractmethod
-    async def drop(self):
+    async def drop(self) -> None:
         """
         Remove all entries from the storage backend.
         """
@@ -209,6 +209,18 @@ class BaseGraphStorage(Generic[NodeT, EdgeT], BaseStorage, ABC):
 
     RAGU assumes that every graph implementation is a directed multigraph.
     """
+
+    def __init__(self, node_cls: Type[NodeT], edge_cls: Type[EdgeT], **kwargs: Any) -> None:
+        """
+        Record the record types this backend materializes.
+
+        :param node_cls: Dataclass used to materialize nodes.
+        :param edge_cls: Dataclass used to materialize edges.
+        :param kwargs: Backend-specific options.
+        """
+        self._node_cls = node_cls
+        self._edge_cls = edge_cls
+
 
     @abstractmethod
     async def edges_degrees(self, edge_specs: List[EdgeSpec]) -> List[int]:
@@ -232,7 +244,7 @@ class BaseGraphStorage(Generic[NodeT, EdgeT], BaseStorage, ABC):
         ...
 
     @abstractmethod
-    async def upsert_nodes(self, nodes: Iterable[NodeT]) -> None:
+    async def upsert_nodes(self, nodes: List[NodeT]) -> None:
         """
         Insert or update nodes.
 
@@ -271,7 +283,7 @@ class BaseGraphStorage(Generic[NodeT, EdgeT], BaseStorage, ABC):
         ...
 
     @abstractmethod
-    async def upsert_edges(self, edges: Iterable[EdgeT]) -> None:
+    async def upsert_edges(self, edges: List[EdgeT]) -> None:
         """
         Insert or update edges.
 

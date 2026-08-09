@@ -66,6 +66,9 @@ test = [
     "httpx[socks]",
     "ruff>=0.15.22",
 ]
+dev = [
+    "mypy>=1.20",
+]
 
 [tool.setuptools.packages.find]
 include = ["ragu*"]

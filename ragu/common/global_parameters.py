@@ -45,7 +45,7 @@ class GlobalSettings:
     embedder_token_limit: int = 8_192
     llm_context_token_limit: int = 30_000
 
-    def __new__(cls, *args: Any, **kwargs: Any):
+    def __new__(cls, *args: Any, **kwargs: Any) -> "GlobalSettings":
         if cls.__instance is None:
             cls.__instance = super(GlobalSettings, cls).__new__(cls)
             return cls.__instance
@@ -57,10 +57,10 @@ class GlobalSettings:
         return self._working_dir
 
     @storage_folder.setter
-    def storage_folder(self, path: str | Path):
+    def storage_folder(self, path: str | Path) -> None:
         self._working_dir = str(path)
 
-    def init_storage_folder(self):
+    def init_storage_folder(self) -> None:
         if not os.path.exists(self._working_dir):
             logger.info(f"Creating folder for current run: {self._working_dir}")
             os.makedirs(self._working_dir, exist_ok=True)
