@@ -457,3 +457,25 @@ formatters) are in [`ragu/common/prompts/README.md`](ragu/common/prompts/README.
 #### **Small Models Pipeline**
 - Matvey Solovyev
 - Ilya Myznikov
+
+## Star History
+
+<p align="left">
+<img src="assets/star-history-2026722.png" alt="RAGU star history" width="600" />
+</p>
+
+## Citation
+
+If you find this work useful, please consider citing our paper:
+
+```python
+@misc{komarov2026ragumultistepgraphragengine,
+      title={RAGU: A Multi-Step GraphRAG Engine with a Compact Domain-Adapted LLM}, 
+      author={Mikhail Komarov and Ivan Bondarenko and Stanislav Shtuka and Oleg Sedukhin and Roman Shuvalov and Yana Dementyeva and Matvey Solovyov and Nikolay O. Nikitin},
+      year={2026},
+      eprint={2607.11683},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2607.11683}, 
+}
+```

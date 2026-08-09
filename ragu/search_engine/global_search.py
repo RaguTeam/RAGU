@@ -7,6 +7,7 @@ from jinja2 import Template
 from typing_extensions import override
 
 from ragu.common.global_parameters import Settings
+from ragu.common.logger import logger
 from ragu.common.prompts.default_models import GlobalSearchContextModel
 from ragu.common.prompts.messages import ChatMessages, render
 from ragu.common.prompts.prompt_storage import RAGUInstruction
@@ -19,6 +20,19 @@ from ragu.search_engine.base_engine import (
     SearchEngineStreamEvent,
     EngineParams,
 )
+
+
+@dataclass
+class GlobalSearchParams(EngineParams):
+    """
+    Per-query parameters for :class:`GlobalSearchEngine`.
+
+    :param min_cluster_size: Minimum number of entities a community must
+        contain for its summary to be evaluated. When ``1`` (the default),
+        every stored community takes part in retrieval.
+    """
+    min_cluster_size: int = 1
+
 
 # TODO: add the ability to use custom schemas instead of GlobalSearchContextModel
 @dataclass(slots=True)
@@ -116,16 +130,16 @@ class GlobalSearchEngine(BaseEngine):
         which low-rated insights are filtered and the rest sorted per query.
 
         :param queries: The input natural language queries.
-        :param params: Retrieval parameters (unused by global search; accepted
-            for interface consistency).
+        :param params: Retrieval parameters. Pass :class:`GlobalSearchParams`
+            to skip communities smaller than ``min_cluster_size``; other
+            parameter types are accepted for interface consistency and ignored.
         :return: ``GlobalSearchRetrieve`` per query, aligned with ``queries``.
         """
         if not queries:
             return []
 
-        communities_ids = await self.knowledge_graph.index.community_summary_kv_storage.all_keys()
-        communities = await self.knowledge_graph.index.community_summary_kv_storage.get_by_ids(communities_ids)
-        communities = [c for c in communities if c is not None]
+        min_cluster_size = params.min_cluster_size if params else GlobalSearchParams().min_cluster_size
+        communities = await self._get_community_summaries(min_cluster_size)
 
         retrieves: List[GlobalSearchRetrieve] = []
         for query, meta_responses in zip(queries, await self.get_meta_responses(queries, communities)):
@@ -143,6 +157,50 @@ class GlobalSearchEngine(BaseEngine):
                 )
             )
         return retrieves
+
+    async def _get_community_summaries(self, min_cluster_size: int) -> List[str]:
+        """
+        Fetch stored community summaries, skipping communities that are too small.
+
+        :param min_cluster_size: Minimum number of entities a community must contain.
+        :return: Summaries of the communities that passed the size filter.
+        """
+        summary_storage = self.knowledge_graph.index.community_summary_kv_storage
+        community_ids = await summary_storage.all_keys()
+        summaries = await summary_storage.get_by_ids(community_ids)
+
+        kept: List[tuple[str, str]] = [
+            (community_id, summary)
+            for community_id, summary in zip(community_ids, summaries)
+            if summary is not None
+        ]
+        if min_cluster_size <= 1 or not kept:
+            return [summary for _, summary in kept]
+
+        rows = await self.knowledge_graph.index.community_kv_storage.get_by_ids(
+            [community_id for community_id, _ in kept]
+        )
+        filtered = [
+            (community_id, summary)
+            for (community_id, summary), row in zip(kept, rows)
+            if row is None or len(row.get("entity_ids", [])) >= min_cluster_size
+        ]
+
+        if len(filtered) != len(kept):
+            logger.debug(
+                "GlobalSearch: skipped {} of {} communities smaller than {} entities",
+                len(kept) - len(filtered),
+                len(kept),
+                min_cluster_size,
+            )
+        if kept and not filtered:
+            logger.warning(
+                "GlobalSearch: every stored community is smaller than "
+                "min_cluster_size={}; the answer will be generated without context",
+                min_cluster_size,
+            )
+
+        return [summary for _, summary in filtered]
 
     async def get_meta_responses(
         self,
@@ -207,8 +265,8 @@ class GlobalSearchEngine(BaseEngine):
         call. The first failing query aborts the whole batch.
 
         :param queries: The natural language queries from the user.
-        :param params: Query parameters (unused by global search; accepted for
-            interface consistency).
+        :param params: Query parameters forwarded to :meth:`batch_search`; see
+            :class:`GlobalSearchParams`.
         :return: ``SearchEngineResponse`` objects aligned with ``queries``.
         """
         if not queries:
@@ -252,8 +310,8 @@ class GlobalSearchEngine(BaseEngine):
         final answer synthesis is streamed.
 
         :param query: The natural language query from the user.
-        :param params: Query parameters (unused by global search; accepted for
-            interface consistency).
+        :param params: Query parameters forwarded to :meth:`search`; see
+            :class:`GlobalSearchParams`.
         :returns: Async iterator of text deltas with the retrieval context.
         """
         context = await self.search(query, params)

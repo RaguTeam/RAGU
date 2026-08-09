@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 import networkx as nx
 from graspologic_native import hierarchical_leiden
@@ -42,6 +42,11 @@ class BuilderArguments:
     :param cluster_only_if_more_than: Minimum number of entities required before
         clustering is applied.
     :param max_cluster_size: Maximum number of entities per cluster.
+    :param min_cluster_size: Minimum number of entities (nodes) a detected
+        community must contain to be kept. Unlike ``max_cluster_size``, this is
+        not passed to the clustering algorithm: smaller communities are dropped
+        right after community detection, so they are neither summarized nor
+        stored. Defaults to ``1``, which keeps every community.
     :param random_seed: Random seed for reproducible clustering/community detection.
     """
     use_llm_summarization: bool = True
@@ -53,6 +58,7 @@ class BuilderArguments:
     cluster_only_if_more_than: int = 10000
     summarize_only_if_more_than: int = 7
     max_cluster_size: int = 128
+    min_cluster_size: int = 1
     random_seed: int = 42
 
 
@@ -318,7 +324,10 @@ class InMemoryGraphBuilder:
             for level, cluster_id in common:
                 clusters[level][cluster_id]["relation_ids"].add(relation.id)
 
+        min_cluster_size = max(1, int(self.build_parameters.min_cluster_size))
+
         communities: List[Community] = []
+        dropped_clusters: Set[Tuple[int, int]] = set()
         for level in sorted(clusters.keys()):
             for cluster_id in sorted(clusters[level].keys()):
                 payload = clusters[level][cluster_id]
@@ -332,6 +341,10 @@ class InMemoryGraphBuilder:
                     for relation_id in sorted(payload["relation_ids"])
                     if relation_id in relation_by_id
                 ]
+                if len(community_entities) < min_cluster_size:
+                    dropped_clusters.add((level, cluster_id))
+                    continue
+
                 communities.append(
                     Community(
                         entities=community_entities,
@@ -340,5 +353,20 @@ class InMemoryGraphBuilder:
                         cluster_id=cluster_id,
                     )
                 )
+
+        if dropped_clusters:
+            for entity in entity_by_id.values():
+                entity.clusters = [
+                    membership
+                    for membership in entity.clusters
+                    if (int(membership["level"]), int(membership["cluster_id"]))
+                    not in dropped_clusters
+                ]
+            logger.debug(
+                "Dropped {} communities with fewer than {} entities; {} kept",
+                len(dropped_clusters),
+                min_cluster_size,
+                len(communities),
+            )
 
         return communities
