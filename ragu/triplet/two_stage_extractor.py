@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple, TypeVar, cast
+from typing import Any, List, Sequence, Tuple, TypeVar, cast
 from typing_extensions import override
 
 from pydantic import BaseModel
@@ -8,6 +8,7 @@ from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
 from ragu.common.prompts.default_models import (
     EntitiesExtractionModel,
+    EntityModel,
     RelationsExtractionModel,
 )
 from ragu.common.prompts.messages import ChatMessages, render_with_few_shots
@@ -24,7 +25,12 @@ from ragu.triplet.prompts import (
     TWO_STAGE_RELATION_EXTRACTION_INSTRUCTION,
     TWO_STAGE_RELATION_VALIDATION_INSTRUCTION,
 )
-from ragu.triplet.types import NEREL_ENTITY_TYPES, NEREL_RELATION_TYPES
+from ragu.triplet.ontology import (
+    Ontology,
+    OntologyValidator,
+    ValidationPolicies,
+    resolve_ontology,
+)
 
 #: Stage model produced by one extraction/validation step.
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -52,8 +58,10 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         do_entity_validation: bool | None = None,
         do_relation_validation: bool | None = None,
         language: str | None = None,
-        entity_types: Optional[List[str]] = NEREL_ENTITY_TYPES,
-        relation_types: Optional[List[str]] = NEREL_RELATION_TYPES,
+        ontology: Ontology | str | None = "nerel",
+        validation: ValidationPolicies = ValidationPolicies(),
+        show_type_signatures: bool = False,
+        prune_relation_types: bool = False,
     ) -> None:
         """
         Initialize two-stage extractor.
@@ -64,8 +72,14 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         :param do_entity_validation: If set, overrides entity validation toggle.
         :param do_relation_validation: If set, overrides relation validation toggle.
         :param language: Language hint injected into prompts.
-        :param entity_types: Optional allowed entity types for prompts.
-        :param relation_types: Optional allowed relation types for prompts.
+        :param ontology: Vocabulary the extraction is restricted to.
+        :param validation: What to do about artifacts that violate the ontology.
+            Ignored when ``ontology`` is ``None``.
+        :param show_type_signatures: Render each predicate in the prompt with its
+            ``[DOMAIN -> RANGE]`` signature.
+        :param prune_relation_types: Offer only the predicates admissible between the
+            entity types actually found in the chunk. Shortens the prompt and removes
+            most of the ways to pick an inapplicable predicate.
         """
         prompts = {
             "entity_extraction": TWO_STAGE_ENTITY_EXTRACTION_INSTRUCTION,
@@ -73,13 +87,24 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             "relation_extraction": TWO_STAGE_RELATION_EXTRACTION_INSTRUCTION,
             "relation_validation": TWO_STAGE_RELATION_VALIDATION_INSTRUCTION,
         }
-        super().__init__(prompts=prompts)
+        resolved = resolve_ontology(ontology)
+        super().__init__(
+            prompts=prompts,
+            validator=OntologyValidator(resolved, validation) if resolved else None,
+        )
 
         self.llm = llm
         self.embedder = embedder
         self.language = language if language else Settings.language
-        self.entity_types = ", ".join(entity_types) if entity_types else None
-        self.relation_types = ", ".join(relation_types) if relation_types else None
+        self.ontology = resolved
+        self.show_type_signatures = show_type_signatures
+        self.prune_relation_types = prune_relation_types
+        self.entity_types = resolved.render_entity_types() if resolved else None
+        self.relation_types = (
+            resolved.render_relation_types(with_signatures=show_type_signatures)
+            if resolved
+            else None
+        )
 
         self.do_entity_validation = do_entity_validation
         self.do_relation_validation = do_relation_validation
@@ -148,6 +173,14 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                     type(e).__name__, e,
                 )
 
+        entity_lists, _ = self._apply_ontology(
+            [model.entities if model else [] for model in entity_results],
+            [[] for _ in entity_results],
+            stage="entities",
+        )
+        entity_results = [
+            EntitiesExtractionModel(entities=entities) for entities in entity_lists
+        ]
         entities_payload = self._models_to_payload(entity_results)
 
         try:
@@ -157,6 +190,8 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                 "Relation extraction failed for {} chunks: {}: {}",
                 len(context), type(e).__name__, e,
             )
+            for chunk_entities, chunk in zip(entity_lists, chunks):
+                entities_result.extend(self._to_entities(chunk_entities, chunk))
             return entities_result, []
 
         if self.do_relation_validation:
@@ -172,27 +207,19 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                     type(e).__name__, e,
                 )
 
-        for entities_model, relations_model, chunk in zip(entity_results, relation_results, chunks):
-            if entities_model is None or relations_model is None:
-                continue
+        entity_lists, relation_lists = self._apply_ontology(
+            entity_lists,
+            [model.relations if model else [] for model in relation_results],
+            stage="relations",
+        )
 
-            current_chunk_entities: List[Entity] = []
-
-            for entity_model in entities_model.entities:
-                entity = Entity(
-                    entity_name=entity_model.entity_name,
-                    entity_type=entity_model.entity_type,
-                    description=entity_model.description,
-                    source_chunk_id=[chunk.id],
-                    documents_id=[],
-                    clusters=[],
-                )
-                current_chunk_entities.append(entity)
-
+        for chunk_entities, chunk_relations, chunk in zip(entity_lists, relation_lists, chunks):
+            current_chunk_entities = self._to_entities(chunk_entities, chunk)
             entities_result.extend(current_chunk_entities)
+
             entity_by_name = {entity.entity_name: entity for entity in current_chunk_entities}
 
-            for relation_model in relations_model.relations:
+            for relation_model in chunk_relations:
                 subject_entity = entity_by_name.get(relation_model.source_entity)
                 object_entity = entity_by_name.get(relation_model.target_entity)
                 if not subject_entity or not object_entity:
@@ -347,7 +374,8 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             context=context,
             entities=entities_payload,
             language=self.language,
-            relation_types=self.relation_types,
+            relation_types=self._relation_types_for(entities_payload),
+            type_signatures=self.show_type_signatures,
         )
 
         results = await self.llm.batch_chat_completion(
@@ -401,7 +429,8 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             entities=entities_payload,
             relations=self._models_to_payload(relations),
             language=self.language,
-            relation_types=self.relation_types,
+            relation_types=self._relation_types_for(entities_payload),
+            type_signatures=self.show_type_signatures,
         )
 
         results = await self.llm.batch_chat_completion(
@@ -417,6 +446,55 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
                 logger.warning("LLM call failed for relation validation chunk at index {}", i)
 
         return results
+
+    def _relation_types_for(
+        self,
+        entities_payload: List[List[dict[str, Any]]],
+    ) -> str | List[str] | None:
+        """
+        Build the predicate list injected into the relation prompts.
+
+        With pruning enabled this becomes a per-chunk value, which
+        :func:`~ragu.common.prompts.messages.render` treats as a batch parameter
+        aligned with ``context``.
+
+        :param entities_payload: Per-chunk entity payloads of the current batch.
+        :return: One string for the whole batch, or one string per chunk.
+        """
+        if self.ontology is None or not self.prune_relation_types:
+            return self.relation_types
+
+        rendered: List[str] = []
+        for entities in entities_payload:
+            types = {str(entity.get("entity_type", "")) for entity in entities}
+            pairs = [(subject, obj) for subject in types for obj in types if subject != obj]
+            pruned = self.ontology.render_relation_types(
+                with_signatures=self.show_type_signatures,
+                for_pairs=pairs,
+            )
+            rendered.append(pruned or self.relation_types or "")
+        return rendered
+
+    @staticmethod
+    def _to_entities(entities: Sequence[EntityModel], chunk: Chunk) -> List[Entity]:
+        """
+        Convert stage-1 entity models of a single chunk into graph entities.
+
+        :param entities: Extracted entities for one chunk.
+        :param chunk: Source chunk the entities were extracted from.
+        :return: Graph entities referencing the source chunk.
+        """
+        return [
+            Entity(
+                entity_name=entity_model.entity_name,
+                entity_type=entity_model.entity_type,
+                description=entity_model.description,
+                source_chunk_id=[chunk.id],
+                documents_id=[],
+                clusters=[],
+            )
+            for entity_model in entities
+        ]
 
     @staticmethod
     def _models_to_payload(models: List[ModelT | None]) -> List[List[dict[str, Any]]]:

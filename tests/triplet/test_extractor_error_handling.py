@@ -4,8 +4,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from ragu.chunker.types import Chunk
-from ragu.common.prompts.default_models import ArtifactsModel, EntityModel, RelationModel
+from ragu.common.prompts.default_models import (
+    ArtifactsModel,
+    EntitiesExtractionModel,
+    EntityModel,
+    RelationModel,
+    RelationsExtractionModel,
+)
 from ragu.triplet.llm_artifact_extractor import ArtifactsExtractorLLM
+from ragu.triplet.two_stage_extractor import TwoStageArtifactsExtractorLLM
 
 
 def _make_chunk(text="Hello world"):
@@ -105,6 +112,125 @@ async def test_extraction_partial_failure():
 
         assert len(entities) == 1
         assert entities[0].entity_name == "Alice"
+    finally:
+        patcher.stop()
+
+
+def _make_two_stage_extractor():
+    llm = AsyncMock()
+    llm.batch_chat_completion = AsyncMock(return_value=[])
+
+    extractor = TwoStageArtifactsExtractorLLM(llm=llm)
+    extractor.get_prompt = MagicMock(side_effect=lambda name: SimpleNamespace(
+        messages=[MagicMock()],
+        pydantic_model=(
+            EntitiesExtractionModel if name.startswith("entity") else RelationsExtractionModel
+        ),
+        few_shot_formatter=None,
+    ))
+
+    return extractor, llm
+
+
+async def test_two_stage_keeps_entities_when_relation_extraction_raises():
+    extractor, llm = _make_two_stage_extractor()
+
+    import ragu.triplet.two_stage_extractor as module
+    patcher, mock_render = _patch_render(module)
+    try:
+        entities_model = EntitiesExtractionModel(
+            entities=[EntityModel(entity_name="Alice", entity_type="Person", description="A person")],
+        )
+
+        call_count = 0
+        async def _batch_side_effect(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return [entities_model]
+            raise RuntimeError("relation stage exploded")
+
+        llm.batch_chat_completion.side_effect = _batch_side_effect
+
+        entities, relations = await extractor.extract([_make_chunk("chunk 1")])
+
+        assert [e.entity_name for e in entities] == ["Alice"]
+        assert relations == []
+    finally:
+        patcher.stop()
+
+
+async def test_two_stage_keeps_entities_when_relations_are_none():
+    extractor, llm = _make_two_stage_extractor()
+
+    import ragu.triplet.two_stage_extractor as module
+    patcher, mock_render = _patch_render(module)
+    try:
+        entities_model = EntitiesExtractionModel(
+            entities=[EntityModel(entity_name="Alice", entity_type="Person", description="A person")],
+        )
+
+        call_count = 0
+        async def _batch_side_effect(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            return [entities_model] if call_count == 1 else [None]
+
+        llm.batch_chat_completion.side_effect = _batch_side_effect
+
+        entities, relations = await extractor.extract([_make_chunk("chunk 1")])
+
+        assert [e.entity_name for e in entities] == ["Alice"]
+        assert relations == []
+    finally:
+        patcher.stop()
+
+
+async def test_two_stage_success_returns_entities_and_relations():
+    extractor, llm = _make_two_stage_extractor()
+
+    import ragu.triplet.two_stage_extractor as module
+    patcher, mock_render = _patch_render(module)
+    try:
+        entities_model = EntitiesExtractionModel(
+            entities=[
+                EntityModel(entity_name="Alice", entity_type="Person", description="A person"),
+                EntityModel(entity_name="Acme", entity_type="Organization", description="A company"),
+            ],
+        )
+        relations_model = RelationsExtractionModel(
+            relations=[
+                RelationModel(
+                    source_entity="Alice",
+                    target_entity="Acme",
+                    relation_type="WORKPLACE",
+                    description="Alice works at Acme",
+                    relationship_strength=4,
+                ),
+                RelationModel(
+                    source_entity="Alice",
+                    target_entity="Nobody",
+                    relation_type="KNOWS",
+                    description="dangling endpoint",
+                    relationship_strength=1,
+                ),
+            ],
+        )
+
+        call_count = 0
+        async def _batch_side_effect(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            return [entities_model] if call_count == 1 else [relations_model]
+
+        llm.batch_chat_completion.side_effect = _batch_side_effect
+
+        entities, relations = await extractor.extract([_make_chunk("chunk 1")])
+
+        assert [e.entity_name for e in entities] == ["Alice", "Acme"]
+        assert len(relations) == 1
+        assert relations[0].subject_name == "Alice"
+        assert relations[0].object_name == "Acme"
     finally:
         patcher.stop()
 

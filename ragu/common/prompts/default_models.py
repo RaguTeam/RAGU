@@ -50,6 +50,11 @@ class EntityModel(BaseModel):
     entity_type: str = Field(..., description="Entity type")
     description: str = Field(..., description="Detailed description of the entity from the text")
 
+    @field_validator("entity_name")
+    @classmethod
+    def _strip_entity_name(cls, v: str) -> str:
+        return v.strip()
+
     @field_validator("entity_type")
     @classmethod
     def _normalize_entity_type(cls, v: str) -> str:
@@ -64,6 +69,11 @@ class RelationModel(BaseModel):
     relationship_strength: int = Field(
         ..., ge=0, le=5, description="Relationship strength 0–5 (0 = weak, 5 = strong)"
     )
+
+    @field_validator("source_entity", "target_entity")
+    @classmethod
+    def _strip_endpoint(cls, v: str) -> str:
+        return v.strip()
 
     @field_validator("relation_type")
     @classmethod

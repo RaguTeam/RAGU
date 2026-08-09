@@ -7,6 +7,7 @@ from ragu.utils.ragu_utils import (
     attach_async_contexts,
     always_get_an_event_loop,
     compute_mdhash_id,
+    deprecated,
     get_disk_cache,
     read_text_from_files,
     save_args_on_exception,
@@ -91,3 +92,68 @@ def test_read_text_from_files_reads_nested_files(tmp_path):
 
     values = read_text_from_files(root, file_extensions={".txt", ".md"})
     assert sorted(values) == ["alpha", "beta"]
+
+
+class TestDeprecated:
+    def test_function_warns_and_still_works(self):
+        @deprecated(replacement="new_one")
+        def old(x):
+            return x * 2
+
+        with pytest.warns(DeprecationWarning, match="old is deprecated. Use new_one instead."):
+            assert old(3) == 6
+
+    async def test_coroutine_warns_and_still_works(self):
+        @deprecated()
+        async def old():
+            return "done"
+
+        with pytest.warns(DeprecationWarning, match="old is deprecated."):
+            assert await old() == "done"
+
+    def test_class_stays_a_class(self):
+        """Wrapping a class in a factory function would break isinstance and subclassing."""
+        @deprecated(replacement="NewOne")
+        class Old:
+            """Kept docstring."""
+
+            def __init__(self, x=0):
+                self.x = x
+
+            def hello(self):
+                return "hi"
+
+        assert isinstance(Old, type)
+        assert Old.__name__ == "Old"
+        assert Old.__doc__ == "Kept docstring."
+
+        with pytest.warns(DeprecationWarning, match="Old is deprecated. Use NewOne instead."):
+            instance = Old(2)
+
+        assert isinstance(instance, Old)
+        assert instance.x == 2
+        assert instance.hello() == "hi"
+
+    def test_subclassing_a_deprecated_class_works_and_warns(self):
+        @deprecated()
+        class Old:
+            def __init__(self, x):
+                self.x = x
+
+        class Child(Old):
+            def __init__(self):
+                super().__init__(5)
+
+        with pytest.warns(DeprecationWarning):
+            child = Child()
+
+        assert child.x == 5
+        assert isinstance(child, Old)
+
+    def test_class_without_replacement(self):
+        @deprecated()
+        class Old:
+            pass
+
+        with pytest.warns(DeprecationWarning, match=r"Old is deprecated\.$"):
+            Old()

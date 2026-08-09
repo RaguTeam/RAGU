@@ -46,30 +46,42 @@ F = TypeVar('F', bound=Callable[..., Any])
 
 def deprecated(replacement: str | None = None) -> Callable[[F], F]:
     """
-    Decorate a deprecated callable and emit a warning when it is used.
+    Decorate a deprecated callable or class and emit a warning when it is used.
 
     :param replacement: Optional replacement callable name shown in the warning.
-    :return: Decorator preserving the wrapped callable.
+    :return: Decorator preserving the wrapped callable or class.
     """
-    def _warn(func: Callable[..., Any]) -> None:
-        message = f"{func.__qualname__} is deprecated."
+    def _warn(_object: Any) -> None:
+        message = f"{_object.__qualname__} is deprecated."
         if replacement:
             message += f" Use {replacement} instead."
         warnings.warn(message, DeprecationWarning, stacklevel=3)
 
-    def decorator(func: F) -> F:
-        if asyncio.iscoroutinefunction(func):
-            @functools.wraps(func)
+    def decorator(_object: F) -> F:
+        if isinstance(_object, type):
+            cls: Any = _object
+            original_init = cls.__init__
+
+            @functools.wraps(original_init)
+            def init(self: Any, *args: Any, **kwargs: Any) -> None:
+                _warn(_object)
+                original_init(self, *args, **kwargs)
+
+            cls.__init__ = init
+            return cast(F, _object)
+
+        if asyncio.iscoroutinefunction(_object):
+            @functools.wraps(_object)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-                _warn(func)
-                return await func(*args, **kwargs)
+                _warn(_object)
+                return await _object(*args, **kwargs)
 
             return cast(F, async_wrapper)
 
-        @functools.wraps(func)
+        @functools.wraps(_object)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            _warn(func)
-            return func(*args, **kwargs)
+            _warn(_object)
+            return _object(*args, **kwargs)
 
         return cast(F, wrapper)
 
