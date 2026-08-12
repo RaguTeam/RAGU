@@ -467,7 +467,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
         rendered: List[str] = []
         for entities in entities_payload:
             types = {str(entity.get("entity_type", "")) for entity in entities}
-            pairs = [(subject, obj) for subject in types for obj in types if subject != obj]
+            pairs = [(subject, obj) for subject in types for obj in types]
             pruned = self.ontology.render_relation_types(
                 with_signatures=self.show_type_signatures,
                 for_pairs=pairs,

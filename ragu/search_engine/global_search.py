@@ -117,15 +117,9 @@ class GlobalSearchEngine(BaseEngine[GlobalSearchParams, GlobalSearchRetrieve]):
         """
         Perform a global semantic search for a batch of queries.
 
-        Community summaries are query-independent, so they are fetched **once**
-        for the whole batch. Every query × community meta-evaluation is then
-        issued through a single :meth:`LLM.batch_chat_completion` call, after
-        which low-rated insights are filtered and the rest sorted per query.
-
         :param queries: The input natural language queries.
         :param params: Retrieval parameters. Pass :class:`GlobalSearchParams`
-            to skip communities smaller than ``min_cluster_size``; other
-            parameter types are accepted for interface consistency and ignored.
+            to skip communities smaller than ``min_cluster_size``.
         :return: ``GlobalSearchRetrieve`` per query, aligned with ``queries``.
         """
         if not queries:
@@ -202,10 +196,6 @@ class GlobalSearchEngine(BaseEngine[GlobalSearchParams, GlobalSearchRetrieve]):
         """
         Evaluate every (query, community) pair in a single batched LLM call.
 
-        The model scores each community summary against each query. Failed
-        evaluations are skipped (via ``continue_on_error``) rather than aborting
-        the batch.
-
         :param queries: User queries used to assess community relevance.
         :param context: Community summaries to evaluate against every query.
         :return: Per-query lists of structured evaluations, aligned with ``queries``.
@@ -252,11 +242,6 @@ class GlobalSearchEngine(BaseEngine[GlobalSearchParams, GlobalSearchRetrieve]):
     ) -> List[SearchEngineResponse]:
         """
         Execute global RAG for multiple queries, batching final synthesis.
-
-        Retrieval (community fetch + cross-query meta-evaluation) is shared
-        across the batch via :meth:`batch_search`; the final answer synthesis for
-        all queries is issued through a single :meth:`LLM.batch_chat_completion`
-        call. The first failing query aborts the whole batch.
 
         :param queries: The natural language queries from the user.
         :param params: Query parameters forwarded to :meth:`batch_search`; see

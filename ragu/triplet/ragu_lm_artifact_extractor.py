@@ -27,10 +27,7 @@ class ChunkContext:
     relations: List[Relation] = field(default_factory=list[Relation])
 
 
-@deprecated(
-    "RaguLmArtifactExtractor is deprecated and will be removed in future"
-    "use TwoStageArtifactsExtractorLLM or ArtifactsExtractorLLM"
-)
+@deprecated("TwoStageArtifactsExtractorLLM or ArtifactsExtractorLLM")
 class RaguLmArtifactExtractor(BaseArtifactExtractor):
     """
     RAGU-LM artifact extractor with stage-by-stage batch processing.
