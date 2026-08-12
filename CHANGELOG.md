@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.5] - 2026-08-13
+
+### Changed
+
+- Updated dependency constraints with upper version bounds to prevent incompatible package upgrades.
+
 ## [0.0.4] - 2026-07-24
 
 ### Added
