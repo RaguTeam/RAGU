@@ -86,6 +86,9 @@ If you want to use local models (via transformers etc.), run:
 pip install graph_ragu[local]
 ```
 
+Audio and video additionally need the `ffmpeg` binary. Speaker diarization runs
+on `pyannote.audio`, which also lives in `graph_ragu[local]`.
+
 ---
 
 ## Quickstart

@@ -1,5 +1,6 @@
 import json
-from collections.abc import MutableMapping
+from collections.abc import Mapping, MutableMapping
+from hashlib import sha256
 from pathlib import Path
 from typing import Any, TypeVar, Union
 
@@ -16,6 +17,60 @@ OutputSchema = Union[type[BaseModel], type[str]]
 
 #: Used by overloads to carry the concrete model class through to the return type.
 ModelT = TypeVar('ModelT', bound=BaseModel)
+
+_BASE64_MARKER = ';base64,'
+
+
+def _digest_data_uri(text: str) -> str:
+    """
+    Replace the payload of an inline data URI with its digest.
+
+    The header is kept, so ``image/png`` and ``image/jpeg`` remain different
+    keys — which they must, since the model is told which it is getting.
+
+    :param text: Any string; returned unchanged unless it is a base64 data URI.
+    :type text: str
+    :returns: The string with its base64 payload replaced by a digest.
+    :rtype: str
+    """
+    if not text.startswith('data:') or _BASE64_MARKER not in text:
+        return text
+
+    header, payload = text.split(_BASE64_MARKER, 1)
+    return f'{header}{_BASE64_MARKER}sha256:{sha256(payload.encode()).hexdigest()}'
+
+
+def digest_inline_media(value: Any) -> Any:
+    """
+    Copy a conversation with every inline media payload reduced to a digest.
+
+    Vision calls carry whole images base64-encoded in the message content. Cache
+    keys are JSON strings held in memory and compared in full, so keying on the
+    conversation verbatim makes every key as large as the page it asks about —
+    and the key is stored a second time alongside the response. A digest keys
+    the same image just as precisely for a fixed cost.
+
+    This is the same treatment `_cached_transcribe` gives recordings; it is done
+    here rather than in the OCR client so that any vision call benefits, and
+    walks the structure generically so audio and other future part types are
+    covered too.
+
+    Conversations without inline media come back structurally identical, so
+    their keys are unaffected.
+
+    :param value: A conversation, or any part of one.
+    :type value: Any
+    :returns: A copy with base64 payloads replaced by their digests.
+    :rtype: Any
+    """
+    if isinstance(value, str):
+        return _digest_data_uri(value)
+    if isinstance(value, Mapping):
+        return {key: digest_inline_media(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [digest_inline_media(item) for item in value]
+    return value
+
 
 class ResponseCachingMixin:
     """
@@ -76,7 +131,7 @@ class ResponseCachingMixin:
             'cache_prefix': self.cache_prefix,
             'model_name': model_name,
             'method': 'chat_completion',
-            'conversation': conversation,
+            'conversation': digest_inline_media(conversation),
             'output_schema': (
                 'str' if issubclass(output_schema, str) else output_schema.model_json_schema()
             ),
@@ -228,6 +283,72 @@ class ResponseCachingMixin:
 
         Subclasses must implement this to send multiple texts in a single
         API call.  kwargs are included for cache-key consistency.
+        """
+        raise NotImplementedError
+
+    async def _cached_transcribe(
+        self,
+        model_name: str,
+        audio: bytes,
+        audio_name: str = 'audio.wav',
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        """
+        Caching wrapper for _uncached_transcribe.
+
+        :param model_name: Provider transcription model name.
+        :param audio: Encoded audio bytes.
+        :param audio_name: File name reported to the provider; its suffix
+            tells the provider which container to expect.
+        :param kwargs: Forwarded transcription options.
+        :returns: Provider payload as a mapping.
+        """
+        if self.cache is None:
+            return await self._uncached_transcribe(
+                model_name=model_name,
+                audio=audio,
+                audio_name=audio_name,
+                **kwargs,
+            )
+
+        args: dict[str, Any] = {
+            'cache_prefix': self.cache_prefix,
+            'model_name': model_name,
+            'method': 'transcribe',
+            'audio_sha256': sha256(audio).hexdigest(),
+            'audio_suffix': Path(audio_name).suffix.lower(),
+            'kwargs': kwargs,
+        }
+        key = json.dumps(args, sort_keys=True)
+
+        if value := self.cache.get(key, None):
+            logger.debug(f'Cache hit for {model_name}!')
+            cached: dict[str, Any]
+            _args, cached = value
+            return cached
+
+        response = await self._uncached_transcribe(
+            model_name=model_name,
+            audio=audio,
+            audio_name=audio_name,
+            **kwargs,
+        )
+
+        self.cache[key] = args, response
+
+        return response
+
+    async def _uncached_transcribe(
+        self,
+        model_name: str,
+        audio: bytes,
+        audio_name: str = 'audio.wav',
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        """
+        Abstract method to cache.
+
+        kwargs are here to add custom arguments that will also be cached
         """
         raise NotImplementedError
 

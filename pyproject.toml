@@ -56,9 +56,12 @@ Changelog = "https://github.com/RaguTeam/RAGU/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 local = [
+    "torch>=2.2",
     "sentence-transformers>=5.1.1",
     "transformers>=4.57.1",
+    "pyannote.audio>=3.1.0",
     "smart-chunker>=0.0.5",
+    "pillow>=10.0.0",
 ]
 test = [
     "pytest>=8.4.2",

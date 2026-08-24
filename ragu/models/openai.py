@@ -27,10 +27,57 @@ from ragu.common.logger import logger
 
 DEFAULT_RETRY_TIMES_SEC: Sequence[float] = (2, 4, 8)
 
+#: Options `transcribe` forwards to ``audio.transcriptions.create``. Everything
+#: the SDK accepts except ``file`` and ``model``, which come from the call's own
+#: arguments, and ``stream``, which returns an event stream this adapter has
+#: nowhere to put.
+TRANSCRIPTION_OPTIONS = frozenset({
+    'chunking_strategy',
+    'include',
+    'known_speaker_names',
+    'known_speaker_references',
+    'language',
+    'prompt',
+    'response_format',
+    'temperature',
+    'timestamp_granularities',
+    'extra_headers',
+    'extra_query',
+    'extra_body',
+    'timeout',
+})
+
 
 def _is_retryable_exception(exc: BaseException) -> bool:
     from openai import APITimeoutError, InternalServerError, RateLimitError, APIConnectionError
     return isinstance(exc, (APITimeoutError, InternalServerError, RateLimitError, APIConnectionError))
+
+
+def _transcription_payload(response: Any) -> dict[str, Any]:
+    """
+    Normalize whatever a transcription call returned into a mapping.
+
+    The response type follows ``response_format``: the SDK parses the JSON
+    formats into models (``Transcription``, ``TranscriptionVerbose``,
+    ``TranscriptionDiarized``) and hands back the text formats — ``text``,
+    ``srt``, ``vtt`` — as a bare string. Callers get one shape either way.
+
+    :param response: Whatever ``audio.transcriptions.create`` returned.
+    :type response: Any
+    :returns: Provider payload as a mapping.
+    :rtype: dict[str, Any]
+    :raises TypeError: If the response is neither a model nor a string.
+    """
+    if isinstance(response, BaseModel):
+        return response.model_dump()
+
+    if isinstance(response, str):
+        return {'text': response}
+
+    raise TypeError(
+        f'Unexpected transcription response of type {type(response).__name__}. '
+        f'Streaming transcriptions are not supported.'
+    )
 
 
 @dataclass
@@ -148,6 +195,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         self._uncached_raw_embed_text = self._uncached_embed_text
         self._uncached_raw_embed_texts = self._uncached_embed_texts
         self._uncached_raw_score = self._uncached_score
+        self._uncached_raw_transcribe = self._uncached_transcribe
 
         # saving errors to debug
         # Per-instance `debug_errors_storage` overrides `Settings.debug_errors_path`; both default to None.
@@ -171,6 +219,9 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
                 self._uncached_embed_texts, self.debug_errors_storage)
             self._uncached_score = save_args_on_exception(
                 self._uncached_score, self.debug_errors_storage)
+            # Transcription is left out on purpose: its arguments carry the
+            # recording itself, and a failed upload of a long one would put
+            # tens of megabytes into the debug storage on every attempt.
 
         # Handlers/wrappers will be called in this order:
         # 1. Caching
@@ -195,6 +246,8 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
                 self._uncached_embed_texts, *contexts)
             self._uncached_score = attach_async_contexts(
                 self._uncached_score, *contexts)
+            self._uncached_transcribe = attach_async_contexts(
+                self._uncached_transcribe, *contexts)
 
         # add retrying decorators
         if retry_times_sec:
@@ -211,6 +264,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             self._uncached_embed_text = retrying_decorator(self._uncached_embed_text)
             self._uncached_embed_texts = retrying_decorator(self._uncached_embed_texts)
             self._uncached_score = retrying_decorator(self._uncached_score)
+            self._uncached_transcribe = retrying_decorator(self._uncached_transcribe)
     
     @overload
     async def chat_completion(
@@ -355,6 +409,37 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             **kwargs,
         )
     
+    async def transcribe(
+        self,
+        model_name: str,
+        audio: bytes,
+        audio_name: str = 'audio.wav',
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        """
+        Returns a speech-to-text transcription with caching.
+
+        The payload is returned raw rather than parsed, because its shape
+        depends on `response_format` and on the model: only the caller knows
+        which of segments, words or speakers it asked for. Parsing it into a
+        transcript is :class:`~ragu.models.asr.ASROpenAI`'s job.
+
+        :param model_name: Provider transcription model name.
+        :param audio: Encoded audio bytes.
+        :param audio_name: File name reported to the provider. Its suffix is
+            how the provider learns the container format, so it must match the
+            bytes; the rest of the name is ignored, cache key included.
+        :param kwargs: Transcription options, see
+            :data:`TRANSCRIPTION_OPTIONS`.
+        :returns: Provider payload as a mapping.
+        """
+        return await self._cached_transcribe(
+            model_name=model_name,
+            audio=audio,
+            audio_name=audio_name,
+            **kwargs,
+        )
+
     async def score(
         self,
         model_name: str,
@@ -525,6 +610,43 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             model=model_name, input=texts, **timeout_kwarg,
         )
         return [item.embedding for item in response.data]
+
+    @override
+    async def _uncached_transcribe(
+        self,
+        model_name: str,
+        audio: bytes,
+        audio_name: str = 'audio.wav',
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        """
+        Performs uncached transcription call.
+
+        :param model_name: Provider transcription model name.
+        :param audio: Encoded audio bytes.
+        :param audio_name: File name reported to the provider.
+        :param kwargs: Supported transcription options.
+        :returns: Provider payload as a mapping.
+        :raises TypeError: If an option is not one the provider accepts, or if
+            the response is neither a model nor a string.
+        """
+        logger.debug(
+            f'Sending transcribe API request to {model_name} '
+            f'with {len(audio) / 1024 / 1024:.1f} MB of audio...'
+        )
+        unsupported = sorted(set(kwargs) - TRANSCRIPTION_OPTIONS)
+        if unsupported:
+            raise TypeError(
+                f'Unsupported transcribe arguments: {unsupported}. '
+                f'Supported extra arguments: {sorted(TRANSCRIPTION_OPTIONS)}.'
+            )
+
+        response = await self.client.audio.transcriptions.create(
+            model=model_name,
+            file=(audio_name, audio),
+            **kwargs,
+        )
+        return _transcription_payload(response)
 
     @override
     async def _uncached_score(
