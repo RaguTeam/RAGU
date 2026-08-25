@@ -70,3 +70,4 @@ Older plain-Python examples covering areas the notebooks do not:
 |---|---|
 | [extract_with_llm_and_local_search.py](extract_with_llm_and_local_search.py) | Minimal end-to-end build and query |
 | [local_embedder_with_short_context.py](local_embedder_with_short_context.py) | Working with a local embedder that has a small context window |
+| [generate_answer.py](generate_answer.py) | Interactive QA over a pre-built index with per-stage retrieval logging; answers auto-detect the question's language (ru/en, `--language` to override); `--no-llm` runs retrieval-only, two or more `--engine` values switch to `MixSearchEngine`, `--query-plan` adds query decomposition |
