@@ -29,7 +29,7 @@ dependencies = [
     "nano-vectordb>=0.0.4.3",
     "networkx>=3.4.2",
     "nltk>=3.9.2",
-    "openai>=2.32.0",
+    "openai>=2.32.0,<3",
     "pandas>=2.3.3",
     "pydantic>=2.11.10",
     "pydantic-settings>=2.11.0",
@@ -55,6 +55,10 @@ Repository = "https://github.com/RaguTeam/RAGU"
 Changelog = "https://github.com/RaguTeam/RAGU/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
+api = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
 local = [
     "sentence-transformers>=5.1.1",
     "transformers>=4.57.1",
