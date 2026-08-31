@@ -1,0 +1,51 @@
+services:
+  ragu-api:
+    build:
+      context: .
+      args:
+        RAGU_SYNC_EXTRAS: "${RAGU_SYNC_EXTRAS:-}"
+    image: ragu-api:latest
+    container_name: ragu-api
+    restart: unless-stopped
+    # LLM_BASE_URL / LLM_API_KEY / LLM_MODEL_NAME / EMBEDDER_* — the same .env
+    # the rest of RAGU reads.
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      RAGU_API_BACKEND: "${RAGU_API_BACKEND:-ragu}"
+      RAGU_API_STORAGE_FOLDER: /data/graph
+      RAGU_API_LANGUAGE: "${RAGU_API_LANGUAGE:-russian}"
+      RAGU_API_EMBEDDER_DIM: "${RAGU_API_EMBEDDER_DIM:-}"
+      RAGU_API_LLM_CACHE: /data/cache/llm_cache.jsonl
+    volumes:
+      # A graph built beforehand; the service only reads it.
+      - "${RAGU_STORAGE_FOLDER:-./ragu_working_dir}:/data/graph"
+      - ragu-llm-cache:/data/cache
+    ports:
+      - "${RAGU_API_PORT:-8020}:8020"
+    networks:
+      - ragu-network
+
+  # Remote Qdrant instead of the embedded one. Enable with:
+  #   docker compose --profile qdrant up -d
+  # and point the graph's vector storage at http://qdrant:6333.
+  qdrant:
+    profiles: ["qdrant"]
+    image: qdrant/qdrant:latest
+    container_name: ragu-qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant-storage:/qdrant/storage
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+    networks:
+      - ragu-network
+
+volumes:
+  ragu-llm-cache:
+  qdrant-storage:
+
+networks:
+  ragu-network:
+    driver: bridge

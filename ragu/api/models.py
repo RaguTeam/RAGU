@@ -1,0 +1,92 @@
+"""
+Request and response schemas of the search API.
+"""
+
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
+from ragu.search_engine.global_search import GlobalSearchParams
+from ragu.search_engine.local_search import LocalParams
+from ragu.search_engine.naive_search import NaiveSearchParams
+
+SearchMode = Literal["global", "local", "naive"]
+
+
+class GlobalSearchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, description="Search query")
+    params: GlobalSearchParams = Field(
+        default_factory=GlobalSearchParams,
+        description="GlobalSearchEngine retrieval parameters: min_cluster_size",
+    )
+
+
+class LocalSearchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, description="Search query")
+    use_query_plan: bool = Field(
+        default=True, description="Decompose the query into subqueries"
+    )
+    params: LocalParams = Field(
+        default_factory=LocalParams,
+        description="LocalSearchEngine retrieval parameters: top_k, rerank_top_k, "
+        "use_summary, use_chunks",
+    )
+
+
+class NaiveSearchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, description="Search query")
+    use_query_plan: bool = Field(
+        default=True, description="Decompose the query into subqueries"
+    )
+    params: NaiveSearchParams = Field(
+        default_factory=NaiveSearchParams,
+        description="NaiveSearchEngine retrieval parameters: top_k, rerank_top_k",
+    )
+
+
+class SourceItem(BaseModel):
+    id: str = Field(
+        description="Stable source identifier, e.g. chunk_42 or community_3"
+    )
+    type: str = Field(
+        description="Source kind: chunk, entity, relation, community_summary"
+    )
+    content: str = Field(default="", description="Source text")
+    score: float | None = Field(
+        default=None, description="Retrieval score when the engine provides one"
+    )
+
+
+class SubqueryItem(BaseModel):
+    query: str = Field(description="Subquery produced by the query plan")
+    answer: str = Field(default="", description="Intermediate answer to the subquery")
+
+
+class SearchResponse(BaseModel):
+    query: str
+    mode: SearchMode
+    used_query_plan: bool
+    answer: str
+    sources: list[SourceItem] = Field(default_factory=list)
+    subqueries: list[SubqueryItem] = Field(default_factory=list)
+
+
+class ErrorBody(BaseModel):
+    code: str
+    mode: str | None = None
+    missing_capability: str | None = None
+    message: str
+
+
+class ErrorResponse(BaseModel):
+    error: ErrorBody
+
+
+class HealthResponse(BaseModel):
+    status: str
+    graph_loaded: bool
