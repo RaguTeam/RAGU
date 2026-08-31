@@ -2,7 +2,11 @@
 
 HTTP service in front of a prebuilt knowledge graph. It owns the graph; clients
 only search it. One route per search mode, so a gateway can apply different
-timeouts and rate limits per mode without touching the service.
+timeouts and rate limits per mode without touching the service — and they do
+differ: `global` rates every community summary against the query with its own
+LLM call (N+1 calls for N communities, growing with the graph), while `local`
+and `naive` issue one generation each. Give `/v1/search/global` the long timeout
+and the tight rate limit; `global_min_cluster_size` is the knob that cuts N.
 
 The service ships with the package as `ragu.api`, so an installed RAGU can
 serve a graph without a checkout.
