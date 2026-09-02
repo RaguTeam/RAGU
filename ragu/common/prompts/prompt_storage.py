@@ -35,6 +35,7 @@ from ragu.common.prompts.default_templates import (
     DEFAULT_RAGU_LM_RELATION_DESCRIPTION_PROMPT,
     DEFAULT_QUERY_DECOMPOSITION_PROMPT,
     DEFAULT_QUERY_REWRITE_PROMPT,
+    DEFAULT_DIALOGUE_REWRITE_PROMPT,
     DEFAULT_RAGU_LM_SYSTEM_PROMPT,
 )
 from ragu.common.prompts.few_shot import (
@@ -272,5 +273,15 @@ DEFAULT_PROMPT_TEMPLATES: dict[str, RAGUInstruction] = {
         ),
         pydantic_model=RewriteQuery,
         description="Prompt for rewriting a subquery using answers from its dependencies.",
+    ),
+
+    "dialogue_query_rewrite": RAGUInstruction(
+        messages=ChatMessages.from_messages(
+            [
+                UserMessage(content=DEFAULT_DIALOGUE_REWRITE_PROMPT),
+            ]
+        ),
+        pydantic_model=RewriteQuery,
+        description="Prompt for resolving pronoun/anaphora references in a query using dialogue history.",
     ),
 }

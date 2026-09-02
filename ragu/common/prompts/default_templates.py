@@ -269,3 +269,28 @@ Dependency answers:
 {% endfor %}
 Rewrite the subquery and return the result as valid JSON matching the provided schema.
 """
+
+DEFAULT_DIALOGUE_REWRITE_PROMPT = """
+**Goal**
+You are a query rewriting assistant for a Retrieval-Augmented Generation (RAG) system.
+
+Your task is to rewrite the current user query so that it is fully explicit and
+self-contained, resolving pronouns and other context-dependent expressions using
+the preceding dialogue history.
+
+**Rules**
+- Resolve all references (pronouns, ellipsis, implicit entities) using the dialogue history.
+- If the query is already self-contained, return it unchanged.
+- Preserve the original intent and scope of the query.
+- Do NOT add information that is not present in the query or the dialogue history.
+- Do NOT answer the query.
+
+Dialogue history:
+{{ dialogue_history }}
+
+Current user query:
+{{ query }}
+
+Provide the answer in the following language: {{ language }}
+Rewrite the query and return the result as valid JSON matching the provided schema.
+"""
