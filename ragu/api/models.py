@@ -87,6 +87,25 @@ class ErrorResponse(BaseModel):
     error: ErrorBody
 
 
+class GraphStatsResponse(BaseModel):
+    """
+    Sizes of the stores each search mode reads, counted once at startup.
+    """
+
+    entities: int = Field(description="Vectorized entities backing local search")
+    relations: int = Field(description="Vectorized relations backing local search")
+    chunks: int = Field(description="Vectorized chunks backing naive search")
+    community_summaries: int = Field(
+        description="Community summaries backing global search"
+    )
+
+
 class HealthResponse(BaseModel):
-    status: str
+    status: str = Field(description="'ok' when searches can be served, else 'degraded'")
     graph_loaded: bool
+    stats: GraphStatsResponse | None = Field(
+        default=None, description="Graph sizes; absent until the graph is loaded"
+    )
+    error: str | None = Field(
+        default=None, description="Why the backend is not ready, when it is not"
+    )

@@ -5,42 +5,60 @@ Serves deterministic canned answers without a real graph, so the agent side can
 be exercised end-to-end without building a knowledge graph.
 """
 
-import logging
-
-from ragu.api.backends.base import (
-    GLOBAL_UNAVAILABLE_MESSAGE,
-    LOCAL_UNAVAILABLE_MESSAGE,
-    NAIVE_UNAVAILABLE_MESSAGE,
-    SearchBackend,
-    SearchOutcome,
-)
+from ragu.api.backends.base import GraphStats, SearchBackend, SearchOutcome
 from ragu.api.config import ServiceSettings
-from ragu.api.errors import CapabilityUnavailableError
 from ragu.api.models import SourceItem, SubqueryItem
+from ragu.common.logger import logger
 from ragu.search_engine.global_search import GlobalSearchParams
 from ragu.search_engine.local_search import LocalParams
 from ragu.search_engine.naive_search import NaiveSearchParams
 
-logger = logging.getLogger(__name__)
+# How a simulated missing capability shows up in the graph sizes the base class
+# reads. Driving the stub through the same GraphStats the real backend measures
+# keeps both backends on one capability code path instead of two.
+_EMPTY_STORE_FOR_CAPABILITY = {
+    "community_summaries": "community_summaries",
+    "entity_graph": "entities",
+    "vector_index": "chunks",
+}
+
+_FULL_STATS = GraphStats(
+    entities=1, relations=1, chunks=1, community_summaries=1
+)
 
 
 class StubBackend(SearchBackend):
     """Canned backend. Which modes fail is driven by
-    ``RAGU_STUB_MISSING_CAPABILITIES``."""
+    ``RAGU_API_STUB_MISSING_CAPABILITIES``."""
 
     def __init__(self, settings: ServiceSettings | None = None):
-        self.settings = settings or ServiceSettings(backend="stub")
+        super().__init__(settings or ServiceSettings(backend="stub"))
         self._missing = self.settings.missing_capabilities()
-        self._loaded = False
-
-    @property
-    def graph_loaded(self) -> bool:
-        return self._loaded
 
     async def startup(self) -> None:
-        self._loaded = True
+        self._stats = self._simulated_stats()
         logger.warning(
             "StubBackend started: canned answers only, no real knowledge graph"
+        )
+
+    def _simulated_stats(self) -> GraphStats:
+        """
+        Build graph sizes that reproduce the configured missing capabilities.
+
+        :return: Sizes where each simulated-missing store counts zero.
+        """
+        empty = {
+            _EMPTY_STORE_FOR_CAPABILITY[capability]
+            for capability in self._missing
+            if capability in _EMPTY_STORE_FOR_CAPABILITY
+        }
+        return GraphStats(
+            entities=0 if "entities" in empty else _FULL_STATS.entities,
+            relations=_FULL_STATS.relations,
+            chunks=0 if "chunks" in empty else _FULL_STATS.chunks,
+            community_summaries=(
+                0 if "community_summaries" in empty else _FULL_STATS.community_summaries
+            ),
         )
 
     @staticmethod
@@ -49,42 +67,45 @@ class StubBackend(SearchBackend):
             return []
         return [SubqueryItem(query=query, answer=f"stub answer for '{query}'")]
 
-    async def search_global(
-        self, 
-        query: str, 
-        *, 
-        params: GlobalSearchParams
+    def _finish(
+        self,
+        mode: str,
+        answer: str,
+        sources: list[SourceItem],
+        subqueries: list[SubqueryItem],
     ) -> SearchOutcome:
-        if "community_summaries" in self._missing:
-            raise CapabilityUnavailableError(
-                GLOBAL_UNAVAILABLE_MESSAGE,
-                mode="global",
-                missing_capability="community_summaries",
-            )
-        return SearchOutcome(
-            answer=f"[stub global] {query}",
-            sources=[
+        """
+        Apply the same no-evidence rule the real backend applies.
+
+        :raises CapabilityUnavailableError: If the canned retrieval is empty.
+        """
+        if not sources:
+            raise self.no_evidence(mode)
+        return SearchOutcome(answer=answer, sources=sources, subqueries=subqueries)
+
+    async def search_global(
+        self, query: str, *, params: GlobalSearchParams
+    ) -> SearchOutcome:
+        self.require_capability("global")
+        params = self.bound_params(params)
+        return self._finish(
+            "global",
+            f"[stub global] {query}",
+            [
                 SourceItem(
                     id="community_1",
                     type="community_summary",
                     content=f"stub community summary (min_cluster_size={params.min_cluster_size})",
                 )
             ],
+            [],
         )
 
     async def search_local(
-        self, 
-        query: str, 
-        *, 
-        use_query_plan: bool, 
-        params: LocalParams
+        self, query: str, *, use_query_plan: bool, params: LocalParams
     ) -> SearchOutcome:
-        if "entity_graph" in self._missing:
-            raise CapabilityUnavailableError(
-                LOCAL_UNAVAILABLE_MESSAGE,
-                mode="local",
-                missing_capability="entity_graph",
-            )
+        self.require_capability("local")
+        params = self.bound_params(params)
         sources = [SourceItem(id="entity_1", type="entity", content="stub entity")]
         if params.use_chunks:
             sources.append(
@@ -98,23 +119,18 @@ class StubBackend(SearchBackend):
                     content="stub community summary",
                 )
             )
-        return SearchOutcome(
-            answer=f"[stub local] {query}",
-            sources=sources,
-            subqueries=self._subqueries(query, use_query_plan),
+        return self._finish(
+            "local",
+            f"[stub local] {query}",
+            sources,
+            self._subqueries(query, use_query_plan),
         )
 
     async def search_naive(
-        self, 
-        query: str, 
-        *, 
-        use_query_plan: bool, 
-        params: NaiveSearchParams
+        self, query: str, *, use_query_plan: bool, params: NaiveSearchParams
     ) -> SearchOutcome:
-        if "vector_index" in self._missing:
-            raise CapabilityUnavailableError(
-                NAIVE_UNAVAILABLE_MESSAGE, mode="naive", missing_capability=None
-            )
+        self.require_capability("naive")
+        params = self.bound_params(params)
         sources = [
             SourceItem(
                 id=f"chunk_{i}",
@@ -124,8 +140,9 @@ class StubBackend(SearchBackend):
             )
             for i in range(1, params.top_k + 1)
         ]
-        return SearchOutcome(
-            answer=f"[stub naive] {query}",
-            sources=sources,
-            subqueries=self._subqueries(query, use_query_plan),
+        return self._finish(
+            "naive",
+            f"[stub naive] {query}",
+            sources,
+            self._subqueries(query, use_query_plan),
         )

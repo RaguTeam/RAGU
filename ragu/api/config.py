@@ -51,7 +51,15 @@ class ServiceSettings(BaseSettings):
     max_top_k: int = Field(
         default=100,
         gt=0,
-        description="Upper bound applied to a client-supplied top_k; requests above it are clamped",
+        description="Upper bound applied to a client-supplied top_k / rerank_top_k; "
+        "requests above it are clamped",
+    )
+    min_cluster_size_floor: int = Field(
+        default=1,
+        gt=0,
+        description="Lower bound applied to a client-supplied global min_cluster_size. "
+        "Global search rates every surviving community with its own LLM call, so this is "
+        "the knob that caps the cost of one request; raise it on large graphs.",
     )
 
     stub_missing_capabilities: str = Field(

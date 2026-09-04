@@ -50,6 +50,7 @@ Our huggingface community is [here](https://huggingface.co/RaguTeam/)
 - [RAGU components and methodology (EN)](docs/en/ragu_components.md) | [RU](docs/ru/ragu_components.md)
 - [NEREL ontology (EN)](docs/en/ontology.md) | [RU](docs/ru/ontology.md)
 - [RAGU-lm extraction model (EN)](docs/en/ragu_lm.md) | [RU](docs/ru/ragu_lm.md)
+- [HTTP service (EN)](docs/en/api.md) | [RU](docs/ru/api.md)
 
 ### Module documentation
 
@@ -60,6 +61,7 @@ Our huggingface community is [here](https://huggingface.co/RaguTeam/)
 - [Graph construction and index](ragu/graph/README.md)
 - [Models, embedders, sparse embedders, and rerankers](ragu/models/README.md)
 - [Search engines](ragu/search_engine/README.md)
+- [HTTP service deployment and internals](ragu/api/README.md)
 - [Storage contracts and adapters](ragu/storage/README.md)
 - [Graph storage adapters](ragu/storage/graph_storage_adapters/README.md)
 - [Vector DB adapters](ragu/storage/vdb_storage_adapters/README.md)
@@ -85,6 +87,14 @@ If you want to use local models (via transformers etc.), run:
 ```bash
 pip install graph_ragu[local]
 ```
+
+To serve a prebuilt graph over HTTP instead of importing RAGU as a library, install
+the `api` extra and run the service:
+```bash
+pip install graph_ragu[api]
+RAGU_API_STORAGE_FOLDER=./ragu_working_dir python -m ragu.api --port 8020
+```
+See [`docs/en/api.md`](docs/en/api.md) ([RU](docs/ru/api.md)) for the API contract.
 
 ---
 

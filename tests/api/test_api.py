@@ -10,16 +10,13 @@ pytest.importorskip(
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from ragu.api.app import create_app
-from ragu.api.backends.ragu_backend import (
-    extract_sources,
-    extract_subqueries,
-    to_outcome,
-)
+from ragu.api.app import UNHANDLED_ERROR_MESSAGE, create_app
+from ragu.api.backends.base import GraphStats
 from ragu.api.config import ServiceSettings
+from ragu.api.mapping import extract_sources, extract_subqueries, to_outcome
 from ragu.chunker.types import Chunk
 from ragu.common.prompts.default_models import GlobalSearchContextModel
-from ragu.graph.types import Entity, Relation
+from ragu.graph.types import CommunitySummary, Entity, Relation
 from ragu.search_engine.base_engine import SearchEngineResponse
 from ragu.search_engine.global_search import (
     GlobalSearchParams,
@@ -38,8 +35,10 @@ from ragu.search_engine.naive_search import (
 )
 
 
-def build_client(missing: str = "") -> TestClient:
-    settings = ServiceSettings(backend="stub", stub_missing_capabilities=missing)
+def build_client(missing: str = "", **overrides) -> TestClient:
+    settings = ServiceSettings(
+        backend="stub", stub_missing_capabilities=missing, **overrides
+    )
     return TestClient(create_app(settings))
 
 
@@ -56,20 +55,77 @@ def make_entity(name: str) -> Entity:
     )
 
 
+def make_retrieval(*contents: str) -> NaiveSearchRetrieve:
+    return NaiveSearchRetrieve(
+        query="sub",
+        result=NaiveSearchResult(chunks=[make_chunk(c) for c in contents]),
+    )
+
+
 class TestHealth:
     def test_health_reports_loaded_graph(self):
         with build_client() as client:
-            assert client.get("/health").json() == {
-                "status": "ok",
-                "graph_loaded": True,
-            }
+            body = client.get("/health").json()
+        assert (body["status"], body["graph_loaded"], body["error"]) == (
+            "ok",
+            True,
+            None,
+        )
+
+    def test_health_reports_graph_sizes(self):
+        with build_client() as client:
+            stats = client.get("/health").json()["stats"]
+        assert stats == {
+            "entities": 1,
+            "relations": 1,
+            "chunks": 1,
+            "community_summaries": 1,
+        }
+
+    def test_readiness_is_503_until_the_graph_is_loaded(self):
+        # No lifespan run: the app has no backend yet.
+        client = TestClient(create_app(ServiceSettings(backend="stub")))
+        response = client.get("/health/ready")
+        assert response.status_code == 503
+        assert response.headers["Retry-After"] == "30"
+        assert response.json()["graph_loaded"] is False
+
+    def test_readiness_is_200_once_loaded(self):
+        with build_client() as client:
+            assert client.get("/health/ready").status_code == 200
+
+    def test_liveness_answers_while_degraded(self):
+        # Liveness must not restart a service that is still loading a graph.
+        client = TestClient(create_app(ServiceSettings(backend="stub")))
+        response = client.get("/health/live")
+        assert response.status_code == 200
+        assert response.json()["status"] == "degraded"
 
     def test_search_answers_503_until_the_graph_is_loaded(self):
-        # No lifespan run: the app has no backend yet.
         client = TestClient(create_app(ServiceSettings(backend="stub")))
         response = client.post("/v1/search/naive", json={"query": "q"})
         assert response.status_code == 503
         assert response.json()["error"]["code"] == "SERVICE_NOT_READY"
+
+    def test_a_startup_failure_is_reported_instead_of_being_swallowed(self):
+        class ExplodingBackend:
+            graph_loaded = False
+            stats = None
+
+            async def startup(self):
+                raise RuntimeError("embedder endpoint unreachable")
+
+            async def shutdown(self):
+                pass
+
+        with TestClient(
+            create_app(ServiceSettings(backend="stub"), backend=ExplodingBackend())
+        ) as client:
+            health = client.get("/health").json()
+            search = client.post("/v1/search/naive", json={"query": "q"})
+
+        assert "embedder endpoint unreachable" in health["error"]
+        assert "embedder endpoint unreachable" in search.json()["error"]["message"]
 
 
 class TestSearchRoutes:
@@ -146,6 +202,16 @@ class TestSearchRoutes:
         assert response.status_code == 400
         assert "params.top_k" in response.json()["error"]["message"]
 
+    def test_an_unknown_key_inside_params_is_rejected(self):
+        # Documented as "silently ignored" for a long time; it is not, and a
+        # client that mistypes a parameter must not be served the default.
+        with build_client() as client:
+            response = client.post(
+                "/v1/search/naive", json={"query": "q", "params": {"topk": 3}}
+            )
+        assert response.status_code == 400
+        assert "params.topk" in response.json()["error"]["message"]
+
     @pytest.mark.parametrize(
         "path, payload",
         [
@@ -159,6 +225,38 @@ class TestSearchRoutes:
             response = client.post(path, json=payload)
         assert response.status_code == 400
         assert response.json()["error"]["code"] == "INVALID_REQUEST"
+
+
+class TestRequestBounds:
+    """Service-level ceilings apply to every backend, not just the real one."""
+
+    def test_top_k_is_clamped_for_the_stub_too(self):
+        # The bound used to live in RaguBackend, so the stub happily allocated
+        # one SourceItem per requested top_k.
+        with build_client(max_top_k=5) as client:
+            body = client.post(
+                "/v1/search/naive",
+                json={"query": "q", "params": {"top_k": 10_000}},
+            ).json()
+        assert len(body["sources"]) == 5
+
+    def test_min_cluster_size_is_raised_to_the_floor(self):
+        # Global rates every surviving community with its own LLM call, so the
+        # floor is the only cap on the cost of one request.
+        with build_client(min_cluster_size_floor=7) as client:
+            body = client.post(
+                "/v1/search/global",
+                json={"query": "q", "params": {"min_cluster_size": 1}},
+            ).json()
+        assert "min_cluster_size=7" in body["sources"][0]["content"]
+
+    def test_a_request_within_the_bounds_is_untouched(self):
+        with build_client(max_top_k=100, min_cluster_size_floor=1) as client:
+            body = client.post(
+                "/v1/search/global",
+                json={"query": "q", "params": {"min_cluster_size": 3}},
+            ).json()
+        assert "min_cluster_size=3" in body["sources"][0]["content"]
 
 
 class TestCapabilityErrors:
@@ -176,17 +274,67 @@ class TestCapabilityErrors:
             error = client.post("/v1/search/local", json={"query": "q"}).json()["error"]
         assert error["missing_capability"] == "entity_graph"
 
+    def test_missing_chunk_index_answers_409(self):
+        with build_client(missing="vector_index") as client:
+            error = client.post("/v1/search/naive", json={"query": "q"}).json()["error"]
+        assert error["missing_capability"] == "vector_index"
+
     def test_other_modes_stay_available(self):
         with build_client(missing="community_summaries") as client:
             assert (
                 client.post("/v1/search/naive", json={"query": "q"}).status_code == 200
             )
 
-    def test_a_search_without_evidence_answers_409(self):
-        with build_client(missing="vector_index") as client:
-            response = client.post("/v1/search/naive", json={"query": "q"})
+    def test_a_query_without_evidence_names_no_capability(self):
+        # The graph supports the mode; this particular query retrieved nothing.
+        with build_client() as client:
+            response = client.post(
+                "/v1/search/naive", json={"query": "q", "params": {"top_k": 0}}
+            )
         assert response.status_code == 409
         assert response.json()["error"]["missing_capability"] is None
+
+    def test_a_graph_with_nothing_at_all_is_not_ready(self):
+        missing = "community_summaries,entity_graph,vector_index"
+        with build_client(missing=missing) as client:
+            assert client.get("/health/ready").status_code == 503
+            assert (
+                client.post("/v1/search/naive", json={"query": "q"}).status_code == 503
+            )
+
+
+class TestErrorEnvelope:
+    def test_an_unhandled_error_does_not_leak_its_message(self):
+        # Engine and LLM-client errors quote the endpoint URL and parts of the
+        # request; only the log may see them.
+        class ExplodingBackend:
+            graph_loaded = True
+            stats = None
+
+            async def startup(self):
+                pass
+
+            async def shutdown(self):
+                pass
+
+            async def search_naive(self, query, *, use_query_plan, params):
+                raise RuntimeError("https://llm.internal/v1 rejected sk-secret")
+
+        app = create_app(ServiceSettings(backend="stub"), backend=ExplodingBackend())
+        with TestClient(app, raise_server_exceptions=False) as client:
+            body = client.post("/v1/search/naive", json={"query": "q"}).json()
+
+        assert body["error"]["message"] == UNHANDLED_ERROR_MESSAGE
+        assert "sk-secret" not in str(body)
+
+    def test_every_error_shares_one_envelope_shape(self):
+        with build_client(missing="entity_graph") as client:
+            errors = [
+                client.post("/v1/search/local", json={"query": "q"}).json()["error"],
+                client.post("/v1/search/naive", json={"query": ""}).json()["error"],
+            ]
+        for error in errors:
+            assert set(error) == {"code", "mode", "missing_capability", "message"}
 
 
 class TestResponseConversion:
@@ -221,14 +369,20 @@ class TestResponseConversion:
             result=LocalSearchResult(
                 entities=[entity],
                 relations=[relation],
-                summaries=[],
+                summaries=[CommunitySummary(id="com-1", summary="сводка")],
                 chunks=[make_chunk("chunk text")],
             ),
         )
         sources = extract_sources(retrieval)
-        assert [source.type for source in sources] == ["entity", "relation", "chunk"]
+        assert [source.type for source in sources] == [
+            "entity",
+            "relation",
+            "community_summary",
+            "chunk",
+        ]
         assert sources[0].id == entity.id
         assert "Сенкевич" in sources[1].content
+        assert sources[2].content == "сводка"
 
     def test_global_insights_become_community_summaries_with_ratings(self):
         insight = GlobalSearchContextModel(
@@ -244,30 +398,27 @@ class TestResponseConversion:
             8.0,
         )
 
-    def test_global_insights_are_dicts_in_practice(self):
-        # GlobalSearchEngine.batch_search stores `model_dump()` results, not the
-        # models themselves.
-        insight = GlobalSearchContextModel(
-            reasoning="r", response="общий вывод", rating=8.0
-        ).model_dump()
-        retrieval = GlobalSearchRetrieve(
-            query="q", result=GlobalSearchResult(insights=[insight])
-        )
-        sources = extract_sources(retrieval)
-        assert (sources[0].type, sources[0].content, sources[0].score) == (
-            "community_summary",
-            "общий вывод",
-            8.0,
-        )
-
     def test_empty_retrieval_yields_no_sources(self):
         retrieval = NaiveSearchRetrieve(query="q", result=NaiveSearchResult())
         assert extract_sources(retrieval) == []
 
+    def test_an_unmodelled_result_keeps_its_rendered_context(self):
+        class UnknownResult:
+            pass
+
+        class UnknownRetrieve:
+            result = UnknownResult()
+
+            def to_text(self):
+                return "rendered context"
+
+        sources = extract_sources(UnknownRetrieve())
+        assert [(s.id, s.type, s.content) for s in sources] == [
+            ("retrieval_context", "context", "rendered context")
+        ]
+
     def test_query_plan_payload_becomes_subqueries(self):
-        retrieval = NaiveSearchRetrieve(
-            query="sub", result=NaiveSearchResult(chunks=[make_chunk("text")])
-        )
+        retrieval = make_retrieval("text")
         payload = {
             "sq-1": SearchEngineResponse(
                 query="Кто написал?", response="Сенкевич", retrieval=retrieval
@@ -281,28 +432,78 @@ class TestResponseConversion:
             ("Из какой страны?", "Польша"),
         ]
 
-    def test_streaming_payload_shape_is_also_understood(self):
-        retrieval = NaiveSearchRetrieve(query="sub", result=NaiveSearchResult())
-        payload = {
-            "answers": {
-                "sq-1": SearchEngineResponse(
-                    query="Кто написал?", response="Сенкевич", retrieval=retrieval
-                )
-            },
-            "plan": ["ignored"],
-        }
-        assert [item.query for item in extract_subqueries(payload)] == ["Кто написал?"]
+    def test_a_response_without_a_plan_has_no_subqueries(self):
+        answer, sources, subqueries = to_outcome(
+            SearchEngineResponse(
+                query="q", response="ответ", retrieval=make_retrieval("text")
+            ),
+            used_query_plan=False,
+        )
+        assert answer == "ответ"
+        assert subqueries == []
+        assert len(sources) == 1
 
-    def test_response_without_plan_has_no_subqueries(self):
-        retrieval = NaiveSearchRetrieve(
-            query="q", result=NaiveSearchResult(chunks=[make_chunk("text")])
+    def test_a_plan_keeps_the_evidence_of_every_subquery(self):
+        # The plan answers the top-level query from the sink subquery alone, so
+        # without this the evidence behind the other subqueries is dropped even
+        # though their answers are returned.
+        sink_retrieval = make_retrieval("sink evidence")
+        payload = {
+            "sq-1": SearchEngineResponse(
+                query="Кто написал?",
+                response="Сенкевич",
+                retrieval=make_retrieval("branch evidence"),
+            ),
+            "sq-2": SearchEngineResponse(
+                query="Итог?", response="ответ", retrieval=sink_retrieval
+            ),
+        }
+        _, sources, subqueries = to_outcome(
+            SearchEngineResponse(
+                query="q", response="ответ", retrieval=sink_retrieval, payload=payload
+            ),
+            used_query_plan=True,
         )
-        outcome = to_outcome(
-            SearchEngineResponse(query="q", response="ответ", retrieval=retrieval)
+        assert len(subqueries) == 2
+        assert {source.content for source in sources} == {
+            "sink evidence",
+            "branch evidence",
+        }
+
+    def test_sources_shared_between_subqueries_appear_once(self):
+        shared = make_retrieval("shared evidence")
+        payload = {
+            "sq-1": SearchEngineResponse(query="a", response="a", retrieval=shared),
+            "sq-2": SearchEngineResponse(query="b", response="b", retrieval=shared),
+        }
+        _, sources, _ = to_outcome(
+            SearchEngineResponse(
+                query="q", response="ответ", retrieval=shared, payload=payload
+            ),
+            used_query_plan=True,
         )
-        assert outcome.answer == "ответ"
-        assert outcome.subqueries == []
-        assert len(outcome.sources) == 1
+        assert len(sources) == 1
+
+    def test_an_empty_sink_still_reports_the_subquery_evidence(self):
+        # An empty sink retrieval used to make the whole request a 409 even when
+        # the branches had retrieved plenty.
+        payload = {
+            "sq-1": SearchEngineResponse(
+                query="Кто написал?",
+                response="Сенкевич",
+                retrieval=make_retrieval("branch evidence"),
+            )
+        }
+        _, sources, _ = to_outcome(
+            SearchEngineResponse(
+                query="q",
+                response="ответ",
+                retrieval=NaiveSearchRetrieve(query="q", result=NaiveSearchResult()),
+                payload=payload,
+            ),
+            used_query_plan=True,
+        )
+        assert [source.content for source in sources] == ["branch evidence"]
 
 
 class TestEngineInvocation:
@@ -316,6 +517,7 @@ class TestEngineInvocation:
     class FakeEngine:
         def __init__(self):
             self.calls = []
+            self.llm = object()
             self.result = NaiveSearchResult(chunks=[make_chunk("text")], scores=[0.5])
 
         async def query(self, query, params=None):
@@ -325,11 +527,14 @@ class TestEngineInvocation:
                 query=query, response="ответ", retrieval=retrieval
             )
 
-    def build_backend(self):
+    def build_backend(self, **overrides):
         from ragu.api.backends.ragu_backend import RaguBackend
 
-        backend = RaguBackend(ServiceSettings(backend="ragu"))
+        backend = RaguBackend(ServiceSettings(backend="ragu", **overrides))
         backend.graph = object()
+        backend._stats = GraphStats(
+            entities=1, relations=1, chunks=1, community_summaries=1
+        )
         engines = {mode: self.FakeEngine() for mode in ("global", "local", "naive")}
         backend._engines = engines
         return backend, engines
@@ -390,6 +595,40 @@ class TestEngineInvocation:
                 )
         assert failure.value.mode == mode
         assert failure.value.status_code == 409
+        assert failure.value.missing_capability is None
+
+    @pytest.mark.parametrize(
+        "mode, stats, capability",
+        [
+            ("global", GraphStats(entities=1, chunks=1), "community_summaries"),
+            ("local", GraphStats(chunks=1, community_summaries=1), "entity_graph"),
+            ("naive", GraphStats(entities=1, community_summaries=1), "vector_index"),
+        ],
+    )
+    async def test_an_unsupported_mode_is_refused_before_generating(
+        self, mode, stats, capability
+    ):
+        # The whole point of measuring the graph at startup: no generation call
+        # is paid for on a graph that cannot serve the mode.
+        from ragu.api.errors import CapabilityUnavailableError
+
+        backend, engines = self.build_backend()
+        backend._stats = stats
+
+        with pytest.raises(CapabilityUnavailableError) as failure:
+            if mode == "global":
+                await backend.search_global("q", params=GlobalSearchParams())
+            elif mode == "local":
+                await backend.search_local(
+                    "q", use_query_plan=False, params=LocalParams()
+                )
+            else:
+                await backend.search_naive(
+                    "q", use_query_plan=False, params=NaiveSearchParams()
+                )
+
+        assert failure.value.missing_capability == capability
+        assert engines[mode].calls == []
 
     async def test_evidence_is_returned_as_an_answer(self):
         backend, _ = self.build_backend()
@@ -404,8 +643,6 @@ class TestEngineInvocation:
     async def test_query_plan_wraps_the_engine_with_no_extra_arguments(
         self, monkeypatch
     ):
-        import ragu
-
         wrapped = {}
 
         class FakePlanEngine:
@@ -417,7 +654,11 @@ class TestEngineInvocation:
             async def query(self, query, params=None):
                 return await self.engine.query(query, params)
 
-        monkeypatch.setattr(ragu, "QueryPlanEngine", FakePlanEngine)
+        # The backend imports the symbol into its own namespace, so patching
+        # ``ragu.QueryPlanEngine`` would not reach the code under test.
+        monkeypatch.setattr(
+            "ragu.api.backends.ragu_backend.QueryPlanEngine", FakePlanEngine
+        )
         backend, engines = self.build_backend()
 
         await backend.search_naive(
@@ -431,32 +672,45 @@ class TestEngineInvocation:
         assert engines["naive"].calls[0][1].top_k == 3
 
     async def test_engine_construction_failures_report_their_mode(self, monkeypatch):
-        import ragu
-
         from ragu.api.errors import BackendExecutionError
 
         class ExplodingPlanEngine:
             def __init__(self, engine, *args, **kwargs):
                 raise TypeError("unexpected keyword argument")
 
-        monkeypatch.setattr(ragu, "QueryPlanEngine", ExplodingPlanEngine)
+        monkeypatch.setattr(
+            "ragu.api.backends.ragu_backend.QueryPlanEngine", ExplodingPlanEngine
+        )
         backend, _ = self.build_backend()
 
         with pytest.raises(BackendExecutionError) as failure:
             await backend.search_local("q", use_query_plan=True, params=LocalParams())
         assert failure.value.mode == "local"
+        assert failure.value.detail == "unexpected keyword argument"
+        # The exception text belongs in the log, not in the client's message.
+        assert "unexpected keyword argument" not in failure.value.message
 
     async def test_top_k_is_clamped_to_the_service_limit(self):
         # The engine parameter classes carry no bounds and now arrive straight
         # from the request body.
-        backend, engines = self.build_backend()
-        backend.settings.max_top_k = 50
+        backend, engines = self.build_backend(max_top_k=50)
 
         await backend.search_naive(
             "версия", use_query_plan=False, params=NaiveSearchParams(top_k=10_000)
         )
 
         assert engines["naive"].calls[0][1].top_k == 50
+
+    async def test_rerank_top_k_is_clamped_too(self):
+        backend, engines = self.build_backend(max_top_k=50)
+
+        await backend.search_naive(
+            "версия",
+            use_query_plan=False,
+            params=NaiveSearchParams(top_k=10, rerank_top_k=9_000),
+        )
+
+        assert engines["naive"].calls[0][1].rerank_top_k == 50
 
     async def test_params_within_the_limit_are_passed_through_untouched(self):
         backend, engines = self.build_backend()
@@ -467,17 +721,149 @@ class TestEngineInvocation:
         assert engines["naive"].calls[0][1] is params
 
     async def test_global_search_never_reaches_the_planner(self, monkeypatch):
-        import ragu
-
         class ForbiddenPlanEngine:
             def __init__(self, engine, *args, **kwargs):
                 raise AssertionError(
                     "global search must not be wrapped in a query plan"
                 )
 
-        monkeypatch.setattr(ragu, "QueryPlanEngine", ForbiddenPlanEngine)
+        monkeypatch.setattr(
+            "ragu.api.backends.ragu_backend.QueryPlanEngine", ForbiddenPlanEngine
+        )
         backend, engines = self.build_backend()
 
         await backend.search_global("тренды", params=GlobalSearchParams())
 
         assert len(engines["global"].calls) == 1
+
+
+class TestStorageFolderValidation:
+    """A typo in the storage folder must not look like a healthy service."""
+
+    def test_a_missing_folder_is_refused_and_not_created(self, tmp_path):
+        from ragu.api.backends.ragu_backend import RaguBackend
+        from ragu.api.errors import ServiceNotReadyError
+
+        missing = tmp_path / "typo"
+        with pytest.raises(ServiceNotReadyError) as failure:
+            RaguBackend._require_storage_folder(str(missing))
+
+        # Index.__init__ would have created it via Settings.init_storage_folder().
+        assert not missing.exists()
+        assert "does not exist" in failure.value.message
+
+    def test_an_empty_folder_is_refused(self, tmp_path):
+        from ragu.api.backends.ragu_backend import RaguBackend
+        from ragu.api.errors import ServiceNotReadyError
+
+        empty = tmp_path / "empty"
+        empty.mkdir()
+        with pytest.raises(ServiceNotReadyError) as failure:
+            RaguBackend._require_storage_folder(str(empty))
+        assert "is empty" in failure.value.message
+
+    def test_a_populated_folder_is_accepted(self, tmp_path):
+        from ragu.api.backends.ragu_backend import RaguBackend
+
+        populated = tmp_path / "graph"
+        populated.mkdir()
+        (populated / "knowledge_graph.gml").write_text("graph [ ]", encoding="utf-8")
+        RaguBackend._require_storage_folder(str(populated))
+
+
+class TestShutdown:
+    async def test_shutdown_closes_the_index_and_the_model_clients(self):
+        from ragu.api.backends.ragu_backend import RaguBackend
+
+        closed = []
+
+        class FakeIndex:
+            async def close(self):
+                closed.append("index")
+
+        class FakeGraph:
+            index = FakeIndex()
+
+        class FakeHTTPClient:
+            async def close(self):
+                closed.append("client")
+
+        class FakeClient:
+            client = FakeHTTPClient()
+
+        backend = RaguBackend(ServiceSettings(backend="ragu"))
+        backend.graph = FakeGraph()
+        backend._stats = GraphStats(entities=1)
+        backend._clients = [FakeClient()]
+
+        await backend.shutdown()
+
+        assert closed == ["index", "client"]
+        assert backend.graph_loaded is False
+
+
+class TestLogging:
+    """The service logs through loguru, like the rest of RAGU."""
+
+    def test_the_api_package_does_not_use_stdlib_logging(self):
+        import pathlib
+
+        import ragu.api
+
+        package = pathlib.Path(ragu.api.__file__).parent
+        offenders = [
+            path.name
+            for path in package.rglob("*.py")
+            # logging_setup.py is the bridge itself; it must import logging.
+            if path.name != "logging_setup.py"
+            and "logging.getLogger" in path.read_text(encoding="utf-8")
+        ]
+        assert offenders == []
+
+    def test_stdlib_records_are_re_emitted_through_loguru(self):
+        import logging
+
+        from ragu.api.logging_setup import InterceptHandler
+        from ragu.common.logger import logger
+
+        captured = []
+        sink_id = logger.add(lambda message: captured.append(message), level="DEBUG")
+        try:
+            record = logging.LogRecord(
+                name="uvicorn.error",
+                level=logging.WARNING,
+                pathname=__file__,
+                lineno=1,
+                msg="listening on %s",
+                args=("127.0.0.1:8020",),
+                exc_info=None,
+            )
+            InterceptHandler().emit(record)
+        finally:
+            logger.remove(sink_id)
+
+        assert len(captured) == 1
+        assert "listening on 127.0.0.1:8020" in captured[0]
+        assert captured[0].record["level"].name == "WARNING"
+
+    def test_set_level_replaces_the_sink(self):
+        from ragu.common.logger import DEFAULT_LEVEL, set_level
+
+        try:
+            set_level("debug")
+            with pytest.raises(ValueError):
+                set_level("not-a-level")
+        finally:
+            set_level(DEFAULT_LEVEL)
+
+    def test_set_level_survives_a_bare_logger_remove(self):
+        # logger.remove() with no argument is the usual way to reconfigure
+        # loguru, and it invalidates the sink id set_level tracks.
+        from ragu.common.logger import DEFAULT_LEVEL, logger, set_level
+
+        try:
+            logger.remove()
+            set_level("warning")
+            assert logger._core.handlers
+        finally:
+            set_level(DEFAULT_LEVEL)

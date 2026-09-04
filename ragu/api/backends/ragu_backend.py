@@ -2,37 +2,33 @@
 Adapter over the RAGU engines.
 """
 
-import logging
-from collections.abc import Mapping
-from dataclasses import replace
+import asyncio
+import os
 from typing import Any
 
-from ragu.api.backends.base import (
-    GLOBAL_UNAVAILABLE_MESSAGE,
-    LOCAL_UNAVAILABLE_MESSAGE,
-    NAIVE_UNAVAILABLE_MESSAGE,
-    SearchBackend,
-    SearchOutcome,
+from ragu import (
+    CachedAsyncOpenAI,
+    EmbedderOpenAI,
+    Env,
+    GlobalSearchEngine,
+    KnowledgeGraph,
+    LLMOpenAI,
+    LocalSearchEngine,
+    NaiveSearchEngine,
+    Settings,
 )
+from ragu.api.backends.base import GraphStats, SearchBackend, SearchOutcome
 from ragu.api.config import ServiceSettings
-from ragu.api.errors import (
-    BackendExecutionError,
-    CapabilityUnavailableError,
-    ServiceNotReadyError,
-)
-from ragu.api.models import SourceItem, SubqueryItem
+from ragu.api.errors import BackendExecutionError, ServiceNotReadyError
+from ragu.api.mapping import to_outcome
+from ragu.api.models import SearchMode
+from ragu.common.logger import logger
+from ragu.search_engine.base_engine import BaseEngine
 from ragu.search_engine.global_search import GlobalSearchParams
 from ragu.search_engine.local_search import LocalParams
 from ragu.search_engine.naive_search import NaiveSearchParams
 from ragu.search_engine.query_plan import QueryPlanEngine
 
-logger = logging.getLogger(__name__)
-
-_NO_EVIDENCE = {
-    "global": (GLOBAL_UNAVAILABLE_MESSAGE, "community_summaries"),
-    "local": (LOCAL_UNAVAILABLE_MESSAGE, "entity_graph"),
-    "naive": (NAIVE_UNAVAILABLE_MESSAGE, None),
-}
 
 class RaguBackend(SearchBackend):
     """
@@ -40,33 +36,22 @@ class RaguBackend(SearchBackend):
     """
 
     def __init__(self, settings: ServiceSettings):
-        self.settings = settings
-        self.graph: Any = None
-        self._engines: dict[str, Any] = {}
-
-    @property
-    def graph_loaded(self) -> bool:
-        return self.graph is not None
+        super().__init__(settings)
+        self.graph: KnowledgeGraph | None = None
+        self._engines: dict[SearchMode, BaseEngine[Any, Any]] = {}
+        self._clients: list[CachedAsyncOpenAI] = []
 
     async def startup(self) -> None:
-        try:
-            from ragu import (
-                GlobalSearchEngine,
-                KnowledgeGraph,
-                LocalSearchEngine,
-                NaiveSearchEngine,
-                Settings,
-            )
-            from ragu.common.env import Env
-            from ragu.models.embedder import EmbedderOpenAI
-            from ragu.models.llm import LLMOpenAI
-            from ragu.models.openai import CachedAsyncOpenAI
-        except ImportError as exc:  # pragma: no cover - depends on the deployment env
-            raise ServiceNotReadyError(
-                "The 'ragu' package is not importable. Install it or run the service with RAGU_API_BACKEND=stub."
-            ) from exc
+        """
+        Load the graph and build one engine per search mode.
 
+        :raises ServiceNotReadyError: If credentials, the embedder endpoint or
+            the storage folder make the graph unusable.
+        """
         settings = self.settings
+
+        self._require_storage_folder(settings.storage_folder)
+
         if settings.settings_file:
             Settings.load(settings.settings_file)
         Settings.storage_folder = settings.storage_folder
@@ -87,14 +72,15 @@ class RaguBackend(SearchBackend):
             rate_max_simultaneous=settings.rate_max_simultaneous,
             cache=settings.llm_cache,
         )
-        embedder_client = (
-            llm_client
-            if not env.embedder_base_url
-            else CachedAsyncOpenAI(
+        self._clients.append(llm_client)
+
+        embedder_client = llm_client
+        if env.embedder_base_url:
+            embedder_client = CachedAsyncOpenAI(
                 base_url=env.embedder_base_url,
                 api_key=env.embedder_api_key or env.llm_api_key,
             )
-        )
+            self._clients.append(embedder_client)
 
         llm = LLMOpenAI(client=llm_client, model_name=env.llm_model_name)
         embedder = EmbedderOpenAI(
@@ -113,8 +99,14 @@ class RaguBackend(SearchBackend):
                 ) from exc
 
         try:
-            graph = KnowledgeGraph(
-                llm=llm, embedder=embedder, language=settings.language
+            # Constructing the graph opens every storage and reads the whole
+            # graph file, which takes minutes on a large corpus. Off the event
+            # loop, so /health keeps answering while it happens.
+            graph = await asyncio.to_thread(
+                KnowledgeGraph,
+                llm=llm,
+                embedder=embedder,
+                language=settings.language,
             )
         except Exception as exc:
             raise ServiceNotReadyError(
@@ -139,231 +131,156 @@ class RaguBackend(SearchBackend):
                 language=settings.language,
             ),
         }
+        self._stats = await self._measure(graph)
+
+        if self._stats.is_empty:
+            raise ServiceNotReadyError(
+                f"The graph at '{settings.storage_folder}' is empty: no entities, chunks or "
+                "community summaries. Point RAGU_API_STORAGE_FOLDER at a built graph."
+            )
+
         logger.info(
-            f"Graph loaded from '{settings.storage_folder}' (language={settings.language})"
+            "Graph loaded from '{}' (language={}): {}",
+            settings.storage_folder,
+            settings.language,
+            self._stats,
+        )
+
+    async def shutdown(self) -> None:
+        """
+        Close the graph storages and the model clients.
+
+        File-backed storages do nothing here, but server-backed ones (Neo4j,
+        remote Qdrant) and the HTTP pool behind every model client stay open
+        until closed.
+        """
+        if self.graph is not None:
+            try:
+                await self.graph.index.close()
+            except Exception:
+                logger.exception("Failed to close the graph index")
+        for client in self._clients:
+            try:
+                await client.client.close()
+            except Exception:
+                logger.exception("Failed to close a model client")
+        self._clients.clear()
+        self.graph = None
+        self._stats = None
+
+    @staticmethod
+    def _require_storage_folder(storage_folder: str) -> None:
+        """
+        Reject a storage folder that holds no graph.
+
+        ``Index.__init__`` calls ``Settings.init_storage_folder()``, which
+        *creates* the folder when it is missing. Without this check a typo in
+        ``RAGU_API_STORAGE_FOLDER`` produces an empty directory and a backend
+        that looks healthy while every search comes back empty.
+
+        :param storage_folder: Folder the service was pointed at.
+        :raises ServiceNotReadyError: If it is missing, not a directory, or empty.
+        """
+        if not os.path.isdir(storage_folder):
+            raise ServiceNotReadyError(
+                f"Storage folder '{storage_folder}' does not exist. Set "
+                "RAGU_API_STORAGE_FOLDER to the folder a build run produced; the service "
+                "serves a prebuilt graph and never builds one."
+            )
+        if not os.listdir(storage_folder):
+            raise ServiceNotReadyError(
+                f"Storage folder '{storage_folder}' is empty. Set RAGU_API_STORAGE_FOLDER "
+                "to the folder a build run produced."
+            )
+
+    @staticmethod
+    async def _measure(graph: KnowledgeGraph) -> GraphStats:
+        """
+        Count what each search mode has to read.
+
+        Vector-store ids are used rather than materialized entities: the counts
+        only decide which modes can run, and listing ids stays cheap on a large
+        graph.
+
+        :param graph: The loaded graph.
+        :return: Sizes of the stores behind the three search modes.
+        """
+        index = graph.index
+        entities, relations, chunks, summaries = await asyncio.gather(
+            index.nodes_vector_db.get_all_ids(),
+            index.edges_vector_db.get_all_ids(),
+            index.chunks_kv_storage.all_keys(),
+            index.community_summary_kv_storage.all_keys(),
+        )
+        return GraphStats(
+            entities=len(entities),
+            relations=len(relations),
+            chunks=len(chunks),
+            community_summaries=len(summaries),
         )
 
     async def _query(
-        self, mode: str, 
-        query: str, 
-        params: Any, 
-        *, 
-        use_query_plan: bool
+        self,
+        mode: SearchMode,
+        query: str,
+        params: Any,
+        *,
+        use_query_plan: bool,
     ) -> SearchOutcome:
+        """
+        Run one search and normalize the engine response.
+
+        :param mode: Search mode to run.
+        :param query: Client query.
+        :param params: Engine parameters, already clamped.
+        :param use_query_plan: Whether to decompose the query first.
+        :return: Normalized outcome.
+        :raises ServiceNotReadyError: If the graph is not loaded.
+        :raises CapabilityUnavailableError: If the graph cannot serve this mode,
+            or this query retrieved nothing.
+        :raises BackendExecutionError: If the engine itself failed.
+        """
         if not self.graph_loaded:
             raise ServiceNotReadyError("Knowledge graph is not loaded yet.", mode=mode)
-        engine = self._engines[mode]
+
+        # Refuse before generating: the engines answer confidently from an empty
+        # context, and a generation call on a graph that cannot serve the mode
+        # is paid for and then discarded.
+        self.require_capability(mode)
+
+        engine: BaseEngine[Any, Any] = self._engines[mode]
         try:
             if use_query_plan:
                 engine = QueryPlanEngine(engine)
             response = await engine.query(query, params)
         except Exception as exc:
-            logger.exception(f"RAGU {mode} search failed")
-            raise BackendExecutionError(
-                f"{mode} search failed: {exc}", mode=mode
-            ) from exc
+            logger.exception("RAGU {} search failed", mode)
+            raise BackendExecutionError(mode=mode, detail=str(exc)) from exc
 
-        outcome = to_outcome(response)
-        if not outcome.sources:
-            # TODO: when the builder records graph metadata (entity/chunk counts,
-            # make_community_summary), read it at startup and refuse an
-            # unsupported mode before spending a generation call on it.
-            raise CapabilityUnavailableError(
-                _NO_EVIDENCE[mode][0],
-                mode=mode,
-                missing_capability=_NO_EVIDENCE[mode][1],
-            )
-        return outcome
-
-    def _capped(self, params: Any) -> Any:
-        """
-        Clamp client-supplied ``top_k`` to what this service will serve.
-
-        The engine parameter classes are plain dataclasses with no bounds, and
-        they now arrive straight from the request body, so an unbounded
-        ``top_k`` would otherwise reach the retriever.
-        """
-        top_k = getattr(params, "top_k", None)
-        if isinstance(top_k, int) and top_k > self.settings.max_top_k:
-            logger.info(f"Clamping top_k {top_k} to {self.settings.max_top_k}")
-            return replace(params, top_k=self.settings.max_top_k)
-        return params
+        answer, sources, subqueries = to_outcome(
+            response, used_query_plan=use_query_plan
+        )
+        if not sources:
+            raise self.no_evidence(mode)
+        return SearchOutcome(answer=answer, sources=sources, subqueries=subqueries)
 
     async def search_global(
-        self, 
-        query: str,
-        *, 
-        params: GlobalSearchParams
-    ) -> SearchOutcome:
-        return await self._query("global", query, params, use_query_plan=False)
-
-    async def search_local(
-        self, 
-        query: str, 
-        *, 
-        use_query_plan: bool, 
-        params: LocalParams
+        self, query: str, *, params: GlobalSearchParams
     ) -> SearchOutcome:
         return await self._query(
-            "local", query, self._capped(params), use_query_plan=use_query_plan
+            "global", query, self.bound_params(params), use_query_plan=False
+        )
+
+    async def search_local(
+        self, query: str, *, use_query_plan: bool, params: LocalParams
+    ) -> SearchOutcome:
+        return await self._query(
+            "local", query, self.bound_params(params), use_query_plan=use_query_plan
         )
 
     async def search_naive(
-        self, 
-        query: str, 
-        *, 
-        use_query_plan: bool, 
-        params: NaiveSearchParams
+        self, query: str, *, use_query_plan: bool, params: NaiveSearchParams
     ) -> SearchOutcome:
         return await self._query(
-            "naive", query, self._capped(params), use_query_plan=use_query_plan
+            "naive", query, self.bound_params(params), use_query_plan=use_query_plan
         )
-
-def _field(item: Any, name: str, default: Any = None) -> Any:
-    """
-    Read a field from an engine result item, dict or object alike.
-    """
-    if isinstance(item, Mapping):
-        return item.get(name, default)
-    return getattr(item, name, default)
-
-
-_KNOWN_RESULT_FIELDS = ("insights", "entities", "relations", "summaries", "chunks")
-
-
-def _sources_from_result(result: Any) -> list[SourceItem]:
-    """
-    Flatten an engine-specific retrieval result into flat sources.
-
-    Handles the three result types the engines return today
-    (``LocalSearchResult``, ``NaiveSearchResult``, ``GlobalSearchResult``) and
-    leaves anything else to the caller's fallback.
-    """
-    sources: list[SourceItem] = []
-
-    for index, insight in enumerate(getattr(result, "insights", []) or [], start=1):
-        sources.append(
-            SourceItem(
-                id=f"insight_{index}",
-                type="community_summary",
-                content=str(_field(insight, "response", "")),
-                score=_as_score(_field(insight, "rating")),
-            )
-        )
-
-    for entity in getattr(result, "entities", []) or []:
-        sources.append(
-            SourceItem(
-                id=str(getattr(entity, "id", ""))
-                or str(getattr(entity, "entity_name", "entity")),
-                type="entity",
-                content=f"{getattr(entity, 'entity_name', '')} — {getattr(entity, 'description', '')}".strip(
-                    " —"
-                ),
-            )
-        )
-
-    for relation in getattr(result, "relations", []) or []:
-        sources.append(
-            SourceItem(
-                id=str(getattr(relation, "id", "")) or "relation",
-                type="relation",
-                content=(
-                    f"{getattr(relation, 'subject_name', '')} "
-                    f"{getattr(relation, 'relation_type', '')} "
-                    f"{getattr(relation, 'object_name', '')}: {getattr(relation, 'description', '')}"
-                ).strip(),
-            )
-        )
-
-    for index, summary in enumerate(getattr(result, "summaries", []) or [], start=1):
-        sources.append(
-            SourceItem(
-                id=str(_field(summary, "id", "")) or f"summary_{index}",
-                type="community_summary",
-                content=str(_field(summary, "summary", summary)),
-            )
-        )
-
-    scores = list(getattr(result, "scores", []) or [])
-    for index, chunk in enumerate(getattr(result, "chunks", []) or []):
-        sources.append(
-            SourceItem(
-                id=str(getattr(chunk, "id", "")) or f"chunk_{index + 1}",
-                type="chunk",
-                content=str(getattr(chunk, "content", chunk)),
-                score=_as_score(scores[index]) if index < len(scores) else None,
-            )
-        )
-
-    return sources
-
-
-def _as_score(value: Any) -> float | None:
-    return (
-        float(value)
-        if isinstance(value, (int, float)) and not isinstance(value, bool)
-        else None
-    )
-
-
-def extract_sources(retrieval: Any) -> list[SourceItem]:
-    """Convert a ``SearchEngineRetrieve`` into flat sources."""
-    if retrieval is None:
-        return []
-
-    result = getattr(retrieval, "result", None)
-    if any(hasattr(result, field) for field in _KNOWN_RESULT_FIELDS):
-        return _sources_from_result(result)
-
-    # Unknown result type (a new engine, or GST): keep the rendered context as
-    # one source rather than dropping the evidence.
-    to_text = getattr(retrieval, "to_text", None)
-    text = to_text() if callable(to_text) else None
-    if text and text.strip():
-        return [SourceItem(id="retrieval_context", type="context", content=str(text))]
-    return []
-
-
-def extract_subqueries(payload: Any) -> list[SubqueryItem]:
-    """
-    Pull the query plan's intermediate answers out of the payload.
-
-    ``QueryPlanEngine.batch_query`` sets ``payload`` to ``{subquery_id:
-    SearchEngineResponse}``; the streaming path nests the same mapping under
-    ``answers``.
-    """
-    if not isinstance(payload, dict):
-        return []
-
-    answers = (
-        payload.get("answers") if isinstance(payload.get("answers"), dict) else payload
-    )
-
-    subqueries = []
-    for item in answers.values():
-        query = getattr(item, "query", None)
-        if not query:
-            continue
-        subqueries.append(
-            SubqueryItem(
-                query=str(query), answer=_response_text(getattr(item, "response", ""))
-            )
-        )
-    return subqueries
-
-
-def _response_text(response: Any) -> str:
-    """Engines may answer with a pydantic model instead of a string."""
-    if response is None:
-        return ""
-    dump = getattr(response, "model_dump_json", None)
-    return dump() if callable(dump) else str(response)
-
-
-def to_outcome(response: Any) -> SearchOutcome:
-    return SearchOutcome(
-        answer=_response_text(getattr(response, "response", "")),
-        sources=extract_sources(getattr(response, "retrieval", None)),
-        subqueries=extract_subqueries(getattr(response, "payload", None)),
-    )
