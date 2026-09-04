@@ -10,7 +10,7 @@ This file covers what is specific to running and extending the package:
 deployment, and how the code is put together.
 
 ```bash
-RAGU_API_BACKEND=stub python -m ragu.api --port 8020   # no graph, no LLM
+python -m ragu.api --port 8020 --backend stub   # no graph, no LLM
 pytest tests/api                                       # needs the `api` extra
 ```
 

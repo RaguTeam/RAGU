@@ -32,19 +32,17 @@
 Установка с extra `api`:
 
 ```bash
-uv pip install -e ".[api]"
+pip install -e ".[api]"
 ```
 
 ## Запуск
 
 ```bash
 # Заготовленные ответы, без графа и без LLM — для разработки клиентов
-RAGU_API_BACKEND=stub python -m ragu.api --port 8020
+python -m ragu.api --backend stub
 
 # Реальный граф
-RAGU_API_STORAGE_FOLDER=./ragu_working_dir \
-RAGU_API_LANGUAGE=russian \
-python -m ragu.api --port 8020
+python -m ragu.api --backend ragu --storage-folder ragu_working_dir
 ```
 
 `--host`, `--port`, `--backend` и `--storage-folder` переопределяют

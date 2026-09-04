@@ -33,19 +33,17 @@ each.
 Install it with the `api` extra:
 
 ```bash
-uv pip install -e ".[api]"
+pip install -e ".[api]"
 ```
 
 ## Running the service
 
 ```bash
 # Canned answers, no graph and no LLM required — for developing clients
-RAGU_API_BACKEND=stub python -m ragu.api --port 8020
+python -m ragu.api --backend stub
 
 # Real graph
-RAGU_API_STORAGE_FOLDER=./ragu_working_dir \
-RAGU_API_LANGUAGE=russian \
-python -m ragu.api --port 8020
+python -m ragu.api --backend ragu --storage-folder ragu_working_dir
 ```
 
 `--host`, `--port`, `--backend` and `--storage-folder` override the
