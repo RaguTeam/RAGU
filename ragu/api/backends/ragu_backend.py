@@ -14,6 +14,7 @@ from ragu import (
     KnowledgeGraph,
     LLMOpenAI,
     LocalSearchEngine,
+    MixSearchEngine,
     NaiveSearchEngine,
     Settings,
 )
@@ -21,13 +22,61 @@ from ragu.api.backends.base import GraphStats, SearchBackend, SearchOutcome
 from ragu.api.config import ServiceSettings
 from ragu.api.errors import BackendExecutionError, ServiceNotReadyError
 from ragu.api.mapping import to_outcome
-from ragu.api.models import SearchMode
+from ragu.api.models import ChildEngineReport, EngineReport, SearchMode
 from ragu.common.logger import logger
+from ragu.models.llm import LLM
 from ragu.search_engine.base_engine import BaseEngine
 from ragu.search_engine.global_search import GlobalSearchParams
 from ragu.search_engine.local_search import LocalParams
+from ragu.search_engine.mix_search import MixQueryParams
 from ragu.search_engine.naive_search import NaiveSearchParams
 from ragu.search_engine.query_plan import QueryPlanEngine
+
+
+class RecordingEngine:
+    """
+    Child-engine proxy that remembers whether the child actually contributed.
+
+    ``MixSearchEngine`` is constructed with ``allow_partial_failures=True``: a
+    child that raises is logged and dropped from the ensemble, so from the
+    outside "graph and chunks" is indistinguishable from "chunks only". This
+    records the failure on the way past, before the ensemble swallows it.
+    """
+
+    def __init__(self, engine: BaseEngine[Any, Any], mode: SearchMode):
+        self.engine = engine
+        self.mode = mode
+        self.error: str | None = None
+        self.called = False
+
+    @property
+    def llm(self) -> LLM:
+        return self.engine.llm
+
+    async def batch_search(self, queries: list[str], params: Any = None) -> Any:
+        return await self._record(self.engine.batch_search, queries, params)
+
+    async def batch_query(self, queries: list[str], params: Any = None) -> Any:
+        return await self._record(self.engine.batch_query, queries, params)
+
+    async def _record(self, call: Any, queries: list[str], params: Any) -> Any:
+        self.called = True
+        try:
+            return await call(queries, params)
+        except Exception as exc:
+            self.error = f"{type(exc).__name__}: {exc}"
+            raise
+
+    def report(self) -> ChildEngineReport:
+        """
+        Describe what this child did, for the response's engine report.
+        """
+        return ChildEngineReport(
+            engine=type(self.engine).__name__,
+            mode=self.mode,
+            ok=self.called and self.error is None,
+            error=self.error,
+        )
 
 
 class RaguBackend(SearchBackend):
@@ -40,6 +89,7 @@ class RaguBackend(SearchBackend):
         self.graph: KnowledgeGraph | None = None
         self._engines: dict[SearchMode, BaseEngine[Any, Any]] = {}
         self._clients: list[CachedAsyncOpenAI] = []
+        self._llm: LLM | None = None
 
     async def startup(self) -> None:
         """
@@ -114,6 +164,7 @@ class RaguBackend(SearchBackend):
             ) from exc
 
         self.graph = graph
+        self._llm = llm
         self._engines = {
             "global": GlobalSearchEngine(
                 llm=llm, knowledge_graph=graph, language=settings.language
@@ -166,6 +217,8 @@ class RaguBackend(SearchBackend):
                 logger.exception("Failed to close a model client")
         self._clients.clear()
         self.graph = None
+        self._llm = None
+        self._engines = {}
         self._stats = None
 
     @staticmethod
@@ -222,33 +275,28 @@ class RaguBackend(SearchBackend):
     async def _query(
         self,
         mode: SearchMode,
+        engine: BaseEngine[Any, Any],
         query: str,
         params: Any,
         *,
         use_query_plan: bool,
+        children: tuple[RecordingEngine, ...] = (),
     ) -> SearchOutcome:
         """
         Run one search and normalize the engine response.
 
         :param mode: Search mode to run.
+        :param engine: Engine that answers the query.
         :param query: Client query.
         :param params: Engine parameters, already clamped.
         :param use_query_plan: Whether to decompose the query first.
+        :param children: Recording proxies of an ensemble's child engines, so
+            the response can report which of them contributed.
         :return: Normalized outcome.
-        :raises ServiceNotReadyError: If the graph is not loaded.
-        :raises CapabilityUnavailableError: If the graph cannot serve this mode,
-            or this query retrieved nothing.
+        :raises CapabilityUnavailableError: If this query retrieved nothing.
         :raises BackendExecutionError: If the engine itself failed.
         """
-        if not self.graph_loaded:
-            raise ServiceNotReadyError("Knowledge graph is not loaded yet.", mode=mode)
-
-        # Refuse before generating: the engines answer confidently from an empty
-        # context, and a generation call on a graph that cannot serve the mode
-        # is paid for and then discarded.
-        self.require_capability(mode)
-
-        engine: BaseEngine[Any, Any] = self._engines[mode]
+        engine_name = type(engine).__name__
         try:
             if use_query_plan:
                 engine = QueryPlanEngine(engine)
@@ -260,27 +308,114 @@ class RaguBackend(SearchBackend):
         answer, sources, subqueries = to_outcome(
             response, used_query_plan=use_query_plan
         )
+        reports = [child.report() for child in children]
         if not sources:
             raise self.no_evidence(mode)
-        return SearchOutcome(answer=answer, sources=sources, subqueries=subqueries)
+        return SearchOutcome(
+            answer=answer,
+            sources=sources,
+            subqueries=subqueries,
+            engines=EngineReport(
+                requested=mode,
+                used=engine_name,
+                query_plan=use_query_plan,
+                degraded=any(not report.ok for report in reports),
+                children=reports,
+            ),
+        )
+
+    def _ready(self, mode: SearchMode) -> BaseEngine[Any, Any]:
+        """
+        Resolve the engine for a mode, refusing what this graph cannot serve.
+
+        The capability check runs before generation: the engines answer
+        confidently from an empty context, so a graph that cannot serve the mode
+        would otherwise be paid for and then discarded.
+
+        :param mode: Search mode about to run.
+        :return: The cached engine for that mode.
+        :raises ServiceNotReadyError: If the graph is not loaded.
+        :raises CapabilityUnavailableError: If the graph cannot serve the mode.
+        """
+        if not self.graph_loaded:
+            raise ServiceNotReadyError("Knowledge graph is not loaded yet.", mode=mode)
+        self.require_capability(mode)
+        return self._engines[mode]
 
     async def search_global(
         self, query: str, *, params: GlobalSearchParams
     ) -> SearchOutcome:
+        engine = self._ready("global")
         return await self._query(
-            "global", query, self.bound_params(params), use_query_plan=False
+            "global", engine, query, self.bound_params(params), use_query_plan=False
         )
 
     async def search_local(
         self, query: str, *, use_query_plan: bool, params: LocalParams
     ) -> SearchOutcome:
+        engine = self._ready("local")
         return await self._query(
-            "local", query, self.bound_params(params), use_query_plan=use_query_plan
+            "local",
+            engine,
+            query,
+            self.bound_params(params),
+            use_query_plan=use_query_plan,
         )
 
     async def search_naive(
         self, query: str, *, use_query_plan: bool, params: NaiveSearchParams
     ) -> SearchOutcome:
+        engine = self._ready("naive")
         return await self._query(
-            "naive", query, self.bound_params(params), use_query_plan=use_query_plan
+            "naive",
+            engine,
+            query,
+            self.bound_params(params),
+            use_query_plan=use_query_plan,
         )
+
+    async def search_mix(
+        self,
+        query: str,
+        *,
+        use_query_plan: bool,
+        params: MixQueryParams,
+        local_params: LocalParams,
+        naive_params: NaiveSearchParams,
+    ) -> SearchOutcome:
+        # MixSearchEngine reads its children's parameters from the constructor —
+        # batch_search ignores the params argument entirely and batch_query reads
+        # only ensemble_responses from it — so the ensemble is assembled per
+        # request around the cached child engines rather than cached itself.
+        children = (
+            RecordingEngine(self._ready("local"), "local"),
+            RecordingEngine(self._ready("naive"), "naive"),
+        )
+        self.require_capability("mix")
+        engine = MixSearchEngine(
+            llm=self._require_llm(),
+            engines=list(children),
+            engine_params=[
+                self.bound_params(local_params),
+                self.bound_params(naive_params),
+            ],
+            language=self.settings.language,
+        )
+        return await self._query(
+            "mix",
+            engine,
+            query,
+            params,
+            use_query_plan=use_query_plan,
+            children=children,
+        )
+
+    def _require_llm(self) -> LLM:
+        """
+        Return the LLM built at startup.
+
+        :raises ServiceNotReadyError: If the backend has not started.
+        """
+        if self._llm is None:
+            raise ServiceNotReadyError("Knowledge graph is not loaded yet.", mode="mix")
+        return self._llm

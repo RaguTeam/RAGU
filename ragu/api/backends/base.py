@@ -10,6 +10,7 @@ from ragu.api.config import ServiceSettings
 from ragu.api.errors import CapabilityUnavailableError
 from ragu.api.models import (
     Capability,
+    EngineReport,
     GraphStatsResponse,
     SearchMode,
     SourceItem,
@@ -17,6 +18,7 @@ from ragu.api.models import (
 )
 from ragu.search_engine.global_search import GlobalSearchParams
 from ragu.search_engine.local_search import LocalParams
+from ragu.search_engine.mix_search import MixQueryParams
 from ragu.search_engine.naive_search import NaiveSearchParams
 
 # The graph has no store this mode can read at all.
@@ -47,39 +49,53 @@ NAIVE_UNAVAILABLE_MESSAGE = (
     "graph carries no chunk index."
 )
 
+MIX_MISSING_MESSAGE = (
+    "Mixed search ensembles the local and naive engines, so it needs both an entity index "
+    "and a chunk index. Use whichever single mode this graph supports."
+)
+MIX_UNAVAILABLE_MESSAGE = (
+    "Mixed search found nothing for this query in either the entity index or the chunk "
+    "index."
+)
+
 
 @dataclass(frozen=True, slots=True)
 class ModeRequirement:
     """
     What one search mode needs from the graph, and what to say when it is absent.
 
-    :param capability: Name reported as ``missing_capability`` when the store
-        this mode reads is empty.
+    :param requires: Capabilities the mode needs, all of them. The first one
+        the graph lacks is reported as ``missing_capability``.
     :param missing_message: Explanation when the graph cannot serve the mode.
     :param no_evidence_message: Explanation when the graph can serve the mode
         but this query retrieved nothing.
     """
 
-    capability: Capability
+    requires: tuple[Capability, ...]
     missing_message: str
     no_evidence_message: str
 
 
 MODE_REQUIREMENTS: dict[SearchMode, ModeRequirement] = {
     "global": ModeRequirement(
-        capability="community_summaries",
+        requires=("community_summaries",),
         missing_message=GLOBAL_MISSING_MESSAGE,
         no_evidence_message=GLOBAL_UNAVAILABLE_MESSAGE,
     ),
     "local": ModeRequirement(
-        capability="entity_graph",
+        requires=("entity_graph",),
         missing_message=LOCAL_MISSING_MESSAGE,
         no_evidence_message=LOCAL_UNAVAILABLE_MESSAGE,
     ),
     "naive": ModeRequirement(
-        capability="vector_index",
+        requires=("vector_index",),
         missing_message=NAIVE_MISSING_MESSAGE,
         no_evidence_message=NAIVE_UNAVAILABLE_MESSAGE,
+    ),
+    "mix": ModeRequirement(
+        requires=("entity_graph", "vector_index"),
+        missing_message=MIX_MISSING_MESSAGE,
+        no_evidence_message=MIX_UNAVAILABLE_MESSAGE,
     ),
 }
 
@@ -107,18 +123,39 @@ class GraphStats:
         """
         return not (self.entities or self.chunks or self.community_summaries)
 
+    def has(self, capability: Capability) -> bool:
+        """
+        Whether the store behind one capability holds anything.
+
+        :param capability: Capability to check.
+        :return: ``True`` when the store is non-empty.
+        """
+        if capability == "community_summaries":
+            return self.community_summaries > 0
+        if capability == "entity_graph":
+            return self.entities > 0
+        return self.chunks > 0
+
     def supports(self, mode: SearchMode) -> bool:
         """
-        Whether the store this mode reads holds anything.
+        Whether the graph holds everything this mode reads.
 
         :param mode: Search mode to check.
         :return: ``True`` when the mode can be served.
         """
-        if mode == "global":
-            return self.community_summaries > 0
-        if mode == "local":
-            return self.entities > 0
-        return self.chunks > 0
+        return self.missing_for(mode) is None
+
+    def missing_for(self, mode: SearchMode) -> Capability | None:
+        """
+        The first capability this mode needs and the graph does not have.
+
+        :param mode: Search mode to check.
+        :return: The missing capability, or ``None`` when the mode is supported.
+        """
+        for capability in MODE_REQUIREMENTS[mode].requires:
+            if not self.has(capability):
+                return capability
+        return None
 
     def to_response(self) -> GraphStatsResponse:
         """
@@ -141,6 +178,7 @@ class SearchOutcome:
     answer: str
     sources: list[SourceItem] = field(default_factory=list)
     subqueries: list[SubqueryItem] = field(default_factory=list)
+    engines: EngineReport | None = None
 
 
 class SearchBackend(ABC):
@@ -219,13 +257,15 @@ class SearchBackend(ABC):
         :raises CapabilityUnavailableError: If the store this mode reads is empty.
         """
         stats = self._stats
-        if stats is None or stats.supports(mode):
+        if stats is None:
             return
-        requirement = MODE_REQUIREMENTS[mode]
+        missing = stats.missing_for(mode)
+        if missing is None:
+            return
         raise CapabilityUnavailableError(
-            requirement.missing_message,
+            MODE_REQUIREMENTS[mode].missing_message,
             mode=mode,
-            missing_capability=requirement.capability,
+            missing_capability=missing,
         )
 
     @staticmethod
@@ -258,4 +298,15 @@ class SearchBackend(ABC):
     @abstractmethod
     async def search_naive(
         self, query: str, *, use_query_plan: bool, params: NaiveSearchParams
+    ) -> SearchOutcome: ...
+
+    @abstractmethod
+    async def search_mix(
+        self,
+        query: str,
+        *,
+        use_query_plan: bool,
+        params: MixQueryParams,
+        local_params: LocalParams,
+        naive_params: NaiveSearchParams,
     ) -> SearchOutcome: ...

@@ -7,14 +7,17 @@ any change in the service (see the spec, "Per-route policy").
 
 from fastapi import APIRouter, Depends, Request, Response
 
-from ragu.api.backends.base import SearchBackend
+from ragu.api.backends.base import SearchBackend, SearchOutcome
 from ragu.api.errors import RETRY_AFTER_SECONDS, ServiceNotReadyError
 from ragu.api.models import (
+    EngineReport,
     ErrorResponse,
     GlobalSearchRequest,
     HealthResponse,
     LocalSearchRequest,
+    MixSearchRequest,
     NaiveSearchRequest,
+    SearchMode,
     SearchResponse,
 )
 
@@ -31,6 +34,33 @@ SEARCH_RESPONSES = {
     },
     500: {"model": ErrorResponse, "description": "Internal error"},
 }
+
+
+def _response(
+    query: str,
+    mode: SearchMode,
+    used_query_plan: bool,
+    outcome: SearchOutcome,
+) -> SearchResponse:
+    """
+    Render one search outcome as the wire response.
+
+    :param query: The client's query, echoed back.
+    :param mode: Mode the client asked for.
+    :param used_query_plan: Whether decomposition was requested.
+    :param outcome: Normalized backend outcome.
+    :return: The response body.
+    """
+    return SearchResponse(
+        query=query,
+        mode=mode,
+        used_query_plan=used_query_plan,
+        answer=outcome.answer,
+        sources=outcome.sources,
+        subqueries=outcome.subqueries,
+        engines=outcome.engines
+        or EngineReport(requested=mode, used="unknown", query_plan=used_query_plan),
+    )
 
 
 def _backend_of(request: Request) -> SearchBackend | None:
@@ -116,14 +146,7 @@ async def search_global(
     backend: SearchBackend = Depends(get_backend),
 ) -> SearchResponse:
     outcome = await backend.search_global(payload.query, params=payload.params)
-    return SearchResponse(
-        query=payload.query,
-        mode="global",
-        used_query_plan=False,
-        answer=outcome.answer,
-        sources=outcome.sources,
-        subqueries=outcome.subqueries,
-    )
+    return _response(payload.query, "global", False, outcome)
 
 
 @router.post(
@@ -138,14 +161,7 @@ async def search_local(
         use_query_plan=payload.use_query_plan,
         params=payload.params,
     )
-    return SearchResponse(
-        query=payload.query,
-        mode="local",
-        used_query_plan=payload.use_query_plan,
-        answer=outcome.answer,
-        sources=outcome.sources,
-        subqueries=outcome.subqueries,
-    )
+    return _response(payload.query, "local", payload.use_query_plan, outcome)
 
 
 @router.post(
@@ -160,11 +176,27 @@ async def search_naive(
         use_query_plan=payload.use_query_plan,
         params=payload.params,
     )
-    return SearchResponse(
-        query=payload.query,
-        mode="naive",
-        used_query_plan=payload.use_query_plan,
-        answer=outcome.answer,
-        sources=outcome.sources,
-        subqueries=outcome.subqueries,
+    return _response(payload.query, "naive", payload.use_query_plan, outcome)
+
+
+@router.post(
+    "/v1/search/mix", response_model=SearchResponse, responses=SEARCH_RESPONSES
+)
+async def search_mix(
+    payload: MixSearchRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> SearchResponse:
+    """
+    Ensemble the local and naive engines over one query.
+
+    Child failures are tolerated by the ensemble, so ``engines`` in the response
+    reports which children actually contributed.
+    """
+    outcome = await backend.search_mix(
+        payload.query,
+        use_query_plan=payload.use_query_plan,
+        params=payload.params,
+        local_params=payload.local_params,
+        naive_params=payload.naive_params,
     )
+    return _response(payload.query, "mix", payload.use_query_plan, outcome)

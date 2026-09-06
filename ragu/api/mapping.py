@@ -18,6 +18,7 @@ from ragu.search_engine.base_engine import (
 )
 from ragu.search_engine.global_search import GlobalSearchResult
 from ragu.search_engine.local_search import LocalSearchResult
+from ragu.search_engine.mix_search import MixSearchResult
 from ragu.search_engine.naive_search import NaiveSearchResult
 
 
@@ -116,6 +117,18 @@ def _global_sources(result: GlobalSearchResult) -> list[SourceItem]:
     ]
 
 
+@_sources_from_result.register
+def _mix_sources(result: MixSearchResult) -> list[SourceItem]:
+    # Entries are child retrieval containers, or full child responses when
+    # MixQueryParams.ensemble_responses is set. Children overlap — local and
+    # naive both return chunks — so the union is deduplicated.
+    sources: list[SourceItem] = []
+    for entry in result.results:
+        retrieval = entry.retrieval if isinstance(entry, SearchEngineResponse) else entry
+        sources.extend(extract_sources(retrieval))
+    return _deduplicated(sources)
+
+
 def extract_sources(retrieval: SearchEngineRetrieve[Any] | None) -> list[SourceItem]:
     """
     Convert a retrieval container into flat sources.
@@ -132,7 +145,7 @@ def extract_sources(retrieval: SearchEngineRetrieve[Any] | None) -> list[SourceI
     if _sources_from_result.dispatch(type(result)) is not _UNREGISTERED:
         return _sources_from_result(result)
 
-    # A result type this module does not model (a new engine, MixSearchEngine):
+    # A result type this module does not model (a new engine, or a custom one):
     # keep the rendered context as one source rather than dropping the evidence.
     text = retrieval.to_text()
     if text and text.strip():

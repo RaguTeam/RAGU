@@ -7,9 +7,10 @@ from typing import Literal, get_args
 from pydantic import BaseModel, ConfigDict, Field
 from ragu.search_engine.global_search import GlobalSearchParams
 from ragu.search_engine.local_search import LocalParams
+from ragu.search_engine.mix_search import MixQueryParams
 from ragu.search_engine.naive_search import NaiveSearchParams
 
-SearchMode = Literal["global", "local", "naive"]
+SearchMode = Literal["global", "local", "naive", "mix"]
 
 # What a search mode needs the graph to hold. Named here rather than in the
 # backends so that the configuration layer can validate against the same set.
@@ -55,6 +56,66 @@ class NaiveSearchRequest(BaseModel):
     )
 
 
+class MixSearchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, description="Search query")
+    use_query_plan: bool = Field(
+        default=True, description="Decompose the query into subqueries"
+    )
+    params: MixQueryParams = Field(
+        default_factory=MixQueryParams,
+        description="MixSearchEngine parameters: ensemble_responses",
+    )
+    local_params: LocalParams = Field(
+        default_factory=LocalParams,
+        description="Parameters for the local child engine. MixSearchEngine reads "
+        "child parameters from its constructor, not from the request-time params, "
+        "so they are named separately here.",
+    )
+    naive_params: NaiveSearchParams = Field(
+        default_factory=NaiveSearchParams,
+        description="Parameters for the naive child engine",
+    )
+
+
+class ChildEngineReport(BaseModel):
+    """
+    What one child engine of an ensemble actually did.
+    """
+
+    engine: str = Field(description="Child engine class name")
+    mode: str | None = Field(
+        default=None, description="Search mode the child corresponds to, when known"
+    )
+    ok: bool = Field(description="Whether the child produced a result")
+    error: str | None = Field(
+        default=None, description="Why the child failed, when it did"
+    )
+
+
+class EngineReport(BaseModel):
+    """
+    What ran, as opposed to what was asked for.
+
+    ``MixSearchEngine`` tolerates child failures by design, so a request that
+    asked for graph plus chunks can silently be answered from chunks alone.
+    This reports the difference instead of hiding it.
+    """
+
+    requested: SearchMode = Field(description="Mode the client asked for")
+    used: str = Field(description="Engine class that produced the answer")
+    query_plan: bool = Field(
+        default=False, description="Whether the query was decomposed first"
+    )
+    degraded: bool = Field(
+        default=False, description="True when some child engine did not contribute"
+    )
+    children: list[ChildEngineReport] = Field(
+        default_factory=list, description="Per-child outcome, for ensemble engines"
+    )
+
+
 class SourceItem(BaseModel):
     id: str = Field(
         description="Stable source identifier, e.g. chunk_42 or community_3"
@@ -80,6 +141,9 @@ class SearchResponse(BaseModel):
     answer: str
     sources: list[SourceItem] = Field(default_factory=list)
     subqueries: list[SubqueryItem] = Field(default_factory=list)
+    engines: EngineReport = Field(
+        description="What actually ran, including child-engine failures"
+    )
 
 
 class ErrorBody(BaseModel):

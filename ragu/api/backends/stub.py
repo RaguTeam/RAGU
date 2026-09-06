@@ -7,10 +7,17 @@ be exercised end-to-end without building a knowledge graph.
 
 from ragu.api.backends.base import GraphStats, SearchBackend, SearchOutcome
 from ragu.api.config import ServiceSettings
-from ragu.api.models import SourceItem, SubqueryItem
+from ragu.api.models import (
+    ChildEngineReport,
+    EngineReport,
+    SearchMode,
+    SourceItem,
+    SubqueryItem,
+)
 from ragu.common.logger import logger
 from ragu.search_engine.global_search import GlobalSearchParams
 from ragu.search_engine.local_search import LocalParams
+from ragu.search_engine.mix_search import MixQueryParams
 from ragu.search_engine.naive_search import NaiveSearchParams
 
 # How a simulated missing capability shows up in the graph sizes the base class
@@ -69,10 +76,11 @@ class StubBackend(SearchBackend):
 
     def _finish(
         self,
-        mode: str,
+        mode: SearchMode,
         answer: str,
         sources: list[SourceItem],
         subqueries: list[SubqueryItem],
+        children: list[ChildEngineReport] | None = None,
     ) -> SearchOutcome:
         """
         Apply the same no-evidence rule the real backend applies.
@@ -81,7 +89,19 @@ class StubBackend(SearchBackend):
         """
         if not sources:
             raise self.no_evidence(mode)
-        return SearchOutcome(answer=answer, sources=sources, subqueries=subqueries)
+        reports = children or []
+        return SearchOutcome(
+            answer=answer,
+            sources=sources,
+            subqueries=subqueries,
+            engines=EngineReport(
+                requested=mode,
+                used="StubBackend",
+                query_plan=bool(subqueries),
+                degraded=any(not report.ok for report in reports),
+                children=reports,
+            ),
+        )
 
     async def search_global(
         self, query: str, *, params: GlobalSearchParams
@@ -145,4 +165,37 @@ class StubBackend(SearchBackend):
             f"[stub naive] {query}",
             sources,
             self._subqueries(query, use_query_plan),
+        )
+
+    async def search_mix(
+        self,
+        query: str,
+        *,
+        use_query_plan: bool,
+        params: MixQueryParams,
+        local_params: LocalParams,
+        naive_params: NaiveSearchParams,
+    ) -> SearchOutcome:
+        self.require_capability("mix")
+        local_params = self.bound_params(local_params)
+        naive_params = self.bound_params(naive_params)
+        sources = [SourceItem(id="entity_1", type="entity", content="stub entity")]
+        sources += [
+            SourceItem(
+                id=f"chunk_{i}",
+                type="chunk",
+                content=f"stub chunk {i}",
+                score=round(0.9 - i / 100, 2),
+            )
+            for i in range(1, naive_params.top_k + 1)
+        ]
+        return self._finish(
+            "mix",
+            f"[stub mix] {query}",
+            sources,
+            self._subqueries(query, use_query_plan),
+            children=[
+                ChildEngineReport(engine="LocalSearchEngine", mode="local", ok=True),
+                ChildEngineReport(engine="NaiveSearchEngine", mode="naive", ok=True),
+            ],
         )
