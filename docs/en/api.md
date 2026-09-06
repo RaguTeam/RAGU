@@ -64,7 +64,7 @@ Service settings are `RAGU_API_*` environment variables, read by
 | Variable | Default | Meaning |
 |---|---|---|
 | `RAGU_API_BACKEND` | `ragu` | `ragu` loads a real graph, `stub` serves canned answers |
-| `RAGU_API_HOST` | `0.0.0.0` | Bind address |
+| `RAGU_API_HOST` | `127.0.0.1` | Bind address; the container image passes `--host 0.0.0.0` itself |
 | `RAGU_API_PORT` | `8020` | Bind port |
 | `RAGU_API_STORAGE_FOLDER` | `ragu_working_dir` | Folder holding the built graph |
 | `RAGU_API_LANGUAGE` | `russian` | Passed to `Settings.language` |
@@ -75,7 +75,7 @@ Service settings are `RAGU_API_*` environment variables, read by
 | `RAGU_API_LLM_CACHE` | — | Path to the LLM response cache; unset disables caching |
 | `RAGU_API_MAX_TOP_K` | `100` | Ceiling applied to a client-supplied `top_k` / `rerank_top_k` |
 | `RAGU_API_MIN_CLUSTER_SIZE_FLOOR` | `1` | Floor applied to global `min_cluster_size` |
-| `RAGU_API_STUB_MISSING_CAPABILITIES` | — | Stub only: capabilities to report as missing |
+| `RAGU_API_STUB_MISSING_CAPABILITIES` | — | Stub only: capabilities to report as missing. An unknown name fails startup rather than simulating nothing |
 
 `RAGU_API_STORAGE_FOLDER` must point at one graph directory, not at a folder of
 them, and the directory must already exist and be non-empty — the service
@@ -183,7 +183,7 @@ All errors share one envelope:
 |---|---|---|
 | 400 | `INVALID_REQUEST` | empty `query`, bad field type, unknown field |
 | 409 | `CAPABILITY_UNAVAILABLE` | the graph cannot serve this mode, or this query found nothing |
-| 503 | `SERVICE_NOT_READY` | graph not loaded, or startup failed |
+| 503 | `SERVICE_NOT_READY` | graph not loaded, or startup failed; carries `Retry-After` |
 | 500 | `INTERNAL_ERROR` | LLM unavailable, embedder timeout, engine failure |
 
 `409` exists so a client can react on its own: a graph built without community

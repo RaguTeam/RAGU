@@ -9,6 +9,7 @@ from typing import Any
 from ragu.api.config import ServiceSettings
 from ragu.api.errors import CapabilityUnavailableError
 from ragu.api.models import (
+    Capability,
     GraphStatsResponse,
     SearchMode,
     SourceItem,
@@ -59,7 +60,7 @@ class ModeRequirement:
         but this query retrieved nothing.
     """
 
-    capability: str
+    capability: Capability
     missing_message: str
     no_evidence_message: str
 

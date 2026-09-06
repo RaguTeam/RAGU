@@ -63,7 +63,7 @@ python -m ragu.api --backend ragu --storage-folder ragu_working_dir
 | Переменная | По умолчанию | Значение |
 |---|---|---|
 | `RAGU_API_BACKEND` | `ragu` | `ragu` загружает реальный граф, `stub` отдаёт заготовленные ответы |
-| `RAGU_API_HOST` | `0.0.0.0` | Адрес прослушивания |
+| `RAGU_API_HOST` | `127.0.0.1` | Адрес прослушивания; образ передаёт `--host 0.0.0.0` сам |
 | `RAGU_API_PORT` | `8020` | Порт |
 | `RAGU_API_STORAGE_FOLDER` | `ragu_working_dir` | Папка с построенным графом |
 | `RAGU_API_LANGUAGE` | `russian` | Передаётся в `Settings.language` |
@@ -74,7 +74,7 @@ python -m ragu.api --backend ragu --storage-folder ragu_working_dir
 | `RAGU_API_LLM_CACHE` | — | Путь к кэшу ответов LLM; без него кэш выключен |
 | `RAGU_API_MAX_TOP_K` | `100` | Потолок для клиентских `top_k` / `rerank_top_k` |
 | `RAGU_API_MIN_CLUSTER_SIZE_FLOOR` | `1` | Нижняя граница для `min_cluster_size` глобального поиска |
-| `RAGU_API_STUB_MISSING_CAPABILITIES` | — | Только для стаба: какие возможности объявлять отсутствующими |
+| `RAGU_API_STUB_MISSING_CAPABILITIES` | — | Только для стаба: какие возможности объявлять отсутствующими. Неизвестное имя роняет старт, а не симулирует пустоту |
 
 `RAGU_API_STORAGE_FOLDER` должна указывать на одну папку графа, а не на папку с
 несколькими, и эта папка обязана существовать и быть непустой — иначе сервис
@@ -182,7 +182,7 @@ python -m ragu.api --backend ragu --storage-folder ragu_working_dir
 |---|---|---|
 | 400 | `INVALID_REQUEST` | пустой `query`, неверный тип поля, неизвестное поле |
 | 409 | `CAPABILITY_UNAVAILABLE` | граф не умеет этот режим, либо запрос ничего не нашёл |
-| 503 | `SERVICE_NOT_READY` | граф не загружен или старт провалился |
+| 503 | `SERVICE_NOT_READY` | граф не загружен или старт провалился; несёт `Retry-After` |
 | 500 | `INTERNAL_ERROR` | LLM недоступна, таймаут эмбеддера, отказ движка |
 
 `409` существует, чтобы клиент мог среагировать сам: граф, построенный без

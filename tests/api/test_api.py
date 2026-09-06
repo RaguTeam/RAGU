@@ -867,3 +867,47 @@ class TestLogging:
             assert logger._core.handlers
         finally:
             set_level(DEFAULT_LEVEL)
+
+
+class TestServiceConfig:
+    def test_bind_address_defaults_to_loopback(self):
+        # Exposing the service is a deliberate act; the container image passes
+        # --host 0.0.0.0 itself.
+        assert ServiceSettings(backend="stub").host == "127.0.0.1"
+
+    def test_a_misspelled_stub_capability_is_rejected(self):
+        # Silently simulating nothing turns a config typo into a test that
+        # passes for the wrong reason.
+        with pytest.raises(ValueError) as failure:
+            ServiceSettings(backend="stub", stub_missing_capabilities="entity_grap")
+        assert "entity_grap" in str(failure.value)
+
+    def test_known_capabilities_are_accepted(self):
+        settings = ServiceSettings(
+            backend="stub",
+            stub_missing_capabilities=" entity_graph , vector_index ",
+        )
+        assert settings.missing_capabilities() == {"entity_graph", "vector_index"}
+
+    def test_capability_names_match_the_mode_requirements(self):
+        # config.py validates against models.CAPABILITIES while the backends
+        # answer from MODE_REQUIREMENTS; they must not drift apart.
+        from ragu.api.backends.base import MODE_REQUIREMENTS
+        from ragu.api.models import CAPABILITIES
+
+        declared = {requirement.capability for requirement in MODE_REQUIREMENTS.values()}
+        assert declared == CAPABILITIES
+
+
+class TestRetryAfter:
+    def test_search_503_tells_the_client_when_to_come_back(self):
+        client = TestClient(create_app(ServiceSettings(backend="stub")))
+        response = client.post("/v1/search/naive", json={"query": "q"})
+        assert response.status_code == 503
+        assert response.headers["Retry-After"] == "30"
+
+    def test_other_errors_carry_no_retry_after(self):
+        with build_client(missing="entity_graph") as client:
+            response = client.post("/v1/search/local", json={"query": "q"})
+        assert response.status_code == 409
+        assert "Retry-After" not in response.headers

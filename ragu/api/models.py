@@ -2,7 +2,7 @@
 Request and response schemas of the search API.
 """
 
-from typing import Literal
+from typing import Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field
 from ragu.search_engine.global_search import GlobalSearchParams
@@ -10,6 +10,12 @@ from ragu.search_engine.local_search import LocalParams
 from ragu.search_engine.naive_search import NaiveSearchParams
 
 SearchMode = Literal["global", "local", "naive"]
+
+# What a search mode needs the graph to hold. Named here rather than in the
+# backends so that the configuration layer can validate against the same set.
+Capability = Literal["entity_graph", "community_summaries", "vector_index"]
+
+CAPABILITIES: frozenset[str] = frozenset(get_args(Capability))
 
 
 class GlobalSearchRequest(BaseModel):

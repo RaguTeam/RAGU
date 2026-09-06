@@ -7,7 +7,11 @@ here are authored for clients; details that come from an exception stay in
 ``detail`` and are logged, never returned.
 """
 
-from ragu.api.models import ErrorBody, ErrorResponse
+from ragu.api.models import Capability, ErrorBody, ErrorResponse
+
+# How long a client should wait before retrying a service that is not ready.
+# Loading a graph takes minutes, so this is a hint to back off, not to spin.
+RETRY_AFTER_SECONDS = 30
 
 
 class RaguServiceError(Exception):
@@ -33,6 +37,13 @@ class RaguServiceError(Exception):
         Capability the graph lacks, for errors that identify one.
         """
         return None
+
+    @property
+    def headers(self) -> dict[str, str]:
+        """
+        Extra HTTP headers to send with this error.
+        """
+        return {}
 
     def to_envelope(self) -> dict:
         """
@@ -73,7 +84,7 @@ class CapabilityUnavailableError(RaguServiceError):
     code = "CAPABILITY_UNAVAILABLE"
     status_code = 409
 
-    def __init__(self, message: str, *, mode: str, missing_capability: str | None):
+    def __init__(self, message: str, *, mode: str, missing_capability: Capability | None):
         super().__init__(message, mode=mode)
         self._missing_capability = missing_capability
 
@@ -85,10 +96,17 @@ class CapabilityUnavailableError(RaguServiceError):
 class ServiceNotReadyError(RaguServiceError):
     """
     The graph is not loaded yet or the backend failed to start (503).
+
+    Carries ``Retry-After`` so a client backs off for the minutes a graph load
+    takes instead of retrying immediately.
     """
 
     code = "SERVICE_NOT_READY"
     status_code = 503
+
+    @property
+    def headers(self) -> dict[str, str]:
+        return {"Retry-After": str(RETRY_AFTER_SECONDS)}
 
 
 class BackendExecutionError(RaguServiceError):

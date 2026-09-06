@@ -8,7 +8,7 @@ any change in the service (see the spec, "Per-route policy").
 from fastapi import APIRouter, Depends, Request, Response
 
 from ragu.api.backends.base import SearchBackend
-from ragu.api.errors import ServiceNotReadyError
+from ragu.api.errors import RETRY_AFTER_SECONDS, ServiceNotReadyError
 from ragu.api.models import (
     ErrorResponse,
     GlobalSearchRequest,
@@ -104,7 +104,7 @@ async def health_ready(request: Request, response: Response) -> HealthResponse:
     payload = _health_of(request)
     if not payload.graph_loaded:
         response.status_code = 503
-        response.headers["Retry-After"] = "30"
+        response.headers["Retry-After"] = str(RETRY_AFTER_SECONDS)
     return payload
 
 

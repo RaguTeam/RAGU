@@ -4,8 +4,10 @@ Service configuration.
 
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from ragu.api.models import CAPABILITIES
 
 
 class ServiceSettings(BaseSettings):
@@ -18,7 +20,11 @@ class ServiceSettings(BaseSettings):
         description="'ragu' loads a real knowledge graph, 'stub' serves canned answers for local development",
     )
 
-    host: str = Field(default="0.0.0.0", description="Bind address")
+    host: str = Field(
+        default="127.0.0.1",
+        description="Bind address. Loopback by default; the container image passes "
+        "--host 0.0.0.0 explicitly, so exposing the service is a deliberate act.",
+    )
     port: int = Field(default=8020, description="Bind port")
 
     storage_folder: str = Field(
@@ -68,9 +74,25 @@ class ServiceSettings(BaseSettings):
         "(entity_graph, community_summaries, vector_index)",
     )
 
+    @field_validator("stub_missing_capabilities")
+    @classmethod
+    def _reject_unknown_capabilities(cls, value: str) -> str:
+        """
+        Fail on a misspelled capability instead of silently simulating nothing.
+        """
+        unknown = sorted(cls._split(value) - CAPABILITIES)
+        if unknown:
+            raise ValueError(
+                f"unknown capabilities {unknown}; expected any of {sorted(CAPABILITIES)}"
+            )
+        return value
+
+    @staticmethod
+    def _split(value: str) -> set[str]:
+        return {item.strip() for item in value.split(",") if item.strip()}
+
     def missing_capabilities(self) -> set[str]:
-        return {
-            item.strip()
-            for item in self.stub_missing_capabilities.split(",")
-            if item.strip()
-        }
+        """
+        Capabilities the stub backend should report as absent.
+        """
+        return self._split(self.stub_missing_capabilities)

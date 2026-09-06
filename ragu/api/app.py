@@ -63,7 +63,11 @@ def create_app(
         detail = getattr(exc, "detail", None)
         if detail:
             logger.error("{} ({}): {}", exc.code, exc.mode, detail)
-        return JSONResponse(status_code=exc.status_code, content=exc.to_envelope())
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=exc.to_envelope(),
+            headers=exc.headers or None,
+        )
 
     @app.exception_handler(RequestValidationError)
     async def _validation_error_handler(
