@@ -72,6 +72,7 @@ python -m ragu.api --backend ragu --storage-folder ragu_working_dir
 | `RAGU_API_RATE_MIN_DELAY` | — | Минимальная задержка между LLM-вызовами, секунды |
 | `RAGU_API_RATE_MAX_SIMULTANEOUS` | — | Максимум одновременных LLM-вызовов |
 | `RAGU_API_LLM_CACHE` | — | Путь к кэшу ответов LLM; без него кэш выключен |
+| `RAGU_API_MAX_BATCH_SIZE` | `50` | Максимум запросов, принимаемых маршрутом /batch |
 | `RAGU_API_MAX_TOP_K` | `100` | Потолок для клиентских `top_k` / `rerank_top_k` |
 | `RAGU_API_MIN_CLUSTER_SIZE_FLOOR` | `1` | Нижняя граница для `min_cluster_size` глобального поиска |
 | `RAGU_API_STUB_MISSING_CAPABILITIES` | — | Только для стаба: какие возможности объявлять отсутствующими. Неизвестное имя роняет старт, а не симулирует пустоту |
@@ -86,11 +87,27 @@ python -m ragu.api --backend ragu --storage-folder ragu_working_dir
 
 ## Эндпоинты поиска
 
-| Маршрут | Тело |
+Четыре режима — `global`, `local`, `naive`, `mix` — каждый в четырёх формах:
+
+| Маршрут | Что возвращает |
 |---|---|
-| `POST /v1/search/global` | `query`, `params: GlobalSearchParams` |
-| `POST /v1/search/local` | `query`, `use_query_plan=true`, `params: LocalParams` |
-| `POST /v1/search/naive` | `query`, `use_query_plan=true`, `params: NaiveSearchParams` |
+| `POST /v1/search/{mode}` | один ответ с источниками |
+| `POST /v1/search/{mode}/retrieve` | только контекст, без генерации |
+| `POST /v1/search/{mode}/batch` | по ответу на каждый запрос из `queries` |
+| `POST /v1/search/{mode}/stream` | ответ через Server-Sent Events |
+
+`mix` ансамблирует локальный и наивный движки. Параметры дочерних движков
+названы отдельно — `local_params` и `naive_params` — потому что
+`MixSearchEngine` читает их из конструктора: `batch_search` игнорирует свой
+аргумент `params` целиком, а `batch_query` берёт из него только
+`ensemble_responses`.
+
+| Режим | Тело |
+|---|---|
+| `global` | `query`, `params: GlobalSearchParams` |
+| `local` | `query`, `use_query_plan=true`, `params: LocalParams` |
+| `naive` | `query`, `use_query_plan=true`, `params: NaiveSearchParams` |
+| `mix` | `query`, `use_query_plan=true`, `params: MixQueryParams`, `local_params`, `naive_params` |
 
 `params` — это собственный класс параметров движка, встроенный в модель
 запроса, а не переписанный поле за полем:
@@ -142,6 +159,56 @@ python -m ragu.api --backend ragu --storage-folder ragu_working_dir
 Если отработал план запроса, `sources` несёт свидетельства **всех** подзапросов
 без дубликатов, а не только финального: промежуточные ответы возвращаются в
 `subqueries`, значит и их доказательная база возвращается вместе с ними.
+
+
+### Ретривал без генерации
+
+`POST /v1/search/{mode}/retrieve` возвращает только контекст — для клиентов,
+которые генерируют ответ сами. Он не принимает `use_query_plan`:
+`QueryPlanEngine.batch_search` делегирует напрямую вложенному движку и никакого
+планирования не выполняет, так что приём этого флага обещал бы декомпозицию,
+которой не будет. Передача флага даёт `400`.
+
+### Батчи
+
+`POST /v1/search/{mode}/batch` принимает `queries` и отвечает на все за один
+проход. Именно здесь движки окупаются: ретривал разделяется на весь список, а
+при плане запроса независимые подзапросы **разных** верхнеуровневых запросов
+отвечаются в одном дочернем батче.
+
+Запрос, который ничего не наретривил, несёт `error` вместо ответа — один пустой
+запрос не роняет батч. Размер списка ограничен `RAGU_API_MAX_BATCH_SIZE`.
+
+```json
+{"mode": "naive", "used_query_plan": true, "engines": {"...": "..."},
+ "results": [{"query": "...", "answer": "...", "sources": [], "subqueries": []}]}
+```
+
+### Стриминг
+
+`POST /v1/search/{mode}/stream` отдаёт `text/event-stream`: одно событие `meta`
+с ретривалом и отчётом о движках, затем события `delta` с текстом, затем `done`
+с финальным отчётом. Отказ после отправки заголовков приходит событием `error`;
+проверка возможностей выполняется **до** начала ответа, поэтому недоступный
+режим по-прежнему отбивается статус-кодом.
+
+### Что реально отработало
+
+Каждый ответ несёт `engines`:
+
+```json
+{"requested": "mix", "used": "MixSearchEngine", "query_plan": true,
+ "degraded": true,
+ "children": [{"engine": "LocalSearchEngine", "mode": "local", "ok": false,
+               "error": "RuntimeError: entity vector store unreachable"},
+              {"engine": "NaiveSearchEngine", "mode": "naive", "ok": true,
+               "error": null}]}
+```
+
+`MixSearchEngine` работает с `allow_partial_failures=True` и выбрасывает
+упавший дочерний движок, поэтому без этого «граф и чанки» было бы неотличимо от
+«только чанки». `degraded` истинно, когда какой-то дочерний движок не внёс
+вклад.
 
 ## Health и readiness
 
@@ -248,8 +315,5 @@ N+1 LLM-вызовов на N уцелевших сообществ. `RAGU_API_M
   ровно один граф.
 - **Нет ingestion по HTTP.** Сервис не умеет строить и дополнять граф;
   `build_from_docs` и CRUD-поверхность `KnowledgeGraph` наружу не выставлены.
-- **Только поиск, по одному запросу за раз.** `MixSearchEngine`, ретривал без
-  генерации (`batch_search`), батчевые запросы (`batch_query`) и стриминг
-  (`stream_query`) движками поддержаны, но пока не выставлены.
 - **Нет аутентификации, квот и метрик.** Каждый запрос стоит LLM-вызовов;
   ставьте сервис за шлюз, который аутентифицирует и ограничивает частоту.

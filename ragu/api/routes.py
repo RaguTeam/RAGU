@@ -5,12 +5,15 @@ Separate paths let a gateway apply per-mode timeouts and rate limits without
 any change in the service (see the spec, "Per-route policy").
 """
 
+import json
 from typing import Any
 
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi.responses import StreamingResponse
 
 from ragu.api.backends.base import (
     RetrieveOutcome,
+    SearchStreamEvent,
     SearchBackend,
     SearchCall,
     SearchOutcome,
@@ -397,3 +400,70 @@ async def batch_mix(
     backend: SearchBackend = Depends(get_backend),
 ) -> BatchSearchResponse:
     return await _batched("mix", payload, backend)
+
+
+def _sse(event: SearchStreamEvent) -> str:
+    """
+    Frame one event as a Server-Sent Event.
+    """
+    payload = json.dumps(event.data, ensure_ascii=False)
+    return f"event: {event.event}\ndata: {payload}\n\n"
+
+
+async def _stream(mode: SearchMode, payload: Any, backend: SearchBackend) -> Response:
+    """
+    Stream one answer, refusing an unservable mode before the response starts.
+    """
+    call = _call(mode, payload)
+    # Inside an open stream a 409 could only be an SSE event, so the capability
+    # is checked while a status code can still carry it.
+    backend.require_capability(mode)
+
+    async def events():
+        async for event in backend.stream(call):
+            yield _sse(event)
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@router.post("/v1/search/global/stream", responses=SEARCH_RESPONSES)
+async def stream_global(
+    payload: GlobalSearchRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> Response:
+    return await _stream("global", payload, backend)
+
+
+@router.post("/v1/search/local/stream", responses=SEARCH_RESPONSES)
+async def stream_local(
+    payload: LocalSearchRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> Response:
+    return await _stream("local", payload, backend)
+
+
+@router.post("/v1/search/naive/stream", responses=SEARCH_RESPONSES)
+async def stream_naive(
+    payload: NaiveSearchRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> Response:
+    """
+    Stream the answer as Server-Sent Events.
+
+    One ``meta`` event carries the retrieval and the engine report, then
+    ``delta`` events carry the text, then ``done`` closes with the final engine
+    report. A failure after the headers are sent arrives as an ``error`` event.
+    """
+    return await _stream("naive", payload, backend)
+
+
+@router.post("/v1/search/mix/stream", responses=SEARCH_RESPONSES)
+async def stream_mix(
+    payload: MixSearchRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> Response:
+    return await _stream("mix", payload, backend)

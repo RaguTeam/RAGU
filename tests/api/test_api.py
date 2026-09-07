@@ -1297,3 +1297,86 @@ class TestBatchRoutes:
 
         assert seen == [["a", "b", "c"]]
         assert len(outcomes) == 3
+
+
+class TestStreamRoutes:
+    """SSE: meta once, then deltas, then done."""
+
+    @staticmethod
+    def parse(body: str) -> list[tuple[str, dict]]:
+        import json
+
+        events = []
+        for block in body.strip().split("\n\n"):
+            lines = dict(
+                line.split(": ", 1) for line in block.splitlines() if ": " in line
+            )
+            events.append((lines["event"], json.loads(lines["data"])))
+        return events
+
+    @pytest.mark.parametrize("mode", ["global", "local", "naive", "mix"])
+    def test_stream_sends_meta_then_deltas_then_done(self, mode):
+        with build_client() as client:
+            response = client.post(
+                f"/v1/search/{mode}/stream", json={"query": "hello there"}
+            )
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/event-stream")
+
+        events = self.parse(response.text)
+        names = [name for name, _ in events]
+        assert names[0] == "meta"
+        assert names[-1] == "done"
+        assert set(names[1:-1]) == {"delta"}
+
+        meta = events[0][1]
+        assert meta["mode"] == mode
+        assert meta["sources"]
+        assert meta["engines"]["requested"] == mode
+
+    def test_the_deltas_reassemble_into_the_answer(self):
+        with build_client() as client:
+            response = client.post(
+                "/v1/search/naive/stream", json={"query": "hello there"}
+            )
+        text = "".join(
+            data["text"] for name, data in self.parse(response.text) if name == "delta"
+        )
+        assert text.strip() == "[stub naive] hello there"
+
+    def test_an_unservable_mode_fails_before_the_stream_opens(self):
+        # Inside an open stream a 409 could only be an SSE event; the client
+        # would have to parse the body to learn the request was refused.
+        with build_client(missing="entity_graph") as client:
+            response = client.post("/v1/search/local/stream", json={"query": "q"})
+        assert response.status_code == 409
+        assert response.json()["error"]["missing_capability"] == "entity_graph"
+
+    def test_a_failure_after_the_headers_arrives_as_an_error_event(self):
+        from ragu.api.backends.base import SearchStreamEvent
+
+        class HalfBrokenBackend:
+            graph_loaded = True
+            stats = None
+
+            async def startup(self):
+                pass
+
+            async def shutdown(self):
+                pass
+
+            def require_capability(self, mode):
+                pass
+
+            async def stream(self, call):
+                yield SearchStreamEvent("meta", {"mode": call.mode, "sources": []})
+                yield SearchStreamEvent(
+                    "error", {"code": "INTERNAL_ERROR", "message": "llm gone"}
+                )
+
+        app = create_app(ServiceSettings(backend="stub"), backend=HalfBrokenBackend())
+        with TestClient(app) as client:
+            response = client.post("/v1/search/naive/stream", json={"query": "q"})
+
+        assert response.status_code == 200
+        assert [name for name, _ in self.parse(response.text)] == ["meta", "error"]

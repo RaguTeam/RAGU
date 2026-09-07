@@ -57,7 +57,8 @@ multi-gigabyte working directories that must stay out of it.
 
 ```
 app.py       application factory: lifespan, exception handlers, error envelope
-routes.py    one POST per search mode + /health, /health/live, /health/ready
+routes.py    per mode: search, /retrieve, /batch, /stream; plus /health,
+             /health/live, /health/ready
 models.py    request/response schemas; the request models embed the engines'
              own parameter dataclasses
 mapping.py   engine results → wire schema, dispatched on the concrete result types
@@ -66,8 +67,9 @@ config.py    ServiceSettings — the RAGU_API_* environment contract
 logging_setup.py  intercepts stdlib logging (uvicorn, httpx) into loguru, so the
              process has one sink; only `python -m ragu.api` installs it
 backends/
-  base.py        SearchBackend ABC, GraphStats, the shared request bounds and
-                 the capability rules both backends obey
+  base.py        SearchBackend ABC (search / retrieve / stream over a
+                 SearchCall), GraphStats, the shared request bounds and the
+                 capability rules both backends obey
   stub.py        canned answers; simulates a graph missing a capability by
                  reporting zero for that store, so it exercises the real path
   ragu_backend.py loads the graph, keeps one engine per mode, wraps in
@@ -99,5 +101,6 @@ Three couplings worth knowing before changing anything here:
 3. Register the engine's result type in `mapping.py` with
    `@_sources_from_result.register`. Without it the mode still works, but its
    retrieval degrades to a single `to_text()` source.
-4. Add the abstract method to `SearchBackend`, implement it in both backends,
-   and add the route.
+4. Add the request models and the four routes. The backend needs no new
+   method: `search`, `retrieve` and `stream` all take a `SearchCall` carrying
+   the mode.

@@ -73,6 +73,7 @@ Service settings are `RAGU_API_*` environment variables, read by
 | `RAGU_API_RATE_MIN_DELAY` | — | Minimum delay between LLM calls, seconds |
 | `RAGU_API_RATE_MAX_SIMULTANEOUS` | — | Maximum simultaneous LLM calls |
 | `RAGU_API_LLM_CACHE` | — | Path to the LLM response cache; unset disables caching |
+| `RAGU_API_MAX_BATCH_SIZE` | `50` | Maximum number of queries a /batch route accepts |
 | `RAGU_API_MAX_TOP_K` | `100` | Ceiling applied to a client-supplied `top_k` / `rerank_top_k` |
 | `RAGU_API_MIN_CLUSTER_SIZE_FLOOR` | `1` | Floor applied to global `min_cluster_size` |
 | `RAGU_API_STUB_MISSING_CAPABILITIES` | — | Stub only: capabilities to report as missing. An unknown name fails startup rather than simulating nothing |
@@ -87,11 +88,26 @@ optionally `EMBEDDER_BASE_URL`, `EMBEDDER_API_KEY`, `EMBEDDER_MODEL_NAME`.
 
 ## Search endpoints
 
-| Route | Body |
+Four modes — `global`, `local`, `naive`, `mix` — each in four shapes:
+
+| Route | Returns |
 |---|---|
-| `POST /v1/search/global` | `query`, `params: GlobalSearchParams` |
-| `POST /v1/search/local` | `query`, `use_query_plan=true`, `params: LocalParams` |
-| `POST /v1/search/naive` | `query`, `use_query_plan=true`, `params: NaiveSearchParams` |
+| `POST /v1/search/{mode}` | one answer with its sources |
+| `POST /v1/search/{mode}/retrieve` | context only, nothing generated |
+| `POST /v1/search/{mode}/batch` | one answer per query in `queries` |
+| `POST /v1/search/{mode}/stream` | the answer as Server-Sent Events |
+
+`mix` ensembles the local and naive engines. Its child parameters are named
+separately — `local_params` and `naive_params` — because `MixSearchEngine` reads
+them from its constructor: `batch_search` ignores its `params` argument
+entirely, and `batch_query` reads only `ensemble_responses` from it.
+
+| Mode | Body |
+|---|---|
+| `global` | `query`, `params: GlobalSearchParams` |
+| `local` | `query`, `use_query_plan=true`, `params: LocalParams` |
+| `naive` | `query`, `use_query_plan=true`, `params: NaiveSearchParams` |
+| `mix` | `query`, `use_query_plan=true`, `params: MixQueryParams`, `local_params`, `naive_params` |
 
 `params` is the engine's own parameter class, embedded in the request model
 rather than restated field by field:
@@ -143,6 +159,55 @@ type the service does not model degrades to a single source rendered with
 When a query plan ran, `sources` carries the evidence of **every** subquery,
 deduplicated, not only that of the final one — the intermediate answers are
 returned in `subqueries`, so their evidence is returned with them.
+
+
+### Retrieval without generation
+
+`POST /v1/search/{mode}/retrieve` returns the context and nothing else, for
+clients that generate the answer themselves. It takes no `use_query_plan`:
+`QueryPlanEngine.batch_search` delegates straight to the wrapped engine and does
+no planning, so accepting the flag would promise a decomposition that never
+happens. Sending it answers `400`.
+
+### Batches
+
+`POST /v1/search/{mode}/batch` takes `queries` and answers all of them in one
+pass. This is where the engines earn their keep: retrieval is shared across the
+list, and with a query plan the independent subqueries of *different* top-level
+queries are answered in the same child batch.
+
+A query that retrieved nothing carries `error` instead of an answer, so one
+empty query does not fail the batch. `RAGU_API_MAX_BATCH_SIZE` bounds the list.
+
+```json
+{"mode": "naive", "used_query_plan": true, "engines": {"...": "..."},
+ "results": [{"query": "...", "answer": "...", "sources": [], "subqueries": []}]}
+```
+
+### Streaming
+
+`POST /v1/search/{mode}/stream` returns `text/event-stream`: one `meta` event
+carrying the retrieval and the engine report, then `delta` events carrying the
+text, then `done` with the final engine report. A failure after the headers are
+sent arrives as an `error` event — the capability check runs *before* the
+response starts, so an unservable mode still fails with a status code.
+
+### What actually ran
+
+Every response carries `engines`:
+
+```json
+{"requested": "mix", "used": "MixSearchEngine", "query_plan": true,
+ "degraded": true,
+ "children": [{"engine": "LocalSearchEngine", "mode": "local", "ok": false,
+               "error": "RuntimeError: entity vector store unreachable"},
+              {"engine": "NaiveSearchEngine", "mode": "naive", "ok": true,
+               "error": null}]}
+```
+
+`MixSearchEngine` runs with `allow_partial_failures=True` and drops a child that
+raises, so without this "graph and chunks" would be indistinguishable from
+"chunks only". `degraded` is true whenever some child did not contribute.
 
 ## Health and readiness
 
@@ -249,8 +314,5 @@ Known gaps, listed so they are not mistaken for oversights:
 - **No ingestion over HTTP.** The service cannot build or extend a graph;
   `build_from_docs` and the graph CRUD surface of `KnowledgeGraph` are not
   exposed.
-- **Search only, one query at a time.** `MixSearchEngine`, retrieval without
-  generation (`batch_search`), batched queries (`batch_query`) and streaming
-  (`stream_query`) are all supported by the engines and not yet exposed.
 - **No authentication, quotas or metrics.** Every request costs LLM calls;
   put the service behind a gateway that authenticates and rate-limits it.

@@ -5,8 +5,11 @@ Serves deterministic canned answers without a real graph, so the agent side can
 be exercised end-to-end without building a knowledge graph.
 """
 
+from collections.abc import AsyncIterator
+
 from ragu.api.backends.base import (
     GraphStats,
+    SearchStreamEvent,
     RetrieveOutcome,
     SearchBackend,
     SearchCall,
@@ -151,6 +154,24 @@ class StubBackend(SearchBackend):
             degraded=any(not child.ok for child in children),
             children=children,
         )
+
+    async def stream(self, call: SearchCall) -> AsyncIterator[SearchStreamEvent]:
+        self.require_capability(call.mode)
+        report = self._report(call, query_plan=call.use_query_plan)
+        yield SearchStreamEvent(
+            "meta",
+            {
+                "query": call.query,
+                "mode": call.mode,
+                "sources": [
+                    source.model_dump() for source in self._sources_for(call)
+                ],
+                "engines": report.model_dump(),
+            },
+        )
+        for word in f"[stub {call.mode}] {call.query}".split(" "):
+            yield SearchStreamEvent("delta", {"text": word + " "})
+        yield SearchStreamEvent("done", {"engines": report.model_dump()})
 
     async def search(self, call: SearchCall) -> list[SearchOutcome]:
         self.require_capability(call.mode)

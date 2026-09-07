@@ -3,8 +3,9 @@ Backend interface used by the API layer.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import Any, Literal
 
 from ragu.api.config import ServiceSettings
 from ragu.api.errors import CapabilityUnavailableError, InvalidRequestError
@@ -207,6 +208,21 @@ class SearchCall:
         return self.queries[0]
 
 
+@dataclass(frozen=True, slots=True)
+class SearchStreamEvent:
+    """
+    One event of a streamed answer, before it is framed as SSE.
+
+    ``meta`` carries the retrieval and the engine report and arrives once, before
+    any text; ``delta`` carries the next chunk of the answer; ``done`` closes the
+    stream with the final engine report; ``error`` reports a failure that struck
+    after the response headers were already sent.
+    """
+
+    event: Literal["meta", "delta", "done", "error"]
+    data: dict[str, Any]
+
+
 @dataclass
 class SearchOutcome:
     """
@@ -361,6 +377,20 @@ class SearchBackend(ABC):
         """
         if not outcome.sources:
             raise self.no_evidence(mode)
+
+    @abstractmethod
+    def stream(self, call: SearchCall) -> AsyncIterator[SearchStreamEvent]:
+        """
+        Stream the answer to a single query.
+
+        Implementations are async generators. Readiness and capability are
+        checked by the caller before the response starts, so that a graph which
+        cannot serve the mode fails with a status code rather than inside an
+        already-open stream.
+
+        :param call: The resolved request; only the first query is streamed.
+        :return: Async iterator of stream events.
+        """
 
     @abstractmethod
     async def search(self, call: SearchCall) -> list[SearchOutcome]:

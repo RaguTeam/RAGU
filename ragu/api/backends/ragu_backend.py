@@ -4,6 +4,7 @@ Adapter over the RAGU engines.
 
 import asyncio
 import os
+from collections.abc import AsyncIterator
 from typing import Any
 
 from ragu import (
@@ -20,6 +21,7 @@ from ragu import (
 )
 from ragu.api.backends.base import (
     GraphStats,
+    SearchStreamEvent,
     RetrieveOutcome,
     SearchBackend,
     SearchCall,
@@ -332,6 +334,54 @@ class RaguBackend(SearchBackend):
             query_plan=query_plan,
             degraded=any(not report.ok for report in reports),
             children=reports,
+        )
+
+    async def stream(self, call: SearchCall) -> AsyncIterator[SearchStreamEvent]:
+        engine, children = self._engine_for(call)
+        engine_name = type(engine).__name__
+        params = self.bound_params(call.params) if call.params is not None else None
+        if call.use_query_plan:
+            engine = QueryPlanEngine(engine)
+
+        started = False
+        try:
+            async for event in engine.stream_query(call.query, params):
+                if not started:
+                    started = True
+                    yield SearchStreamEvent(
+                        "meta",
+                        {
+                            "query": call.query,
+                            "mode": call.mode,
+                            "sources": [
+                                source.model_dump()
+                                for source in extract_sources(event.retrieval)
+                            ],
+                            "engines": self._report(
+                                call,
+                                engine_name,
+                                children,
+                                query_plan=call.use_query_plan,
+                            ).model_dump(),
+                        },
+                    )
+                if event.delta:
+                    yield SearchStreamEvent("delta", {"text": event.delta})
+        except Exception as exc:
+            logger.exception("RAGU {} stream failed", call.mode)
+            yield SearchStreamEvent(
+                "error",
+                {"code": "INTERNAL_ERROR", "message": f"The {call.mode} search engine failed."},
+            )
+            return
+
+        yield SearchStreamEvent(
+            "done",
+            {
+                "engines": self._report(
+                    call, engine_name, children, query_plan=call.use_query_plan
+                ).model_dump()
+            },
         )
 
     async def search(self, call: SearchCall) -> list[SearchOutcome]:
