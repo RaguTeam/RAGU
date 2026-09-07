@@ -25,12 +25,7 @@ from ragu.triplet.prompts import (
     TWO_STAGE_RELATION_EXTRACTION_INSTRUCTION,
     TWO_STAGE_RELATION_VALIDATION_INSTRUCTION,
 )
-from ragu.triplet.ontology import (
-    Ontology,
-    OntologyValidator,
-    ValidationPolicies,
-    resolve_ontology,
-)
+from ragu.triplet.ontology import Ontology, ValidationPolicies
 
 #: Stage model produced by one extraction/validation step.
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -87,22 +82,19 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
             "relation_extraction": TWO_STAGE_RELATION_EXTRACTION_INSTRUCTION,
             "relation_validation": TWO_STAGE_RELATION_VALIDATION_INSTRUCTION,
         }
-        resolved = resolve_ontology(ontology)
-        super().__init__(
-            prompts=prompts,
-            validator=OntologyValidator(resolved, validation) if resolved else None,
-        )
+        super().__init__(prompts=prompts, ontology=ontology, validation=validation)
 
         self.llm = llm
         self.embedder = embedder
         self.language = language if language else Settings.language
-        self.ontology = resolved
         self.show_type_signatures = show_type_signatures
         self.prune_relation_types = prune_relation_types
-        self.entity_types = resolved.render_entity_types() if resolved else None
+        self.entity_types = (
+            self.ontology.render_entity_types() if self.ontology else None
+        )
         self.relation_types = (
-            resolved.render_relation_types(with_signatures=show_type_signatures)
-            if resolved
+            self.ontology.render_relation_types(with_signatures=show_type_signatures)
+            if self.ontology
             else None
         )
 

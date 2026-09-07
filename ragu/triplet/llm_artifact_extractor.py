@@ -14,12 +14,7 @@ from ragu.graph.types import Entity, Relation
 from ragu.models.llm import LLM
 from ragu.models.embedder import Embedder
 from ragu.triplet.base_artifact_extractor import BaseArtifactExtractor
-from ragu.triplet.ontology import (
-    Ontology,
-    OntologyValidator,
-    ValidationPolicies,
-    resolve_ontology,
-)
+from ragu.triplet.ontology import Ontology, ValidationPolicies
 
 
 class ArtifactsExtractorLLM(BaseArtifactExtractor):
@@ -67,22 +62,19 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             then has to discard.
         """
         _PROMPTS = ["artifact_extraction", "artifact_validation"]
-        resolved = resolve_ontology(ontology)
-        super().__init__(
-            prompts=_PROMPTS,
-            validator=OntologyValidator(resolved, validation) if resolved else None,
-        )
+        super().__init__(prompts=_PROMPTS, ontology=ontology, validation=validation)
 
         self.llm = llm
         self.embedder = embedder
         self.do_validation = do_validation
         self.language = language if language else Settings.language
-        self.ontology = resolved
         self.show_type_signatures = show_type_signatures
-        self.entity_types = resolved.render_entity_types() if resolved else None
+        self.entity_types = (
+            self.ontology.render_entity_types() if self.ontology else None
+        )
         self.relation_types = (
-            resolved.render_relation_types(with_signatures=show_type_signatures)
-            if resolved
+            self.ontology.render_relation_types(with_signatures=show_type_signatures)
+            if self.ontology
             else None
         )
 

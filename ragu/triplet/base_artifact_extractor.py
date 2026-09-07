@@ -8,7 +8,12 @@ from ragu.common.prompts.default_models import EntityModel, RelationModel
 from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.graph.types import Entity, Relation
 from ragu.common.base import RaguGenerativeModule
-from ragu.triplet.ontology import OntologyValidator
+from ragu.triplet.ontology import (
+    Ontology,
+    OntologyValidator,
+    ValidationPolicies,
+    resolve_ontology,
+)
 
 
 class BaseArtifactExtractor(RaguGenerativeModule, ABC):
@@ -23,17 +28,24 @@ class BaseArtifactExtractor(RaguGenerativeModule, ABC):
     def __init__(
         self,
         prompts: list[str] | dict[str, RAGUInstruction],
-        validator: OntologyValidator | None = None,
+        ontology: Ontology | str | None = None,
+        validation: ValidationPolicies = ValidationPolicies(),
     ) -> None:
         """
         Initialize a new :class:`BaseArtifactExtractor`.
 
         :param prompts: One or more prompt templates used for extraction or validation.
-        :param validator: Ontology enforcement applied to extracted artifacts, or
+        :param ontology: Vocabulary the extraction is restricted to: an
+            :class:`~ragu.triplet.ontology.Ontology`, the name of a built-in one, or
             ``None`` to accept whatever the model produced.
+        :param validation: What to do about artifacts that violate the ontology.
+            Ignored when ``ontology`` is ``None``.
         """
         super().__init__(prompts)
-        self.validator = validator
+        self.ontology = resolve_ontology(ontology)
+        self.validator: OntologyValidator | None = (
+            OntologyValidator(self.ontology, validation) if self.ontology else None
+        )
 
     def _apply_ontology(
         self,
