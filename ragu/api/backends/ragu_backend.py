@@ -18,10 +18,16 @@ from ragu import (
     NaiveSearchEngine,
     Settings,
 )
-from ragu.api.backends.base import GraphStats, SearchBackend, SearchOutcome
+from ragu.api.backends.base import (
+    GraphStats,
+    RetrieveOutcome,
+    SearchBackend,
+    SearchCall,
+    SearchOutcome,
+)
 from ragu.api.config import ServiceSettings
 from ragu.api.errors import BackendExecutionError, ServiceNotReadyError
-from ragu.api.mapping import to_outcome
+from ragu.api.mapping import extract_sources, to_outcome
 from ragu.api.models import ChildEngineReport, EngineReport, SearchMode
 from ragu.common.logger import logger
 from ragu.models.llm import LLM
@@ -272,143 +278,105 @@ class RaguBackend(SearchBackend):
             community_summaries=len(summaries),
         )
 
-    async def _query(
-        self,
-        mode: SearchMode,
-        engine: BaseEngine[Any, Any],
-        query: str,
-        params: Any,
-        *,
-        use_query_plan: bool,
-        children: tuple[RecordingEngine, ...] = (),
-    ) -> SearchOutcome:
+    def _engine_for(self, call: SearchCall) -> tuple[Any, tuple[RecordingEngine, ...]]:
         """
-        Run one search and normalize the engine response.
+        Build the engine that answers this call.
 
-        :param mode: Search mode to run.
-        :param engine: Engine that answers the query.
-        :param query: Client query.
-        :param params: Engine parameters, already clamped.
-        :param use_query_plan: Whether to decompose the query first.
-        :param children: Recording proxies of an ensemble's child engines, so
-            the response can report which of them contributed.
-        :return: Normalized outcome.
-        :raises CapabilityUnavailableError: If this query retrieved nothing.
-        :raises BackendExecutionError: If the engine itself failed.
-        """
-        engine_name = type(engine).__name__
-        try:
-            if use_query_plan:
-                engine = QueryPlanEngine(engine)
-            response = await engine.query(query, params)
-        except Exception as exc:
-            logger.exception("RAGU {} search failed", mode)
-            raise BackendExecutionError(mode=mode, detail=str(exc)) from exc
+        Every mode but ``mix`` uses the engine cached at startup. ``mix`` is
+        assembled per request: ``MixSearchEngine`` reads its children's
+        parameters from the constructor — ``batch_search`` ignores its ``params``
+        argument and ``batch_query`` reads only ``ensemble_responses`` — so the
+        ensemble cannot be built once and parameterized later.
 
-        answer, sources, subqueries = to_outcome(
-            response, used_query_plan=use_query_plan
-        )
-        reports = [child.report() for child in children]
-        if not sources:
-            raise self.no_evidence(mode)
-        return SearchOutcome(
-            answer=answer,
-            sources=sources,
-            subqueries=subqueries,
-            engines=EngineReport(
-                requested=mode,
-                used=engine_name,
-                query_plan=use_query_plan,
-                degraded=any(not report.ok for report in reports),
-                children=reports,
-            ),
-        )
-
-    def _ready(self, mode: SearchMode) -> BaseEngine[Any, Any]:
-        """
-        Resolve the engine for a mode, refusing what this graph cannot serve.
-
-        The capability check runs before generation: the engines answer
-        confidently from an empty context, so a graph that cannot serve the mode
-        would otherwise be paid for and then discarded.
-
-        :param mode: Search mode about to run.
-        :return: The cached engine for that mode.
+        :param call: The resolved request.
+        :return: The engine, and the recording proxies of its children if any.
         :raises ServiceNotReadyError: If the graph is not loaded.
         :raises CapabilityUnavailableError: If the graph cannot serve the mode.
         """
         if not self.graph_loaded:
-            raise ServiceNotReadyError("Knowledge graph is not loaded yet.", mode=mode)
-        self.require_capability(mode)
-        return self._engines[mode]
+            raise ServiceNotReadyError(
+                "Knowledge graph is not loaded yet.", mode=call.mode
+            )
+        self.require_capability(call.mode)
 
-    async def search_global(
-        self, query: str, *, params: GlobalSearchParams
-    ) -> SearchOutcome:
-        engine = self._ready("global")
-        return await self._query(
-            "global", engine, query, self.bound_params(params), use_query_plan=False
-        )
+        if call.mode != "mix":
+            return self._engines[call.mode], ()
 
-    async def search_local(
-        self, query: str, *, use_query_plan: bool, params: LocalParams
-    ) -> SearchOutcome:
-        engine = self._ready("local")
-        return await self._query(
-            "local",
-            engine,
-            query,
-            self.bound_params(params),
-            use_query_plan=use_query_plan,
-        )
-
-    async def search_naive(
-        self, query: str, *, use_query_plan: bool, params: NaiveSearchParams
-    ) -> SearchOutcome:
-        engine = self._ready("naive")
-        return await self._query(
-            "naive",
-            engine,
-            query,
-            self.bound_params(params),
-            use_query_plan=use_query_plan,
-        )
-
-    async def search_mix(
-        self,
-        query: str,
-        *,
-        use_query_plan: bool,
-        params: MixQueryParams,
-        local_params: LocalParams,
-        naive_params: NaiveSearchParams,
-    ) -> SearchOutcome:
-        # MixSearchEngine reads its children's parameters from the constructor —
-        # batch_search ignores the params argument entirely and batch_query reads
-        # only ensemble_responses from it — so the ensemble is assembled per
-        # request around the cached child engines rather than cached itself.
         children = (
-            RecordingEngine(self._ready("local"), "local"),
-            RecordingEngine(self._ready("naive"), "naive"),
+            RecordingEngine(self._engines["local"], "local"),
+            RecordingEngine(self._engines["naive"], "naive"),
         )
-        self.require_capability("mix")
         engine = MixSearchEngine(
             llm=self._require_llm(),
             engines=list(children),
             engine_params=[
-                self.bound_params(local_params),
-                self.bound_params(naive_params),
+                self.bound_params(call.local_params or LocalParams()),
+                self.bound_params(call.naive_params or NaiveSearchParams()),
             ],
             language=self.settings.language,
         )
-        return await self._query(
-            "mix",
-            engine,
-            query,
-            params,
-            use_query_plan=use_query_plan,
-            children=children,
+        return engine, children
+
+    def _report(
+        self,
+        call: SearchCall,
+        engine_name: str,
+        children: tuple[RecordingEngine, ...],
+        *,
+        query_plan: bool,
+    ) -> EngineReport:
+        reports = [child.report() for child in children]
+        return EngineReport(
+            requested=call.mode,
+            used=engine_name,
+            query_plan=query_plan,
+            degraded=any(not report.ok for report in reports),
+            children=reports,
         )
+
+    async def search(self, call: SearchCall) -> SearchOutcome:
+        engine, children = self._engine_for(call)
+        engine_name = type(engine).__name__
+        params = self.bound_params(call.params) if call.params is not None else None
+
+        try:
+            if call.use_query_plan:
+                engine = QueryPlanEngine(engine)
+            response = await engine.query(call.query, params)
+        except Exception as exc:
+            logger.exception("RAGU {} search failed", call.mode)
+            raise BackendExecutionError(mode=call.mode, detail=str(exc)) from exc
+
+        answer, sources, subqueries = to_outcome(
+            response, used_query_plan=call.use_query_plan
+        )
+        report = self._report(
+            call, engine_name, children, query_plan=call.use_query_plan
+        )
+        if not sources:
+            raise self.no_evidence(call.mode)
+        return SearchOutcome(
+            answer=answer, sources=sources, subqueries=subqueries, engines=report
+        )
+
+    async def retrieve(self, call: SearchCall) -> RetrieveOutcome:
+        engine, children = self._engine_for(call)
+        params = self.bound_params(call.params) if call.params is not None else None
+
+        try:
+            # No QueryPlanEngine here: its batch_search delegates straight to the
+            # wrapped engine, so wrapping would only imply planning that does not
+            # happen.
+            retrieval = await engine.search(call.query, params)
+        except Exception as exc:
+            logger.exception("RAGU {} retrieval failed", call.mode)
+            raise BackendExecutionError(mode=call.mode, detail=str(exc)) from exc
+
+        sources = extract_sources(retrieval)
+        report = self._report(call, type(engine).__name__, children, query_plan=False)
+        if not sources:
+            raise self.no_evidence(call.mode)
+        return RetrieveOutcome(sources=sources, engines=report)
 
     def _require_llm(self) -> LLM:
         """

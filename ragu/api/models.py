@@ -146,6 +146,57 @@ class SearchResponse(BaseModel):
     )
 
 
+class GlobalRetrieveRequest(BaseModel):
+    """
+    Retrieval-only request.
+
+    No ``use_query_plan``: ``QueryPlanEngine.batch_search`` delegates straight to
+    the wrapped engine and does no planning, so accepting the flag would promise
+    a decomposition that never happens.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, description="Search query")
+    params: GlobalSearchParams = Field(default_factory=GlobalSearchParams)
+
+
+class LocalRetrieveRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, description="Search query")
+    params: LocalParams = Field(default_factory=LocalParams)
+
+
+class NaiveRetrieveRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, description="Search query")
+    params: NaiveSearchParams = Field(default_factory=NaiveSearchParams)
+
+
+class MixRetrieveRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, description="Search query")
+    params: MixQueryParams = Field(default_factory=MixQueryParams)
+    local_params: LocalParams = Field(default_factory=LocalParams)
+    naive_params: NaiveSearchParams = Field(default_factory=NaiveSearchParams)
+
+
+class RetrieveResponse(BaseModel):
+    """
+    Context gathered for a query, with no answer generated for it.
+    """
+
+    query: str
+    mode: SearchMode
+    sources: list[SourceItem] = Field(default_factory=list)
+    engines: EngineReport = Field(
+        description="What actually ran, including child-engine failures"
+    )
+
+
 class ErrorBody(BaseModel):
     code: str
     mode: str | None = None

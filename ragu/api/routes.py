@@ -5,18 +5,30 @@ Separate paths let a gateway apply per-mode timeouts and rate limits without
 any change in the service (see the spec, "Per-route policy").
 """
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, Request, Response
 
-from ragu.api.backends.base import SearchBackend, SearchOutcome
+from ragu.api.backends.base import (
+    RetrieveOutcome,
+    SearchBackend,
+    SearchCall,
+    SearchOutcome,
+)
 from ragu.api.errors import RETRY_AFTER_SECONDS, ServiceNotReadyError
 from ragu.api.models import (
     EngineReport,
     ErrorResponse,
+    GlobalRetrieveRequest,
     GlobalSearchRequest,
     HealthResponse,
+    LocalRetrieveRequest,
     LocalSearchRequest,
+    MixRetrieveRequest,
     MixSearchRequest,
+    NaiveRetrieveRequest,
     NaiveSearchRequest,
+    RetrieveResponse,
     SearchMode,
     SearchResponse,
 )
@@ -36,30 +48,25 @@ SEARCH_RESPONSES = {
 }
 
 
-def _response(
-    query: str,
-    mode: SearchMode,
-    used_query_plan: bool,
-    outcome: SearchOutcome,
-) -> SearchResponse:
+def _response(call: SearchCall, outcome: SearchOutcome) -> SearchResponse:
     """
     Render one search outcome as the wire response.
 
-    :param query: The client's query, echoed back.
-    :param mode: Mode the client asked for.
-    :param used_query_plan: Whether decomposition was requested.
+    :param call: The resolved request.
     :param outcome: Normalized backend outcome.
     :return: The response body.
     """
     return SearchResponse(
-        query=query,
-        mode=mode,
-        used_query_plan=used_query_plan,
+        query=call.query,
+        mode=call.mode,
+        used_query_plan=call.use_query_plan,
         answer=outcome.answer,
         sources=outcome.sources,
         subqueries=outcome.subqueries,
         engines=outcome.engines
-        or EngineReport(requested=mode, used="unknown", query_plan=used_query_plan),
+        or EngineReport(
+            requested=call.mode, used="unknown", query_plan=call.use_query_plan
+        ),
     )
 
 
@@ -138,6 +145,33 @@ async def health_ready(request: Request, response: Response) -> HealthResponse:
     return payload
 
 
+def _call(mode: SearchMode, payload: Any) -> SearchCall:
+    """
+    Build a backend call from any of the search or retrieve request models.
+
+    :param mode: Mode the route serves.
+    :param payload: The validated request body.
+    :return: The resolved call.
+    """
+    return SearchCall(
+        mode=mode,
+        query=payload.query,
+        params=payload.params,
+        local_params=getattr(payload, "local_params", None),
+        naive_params=getattr(payload, "naive_params", None),
+        use_query_plan=getattr(payload, "use_query_plan", False),
+    )
+
+
+def _retrieved(call: SearchCall, outcome: RetrieveOutcome) -> RetrieveResponse:
+    return RetrieveResponse(
+        query=call.query,
+        mode=call.mode,
+        sources=outcome.sources,
+        engines=outcome.engines or EngineReport(requested=call.mode, used="unknown"),
+    )
+
+
 @router.post(
     "/v1/search/global", response_model=SearchResponse, responses=SEARCH_RESPONSES
 )
@@ -145,8 +179,8 @@ async def search_global(
     payload: GlobalSearchRequest,
     backend: SearchBackend = Depends(get_backend),
 ) -> SearchResponse:
-    outcome = await backend.search_global(payload.query, params=payload.params)
-    return _response(payload.query, "global", False, outcome)
+    call = _call("global", payload)
+    return _response(call, await backend.search(call))
 
 
 @router.post(
@@ -156,12 +190,8 @@ async def search_local(
     payload: LocalSearchRequest,
     backend: SearchBackend = Depends(get_backend),
 ) -> SearchResponse:
-    outcome = await backend.search_local(
-        payload.query,
-        use_query_plan=payload.use_query_plan,
-        params=payload.params,
-    )
-    return _response(payload.query, "local", payload.use_query_plan, outcome)
+    call = _call("local", payload)
+    return _response(call, await backend.search(call))
 
 
 @router.post(
@@ -171,12 +201,8 @@ async def search_naive(
     payload: NaiveSearchRequest,
     backend: SearchBackend = Depends(get_backend),
 ) -> SearchResponse:
-    outcome = await backend.search_naive(
-        payload.query,
-        use_query_plan=payload.use_query_plan,
-        params=payload.params,
-    )
-    return _response(payload.query, "naive", payload.use_query_plan, outcome)
+    call = _call("naive", payload)
+    return _response(call, await backend.search(call))
 
 
 @router.post(
@@ -192,11 +218,60 @@ async def search_mix(
     Child failures are tolerated by the ensemble, so ``engines`` in the response
     reports which children actually contributed.
     """
-    outcome = await backend.search_mix(
-        payload.query,
-        use_query_plan=payload.use_query_plan,
-        params=payload.params,
-        local_params=payload.local_params,
-        naive_params=payload.naive_params,
-    )
-    return _response(payload.query, "mix", payload.use_query_plan, outcome)
+    call = _call("mix", payload)
+    return _response(call, await backend.search(call))
+
+
+@router.post(
+    "/v1/search/global/retrieve",
+    response_model=RetrieveResponse,
+    responses=SEARCH_RESPONSES,
+)
+async def retrieve_global(
+    payload: GlobalRetrieveRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> RetrieveResponse:
+    call = _call("global", payload)
+    return _retrieved(call, await backend.retrieve(call))
+
+
+@router.post(
+    "/v1/search/local/retrieve",
+    response_model=RetrieveResponse,
+    responses=SEARCH_RESPONSES,
+)
+async def retrieve_local(
+    payload: LocalRetrieveRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> RetrieveResponse:
+    call = _call("local", payload)
+    return _retrieved(call, await backend.retrieve(call))
+
+
+@router.post(
+    "/v1/search/naive/retrieve",
+    response_model=RetrieveResponse,
+    responses=SEARCH_RESPONSES,
+)
+async def retrieve_naive(
+    payload: NaiveRetrieveRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> RetrieveResponse:
+    call = _call("naive", payload)
+    return _retrieved(call, await backend.retrieve(call))
+
+
+@router.post(
+    "/v1/search/mix/retrieve",
+    response_model=RetrieveResponse,
+    responses=SEARCH_RESPONSES,
+)
+async def retrieve_mix(
+    payload: MixRetrieveRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> RetrieveResponse:
+    """
+    Gather context from both child engines without generating an answer.
+    """
+    call = _call("mix", payload)
+    return _retrieved(call, await backend.retrieve(call))

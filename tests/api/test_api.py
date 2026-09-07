@@ -11,7 +11,7 @@ pytest.importorskip(
 from fastapi.testclient import TestClient  # noqa: E402
 
 from ragu.api.app import UNHANDLED_ERROR_MESSAGE, create_app
-from ragu.api.backends.base import GraphStats
+from ragu.api.backends.base import GraphStats, SearchCall
 from ragu.api.config import ServiceSettings
 from ragu.api.mapping import extract_sources, extract_subqueries, to_outcome
 from ragu.chunker.types import Chunk
@@ -518,21 +518,28 @@ class TestEngineInvocation:
     class FakeEngine:
         def __init__(self):
             self.calls = []
+            self.retrievals = []
             self.llm = object()
             self.result = NaiveSearchResult(chunks=[make_chunk("text")], scores=[0.5])
 
         async def query(self, query, params=None):
             self.calls.append((query, params))
-            retrieval = NaiveSearchRetrieve(query=query, result=self.result)
             return SearchEngineResponse(
-                query=query, response="ответ", retrieval=retrieval
+                query=query,
+                response="ответ",
+                retrieval=NaiveSearchRetrieve(query=query, result=self.result),
             )
+
+        async def search(self, query, params=None):
+            self.retrievals.append((query, params))
+            return NaiveSearchRetrieve(query=query, result=self.result)
 
     def build_backend(self, **overrides):
         from ragu.api.backends.ragu_backend import RaguBackend
 
         backend = RaguBackend(ServiceSettings(backend="ragu", **overrides))
         backend.graph = object()
+        backend._llm = object()
         backend._stats = GraphStats(
             entities=1, relations=1, chunks=1, community_summaries=1
         )
@@ -543,10 +550,12 @@ class TestEngineInvocation:
     async def test_local_search_passes_context_flags_as_params(self):
         backend, engines = self.build_backend()
 
-        outcome = await backend.search_local(
-            "кто написал",
-            use_query_plan=False,
-            params=LocalParams(top_k=5, use_summary=False, use_chunks=True),
+        outcome = await backend.search(
+            SearchCall(
+                mode="local",
+                query="кто написал",
+                params=LocalParams(top_k=5, use_summary=False, use_chunks=True),
+            )
         )
 
         query, params = engines["local"].calls[0]
@@ -559,8 +568,8 @@ class TestEngineInvocation:
     async def test_naive_search_passes_top_k(self):
         backend, engines = self.build_backend()
 
-        await backend.search_naive(
-            "версия", use_query_plan=False, params=NaiveSearchParams(top_k=7)
+        await backend.search(
+            SearchCall(mode="naive", query="версия", params=NaiveSearchParams(top_k=7))
         )
 
         _, params = engines["naive"].calls[0]
@@ -570,7 +579,7 @@ class TestEngineInvocation:
         backend, engines = self.build_backend()
         params = GlobalSearchParams(min_cluster_size=3)
 
-        await backend.search_global("тренды", params=params)
+        await backend.search(SearchCall(mode="global", query="тренды", params=params))
 
         assert engines["global"].calls == [("тренды", params)]
 
@@ -584,16 +593,7 @@ class TestEngineInvocation:
         engines[mode].result = NaiveSearchResult()
 
         with pytest.raises(CapabilityUnavailableError) as failure:
-            if mode == "global":
-                await backend.search_global("q", params=GlobalSearchParams())
-            elif mode == "local":
-                await backend.search_local(
-                    "q", use_query_plan=False, params=LocalParams()
-                )
-            else:
-                await backend.search_naive(
-                    "q", use_query_plan=False, params=NaiveSearchParams()
-                )
+            await backend.search(SearchCall(mode=mode, query="q"))
         assert failure.value.mode == mode
         assert failure.value.status_code == 409
         assert failure.value.missing_capability is None
@@ -617,16 +617,7 @@ class TestEngineInvocation:
         backend._stats = stats
 
         with pytest.raises(CapabilityUnavailableError) as failure:
-            if mode == "global":
-                await backend.search_global("q", params=GlobalSearchParams())
-            elif mode == "local":
-                await backend.search_local(
-                    "q", use_query_plan=False, params=LocalParams()
-                )
-            else:
-                await backend.search_naive(
-                    "q", use_query_plan=False, params=NaiveSearchParams()
-                )
+            await backend.search(SearchCall(mode=mode, query="q"))
 
         assert failure.value.missing_capability == capability
         assert engines[mode].calls == []
@@ -634,12 +625,41 @@ class TestEngineInvocation:
     async def test_evidence_is_returned_as_an_answer(self):
         backend, _ = self.build_backend()
 
-        outcome = await backend.search_naive(
-            "q", use_query_plan=False, params=NaiveSearchParams()
-        )
+        outcome = await backend.search(SearchCall(mode="naive", query="q"))
 
         assert outcome.answer == "ответ"
         assert len(outcome.sources) == 1
+
+    async def test_retrieval_skips_generation_entirely(self):
+        backend, engines = self.build_backend()
+
+        outcome = await backend.retrieve(
+            SearchCall(mode="naive", query="q", params=NaiveSearchParams(top_k=2))
+        )
+
+        assert engines["naive"].calls == []
+        assert engines["naive"].retrievals[0][0] == "q"
+        assert [source.type for source in outcome.sources] == ["chunk"]
+        assert outcome.engines.query_plan is False
+
+    async def test_retrieval_is_not_wrapped_in_a_query_plan(self, monkeypatch):
+        # QueryPlanEngine.batch_search delegates to the wrapped engine and does
+        # no planning, so wrapping would only imply a decomposition that never
+        # happens.
+        class ForbiddenPlanEngine:
+            def __init__(self, engine, *args, **kwargs):
+                raise AssertionError("retrieval must not be wrapped in a query plan")
+
+        monkeypatch.setattr(
+            "ragu.api.backends.ragu_backend.QueryPlanEngine", ForbiddenPlanEngine
+        )
+        backend, _ = self.build_backend()
+
+        outcome = await backend.retrieve(
+            SearchCall(mode="naive", query="q", use_query_plan=True)
+        )
+
+        assert outcome.sources
 
     async def test_query_plan_wraps_the_engine_with_no_extra_arguments(
         self, monkeypatch
@@ -662,8 +682,13 @@ class TestEngineInvocation:
         )
         backend, engines = self.build_backend()
 
-        await backend.search_naive(
-            "версия", use_query_plan=True, params=NaiveSearchParams(top_k=3)
+        await backend.search(
+            SearchCall(
+                mode="naive",
+                query="версия",
+                params=NaiveSearchParams(top_k=3),
+                use_query_plan=True,
+            )
         )
 
         # RAGU 0.0.5 dropped the `language` argument; anything extra here is a
@@ -685,7 +710,9 @@ class TestEngineInvocation:
         backend, _ = self.build_backend()
 
         with pytest.raises(BackendExecutionError) as failure:
-            await backend.search_local("q", use_query_plan=True, params=LocalParams())
+            await backend.search(
+                SearchCall(mode="local", query="q", use_query_plan=True)
+            )
         assert failure.value.mode == "local"
         assert failure.value.detail == "unexpected keyword argument"
         # The exception text belongs in the log, not in the client's message.
@@ -696,8 +723,10 @@ class TestEngineInvocation:
         # from the request body.
         backend, engines = self.build_backend(max_top_k=50)
 
-        await backend.search_naive(
-            "версия", use_query_plan=False, params=NaiveSearchParams(top_k=10_000)
+        await backend.search(
+            SearchCall(
+                mode="naive", query="версия", params=NaiveSearchParams(top_k=10_000)
+            )
         )
 
         assert engines["naive"].calls[0][1].top_k == 50
@@ -705,10 +734,12 @@ class TestEngineInvocation:
     async def test_rerank_top_k_is_clamped_too(self):
         backend, engines = self.build_backend(max_top_k=50)
 
-        await backend.search_naive(
-            "версия",
-            use_query_plan=False,
-            params=NaiveSearchParams(top_k=10, rerank_top_k=9_000),
+        await backend.search(
+            SearchCall(
+                mode="naive",
+                query="версия",
+                params=NaiveSearchParams(top_k=10, rerank_top_k=9_000),
+            )
         )
 
         assert engines["naive"].calls[0][1].rerank_top_k == 50
@@ -717,7 +748,7 @@ class TestEngineInvocation:
         backend, engines = self.build_backend()
         params = NaiveSearchParams(top_k=5, rerank_top_k=2)
 
-        await backend.search_naive("версия", use_query_plan=False, params=params)
+        await backend.search(SearchCall(mode="naive", query="версия", params=params))
 
         assert engines["naive"].calls[0][1] is params
 
@@ -733,7 +764,7 @@ class TestEngineInvocation:
         )
         backend, engines = self.build_backend()
 
-        await backend.search_global("тренды", params=GlobalSearchParams())
+        await backend.search(SearchCall(mode="global", query="тренды"))
 
         assert len(engines["global"].calls) == 1
 
@@ -1074,12 +1105,14 @@ class TestMixDegradation:
         # still comes back — built on chunks alone.
         backend = self.build_backend()
 
-        outcome = await backend.search_mix(
-            "q",
-            use_query_plan=False,
-            params=MixQueryParams(),
-            local_params=LocalParams(),
-            naive_params=NaiveSearchParams(top_k=1),
+        outcome = await backend.search(
+            SearchCall(
+                mode="mix",
+                query="q",
+                params=MixQueryParams(),
+                local_params=LocalParams(),
+                naive_params=NaiveSearchParams(top_k=1),
+            )
         )
 
         assert outcome.answer == "синтез"
@@ -1096,13 +1129,71 @@ class TestMixDegradation:
         backend = self.build_backend()
         backend._engines["local"] = self.WorkingChild(backend._llm)
 
-        outcome = await backend.search_mix(
-            "q",
-            use_query_plan=False,
-            params=MixQueryParams(),
-            local_params=LocalParams(),
-            naive_params=NaiveSearchParams(top_k=1),
+        outcome = await backend.search(
+            SearchCall(
+                mode="mix",
+                query="q",
+                params=MixQueryParams(),
+                local_params=LocalParams(),
+                naive_params=NaiveSearchParams(top_k=1),
+            )
         )
 
         assert outcome.engines.degraded is False
         assert all(child.ok for child in outcome.engines.children)
+
+
+class TestRetrieveRoutes:
+    """Context without generation, for clients that answer for themselves."""
+
+    @pytest.mark.parametrize("mode", ["global", "local", "naive", "mix"])
+    def test_retrieve_returns_context_and_no_answer(self, mode):
+        with build_client() as client:
+            body = client.post(
+                f"/v1/search/{mode}/retrieve", json={"query": "q"}
+            ).json()
+        assert body["mode"] == mode
+        assert body["sources"]
+        assert "answer" not in body
+        assert body["engines"]["requested"] == mode
+        assert body["engines"]["query_plan"] is False
+
+    def test_retrieve_rejects_the_query_plan_flag(self):
+        # QueryPlanEngine does not plan for retrieval, so accepting the flag
+        # would promise a decomposition that never happens.
+        with build_client() as client:
+            response = client.post(
+                "/v1/search/local/retrieve",
+                json={"query": "q", "use_query_plan": True},
+            )
+        assert response.status_code == 400
+        assert "use_query_plan" in response.json()["error"]["message"]
+
+    def test_retrieve_honours_engine_parameters(self):
+        with build_client() as client:
+            body = client.post(
+                "/v1/search/naive/retrieve",
+                json={"query": "q", "params": {"top_k": 3}},
+            ).json()
+        assert len(body["sources"]) == 3
+
+    def test_retrieve_bounds_are_applied(self):
+        with build_client(max_top_k=2) as client:
+            body = client.post(
+                "/v1/search/naive/retrieve",
+                json={"query": "q", "params": {"top_k": 500}},
+            ).json()
+        assert len(body["sources"]) == 2
+
+    def test_retrieve_reports_a_missing_capability(self):
+        with build_client(missing="entity_graph") as client:
+            response = client.post("/v1/search/local/retrieve", json={"query": "q"})
+        assert response.status_code == 409
+        assert response.json()["error"]["missing_capability"] == "entity_graph"
+
+    def test_mix_retrieve_names_both_children(self):
+        with build_client() as client:
+            engines = client.post(
+                "/v1/search/mix/retrieve", json={"query": "q"}
+            ).json()["engines"]
+        assert [child["mode"] for child in engines["children"]] == ["local", "naive"]

@@ -5,7 +5,13 @@ Serves deterministic canned answers without a real graph, so the agent side can
 be exercised end-to-end without building a knowledge graph.
 """
 
-from ragu.api.backends.base import GraphStats, SearchBackend, SearchOutcome
+from ragu.api.backends.base import (
+    GraphStats,
+    RetrieveOutcome,
+    SearchBackend,
+    SearchCall,
+    SearchOutcome,
+)
 from ragu.api.config import ServiceSettings
 from ragu.api.models import (
     ChildEngineReport,
@@ -74,128 +80,95 @@ class StubBackend(SearchBackend):
             return []
         return [SubqueryItem(query=query, answer=f"stub answer for '{query}'")]
 
-    def _finish(
-        self,
-        mode: SearchMode,
-        answer: str,
-        sources: list[SourceItem],
-        subqueries: list[SubqueryItem],
-        children: list[ChildEngineReport] | None = None,
-    ) -> SearchOutcome:
+    def _sources_for(self, call: SearchCall) -> list[SourceItem]:
         """
-        Apply the same no-evidence rule the real backend applies.
-
-        :raises CapabilityUnavailableError: If the canned retrieval is empty.
+        Canned retrieval for one mode, shaped by the request parameters.
         """
-        if not sources:
-            raise self.no_evidence(mode)
-        reports = children or []
-        return SearchOutcome(
-            answer=answer,
-            sources=sources,
-            subqueries=subqueries,
-            engines=EngineReport(
-                requested=mode,
-                used="StubBackend",
-                query_plan=bool(subqueries),
-                degraded=any(not report.ok for report in reports),
-                children=reports,
-            ),
-        )
-
-    async def search_global(
-        self, query: str, *, params: GlobalSearchParams
-    ) -> SearchOutcome:
-        self.require_capability("global")
-        params = self.bound_params(params)
-        return self._finish(
-            "global",
-            f"[stub global] {query}",
-            [
+        if call.mode == "global":
+            params = self.bound_params(call.params or GlobalSearchParams())
+            return [
                 SourceItem(
                     id="community_1",
                     type="community_summary",
                     content=f"stub community summary (min_cluster_size={params.min_cluster_size})",
                 )
-            ],
-            [],
-        )
+            ]
 
-    async def search_local(
-        self, query: str, *, use_query_plan: bool, params: LocalParams
-    ) -> SearchOutcome:
-        self.require_capability("local")
-        params = self.bound_params(params)
-        sources = [SourceItem(id="entity_1", type="entity", content="stub entity")]
-        if params.use_chunks:
-            sources.append(
-                SourceItem(id="chunk_1", type="chunk", content="stub chunk", score=0.87)
-            )
-        if params.use_summary:
-            sources.append(
-                SourceItem(
-                    id="community_1",
-                    type="community_summary",
-                    content="stub community summary",
+        if call.mode == "local":
+            params = self.bound_params(call.params or LocalParams())
+            sources = [SourceItem(id="entity_1", type="entity", content="stub entity")]
+            if params.use_chunks:
+                sources.append(
+                    SourceItem(
+                        id="chunk_1", type="chunk", content="stub chunk", score=0.87
+                    )
                 )
-            )
-        return self._finish(
-            "local",
-            f"[stub local] {query}",
-            sources,
-            self._subqueries(query, use_query_plan),
-        )
+            if params.use_summary:
+                sources.append(
+                    SourceItem(
+                        id="community_1",
+                        type="community_summary",
+                        content="stub community summary",
+                    )
+                )
+            return sources
 
-    async def search_naive(
-        self, query: str, *, use_query_plan: bool, params: NaiveSearchParams
-    ) -> SearchOutcome:
-        self.require_capability("naive")
-        params = self.bound_params(params)
-        sources = [
+        if call.mode == "mix":
+            naive_params = self.bound_params(call.naive_params or NaiveSearchParams())
+            return [
+                SourceItem(id="entity_1", type="entity", content="stub entity")
+            ] + self._chunks(naive_params.top_k)
+
+        params = self.bound_params(call.params or NaiveSearchParams())
+        return self._chunks(params.top_k)
+
+    @staticmethod
+    def _chunks(top_k: int) -> list[SourceItem]:
+        return [
             SourceItem(
                 id=f"chunk_{i}",
                 type="chunk",
                 content=f"stub chunk {i}",
                 score=round(0.9 - i / 100, 2),
             )
-            for i in range(1, params.top_k + 1)
+            for i in range(1, top_k + 1)
         ]
-        return self._finish(
-            "naive",
-            f"[stub naive] {query}",
-            sources,
-            self._subqueries(query, use_query_plan),
+
+    def _children_for(self, call: SearchCall) -> list[ChildEngineReport]:
+        if call.mode != "mix":
+            return []
+        return [
+            ChildEngineReport(engine="LocalSearchEngine", mode="local", ok=True),
+            ChildEngineReport(engine="NaiveSearchEngine", mode="naive", ok=True),
+        ]
+
+    def _report(self, call: SearchCall, *, query_plan: bool) -> EngineReport:
+        children = self._children_for(call)
+        return EngineReport(
+            requested=call.mode,
+            used="StubBackend",
+            query_plan=query_plan,
+            degraded=any(not child.ok for child in children),
+            children=children,
         )
 
-    async def search_mix(
-        self,
-        query: str,
-        *,
-        use_query_plan: bool,
-        params: MixQueryParams,
-        local_params: LocalParams,
-        naive_params: NaiveSearchParams,
-    ) -> SearchOutcome:
-        self.require_capability("mix")
-        local_params = self.bound_params(local_params)
-        naive_params = self.bound_params(naive_params)
-        sources = [SourceItem(id="entity_1", type="entity", content="stub entity")]
-        sources += [
-            SourceItem(
-                id=f"chunk_{i}",
-                type="chunk",
-                content=f"stub chunk {i}",
-                score=round(0.9 - i / 100, 2),
-            )
-            for i in range(1, naive_params.top_k + 1)
-        ]
-        return self._finish(
-            "mix",
-            f"[stub mix] {query}",
-            sources,
-            self._subqueries(query, use_query_plan),
-            children=[
-                ChildEngineReport(engine="LocalSearchEngine", mode="local", ok=True),
-                ChildEngineReport(engine="NaiveSearchEngine", mode="naive", ok=True),
-            ],
+    async def search(self, call: SearchCall) -> SearchOutcome:
+        self.require_capability(call.mode)
+        sources = self._sources_for(call)
+        if not sources:
+            raise self.no_evidence(call.mode)
+        return SearchOutcome(
+            answer=f"[stub {call.mode}] {call.query}",
+            sources=sources,
+            subqueries=self._subqueries(call.query, call.use_query_plan),
+            engines=self._report(call, query_plan=call.use_query_plan),
+        )
+
+    async def retrieve(self, call: SearchCall) -> RetrieveOutcome:
+        self.require_capability(call.mode)
+        sources = self._sources_for(call)
+        if not sources:
+            raise self.no_evidence(call.mode)
+        return RetrieveOutcome(
+            sources=sources, engines=self._report(call, query_plan=False)
         )

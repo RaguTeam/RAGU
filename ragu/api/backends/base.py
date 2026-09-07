@@ -169,6 +169,34 @@ class GraphStats:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class SearchCall:
+    """
+    One resolved search request, independent of how it arrived.
+
+    Collapsing the per-mode backend methods into a single call object keeps the
+    backend contract at two methods as retrieval, batching and streaming are
+    added, and gives later work (graph selection, per-request budgets) one place
+    to grow.
+
+    :param mode: Search mode to run.
+    :param query: The client's query.
+    :param params: The engine's own parameter object for this mode.
+    :param local_params: Local child parameters; ``mix`` only.
+    :param naive_params: Naive child parameters; ``mix`` only.
+    :param use_query_plan: Whether to decompose the query first. Ignored by
+        retrieval: ``QueryPlanEngine.batch_search`` delegates straight to the
+        wrapped engine and does no planning.
+    """
+
+    mode: SearchMode
+    query: str
+    params: Any = None
+    local_params: LocalParams | None = None
+    naive_params: NaiveSearchParams | None = None
+    use_query_plan: bool = False
+
+
 @dataclass
 class SearchOutcome:
     """
@@ -178,6 +206,16 @@ class SearchOutcome:
     answer: str
     sources: list[SourceItem] = field(default_factory=list)
     subqueries: list[SubqueryItem] = field(default_factory=list)
+    engines: EngineReport | None = None
+
+
+@dataclass
+class RetrieveOutcome:
+    """
+    Normalized result of a retrieval-only call: context, no generation.
+    """
+
+    sources: list[SourceItem] = field(default_factory=list)
     engines: EngineReport | None = None
 
 
@@ -286,27 +324,19 @@ class SearchBackend(ABC):
         )
 
     @abstractmethod
-    async def search_global(
-        self, query: str, *, params: GlobalSearchParams
-    ) -> SearchOutcome: ...
+    async def search(self, call: SearchCall) -> SearchOutcome:
+        """
+        Retrieve context and generate an answer.
+
+        :param call: The resolved request.
+        :return: Answer, flat sources, subqueries and the engine report.
+        """
 
     @abstractmethod
-    async def search_local(
-        self, query: str, *, use_query_plan: bool, params: LocalParams
-    ) -> SearchOutcome: ...
+    async def retrieve(self, call: SearchCall) -> RetrieveOutcome:
+        """
+        Retrieve context without generating an answer.
 
-    @abstractmethod
-    async def search_naive(
-        self, query: str, *, use_query_plan: bool, params: NaiveSearchParams
-    ) -> SearchOutcome: ...
-
-    @abstractmethod
-    async def search_mix(
-        self,
-        query: str,
-        *,
-        use_query_plan: bool,
-        params: MixQueryParams,
-        local_params: LocalParams,
-        naive_params: NaiveSearchParams,
-    ) -> SearchOutcome: ...
+        :param call: The resolved request. ``use_query_plan`` has no effect.
+        :return: Flat sources and the engine report.
+        """
