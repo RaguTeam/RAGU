@@ -197,6 +197,66 @@ class RetrieveResponse(BaseModel):
     )
 
 
+class BatchQueries(BaseModel):
+    """
+    Shared shape of the batch requests: many queries, one mode, one parameter set.
+
+    One mode and one parameter set per batch is what makes the batch worth
+    making: the engines share retrieval across the whole list, and
+    ``QueryPlanEngine`` merges independent subqueries from different top-level
+    queries into the same child batch.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    queries: list[str] = Field(
+        min_length=1, description="Queries to answer in one pass"
+    )
+
+
+class GlobalBatchRequest(BatchQueries):
+    params: GlobalSearchParams = Field(default_factory=GlobalSearchParams)
+
+
+class LocalBatchRequest(BatchQueries):
+    use_query_plan: bool = Field(default=True)
+    params: LocalParams = Field(default_factory=LocalParams)
+
+
+class NaiveBatchRequest(BatchQueries):
+    use_query_plan: bool = Field(default=True)
+    params: NaiveSearchParams = Field(default_factory=NaiveSearchParams)
+
+
+class MixBatchRequest(BatchQueries):
+    use_query_plan: bool = Field(default=True)
+    params: MixQueryParams = Field(default_factory=MixQueryParams)
+    local_params: LocalParams = Field(default_factory=LocalParams)
+    naive_params: NaiveSearchParams = Field(default_factory=NaiveSearchParams)
+
+
+class BatchSearchItem(BaseModel):
+    """
+    One query's result inside a batch.
+
+    A query that retrieved nothing carries ``error`` instead of an answer: one
+    empty query must not fail the whole batch.
+    """
+
+    query: str
+    answer: str = ""
+    sources: list[SourceItem] = Field(default_factory=list)
+    subqueries: list[SubqueryItem] = Field(default_factory=list)
+    error: "ErrorBody | None" = None
+
+
+class BatchSearchResponse(BaseModel):
+    mode: SearchMode
+    used_query_plan: bool
+    engines: EngineReport
+    results: list[BatchSearchItem]
+
+
 class ErrorBody(BaseModel):
     code: str
     mode: str | None = None
@@ -230,3 +290,6 @@ class HealthResponse(BaseModel):
     error: str | None = Field(
         default=None, description="Why the backend is not ready, when it is not"
     )
+
+
+BatchSearchItem.model_rebuild()

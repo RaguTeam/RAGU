@@ -60,6 +60,11 @@ class ServiceSettings(BaseSettings):
         description="Upper bound applied to a client-supplied top_k / rerank_top_k; "
         "requests above it are clamped",
     )
+    max_batch_size: int = Field(
+        default=50,
+        gt=0,
+        description="Maximum number of queries accepted by a /batch route",
+    )
     min_cluster_size_floor: int = Field(
         default=1,
         gt=0,

@@ -17,15 +17,22 @@ from ragu.api.backends.base import (
 )
 from ragu.api.errors import RETRY_AFTER_SECONDS, ServiceNotReadyError
 from ragu.api.models import (
+    BatchSearchItem,
+    BatchSearchResponse,
     EngineReport,
+    ErrorBody,
     ErrorResponse,
+    GlobalBatchRequest,
     GlobalRetrieveRequest,
     GlobalSearchRequest,
     HealthResponse,
+    LocalBatchRequest,
     LocalRetrieveRequest,
     LocalSearchRequest,
+    MixBatchRequest,
     MixRetrieveRequest,
     MixSearchRequest,
+    NaiveBatchRequest,
     NaiveRetrieveRequest,
     NaiveSearchRequest,
     RetrieveResponse,
@@ -155,12 +162,23 @@ def _call(mode: SearchMode, payload: Any) -> SearchCall:
     """
     return SearchCall(
         mode=mode,
-        query=payload.query,
+        queries=(payload.query,),
         params=payload.params,
         local_params=getattr(payload, "local_params", None),
         naive_params=getattr(payload, "naive_params", None),
         use_query_plan=getattr(payload, "use_query_plan", False),
     )
+
+
+async def _one(backend: SearchBackend, awaitable: Any, mode: SearchMode) -> Any:
+    """
+    Take the single outcome of a one-query call, refusing an empty one.
+
+    :raises CapabilityUnavailableError: If the query retrieved nothing.
+    """
+    outcome = (await awaitable)[0]
+    backend.require_evidence(mode, outcome)
+    return outcome
 
 
 def _retrieved(call: SearchCall, outcome: RetrieveOutcome) -> RetrieveResponse:
@@ -180,7 +198,7 @@ async def search_global(
     backend: SearchBackend = Depends(get_backend),
 ) -> SearchResponse:
     call = _call("global", payload)
-    return _response(call, await backend.search(call))
+    return _response(call, await _one(backend, backend.search(call), call.mode))
 
 
 @router.post(
@@ -191,7 +209,7 @@ async def search_local(
     backend: SearchBackend = Depends(get_backend),
 ) -> SearchResponse:
     call = _call("local", payload)
-    return _response(call, await backend.search(call))
+    return _response(call, await _one(backend, backend.search(call), call.mode))
 
 
 @router.post(
@@ -202,7 +220,7 @@ async def search_naive(
     backend: SearchBackend = Depends(get_backend),
 ) -> SearchResponse:
     call = _call("naive", payload)
-    return _response(call, await backend.search(call))
+    return _response(call, await _one(backend, backend.search(call), call.mode))
 
 
 @router.post(
@@ -219,7 +237,7 @@ async def search_mix(
     reports which children actually contributed.
     """
     call = _call("mix", payload)
-    return _response(call, await backend.search(call))
+    return _response(call, await _one(backend, backend.search(call), call.mode))
 
 
 @router.post(
@@ -232,7 +250,7 @@ async def retrieve_global(
     backend: SearchBackend = Depends(get_backend),
 ) -> RetrieveResponse:
     call = _call("global", payload)
-    return _retrieved(call, await backend.retrieve(call))
+    return _retrieved(call, await _one(backend, backend.retrieve(call), call.mode))
 
 
 @router.post(
@@ -245,7 +263,7 @@ async def retrieve_local(
     backend: SearchBackend = Depends(get_backend),
 ) -> RetrieveResponse:
     call = _call("local", payload)
-    return _retrieved(call, await backend.retrieve(call))
+    return _retrieved(call, await _one(backend, backend.retrieve(call), call.mode))
 
 
 @router.post(
@@ -258,7 +276,7 @@ async def retrieve_naive(
     backend: SearchBackend = Depends(get_backend),
 ) -> RetrieveResponse:
     call = _call("naive", payload)
-    return _retrieved(call, await backend.retrieve(call))
+    return _retrieved(call, await _one(backend, backend.retrieve(call), call.mode))
 
 
 @router.post(
@@ -274,4 +292,108 @@ async def retrieve_mix(
     Gather context from both child engines without generating an answer.
     """
     call = _call("mix", payload)
-    return _retrieved(call, await backend.retrieve(call))
+    return _retrieved(call, await _one(backend, backend.retrieve(call), call.mode))
+
+
+def _batch_call(mode: SearchMode, payload: Any) -> SearchCall:
+    return SearchCall(
+        mode=mode,
+        queries=tuple(payload.queries),
+        params=payload.params,
+        local_params=getattr(payload, "local_params", None),
+        naive_params=getattr(payload, "naive_params", None),
+        use_query_plan=getattr(payload, "use_query_plan", False),
+    )
+
+
+async def _batched(
+    mode: SearchMode, payload: Any, backend: SearchBackend
+) -> BatchSearchResponse:
+    """
+    Answer a batch, reporting per-query emptiness instead of failing the batch.
+    """
+    call = _batch_call(mode, payload)
+    backend.require_batch_size(len(call.queries))
+    outcomes = await backend.search(call)
+
+    results = []
+    for query, outcome in zip(call.queries, outcomes):
+        if outcome.sources:
+            results.append(
+                BatchSearchItem(
+                    query=query,
+                    answer=outcome.answer,
+                    sources=outcome.sources,
+                    subqueries=outcome.subqueries,
+                )
+            )
+        else:
+            empty = backend.no_evidence(mode)
+            results.append(
+                BatchSearchItem(
+                    query=query, error=ErrorBody(**empty.to_envelope()["error"])
+                )
+            )
+
+    engines = outcomes[0].engines if outcomes else None
+    return BatchSearchResponse(
+        mode=mode,
+        used_query_plan=call.use_query_plan,
+        engines=engines or EngineReport(requested=mode, used="unknown"),
+        results=results,
+    )
+
+
+@router.post(
+    "/v1/search/global/batch",
+    response_model=BatchSearchResponse,
+    responses=SEARCH_RESPONSES,
+)
+async def batch_global(
+    payload: GlobalBatchRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> BatchSearchResponse:
+    return await _batched("global", payload, backend)
+
+
+@router.post(
+    "/v1/search/local/batch",
+    response_model=BatchSearchResponse,
+    responses=SEARCH_RESPONSES,
+)
+async def batch_local(
+    payload: LocalBatchRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> BatchSearchResponse:
+    return await _batched("local", payload, backend)
+
+
+@router.post(
+    "/v1/search/naive/batch",
+    response_model=BatchSearchResponse,
+    responses=SEARCH_RESPONSES,
+)
+async def batch_naive(
+    payload: NaiveBatchRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> BatchSearchResponse:
+    """
+    Answer many queries in one pass.
+
+    This is where the engines earn their keep: retrieval is shared across the
+    whole list and, with a query plan, independent subqueries from different
+    top-level queries are answered in the same child batch.
+    """
+    return await _batched("naive", payload, backend)
+
+
+@router.post(
+    "/v1/search/mix/batch",
+    response_model=BatchSearchResponse,
+    responses=SEARCH_RESPONSES,
+)
+async def batch_mix(
+    payload: MixBatchRequest,
+    backend: SearchBackend = Depends(get_backend),
+) -> BatchSearchResponse:
+    return await _batched("mix", payload, backend)

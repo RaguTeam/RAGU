@@ -152,23 +152,23 @@ class StubBackend(SearchBackend):
             children=children,
         )
 
-    async def search(self, call: SearchCall) -> SearchOutcome:
+    async def search(self, call: SearchCall) -> list[SearchOutcome]:
         self.require_capability(call.mode)
-        sources = self._sources_for(call)
-        if not sources:
-            raise self.no_evidence(call.mode)
-        return SearchOutcome(
-            answer=f"[stub {call.mode}] {call.query}",
-            sources=sources,
-            subqueries=self._subqueries(call.query, call.use_query_plan),
-            engines=self._report(call, query_plan=call.use_query_plan),
-        )
+        report = self._report(call, query_plan=call.use_query_plan)
+        return [
+            SearchOutcome(
+                answer=f"[stub {call.mode}] {query}",
+                sources=self._sources_for(call),
+                subqueries=self._subqueries(query, call.use_query_plan),
+                engines=report,
+            )
+            for query in call.queries
+        ]
 
-    async def retrieve(self, call: SearchCall) -> RetrieveOutcome:
+    async def retrieve(self, call: SearchCall) -> list[RetrieveOutcome]:
         self.require_capability(call.mode)
-        sources = self._sources_for(call)
-        if not sources:
-            raise self.no_evidence(call.mode)
-        return RetrieveOutcome(
-            sources=sources, engines=self._report(call, query_plan=False)
-        )
+        report = self._report(call, query_plan=False)
+        return [
+            RetrieveOutcome(sources=self._sources_for(call), engines=report)
+            for _ in call.queries
+        ]

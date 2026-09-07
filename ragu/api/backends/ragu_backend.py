@@ -334,7 +334,7 @@ class RaguBackend(SearchBackend):
             children=reports,
         )
 
-    async def search(self, call: SearchCall) -> SearchOutcome:
+    async def search(self, call: SearchCall) -> list[SearchOutcome]:
         engine, children = self._engine_for(call)
         engine_name = type(engine).__name__
         params = self.bound_params(call.params) if call.params is not None else None
@@ -342,24 +342,30 @@ class RaguBackend(SearchBackend):
         try:
             if call.use_query_plan:
                 engine = QueryPlanEngine(engine)
-            response = await engine.query(call.query, params)
+            responses = await engine.batch_query(list(call.queries), params)
         except Exception as exc:
             logger.exception("RAGU {} search failed", call.mode)
             raise BackendExecutionError(mode=call.mode, detail=str(exc)) from exc
 
-        answer, sources, subqueries = to_outcome(
-            response, used_query_plan=call.use_query_plan
-        )
         report = self._report(
             call, engine_name, children, query_plan=call.use_query_plan
         )
-        if not sources:
-            raise self.no_evidence(call.mode)
-        return SearchOutcome(
-            answer=answer, sources=sources, subqueries=subqueries, engines=report
-        )
+        outcomes = []
+        for response in responses:
+            answer, sources, subqueries = to_outcome(
+                response, used_query_plan=call.use_query_plan
+            )
+            outcomes.append(
+                SearchOutcome(
+                    answer=answer,
+                    sources=sources,
+                    subqueries=subqueries,
+                    engines=report,
+                )
+            )
+        return outcomes
 
-    async def retrieve(self, call: SearchCall) -> RetrieveOutcome:
+    async def retrieve(self, call: SearchCall) -> list[RetrieveOutcome]:
         engine, children = self._engine_for(call)
         params = self.bound_params(call.params) if call.params is not None else None
 
@@ -367,16 +373,16 @@ class RaguBackend(SearchBackend):
             # No QueryPlanEngine here: its batch_search delegates straight to the
             # wrapped engine, so wrapping would only imply planning that does not
             # happen.
-            retrieval = await engine.search(call.query, params)
+            retrievals = await engine.batch_search(list(call.queries), params)
         except Exception as exc:
             logger.exception("RAGU {} retrieval failed", call.mode)
             raise BackendExecutionError(mode=call.mode, detail=str(exc)) from exc
 
-        sources = extract_sources(retrieval)
         report = self._report(call, type(engine).__name__, children, query_plan=False)
-        if not sources:
-            raise self.no_evidence(call.mode)
-        return RetrieveOutcome(sources=sources, engines=report)
+        return [
+            RetrieveOutcome(sources=extract_sources(retrieval), engines=report)
+            for retrieval in retrievals
+        ]
 
     def _require_llm(self) -> LLM:
         """

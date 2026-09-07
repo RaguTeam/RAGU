@@ -7,7 +7,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any
 
 from ragu.api.config import ServiceSettings
-from ragu.api.errors import CapabilityUnavailableError
+from ragu.api.errors import CapabilityUnavailableError, InvalidRequestError
 from ragu.api.models import (
     Capability,
     EngineReport,
@@ -180,7 +180,10 @@ class SearchCall:
     to grow.
 
     :param mode: Search mode to run.
-    :param query: The client's query.
+    :param queries: The client's queries. The engines batch internally — and
+        ``QueryPlanEngine`` merges independent subqueries across different
+        top-level queries into one child batch — so the batch is carried all the
+        way down rather than being split here.
     :param params: The engine's own parameter object for this mode.
     :param local_params: Local child parameters; ``mix`` only.
     :param naive_params: Naive child parameters; ``mix`` only.
@@ -190,11 +193,18 @@ class SearchCall:
     """
 
     mode: SearchMode
-    query: str
+    queries: tuple[str, ...]
     params: Any = None
     local_params: LocalParams | None = None
     naive_params: NaiveSearchParams | None = None
     use_query_plan: bool = False
+
+    @property
+    def query(self) -> str:
+        """
+        The first query. A batch of one is the common case.
+        """
+        return self.queries[0]
 
 
 @dataclass
@@ -287,6 +297,19 @@ class SearchBackend(ABC):
             return params
         return replace(params, **changes)
 
+    def require_batch_size(self, size: int) -> None:
+        """
+        Reject a batch larger than this service will serve.
+
+        :param size: Number of queries in the batch.
+        :raises InvalidRequestError: If the batch is too large.
+        """
+        if size > self.settings.max_batch_size:
+            raise InvalidRequestError(
+                f"queries: batch of {size} exceeds the limit of "
+                f"{self.settings.max_batch_size}"
+            )
+
     def require_capability(self, mode: SearchMode) -> None:
         """
         Refuse a mode the loaded graph cannot serve, before generating anything.
@@ -323,20 +346,36 @@ class SearchBackend(ABC):
             missing_capability=None,
         )
 
-    @abstractmethod
-    async def search(self, call: SearchCall) -> SearchOutcome:
+    def require_evidence(self, mode: SearchMode, outcome: SearchOutcome | RetrieveOutcome) -> None:
         """
-        Retrieve context and generate an answer.
+        Refuse an outcome that rests on nothing.
+
+        The engines answer confidently from an empty context, so a single-query
+        route turns "no evidence at all" into a 409 rather than returning an
+        answer built on nothing. Batch routes report it per query instead, since
+        one empty query must not fail the whole batch.
+
+        :param mode: Mode that produced the outcome.
+        :param outcome: The outcome to check.
+        :raises CapabilityUnavailableError: If the outcome has no sources.
+        """
+        if not outcome.sources:
+            raise self.no_evidence(mode)
+
+    @abstractmethod
+    async def search(self, call: SearchCall) -> list[SearchOutcome]:
+        """
+        Retrieve context and generate an answer for every query in the call.
 
         :param call: The resolved request.
-        :return: Answer, flat sources, subqueries and the engine report.
+        :return: One outcome per query, aligned with ``call.queries``.
         """
 
     @abstractmethod
-    async def retrieve(self, call: SearchCall) -> RetrieveOutcome:
+    async def retrieve(self, call: SearchCall) -> list[RetrieveOutcome]:
         """
-        Retrieve context without generating an answer.
+        Retrieve context for every query, generating nothing.
 
         :param call: The resolved request. ``use_query_plan`` has no effect.
-        :return: Flat sources and the engine report.
+        :return: One outcome per query, aligned with ``call.queries``.
         """

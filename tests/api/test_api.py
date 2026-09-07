@@ -516,23 +516,31 @@ class TestEngineInvocation:
     """
 
     class FakeEngine:
+        """Stands in for a leaf engine; batch_* is the real entry point."""
+
         def __init__(self):
             self.calls = []
             self.retrievals = []
             self.llm = object()
             self.result = NaiveSearchResult(chunks=[make_chunk("text")], scores=[0.5])
 
-        async def query(self, query, params=None):
-            self.calls.append((query, params))
-            return SearchEngineResponse(
-                query=query,
-                response="ответ",
-                retrieval=NaiveSearchRetrieve(query=query, result=self.result),
-            )
+        async def batch_query(self, queries, params=None):
+            self.calls.extend((query, params) for query in queries)
+            return [
+                SearchEngineResponse(
+                    query=query,
+                    response="ответ",
+                    retrieval=NaiveSearchRetrieve(query=query, result=self.result),
+                )
+                for query in queries
+            ]
 
-        async def search(self, query, params=None):
-            self.retrievals.append((query, params))
-            return NaiveSearchRetrieve(query=query, result=self.result)
+        async def batch_search(self, queries, params=None):
+            self.retrievals.extend((query, params) for query in queries)
+            return [
+                NaiveSearchRetrieve(query=query, result=self.result)
+                for query in queries
+            ]
 
     def build_backend(self, **overrides):
         from ragu.api.backends.ragu_backend import RaguBackend
@@ -550,10 +558,10 @@ class TestEngineInvocation:
     async def test_local_search_passes_context_flags_as_params(self):
         backend, engines = self.build_backend()
 
-        outcome = await backend.search(
+        outcome, = await backend.search(
             SearchCall(
                 mode="local",
-                query="кто написал",
+                queries=("кто написал",),
                 params=LocalParams(top_k=5, use_summary=False, use_chunks=True),
             )
         )
@@ -569,7 +577,7 @@ class TestEngineInvocation:
         backend, engines = self.build_backend()
 
         await backend.search(
-            SearchCall(mode="naive", query="версия", params=NaiveSearchParams(top_k=7))
+            SearchCall(mode="naive", queries=("версия",), params=NaiveSearchParams(top_k=7))
         )
 
         _, params = engines["naive"].calls[0]
@@ -579,7 +587,7 @@ class TestEngineInvocation:
         backend, engines = self.build_backend()
         params = GlobalSearchParams(min_cluster_size=3)
 
-        await backend.search(SearchCall(mode="global", query="тренды", params=params))
+        await backend.search(SearchCall(mode="global", queries=("тренды",), params=params))
 
         assert engines["global"].calls == [("тренды", params)]
 
@@ -592,8 +600,13 @@ class TestEngineInvocation:
         backend, engines = self.build_backend()
         engines[mode].result = NaiveSearchResult()
 
+        outcome, = await backend.search(SearchCall(mode=mode, queries=("q",)))
+        assert outcome.sources == []
+
+        # A batch reports emptiness per query; a single-query route turns it
+        # into a 409 rather than returning an answer built on nothing.
         with pytest.raises(CapabilityUnavailableError) as failure:
-            await backend.search(SearchCall(mode=mode, query="q"))
+            backend.require_evidence(mode, outcome)
         assert failure.value.mode == mode
         assert failure.value.status_code == 409
         assert failure.value.missing_capability is None
@@ -617,7 +630,7 @@ class TestEngineInvocation:
         backend._stats = stats
 
         with pytest.raises(CapabilityUnavailableError) as failure:
-            await backend.search(SearchCall(mode=mode, query="q"))
+            await backend.search(SearchCall(mode=mode, queries=("q",)))
 
         assert failure.value.missing_capability == capability
         assert engines[mode].calls == []
@@ -625,7 +638,7 @@ class TestEngineInvocation:
     async def test_evidence_is_returned_as_an_answer(self):
         backend, _ = self.build_backend()
 
-        outcome = await backend.search(SearchCall(mode="naive", query="q"))
+        outcome, = await backend.search(SearchCall(mode="naive", queries=("q",)))
 
         assert outcome.answer == "ответ"
         assert len(outcome.sources) == 1
@@ -633,8 +646,8 @@ class TestEngineInvocation:
     async def test_retrieval_skips_generation_entirely(self):
         backend, engines = self.build_backend()
 
-        outcome = await backend.retrieve(
-            SearchCall(mode="naive", query="q", params=NaiveSearchParams(top_k=2))
+        outcome, = await backend.retrieve(
+            SearchCall(mode="naive", queries=("q",), params=NaiveSearchParams(top_k=2))
         )
 
         assert engines["naive"].calls == []
@@ -655,8 +668,8 @@ class TestEngineInvocation:
         )
         backend, _ = self.build_backend()
 
-        outcome = await backend.retrieve(
-            SearchCall(mode="naive", query="q", use_query_plan=True)
+        outcome, = await backend.retrieve(
+            SearchCall(mode="naive", queries=("q",), use_query_plan=True)
         )
 
         assert outcome.sources
@@ -672,8 +685,8 @@ class TestEngineInvocation:
                 wrapped["args"] = (args, kwargs)
                 self.engine = engine
 
-            async def query(self, query, params=None):
-                return await self.engine.query(query, params)
+            async def batch_query(self, queries, params=None):
+                return await self.engine.batch_query(queries, params)
 
         # The backend imports the symbol into its own namespace, so patching
         # ``ragu.QueryPlanEngine`` would not reach the code under test.
@@ -685,7 +698,7 @@ class TestEngineInvocation:
         await backend.search(
             SearchCall(
                 mode="naive",
-                query="версия",
+                queries=("версия",),
                 params=NaiveSearchParams(top_k=3),
                 use_query_plan=True,
             )
@@ -711,7 +724,7 @@ class TestEngineInvocation:
 
         with pytest.raises(BackendExecutionError) as failure:
             await backend.search(
-                SearchCall(mode="local", query="q", use_query_plan=True)
+                SearchCall(mode="local", queries=("q",), use_query_plan=True)
             )
         assert failure.value.mode == "local"
         assert failure.value.detail == "unexpected keyword argument"
@@ -725,7 +738,7 @@ class TestEngineInvocation:
 
         await backend.search(
             SearchCall(
-                mode="naive", query="версия", params=NaiveSearchParams(top_k=10_000)
+                mode="naive", queries=("версия",), params=NaiveSearchParams(top_k=10_000)
             )
         )
 
@@ -737,7 +750,7 @@ class TestEngineInvocation:
         await backend.search(
             SearchCall(
                 mode="naive",
-                query="версия",
+                queries=("версия",),
                 params=NaiveSearchParams(top_k=10, rerank_top_k=9_000),
             )
         )
@@ -748,7 +761,7 @@ class TestEngineInvocation:
         backend, engines = self.build_backend()
         params = NaiveSearchParams(top_k=5, rerank_top_k=2)
 
-        await backend.search(SearchCall(mode="naive", query="версия", params=params))
+        await backend.search(SearchCall(mode="naive", queries=("версия",), params=params))
 
         assert engines["naive"].calls[0][1] is params
 
@@ -764,7 +777,7 @@ class TestEngineInvocation:
         )
         backend, engines = self.build_backend()
 
-        await backend.search(SearchCall(mode="global", query="тренды"))
+        await backend.search(SearchCall(mode="global", queries=("тренды",)))
 
         assert len(engines["global"].calls) == 1
 
@@ -1105,10 +1118,10 @@ class TestMixDegradation:
         # still comes back — built on chunks alone.
         backend = self.build_backend()
 
-        outcome = await backend.search(
+        outcome, = await backend.search(
             SearchCall(
                 mode="mix",
-                query="q",
+                queries=("q",),
                 params=MixQueryParams(),
                 local_params=LocalParams(),
                 naive_params=NaiveSearchParams(top_k=1),
@@ -1129,10 +1142,10 @@ class TestMixDegradation:
         backend = self.build_backend()
         backend._engines["local"] = self.WorkingChild(backend._llm)
 
-        outcome = await backend.search(
+        outcome, = await backend.search(
             SearchCall(
                 mode="mix",
-                query="q",
+                queries=("q",),
                 params=MixQueryParams(),
                 local_params=LocalParams(),
                 naive_params=NaiveSearchParams(top_k=1),
@@ -1197,3 +1210,90 @@ class TestRetrieveRoutes:
                 "/v1/search/mix/retrieve", json={"query": "q"}
             ).json()["engines"]
         assert [child["mode"] for child in engines["children"]] == ["local", "naive"]
+
+
+class TestBatchRoutes:
+    """Many queries in one pass — the engines' primary entry point."""
+
+    @pytest.mark.parametrize("mode", ["global", "local", "naive", "mix"])
+    def test_batch_answers_every_query(self, mode):
+        with build_client() as client:
+            body = client.post(
+                f"/v1/search/{mode}/batch", json={"queries": ["a", "b", "c"]}
+            ).json()
+        assert body["mode"] == mode
+        assert [item["query"] for item in body["results"]] == ["a", "b", "c"]
+        assert all(item["answer"] for item in body["results"])
+        assert all(item["error"] is None for item in body["results"])
+
+    def test_the_batch_reports_the_engine_once(self):
+        with build_client() as client:
+            body = client.post(
+                "/v1/search/mix/batch", json={"queries": ["a", "b"]}
+            ).json()
+        assert body["engines"]["requested"] == "mix"
+        assert [child["mode"] for child in body["engines"]["children"]] == [
+            "local",
+            "naive",
+        ]
+
+    def test_an_empty_query_does_not_fail_the_batch(self):
+        # top_k=0 gives that query no evidence; the others must still answer.
+        with build_client() as client:
+            body = client.post(
+                "/v1/search/naive/batch",
+                json={"queries": ["a", "b"], "params": {"top_k": 0}},
+            ).json()
+        errors = [item["error"] for item in body["results"]]
+        assert all(error is not None for error in errors)
+        assert errors[0]["code"] == "CAPABILITY_UNAVAILABLE"
+        assert errors[0]["missing_capability"] is None
+
+    def test_an_empty_batch_is_rejected(self):
+        with build_client() as client:
+            response = client.post("/v1/search/naive/batch", json={"queries": []})
+        assert response.status_code == 400
+
+    def test_a_batch_beyond_the_ceiling_is_rejected(self):
+        with build_client(max_batch_size=2) as client:
+            response = client.post(
+                "/v1/search/naive/batch", json={"queries": ["a", "b", "c"]}
+            )
+        assert response.status_code == 400
+        assert "batch of 3" in response.json()["error"]["message"]
+
+    def test_batch_carries_the_whole_list_to_the_engine(self):
+        # This is the point of the route: QueryPlanEngine merges independent
+        # subqueries from different top-level queries into one child batch, and
+        # splitting the list here would throw that away.
+        from ragu.api.backends.ragu_backend import RaguBackend
+
+        seen = []
+
+        class BatchSpy:
+            llm = object()
+
+            async def batch_query(self, queries, params=None):
+                seen.append(list(queries))
+                return [
+                    SearchEngineResponse(
+                        query=query,
+                        response="ответ",
+                        retrieval=make_retrieval("text"),
+                    )
+                    for query in queries
+                ]
+
+        backend = RaguBackend(ServiceSettings(backend="ragu"))
+        backend.graph = object()
+        backend._stats = GraphStats(entities=1, chunks=1, community_summaries=1)
+        backend._engines = {"naive": BatchSpy()}
+
+        import asyncio
+
+        outcomes = asyncio.run(
+            backend.search(SearchCall(mode="naive", queries=("a", "b", "c")))
+        )
+
+        assert seen == [["a", "b", "c"]]
+        assert len(outcomes) == 3
