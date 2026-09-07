@@ -8,18 +8,16 @@ from dataclasses import asdict
 from typing import (
     Any,
     Dict,
-    Iterable,
     List,
     Optional,
     Type,
     TypeVar,
-    cast,
     get_args,
     get_origin,
     get_type_hints,
 )
 
-from neo4j import AsyncDriver
+from neo4j import AsyncDriver, Record
 from neo4j import AsyncGraphDatabase
 from ragu.storage.base_storage import BaseGraphStorage, EdgeSpec
 from ragu.storage.types import Node, Edge
@@ -64,7 +62,7 @@ def _cypher(query: str) -> LiteralString:
     :returns: The same statement, typed as a literal for the driver.
     :rtype: LiteralString
     """
-    return cast(LiteralString, query)
+    return query
 
 
 class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
@@ -190,7 +188,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         :returns: Property mapping safe to pass to Cypher.
         :rtype: dict
         """
-        result = {}
+        result: dict[str, Any] = {}
         for key, value in props.items():
             if isinstance(value, _PRIMITIVES) or value is None:
                 result[key] = value
@@ -252,7 +250,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
                     pass
         return props
 
-    def _edge_from_record(self, record) -> EdgeT:
+    def _edge_from_record(self, record: Record) -> EdgeT:
         """
         Build an edge from a record holding ``s`` (start), ``r`` and ``t`` (end).
 
@@ -375,7 +373,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         ]
 
     @override
-    async def upsert_nodes(self, nodes: Iterable[NodeT]) -> None:
+    async def upsert_nodes(self, nodes: List[NodeT]) -> None:
         """
         Insert or update nodes, keyed by ``id`` alone.
 
@@ -402,7 +400,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
            server requirement that must be declared explicitly first.
 
         :param nodes: Nodes to insert or update.
-        :type nodes: Iterable[NodeT]
+        :type nodes: List[NodeT]
         """
         rows_by_label: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         for node in nodes:
@@ -523,7 +521,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         return [found.get(index, []) for index in range(len(edge_specs))]
 
     @override
-    async def upsert_edges(self, edges: Iterable[EdgeT]) -> None:
+    async def upsert_edges(self, edges: List[EdgeT]) -> None:
         """
         Insert or update edges, grouped by relationship type. Endpoints must
         already exist.
@@ -537,7 +535,7 @@ class Neo4jStorage(BaseGraphStorage[NodeT, EdgeT]):
         but code assigning ids by hand can.
 
         :param edges: Edges to insert or update.
-        :type edges: Iterable[EdgeT]
+        :type edges: List[EdgeT]
         """
         rows_by_type: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         for edge in edges:

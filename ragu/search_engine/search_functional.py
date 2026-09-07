@@ -1,6 +1,6 @@
 # Based on https://github.com/gusye1234/nano-graphrag/blob/main/nano_graphrag/
 
-from typing import Callable, Dict, List, Sequence, TypeVar
+from typing import Any, Callable, Dict, List, Sequence, TypeVar
 
 from ragu.chunker.types import Chunk
 from ragu.common.prompts.default_models import SubQuery
@@ -120,7 +120,7 @@ async def _find_most_related_text_unit_from_entities(
     grouped_relations = [edges_by_entity.get(seed_id, []) for seed_id in seed_ids]
     all_one_hop_text_units_lookup = neighbor_chunks
 
-    all_text_units_lookup = {}
+    all_text_units_lookup: Dict[str, Dict[str, Any]] = {}
     for index, (seed_id, this_text_units, this_edges) in enumerate(zip(seed_ids, chunks_id, grouped_relations)):
         for c_id in this_text_units:
             if c_id in all_text_units_lookup:
@@ -162,7 +162,7 @@ async def _find_most_related_text_unit_from_entities(
         if (chunk_data := chunk["data"]) is not None
     ]
 
-async def _find_documents_id(entities: List[Entity]):
+async def _find_documents_id(entities: List[Entity]) -> List[str]:
     """
     Collect unique document IDs referenced by the supplied entities.
     """
@@ -264,7 +264,7 @@ def _topological_sort(subqueries: List[SubQuery]) -> List[SubQuery]:
     visited = set()
     ordered: List[SubQuery] = []
 
-    def visit(q: SubQuery):
+    def visit(q: SubQuery) -> None:
         if q.id in visited:
             return
         for dep in q.depends_on:

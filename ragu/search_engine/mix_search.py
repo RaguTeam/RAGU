@@ -67,7 +67,7 @@ class MixSearchRetrieve(SearchEngineRetrieve[MixSearchResult]):
         return self._TO_TEXT_TEMPLATE.render(result=self.result)
 
 
-class MixSearchEngine(BaseEngine):
+class MixSearchEngine(BaseEngine[MixQueryParams, MixSearchRetrieve]):
     """
     Performs ensemble retrieval-augmented search over multiple engines.
 
@@ -81,15 +81,13 @@ class MixSearchEngine(BaseEngine):
     def __init__(
         self,
         llm: LLM,
-        engines: List[BaseEngine],
+        engines: List[BaseEngine[Any, Any]],
         engine_params: List[EngineParams | None] | None = None,
         allow_partial_failures: bool = True,
         language: str | None = None,
         max_context_length: int | None = None,
         tokenizer_backend: Literal["tiktoken", "local"] | None = None,
         tokenizer_model: str | None = None,
-        *args: Any,
-        **kwargs: Any,
     ):
         """
         Initialize a `MixSearchEngine`.
@@ -119,13 +117,11 @@ class MixSearchEngine(BaseEngine):
         """
         prompts = ["mix_search_context", "mix_search"]
         super().__init__(
-            llm=llm,
+            llm,
             prompts=prompts,
             max_context_length=max_context_length,
             tokenizer_backend=tokenizer_backend,
             tokenizer_model=tokenizer_model,
-            *args,
-            **kwargs,
         )
 
         self.engines = engines
@@ -145,7 +141,7 @@ class MixSearchEngine(BaseEngine):
 
     async def _child_batch(
         self,
-        engine: BaseEngine,
+        engine: BaseEngine[Any, Any],
         queries: List[str],
         ensemble: bool,
         params: EngineParams | None,
@@ -311,7 +307,7 @@ class MixSearchEngine(BaseEngine):
         instruction: RAGUInstruction = self.get_prompt("mix_search")
         answers = await self.llm.batch_chat_completion(
             conversations,
-            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+            output_schema=instruction.pydantic_model,
             desc="MixSearch batch query",
         )
 

@@ -49,7 +49,7 @@ class Entity(Node):
 
     label_field: ClassVar[str] = "entity_type"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Generate a stable MD5-based identifier if not already set.
 
@@ -63,15 +63,15 @@ class Entity(Node):
         elif not self.id:
             raise ValueError("Entity id must be a non-empty string")
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Entity):
             return NotImplemented
         return self.id == other.id and self.description == other.description
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)
 
-    def to_text(self):
+    def to_text(self) -> str:
         return f"{self.entity_name} - {self.description}"
 
 
@@ -102,7 +102,7 @@ class Relation(Edge):
     label_field: ClassVar[str] = "relation_type"
     id: str = 'auto'
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Generate a stable MD5-based identifier if not already set.
 
@@ -116,15 +116,15 @@ class Relation(Edge):
         elif not self.id:
             raise ValueError("Relation id must be a non-empty string")
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Relation):
             return NotImplemented
         return self.id == other.id and self.description == other.description
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)
 
-    def to_text(self):
+    def to_text(self) -> str:
         return f"{self.description}"
 
 
@@ -145,7 +145,7 @@ class Community:
     relations: List[Relation]
     id: str = 'auto'
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Generate a stable MD5-based identifier if not already set.
 
@@ -159,12 +159,12 @@ class Community:
         elif not self.id:
             raise ValueError("Community id must be a non-empty string")
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Community):
             return NotImplemented
         return self.id == other.id
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)
 
 
@@ -180,7 +180,7 @@ class CommunitySummary:
     id: str
     summary: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Validate the summary identifier.
 

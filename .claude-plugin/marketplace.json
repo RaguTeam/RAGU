@@ -1,0 +1,19 @@
+{
+  "name": "ragu",
+  "version": "1.0.0",
+  "owner": {
+    "name": "AsphodelRem",
+    "url": "https://github.com/AsphodelRem"
+  },
+  "description": "Skills for working with RAGU — building knowledge graphs from unstructured text and querying them.",
+  "metadata": {
+    "pluginRoot": "./.agents/skills"
+  },
+  "plugins": [
+    {
+      "name": "ragu-build",
+      "source": "./ragu-build",
+      "description": "Assemble a RAGU configuration through a short interview and generate a validated build script."
+    }
+  ]
+}

@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
+from ragu.common.prompts.default_models import GlobalSearchContextModel
 from ragu.common.prompts.messages import ChatMessages, UserMessage
 from ragu.search_engine.base_engine import BaseEngine, SearchEngineResponse
 from ragu.search_engine.global_search import GlobalSearchResult, GlobalSearchRetrieve
@@ -41,7 +42,9 @@ async def test_mix_search_collects_contexts_in_engine_order():
     )
     global_result = GlobalSearchRetrieve(
         query="query",
-        result=GlobalSearchResult(insights=[{"response": "x", "rating": "3"}]),
+        result=GlobalSearchResult(insights=[
+            GlobalSearchContextModel(reasoning="", response="x", rating=3),
+        ]),
     )
     engine = MixSearchEngine(
         llm=SimpleNamespace(chat_completion=AsyncMock()),

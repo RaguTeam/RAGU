@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 from ragu.common.logger import logger
 from ragu.graph.graph_builder_pipeline import GraphBuilderModule
@@ -13,14 +13,14 @@ class RemoveIsolatedNodes(GraphBuilderModule):
     entities not connected by any remaining relation.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     async def run(
             self,
             entities: List[Entity],
             relations: List[Relation],
-            **kwargs
+            **kwargs: Any
     ) -> Tuple[List[Entity], List[Relation]]:
         """
         Remove dangling relations and entities without edges.

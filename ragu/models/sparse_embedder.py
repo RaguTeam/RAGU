@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, List, Iterable
 
 from fastembed import SparseTextEmbedding
+from fastembed.common.types import Device
 from fastembed.sparse.bm42 import Bm42 as FastEmbedBM42
 from fastembed.sparse.bm25 import Bm25 as FastEmbedBM25
 
@@ -45,8 +46,8 @@ class BM25(SparseEmbedder):
         self.kwargs = dict(kwargs)
 
         if not disable_stemmer and normalizer:
-            raise ValueError(f"You cannot use custom normalizer along with default fastembed stemmer."
-                             f" Set `disable_stemmer` to True or remove normalizer")
+            raise ValueError("You cannot use custom normalizer along with default fastembed stemmer."
+                             " Set `disable_stemmer` to True or remove normalizer")
 
         self._model = FastEmbedBM25(
             model_name=model_name,
@@ -125,7 +126,7 @@ class BM42(SparseEmbedder):
             threads=threads,
             providers=providers,
             alpha=alpha,
-            cuda=cuda,
+            cuda=Device(cuda) if isinstance(cuda, str) else cuda,
             device_ids=device_ids,
             lazy_load=lazy_load,
             specific_model_path=specific_model_path,

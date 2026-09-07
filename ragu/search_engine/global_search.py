@@ -1,15 +1,16 @@
 from collections.abc import AsyncIterator
 from dataclasses import field, dataclass
 from textwrap import dedent
-from typing import Any, List, Literal
+from typing import List, Literal
 
 from jinja2 import Template
 from typing_extensions import override
 
 from ragu.common.global_parameters import Settings
+from ragu.common.logger import logger
 from ragu.common.prompts.default_models import GlobalSearchContextModel
 from ragu.common.prompts.messages import ChatMessages, render
-from ragu.common.prompts.prompt_storage import RAGUInstruction
+from ragu.common.prompts.prompt_storage import RAGUInstruction, require_prompt_schema
 from ragu.graph.knowledge_graph import KnowledgeGraph
 from ragu.models.llm import LLM
 from ragu.search_engine.base_engine import (
@@ -20,14 +21,24 @@ from ragu.search_engine.base_engine import (
     EngineParams,
 )
 
+
+@dataclass
+class GlobalSearchParams(EngineParams):
+    """
+    Per-query parameters for :class:`GlobalSearchEngine`.
+
+    :param min_cluster_size: Minimum number of entities a community must
+        contain for its summary to be evaluated. When ``1`` (the default),
+        every stored community takes part in retrieval.
+    """
+    min_cluster_size: int = 1
+
+
 # TODO: add the ability to use custom schemas instead of GlobalSearchContextModel
 @dataclass(slots=True)
 class GlobalSearchResult:
     """
     Ranked community-level insights selected for a global query.
-
-    Each insight is expected to contain at least a ``response`` and ``rating``
-    field as produced by the global-search context prompt.
     """
     insights: list[GlobalSearchContextModel] = field(default_factory=list)
 
@@ -54,7 +65,7 @@ class GlobalSearchRetrieve(SearchEngineRetrieve[GlobalSearchResult]):
         return self._TO_TEXT_TEMPLATE.render(result=self.result)
 
 
-class GlobalSearchEngine(BaseEngine):
+class GlobalSearchEngine(BaseEngine[GlobalSearchParams, GlobalSearchRetrieve]):
     """
     Executes global retrieval-augmented search (RAG) across the entire knowledge graph.
 
@@ -71,8 +82,6 @@ class GlobalSearchEngine(BaseEngine):
         max_context_length: int | None = None,
         tokenizer_backend: Literal["tiktoken", "local"] | None = None,
         tokenizer_model: str | None = None,
-        *args: Any,
-        **kwargs: Any,
     ):
         """
         Initialize a new `GlobalSearchEngine`.
@@ -89,13 +98,11 @@ class GlobalSearchEngine(BaseEngine):
         """
         _PROMPTS = ["global_search_context", "global_search"]
         super().__init__(
-            llm=llm,
+            llm,
             prompts=_PROMPTS,
             max_context_length=max_context_length,
             tokenizer_backend=tokenizer_backend,
             tokenizer_model=tokenizer_model,
-            *args,
-            **kwargs,
         )
 
         self.knowledge_graph = knowledge_graph
@@ -105,56 +112,89 @@ class GlobalSearchEngine(BaseEngine):
     async def batch_search(
         self,
         queries: List[str],
-        params: EngineParams | None = None,
+        params: GlobalSearchParams | None = None,
     ) -> List[GlobalSearchRetrieve]:
         """
         Perform a global semantic search for a batch of queries.
 
-        Community summaries are query-independent, so they are fetched **once**
-        for the whole batch. Every query × community meta-evaluation is then
-        issued through a single :meth:`LLM.batch_chat_completion` call, after
-        which low-rated insights are filtered and the rest sorted per query.
-
         :param queries: The input natural language queries.
-        :param params: Retrieval parameters (unused by global search; accepted
-            for interface consistency).
+        :param params: Retrieval parameters. Pass :class:`GlobalSearchParams`
+            to skip communities smaller than ``min_cluster_size``.
         :return: ``GlobalSearchRetrieve`` per query, aligned with ``queries``.
         """
         if not queries:
             return []
 
-        communities_ids = await self.knowledge_graph.index.community_summary_kv_storage.all_keys()
-        communities = await self.knowledge_graph.index.community_summary_kv_storage.get_by_ids(communities_ids)
-        communities = [c for c in communities if c is not None]
+        min_cluster_size = params.min_cluster_size if params else GlobalSearchParams().min_cluster_size
+        communities = await self._get_community_summaries(min_cluster_size)
 
         retrieves: List[GlobalSearchRetrieve] = []
         for query, meta_responses in zip(queries, await self.get_meta_responses(queries, communities)):
-            insights = [r.model_dump() for r in meta_responses]
-            insights = [r for r in insights if int(r.get("rating", 0)) > 0]
-            insights = sorted(insights, key=lambda x: int(x.get("rating", 0)), reverse=True)
+            rated = [insight for insight in meta_responses if insight.rating > 0]
+            insights = sorted(rated, key=lambda insight: insight.rating, reverse=True)
             retrieves.append(
                 GlobalSearchRetrieve(
                     query=query,
                     result=GlobalSearchResult(insights=insights),
                     metrics={
-                        f"insight_{idx}_rating": r.get("rating", 0)
-                        for idx, r in enumerate(insights)
+                        f"insight_{idx}_rating": insight.rating
+                        for idx, insight in enumerate(insights)
                     },
                 )
             )
         return retrieves
 
+    async def _get_community_summaries(self, min_cluster_size: int) -> List[str]:
+        """
+        Fetch stored community summaries, skipping communities that are too small.
+
+        :param min_cluster_size: Minimum number of entities a community must contain.
+        :return: Summaries of the communities that passed the size filter.
+        """
+        summary_storage = self.knowledge_graph.index.community_summary_kv_storage
+        community_ids = await summary_storage.all_keys()
+        summaries = await summary_storage.get_by_ids(community_ids)
+
+        kept: List[tuple[str, str]] = [
+            (community_id, summary)
+            for community_id, summary in zip(community_ids, summaries)
+            if summary is not None
+        ]
+        if min_cluster_size <= 1 or not kept:
+            return [summary for _, summary in kept]
+
+        rows = await self.knowledge_graph.index.community_kv_storage.get_by_ids(
+            [community_id for community_id, _ in kept]
+        )
+        filtered = [
+            (community_id, summary)
+            for (community_id, summary), row in zip(kept, rows)
+            if row is None or len(row.get("entity_ids", [])) >= min_cluster_size
+        ]
+
+        if len(filtered) != len(kept):
+            logger.debug(
+                "GlobalSearch: skipped {} of {} communities smaller than {} entities",
+                len(kept) - len(filtered),
+                len(kept),
+                min_cluster_size,
+            )
+        if kept and not filtered:
+            logger.warning(
+                "GlobalSearch: every stored community is smaller than "
+                "min_cluster_size={}; the answer will be generated without context",
+                min_cluster_size,
+            )
+
+        return [summary for _, summary in filtered]
+
     async def get_meta_responses(
         self,
         queries: List[str],
-        context: List[Any],
+        context: List[str],
     ) -> List[List[GlobalSearchContextModel]]:
         """
         Evaluate every (query, community) pair in a single batched LLM call.
-
-        The model scores each community summary against each query. Failed
-        evaluations are skipped (via ``continue_on_error``) rather than aborting
-        the batch.
 
         :param queries: User queries used to assess community relevance.
         :param context: Community summaries to evaluate against every query.
@@ -166,7 +206,7 @@ class GlobalSearchEngine(BaseEngine):
         instruction: RAGUInstruction = self.get_prompt("global_search_context")
 
         expanded_queries: List[str] = []
-        expanded_context: List[Any] = []
+        expanded_context: List[str] = []
         for query in queries:
             for community in context:
                 expanded_queries.append(query)
@@ -181,7 +221,9 @@ class GlobalSearchEngine(BaseEngine):
 
         answers = await self.llm.batch_chat_completion(
             [rendered.to_openai() for rendered in rendered_list],
-            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+            output_schema=require_prompt_schema(
+                instruction, "global_search_context", GlobalSearchContextModel
+            ),
             continue_on_error=True,
             desc="GlobalSearch batch meta-eval",
         )
@@ -196,19 +238,14 @@ class GlobalSearchEngine(BaseEngine):
     async def batch_query(
         self,
         queries: List[str],
-        params: EngineParams | None = None,
+        params: GlobalSearchParams | None = None,
     ) -> List[SearchEngineResponse]:
         """
         Execute global RAG for multiple queries, batching final synthesis.
 
-        Retrieval (community fetch + cross-query meta-evaluation) is shared
-        across the batch via :meth:`batch_search`; the final answer synthesis for
-        all queries is issued through a single :meth:`LLM.batch_chat_completion`
-        call. The first failing query aborts the whole batch.
-
         :param queries: The natural language queries from the user.
-        :param params: Query parameters (unused by global search; accepted for
-            interface consistency).
+        :param params: Query parameters forwarded to :meth:`batch_search`; see
+            :class:`GlobalSearchParams`.
         :return: ``SearchEngineResponse`` objects aligned with ``queries``.
         """
         if not queries:
@@ -225,7 +262,7 @@ class GlobalSearchEngine(BaseEngine):
         )
         answers = await self.llm.batch_chat_completion(
             [conversation.to_openai() for conversation in conversations],
-            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+            output_schema=instruction.pydantic_model,
             desc="GlobalSearch batch query",
         )
 
@@ -243,7 +280,7 @@ class GlobalSearchEngine(BaseEngine):
     async def stream_query(
         self,
         query: str,
-        params: EngineParams | None = None,
+        params: GlobalSearchParams | None = None,
     ) -> AsyncIterator[SearchEngineStreamEvent]:
         """
         Execute global RAG and stream the final plain-text synthesis.
@@ -252,8 +289,8 @@ class GlobalSearchEngine(BaseEngine):
         final answer synthesis is streamed.
 
         :param query: The natural language query from the user.
-        :param params: Query parameters (unused by global search; accepted for
-            interface consistency).
+        :param params: Query parameters forwarded to :meth:`search`; see
+            :class:`GlobalSearchParams`.
         :returns: Async iterator of text deltas with the retrieval context.
         """
         context = await self.search(query, params)

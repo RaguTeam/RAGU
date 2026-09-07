@@ -1,9 +1,9 @@
 from collections.abc import AsyncIterator
-from typing import List, Dict
+from typing import Any, Dict, List
 
 from ragu.common.prompts.default_models import SubQuery, QueryPlan, RewriteQuery
 from ragu.common.prompts.messages import ChatMessages, render
-from ragu.common.prompts.prompt_storage import RAGUInstruction
+from ragu.common.prompts.prompt_storage import RAGUInstruction, require_prompt_schema
 from ragu.search_engine.base_engine import (
     BaseEngine,
     SearchEngineResponse,
@@ -15,7 +15,7 @@ from ragu.search_engine.search_functional import _topological_sort
 from typing_extensions import override
 
 
-class QueryPlanEngine(BaseEngine):
+class QueryPlanEngine(BaseEngine[EngineParams, SearchEngineRetrieve[Any]]):
     """
     Query planning engine that decomposes complex queries into a DAG of subqueries
     and executes them with an underlying engine.
@@ -31,15 +31,15 @@ class QueryPlanEngine(BaseEngine):
       4. Each input query returns the answer of its plan's final (sink) subquery.
     """
 
-    def __init__(self, engine: BaseEngine, *args, **kwargs):
+    def __init__(self, engine: BaseEngine[Any, Any]):
         """
         Initialize a query planner around an existing search engine.
 
         :param engine: Engine used to answer each planned subquery.
         """
         _PROMPTS_NAMES = ["query_decomposition", "query_rewrite"]
-        super().__init__(llm=engine.llm, prompts=_PROMPTS_NAMES, *args, **kwargs)
-        self.engine: BaseEngine = engine
+        super().__init__(engine.llm, prompts=_PROMPTS_NAMES)
+        self.engine: BaseEngine[Any, Any] = engine
 
     async def process_queries(self, queries: List[str]) -> List[List[SubQuery]]:
         """
@@ -59,7 +59,9 @@ class QueryPlanEngine(BaseEngine):
         )
         plans: List[QueryPlan] = await self.engine.llm.batch_chat_completion(
             [rendered.to_openai() for rendered in rendered_list],
-            output_schema=instruction.pydantic_model, # type: ignore
+            output_schema=require_prompt_schema(
+                instruction, "query_decomposition", QueryPlan
+            ),
             desc="QueryPlan decompose",
         )
         return [plan.subqueries for plan in plans]
@@ -106,7 +108,9 @@ class QueryPlanEngine(BaseEngine):
         )
         responses = await self.engine.llm.batch_chat_completion(
             [rendered.to_openai() for rendered in rendered_list],
-            output_schema=instruction.pydantic_model, # type: ignore
+            output_schema=require_prompt_schema(
+                instruction, "query_rewrite", RewriteQuery
+            ),
             desc="QueryPlan rewrite",
         )
 

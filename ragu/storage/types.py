@@ -1,6 +1,6 @@
 import time
-from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Optional, TypedDict
+from dataclasses import Field, dataclass, field
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, TypedDict
 
 from ragu.utils.ragu_utils import FLOATS, compute_mdhash_id, serialize
 
@@ -22,6 +22,10 @@ class Node:
     """
 
     id: str
+
+    if TYPE_CHECKING:
+        __dataclass_fields__: ClassVar[Dict[str, Field[Any]]]
+        def __init__(self, **kwargs: Any) -> None: ...
 
     #: Name of the field whose value groups nodes of this type. Storage backends
     #: may use it to build labels, indexes or partitions; ``None`` means this
@@ -48,7 +52,7 @@ class Node:
         """
         return serialize(self)
     
-    def to_text(self):
+    def to_text(self) -> str:
         """
         Convert node to text representation.
         """
@@ -66,6 +70,10 @@ class Edge:
     id: str
     subject_id: str
     object_id: str
+
+    if TYPE_CHECKING:
+        __dataclass_fields__: ClassVar[Dict[str, Field[Any]]]
+        def __init__(self, **kwargs: Any) -> None: ...
 
     #: Name of the field whose value groups edges of this type. Same contract as
     #: :attr:`Node.label_field`; see there for why it is a ``ClassVar``.
@@ -89,7 +97,7 @@ class Edge:
         """
         return serialize(self)
 
-    def to_text(self):
+    def to_text(self) -> str:
         """
         Convert edge to text representation.
         """
@@ -104,7 +112,7 @@ class SparseEmbedding:
     indices: List[int]
     values: List[float]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if len(self.indices) != len(self.values):
             raise ValueError("indices and values must have the same length")
 
@@ -124,7 +132,7 @@ class Point:
     sparse_embedding: SparseEmbedding | None = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.id == "auto":
             self.id = compute_mdhash_id(str(time.time_ns()), prefix="pnt")
 

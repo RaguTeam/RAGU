@@ -34,13 +34,20 @@ class RaguGenerativeModule:
         :param prompts: Either a list of prompt names (loaded from
                         :data:`DEFAULT_PROMPT_TEMPLATES`) or a dictionary
                         mapping prompt names to :class:`ChatTemplate` objects.
-        :raises ValueError: If the input format is neither list nor dict.
+        :raises ValueError: If the input format is neither list nor dict, or if a
+                            requested prompt name is not a known default prompt.
         """
         super().__init__()
 
         if isinstance(prompts, list):
+            unknown = [name for name in prompts if name not in DEFAULT_PROMPT_TEMPLATES]
+            if unknown:
+                raise ValueError(
+                    f"Unknown prompt name(s): {', '.join(unknown)}. "
+                    f"Available prompts: {', '.join(sorted(DEFAULT_PROMPT_TEMPLATES))}"
+                )
             self.prompts: dict[str, RAGUInstruction] = {
-                prompt_name: DEFAULT_PROMPT_TEMPLATES.get(prompt_name) for prompt_name in prompts
+                prompt_name: DEFAULT_PROMPT_TEMPLATES[prompt_name] for prompt_name in prompts
             }
         elif isinstance(prompts, dict):
             self.prompts = prompts

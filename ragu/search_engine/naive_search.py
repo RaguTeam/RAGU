@@ -2,10 +2,11 @@ import asyncio
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from textwrap import dedent
-from typing import Any, Optional, List, Literal
+from typing import Optional, List, Literal
 
 from jinja2 import Template
 from ragu.chunker.types import Chunk
+from ragu.storage.types import EmbeddingHit
 from ragu.common.global_parameters import Settings
 from ragu.common.prompts.messages import ChatMessages, render
 from ragu.common.prompts.prompt_storage import RAGUInstruction
@@ -76,7 +77,7 @@ class NaiveSearchRetrieve(SearchEngineRetrieve[NaiveSearchResult]):
         return template.render(result=self.result, zip=zip)
 
 
-class NaiveSearchEngine(BaseEngine):
+class NaiveSearchEngine(BaseEngine[NaiveSearchParams, NaiveSearchRetrieve]):
     """
     Performs naive vector RAG search over document chunks.
 
@@ -95,8 +96,6 @@ class NaiveSearchEngine(BaseEngine):
         max_context_length: int | None = None,
         tokenizer_backend: Literal["tiktoken", "local"] | None = None,
         tokenizer_model: str | None = None,
-        *args: Any,
-        **kwargs: Any,
     ):
         """
         Initialize a `NaiveSearchEngine`.
@@ -116,13 +115,11 @@ class NaiveSearchEngine(BaseEngine):
         """
         _PROMPTS_NAMES = ["naive_search"]
         super().__init__(
-            llm=llm,
+            llm,
             prompts=_PROMPTS_NAMES,
             max_context_length=max_context_length,
             tokenizer_backend=tokenizer_backend,
             tokenizer_model=tokenizer_model,
-            *args,
-            **kwargs,
         )
 
         self.graph = knowledge_graph
@@ -165,7 +162,13 @@ class NaiveSearchEngine(BaseEngine):
             for query, (chunks, hits) in zip(queries, chunk_results)
         ]))
 
-    async def _assemble(self, query, chunks, hits, rerank_top_k) -> NaiveSearchRetrieve:
+    async def _assemble(
+        self,
+        query: str,
+        chunks: List[Chunk],
+        hits: List[EmbeddingHit],
+        rerank_top_k: Optional[int],
+    ) -> NaiveSearchRetrieve:
         """
         Build a :class:`NaiveSearchRetrieve` from retrieved chunks for one query.
 
@@ -277,7 +280,7 @@ class NaiveSearchEngine(BaseEngine):
         instruction: RAGUInstruction = self.get_prompt("naive_search")
         answers = await self.llm.batch_chat_completion(
             conversations,
-            output_schema=instruction.pydantic_model,  # type: ignore[arg-type]
+            output_schema=instruction.pydantic_model,
             desc="NaiveSearch batch query",
         )
 

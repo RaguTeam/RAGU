@@ -1,89 +1,41 @@
+"""
+Legacy type-list constants.
+
+``NEREL_ENTITY_TYPES`` and ``NEREL_RELATION_TYPES`` are derived from
+``ragu/triplet/ontology/builtin/nerel.yaml``, which is the single source of truth for
+the NEREL vocabulary. They are kept in the historical ``"NAME (description)"``
+inline format for code that still expects plain lists — new code should take an
+:class:`~ragu.triplet.ontology.Ontology` instead, via
+``Ontology.builtin("nerel")`` or simply ``ontology="nerel"``.
+"""
+
+from ragu.triplet.ontology import builtin_ontology
+
 DEFAULT_ENTITY_TYPES = [
     "PERSON (a human being, including full names and nicknames)",
     "ORGANIZATION (a company, agency, political party, or other organized group)",
     "LOCATION (a geographic location, natural or physical, not otherwise classified)",
     "DATE (a calendar date, absolute or relative)"
 ]
+
+
+def _inline(name: str, description: str) -> str:
+    """
+    Render a type in the legacy inline format.
+
+    :param name: Canonical type name.
+    :param description: Type description, may be empty.
+    :return: ``"NAME (description)"``, or just the name when there is no description.
+    """
+    return f"{name} ({description})" if description else name
+
+
 NEREL_ENTITY_TYPES = [
-    "AGE (a person’s age or the age of an entity)",
-    "FAMILY (a family name or a family as a social unit)",
-    "AWARD (a prize, honor, or recognition)",
-    "IDEOLOGY (a political or philosophical belief system)",
-    "PERCENT (a percentage value)",
-    "CITY (a city or town)",
-    "LANGUAGE (a natural language name)",
-    "PERSON (a human being, including full names and nicknames)",
-    "COUNTRY (a sovereign state or country)",
-    "LAW (a legal act, regulation, or code)",
-    "PRODUCT (a commercial product, including model names)",
-    "CRIME (an illegal act or offense)",
-    "PENALTY (a legal punishment or sanction)",
-    "PROFESSION (a job title or occupation)",
-    "DATE (a calendar date, absolute or relative)",
-    "MONEY (a monetary amount or currency)",
-    "RELIGION (a religious belief system or denomination)",
-    "DISEASE (a medical condition or illness)",
-    "NATIONALITY (a person’s nationality or ethnic affiliation)",
-    "STATE_OR_PROV (a state, province, or other first‑level administrative division)",
-    "ORDINAL (an ordinal number, e.g., “first”, “2nd”, “третий”)",
-    "TIME (a time expression, e.g., “10:30 AM”, “19:58”)",
-    "EVENT (a named event or a concrete news event occurrence)",
-    "DISTRICT (a district, borough, or other sub‑city administrative unit)",
-    "WORK_OF_ART (a creative work such as a book, film, painting, etc.)",
-    "ORGANIZATION (a company, agency, political party, or other organized group)",
-    "FACILITY (a man‑made structure or installation, e.g., airport, stadium)",
-    "NUMBER (a numeric value not covered by other numeric types)",
-    "LOCATION (a geographic location, natural or physical, not otherwise classified)",
+    _inline(spec.name, spec.description)
+    for spec in builtin_ontology("nerel").entity_types.values()
 ]
 
 NEREL_RELATION_TYPES = [
-    "ABBREVIATION (connects an abbreviation to its full form)",
-    "AGE_DIED_AT (the age at which a person died)",
-    "AGE_IS (assigns an age value to a person)",
-    "AGENT (links an event to its active agent or performer)",
-    "ALTERNATIVE_NAME (connects different names or aliases for the same entity)",
-    "AWARDED_WITH (links a person or organization to an award they received)",
-    "CAUSE_OF_DEATH (the cause of a person’s death)",
-    "CONVICTED_OF (connects a person to a crime they were convicted of)",
-    "DATE_DEFUNCT_IN (the date when an organization or entity ceased to exist)",
-    "DATE_FOUNDED_IN (the date when an organization or entity was founded)",
-    "DATE_OF_BIRTH (the birth date of a person)",
-    "DATE_OF_CREATION (the creation date of a product or work of art)",
-    "DATE_OF_DEATH (the death date of a person)",
-    "END_TIME (the end time of an event or state)",
-    "EXPENDITURE (the amount of money spent by an entity)",
-    "FOUNDED_BY (links an organization to its founder)",
-    "HAS_CAUSE (links an event or state to its cause)",
-    "HEADQUARTERED_IN (links an organization to its headquarters location)",
-    "IDEOLOGY_OF (links an organization or person to their ideology)",
-    "INANIMATE_INVOLVED (links an event to an inanimate object involved)",
-    "INCOME (the amount of money earned by an entity)",
-    "KNOWS (links a person to another person they know)",
-    "LOCATED_IN (links a physical entity to its containing location)",
-    "MEDICAL_CONDITION (links a person to a disease or medical condition)",
-    "MEMBER_OF (links a person or organization to a group they belong to)",
-    "ORGANIZES (links an organizer to the event they organize)",
-    "ORIGINS_FROM (links an entity to its country or place of origin)",
-    "OWNER_OF (links an owner to an asset or product they own)",
-    "PARENT_OF (links a parent to their child)",
-    "PART_OF (links a component entity to the larger whole it belongs to)",
-    "PARTICIPANT_IN (links a person or organization to an event they took part in)",
-    "PENALIZED_AS (links a convicted person to the penalty imposed)",
-    "PLACE_OF_BIRTH (the location where a person was born)",
-    "PLACE_OF_DEATH (the location where a person died)",
-    "PLACE_RESIDES_IN (the location where a person lives)",
-    "POINT_IN_TIME (links an event or state to a specific timestamp)",
-    "PRICE_OF (the price of a product or service)",
-    "PRODUCES (links a manufacturer or organization to a product it produces)",
-    "RELATIVE (a generic family relation between two persons)",
-    "RELIGION_OF (links a person to their religion)",
-    "SCHOOLS_ATTENDED (links a person to an educational institution they attended)",
-    "SIBLING (links two persons as siblings)",
-    "SPOUSE (links two persons as married partners)",
-    "START_TIME (the start time of an event or state)",
-    "SUBEVENT_OF (links a sub‑event to a larger encompassing event)",
-    "SUBORDINATE_OF (links a subordinate person to their superior)",
-    "TAKES_PLACE_IN (links an event to the location where it occurs)",
-    "WORKPLACE (links a person to the organization they work for)",
-    "WORKS_AS (links a person to their profession or job title)",
+    _inline(spec.name, spec.description)
+    for spec in builtin_ontology("nerel").relation_types.values()
 ]

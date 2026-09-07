@@ -4,7 +4,7 @@ import asyncio
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from textwrap import dedent
-from typing import Any, List, Literal
+from typing import Any, Dict, List, Literal
 from typing_extensions import override
 
 from jinja2 import Template
@@ -17,6 +17,7 @@ from ragu.common.prompts.prompt_storage import RAGUInstruction
 from ragu.graph.graph_retrieve_backend import GraphRetriever
 from ragu.graph.knowledge_graph import KnowledgeGraph
 from ragu.graph.types import Entity, Relation
+from ragu.storage.types import EmbeddingHit
 
 from ragu.models.embedder import Embedder
 from ragu.models.llm import LLM
@@ -122,7 +123,7 @@ class LocalSearchRetrieve(SearchEngineRetrieve[LocalSearchResult]):
         return self._TO_TEXT_TEMPLATE.render(result=self.result)
 
 
-class LocalSearchEngine(BaseEngine):
+class LocalSearchEngine(BaseEngine[LocalParams, LocalSearchRetrieve]):
     """
     Performs local retrieval-augmented search (RAG) over a knowledge graph.
 
@@ -147,8 +148,6 @@ class LocalSearchEngine(BaseEngine):
         max_context_length: int | None = None,
         tokenizer_backend: Literal["tiktoken", "local"] | None = None,
         tokenizer_model: str | None = None,
-        *args: Any,
-        **kwargs: Any,
     ):
         """
         Initialize a `LocalSearchEngine`.
@@ -168,13 +167,11 @@ class LocalSearchEngine(BaseEngine):
         """
         _PROMPTS_NAMES = ["local_search"]
         super().__init__(
-            llm=llm,
+            llm,
             prompts=_PROMPTS_NAMES,
             max_context_length=max_context_length,
             tokenizer_backend=tokenizer_backend,
             tokenizer_model=tokenizer_model,
-            *args,
-            **kwargs,
         )
 
         self.knowledge_graph = knowledge_graph
@@ -227,7 +224,12 @@ class LocalSearchEngine(BaseEngine):
             in zip(queries, entity_results, ranked_entities)
         ]))
 
-    async def _rank_entities(self, query, entities, rerank_top_k=None) -> List[Entity]:
+    async def _rank_entities(
+        self,
+        query: str,
+        entities: List[Entity],
+        rerank_top_k: int | None = None,
+    ) -> List[Entity]:
         """
         Select the entities most relevant to the query from those retrieved.
 
@@ -251,12 +253,12 @@ class LocalSearchEngine(BaseEngine):
 
     async def _assemble(
         self,
-        query,
-        entities,
-        entity_hits,
-        ranked_entities,
-        edges_by_entity,
-        neighbor_chunks,
+        query: str,
+        entities: List[Entity],
+        entity_hits: List[EmbeddingHit],
+        ranked_entities: List[Entity],
+        edges_by_entity: Dict[str, List[Relation]],
+        neighbor_chunks: Dict[str, List[str]],
     ) -> LocalSearchRetrieve:
         """
         Gather the local context connected to a query's anchor entities.
@@ -408,7 +410,7 @@ class LocalSearchEngine(BaseEngine):
         instruction: RAGUInstruction = self.get_prompt("local_search")
         answers = await self.llm.batch_chat_completion(
             conversations,
-            output_schema=instruction.pydantic_model or str,  # type: ignore[arg-type]
+            output_schema=instruction.pydantic_model,
             desc="LocalSearch batch query",
         )
 

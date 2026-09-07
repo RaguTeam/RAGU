@@ -1,6 +1,6 @@
 from dataclasses import asdict
 from itertools import chain
-from typing import List, Optional, Sequence
+from typing import Any, List, Optional, Sequence
 
 import numpy as np
 import pandas as pd
@@ -285,7 +285,7 @@ class RelationSummarizer(RaguGenerativeModule):
                 "LLM summarization is enabled but no client is provided. Please provide a client."
             )
 
-    async def run(self, relations: List[Relation], **kwargs) -> List[Relation]:
+    async def run(self, relations: List[Relation], **kwargs: Any) -> List[Relation]:
         """
         Execute the full artifact summarization pipeline.
 

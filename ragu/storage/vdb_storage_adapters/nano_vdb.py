@@ -498,7 +498,7 @@ class NanoVectorDBStorage(BaseVectorStorage):
         )
 
     @override
-    async def upsert(self, data: List[Point], **kwargs) -> None:
+    async def upsert(self, data: List[Point], **kwargs: Any) -> None:
         """
         Insert or update a batch of embeddings in the database.
 
@@ -623,13 +623,13 @@ class NanoVectorDBStorage(BaseVectorStorage):
         """
         return [None if row is None else dict(row) for row in self._client.get_rows(ids)]
 
-    async def index_start_callback(self):
+    async def index_start_callback(self) -> None:
         """
         Pre-index hook for interface compatibility.
         """
         pass
 
-    async def query_done_callback(self):
+    async def query_done_callback(self) -> None:
         """
         Post-query hook for interface compatibility.
         """

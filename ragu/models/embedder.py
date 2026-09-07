@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABC, abstractmethod
-from typing import Any, Literal, TypeVar
+from typing import Any, Literal, TypeVar, cast
 
 from typing_extensions import override
 from pydantic import BaseModel
@@ -243,7 +243,7 @@ class EmbedderOpenAI(Embedder):
         if first_error is not None:
             raise first_error
 
-        return results
+        return cast("list[list[float]] | FLOATS", results)
     
     @property
     @override

@@ -2,7 +2,7 @@ from __future__ import annotations
 import asyncio
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
-from typing import Any, Sequence, TypeVar
+from typing import Any, Literal, overload
 from tqdm import tqdm
 from tqdm.asyncio import tqdm_asyncio
 from typing_extensions import override
@@ -11,24 +11,50 @@ from openai.types.chat import ChatCompletionMessageParam
 from pydantic import BaseModel
 
 from ragu.common.logger import logger
+from ragu.models.caching import ModelT, OutputSchema
 from ragu.models.openai import CachedAsyncOpenAI
-
-
-T = TypeVar('T', BaseModel, str)
 
 
 class LLM(ABC):
     """LLM interface to support various backends (openai, transformers etc.)."""
 
+    @overload
+    async def chat_completion(
+        self,
+        conversation: list[ChatCompletionMessageParam],
+        output_schema: type[str] = ...,
+        **kwargs: Any,
+    ) -> str: ...
+
+    @overload
+    async def chat_completion(
+        self,
+        conversation: list[ChatCompletionMessageParam],
+        output_schema: type[ModelT],
+        **kwargs: Any,
+    ) -> ModelT: ...
+
+    @overload
+    async def chat_completion(
+        self,
+        conversation: list[ChatCompletionMessageParam],
+        output_schema: OutputSchema,
+        **kwargs: Any,
+    ) -> BaseModel | str: ...
+
     @abstractmethod
     async def chat_completion(
         self,
         conversation: list[ChatCompletionMessageParam],
-        output_schema: type[T] = str,
+        output_schema: OutputSchema = str,
         **kwargs: Any,
-    ) -> T:
+    ) -> Any:
         """
         Returns one chat completion response.
+
+        A concrete schema is carried through to the return type; a schema whose
+        type is only known as ``type[BaseModel] | type[str]`` - typically one read
+        off a prompt the caller may have replaced - yields ``BaseModel | str``.
 
         :param conversation: OpenAI-format conversation messages.
         :param output_schema: ``str`` for plain text or ``BaseModel`` subclass
@@ -37,14 +63,80 @@ class LLM(ABC):
         :returns: Response value as plain text or validated schema instance.
         """
 
+    # ``continue_on_error`` decides whether ``None`` can appear in the result at
+    # all, so it is part of the return type rather than a runtime detail: with the
+    # default the first failure propagates and every item is a real response.
+    @overload
     async def batch_chat_completion(
         self,
         conversations: list[list[ChatCompletionMessageParam]],
-        output_schema: type[T] = str,
+        output_schema: type[str] = ...,
+        desc: str | None = ...,
+        continue_on_error: Literal[False] = ...,
+        **kwargs: Any,
+    ) -> list[str]: ...
+
+    @overload
+    async def batch_chat_completion(
+        self,
+        conversations: list[list[ChatCompletionMessageParam]],
+        output_schema: type[ModelT],
+        desc: str | None = ...,
+        continue_on_error: Literal[False] = ...,
+        **kwargs: Any,
+    ) -> list[ModelT]: ...
+
+    @overload
+    async def batch_chat_completion(
+        self,
+        conversations: list[list[ChatCompletionMessageParam]],
+        output_schema: OutputSchema = ...,
+        desc: str | None = ...,
+        continue_on_error: Literal[False] = ...,
+        **kwargs: Any,
+    ) -> list[BaseModel | str]: ...
+
+    @overload
+    async def batch_chat_completion(
+        self,
+        conversations: list[list[ChatCompletionMessageParam]],
+        output_schema: type[str] = ...,
+        desc: str | None = ...,
+        *,
+        continue_on_error: Literal[True],
+        **kwargs: Any,
+    ) -> list[str | None]: ...
+
+    @overload
+    async def batch_chat_completion(
+        self,
+        conversations: list[list[ChatCompletionMessageParam]],
+        output_schema: type[ModelT],
+        desc: str | None = ...,
+        *,
+        continue_on_error: Literal[True],
+        **kwargs: Any,
+    ) -> list[ModelT | None]: ...
+
+    @overload
+    async def batch_chat_completion(
+        self,
+        conversations: list[list[ChatCompletionMessageParam]],
+        output_schema: OutputSchema = ...,
+        desc: str | None = ...,
+        *,
+        continue_on_error: Literal[True],
+        **kwargs: Any,
+    ) -> list[BaseModel | str | None]: ...
+
+    async def batch_chat_completion(
+        self,
+        conversations: list[list[ChatCompletionMessageParam]],
+        output_schema: OutputSchema = str,
         desc: str | None = None,
         continue_on_error: bool = False,
         **kwargs: Any,
-    ) -> Sequence[T | None]:
+    ) -> list[Any]:
         """
         Runs multiple :meth:`chat_completion` calls concurrently.
 
@@ -84,7 +176,7 @@ class LLM(ABC):
         ]
 
         task_to_idx = {id(t): i for i, t in enumerate(tasks)}
-        results: list[T | None] = [None] * len(tasks)
+        results: list[Any] = [None] * len(tasks)
         pending: set[asyncio.Future[Any]] = set(tasks)
         pbar = tqdm(total=len(tasks), desc=desc)
 
@@ -154,13 +246,37 @@ class LLMOpenAI(LLM):
         self.model_name = model_name
         self.kwargs = kwargs
     
+    @overload
+    async def chat_completion(
+        self,
+        conversation: list[ChatCompletionMessageParam],
+        output_schema: type[str] = ...,
+        **kwargs: Any,
+    ) -> str: ...
+
+    @overload
+    async def chat_completion(
+        self,
+        conversation: list[ChatCompletionMessageParam],
+        output_schema: type[ModelT],
+        **kwargs: Any,
+    ) -> ModelT: ...
+
+    @overload
+    async def chat_completion(
+        self,
+        conversation: list[ChatCompletionMessageParam],
+        output_schema: OutputSchema,
+        **kwargs: Any,
+    ) -> BaseModel | str: ...
+
     @override
     async def chat_completion(
         self,
         conversation: list[ChatCompletionMessageParam],
-        output_schema: type[T] = str,
+        output_schema: OutputSchema = str,
         **kwargs: Any,
-    ) -> T:
+    ) -> Any:
         """
         Forwards chat completion request.
 

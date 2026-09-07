@@ -5,18 +5,10 @@ from typing import Any, List, Dict, Literal
 from typing_extensions import override
 
 import numpy as np
+from pydantic import BaseModel
 
 from qdrant_client.conversions.common_types import CollectionInfo, QueryResponse
 from qdrant_client.http.models import FusionQuery, Fusion
-
-from pydantic import BaseModel
-from ragu.common.global_parameters import Settings
-from ragu.storage.base_storage import BaseVectorStorage
-from ragu.storage.types import EmbeddingHit, Point, SparseEmbedding
-from ragu.common.logger import logger
-
-from ragu.utils.ragu_utils import serialized_size, split_on_batches_by_size
-
 from qdrant_client import AsyncQdrantClient, models
 from qdrant_client.models import (
     Distance,
@@ -28,6 +20,18 @@ from qdrant_client.models import (
     SparseVectorParams,
     VectorParams,
 )
+
+from ragu.common.global_parameters import Settings
+from ragu.storage.base_storage import BaseVectorStorage
+from ragu.storage.types import (
+    DenseEmbedding, 
+    EmbeddingHit, 
+    Point, 
+    SparseEmbedding
+)
+from ragu.common.logger import logger
+from ragu.utils.ragu_utils import serialized_size, split_on_batches_by_size
+
 
 #: Approximate JSON size of one float in a serialized dense vector, used to
 #: derive an upsert batch size without serializing points to measure them.
@@ -390,7 +394,7 @@ class QdrantVectorDBStorage(BaseVectorStorage):
         for chunk in batches:
             ids: List[str] = []
             payloads: List[Dict[str, Any]] = []
-            dense_vectors: List[List[float]] = []
+            dense_vectors: List[DenseEmbedding] = []
             sparse_vectors: List[SparseVector] = []
 
             for point in chunk:
@@ -415,7 +419,7 @@ class QdrantVectorDBStorage(BaseVectorStorage):
                 # np.asarray(...).tolist() converts the whole chunk in one pass,
                 # which is markedly cheaper than calling tolist() per vector.
                 vectors[self.DENSE_VECTOR_NAME] = np.asarray(dense_vectors).tolist()
-            if sparse_vectors:
+            if sparse_vectors and self._sparse_mode is not None:
                 vectors[self._sparse_mode] = sparse_vectors
 
             if not vectors:
@@ -664,7 +668,7 @@ class QdrantVectorDBStorage(BaseVectorStorage):
 
             points_by_id[record_id] = Point(
                 id=record_id,
-                dense_embedding=dense_vector,
+                dense_embedding=np.asarray(dense_vector, dtype=float),
                 sparse_embedding=sparse_embedding,
                 metadata=payload,
             )
@@ -683,19 +687,19 @@ class QdrantVectorDBStorage(BaseVectorStorage):
             self._client = None
             self._collection_ready = False
 
-    async def index_start_callback(self):
+    async def index_start_callback(self) -> None:
         """
         Ensure collection availability before indexing starts.
         """
         await self._ensure_collection()
 
-    async def index_done_callback(self):
+    async def index_done_callback(self) -> None:
         """
         Finalize indexing.
         """
         pass
 
-    async def query_done_callback(self):
+    async def query_done_callback(self) -> None:
         """
         Finalize query processing.
         """

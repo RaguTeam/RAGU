@@ -1,0 +1,13 @@
+{
+  "name": "ragu-build",
+  "displayName": "RAGU build assistant",
+  "description": "Assemble a RAGU configuration through a short interview — chunker, extractor, search engine, storage backends and models — and generate a validated build script.",
+  "author": {
+    "name": "RAGU",
+    "url": "https://github.com/AsphodelRem/RAGU"
+  },
+  "homepage": "https://github.com/AsphodelRem/RAGU",
+  "repository": "https://github.com/AsphodelRem/RAGU",
+  "license": "MIT",
+  "keywords": ["ragu", "rag", "knowledge-graph", "retrieval", "scaffolding"]
+}

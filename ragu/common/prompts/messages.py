@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Iterator
 from typing import (
     TYPE_CHECKING,
     Literal,
@@ -135,10 +136,10 @@ class ChatMessages:
         """
         return [m.to_openai() for m in self.messages]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[BaseMessage]:
         return iter(self.messages)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.messages)
 
     def to_str(self) -> str:

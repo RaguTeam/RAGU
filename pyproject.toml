@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graph_ragu"
-version = "0.0.5"
+version = "0.1.0"
 description = "A GraphRAG toolkit for building and querying knowledge graphs from text."
 readme = "README.md"
 requires-python = ">=3.10"

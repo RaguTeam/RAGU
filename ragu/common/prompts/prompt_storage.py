@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Type
+from typing import Type, TypeVar
 
 from pydantic import BaseModel
 
@@ -49,6 +49,10 @@ from ragu.common.prompts.messages import (
 )
 
 
+#: Concrete output schema a component requires from its prompt.
+ModelT = TypeVar("ModelT", bound=BaseModel)
+
+
 @dataclass(frozen=True, slots=True)
 class RAGUInstruction:
     messages: ChatMessages
@@ -60,17 +64,24 @@ class RAGUInstruction:
 def require_prompt_schema(
     instruction: RAGUInstruction,
     prompt_name: str,
-    expected_model: type,
-) -> None:
+    expected_model: Type[ModelT],
+) -> Type[ModelT]:
     """
     Validate that a prompt instruction uses the output schema a component expects.
+
+    Returns the schema so that callers can pass it straight to
+    :meth:`~ragu.models.llm.LLM.chat_completion`: ``instruction.pydantic_model``
+    is only known as ``Type[BaseModel] | Type[str]``, while the validated model
+    is a concrete class and carries through to the response type.
 
     :param instruction: Prompt instruction to check.
     :type instruction: RAGUInstruction
     :param prompt_name: Prompt name used in the error message.
     :type prompt_name: str
     :param expected_model: Output schema type the calling component requires.
-    :type expected_model: type
+    :type expected_model: Type[ModelT]
+    :returns: The same ``expected_model``, once validated.
+    :rtype: Type[ModelT]
     :raises ValueError: If the instruction's ``pydantic_model`` differs from
         ``expected_model`` (e.g. the prompt was replaced with an incompatible one).
     """
@@ -83,6 +94,7 @@ def require_prompt_schema(
             f"{expected_model.__name__}, got {actual}. The prompt template was "
             f"likely replaced with an incompatible schema via update_prompt()."
         )
+    return expected_model
 
 
 DEFAULT_PROMPT_TEMPLATES: dict[str, RAGUInstruction] = {

@@ -153,6 +153,10 @@ For each relationship, provide:
 ### Relation Type Rules
 {% if relation_types %}
 - You MUST use one of the following predefined relation types: {{ relation_types }}
+{% if type_signatures is defined and type_signatures -%}
+- Some types are shown as `TYPE [SUBJECT -> OBJECT] (meaning)`. The brackets state which entity types the relation may connect: `WORKPLACE [PERSON -> ORGANIZATION|FACILITY]` may only go from a PERSON to an ORGANIZATION or a FACILITY. `|` separates alternatives, `<->` marks a relation that holds in both directions, and a type shown without brackets accepts any pair.
+- Pick a type whose signature matches the types of the two entities you are linking, and order **source_entity** and **target_entity** to follow the arrow. A relation whose endpoints do not match its signature will be discarded.
+{% endif -%}
 - If a relationship clearly does not fit any predefined type, use the closest matching type.
 - Every extracted relation MUST be assigned one of these types.
 {% else %}
@@ -204,6 +208,10 @@ Perform a comprehensive validation of the provided relation list against the sou
 - Verify each relation's type accurately reflects the nature of the relationship as described in the text.
 {% if relation_types %}
 - Every relation MUST use one of the following allowed types: {{ relation_types }}
+{% if type_signatures is defined and type_signatures -%}
+- Some types are shown as `TYPE [SUBJECT -> OBJECT] (meaning)`. The brackets state which entity types the relation may connect: `WORKPLACE [PERSON -> ORGANIZATION|FACILITY]` may only go from a PERSON to an ORGANIZATION or a FACILITY. `|` separates alternatives, `<->` marks a relation that holds in both directions, and a type shown without brackets accepts any pair.
+- Pick a type whose signature matches the types of the two entities you are linking, and order **source_entity** and **target_entity** to follow the arrow. A relation whose endpoints do not match its signature will be discarded.
+{% endif -%}
 {% else %}
 - Ensure types are concise, consistent UPPER_SNAKE_CASE labels (e.g., CEO_OF, LOCATED_IN, PRODUCES, PART_OF, ANNOUNCED_AT, SUBSIDIARY_OF, FOUNDED_BY, CAUSES, PRESENTED_AT, WORKS_FOR, HOSTS).
 - Ensure type consistency: the same kind of relationship must always receive the same type label across the entire list.

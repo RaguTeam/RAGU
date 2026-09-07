@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Tuple, Optional, cast
+from typing import Any, List, Tuple
 
 from ragu.common.logger import logger
 from ragu.chunker.types import Chunk
@@ -14,7 +14,7 @@ from ragu.graph.types import Entity, Relation
 from ragu.models.llm import LLM
 from ragu.models.embedder import Embedder
 from ragu.triplet.base_artifact_extractor import BaseArtifactExtractor
-from ragu.triplet.types import NEREL_ENTITY_TYPES, NEREL_RELATION_TYPES
+from ragu.triplet.ontology import Ontology, ValidationPolicies
 
 
 class ArtifactsExtractorLLM(BaseArtifactExtractor):
@@ -37,8 +37,9 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         icl_config: ICLConfig | None = None,
         do_validation: bool = False,
         language: str | None = None,
-        entity_types: Optional[List[str]] = NEREL_ENTITY_TYPES,
-        relation_types: Optional[List[str]] = NEREL_RELATION_TYPES,
+        ontology: Ontology | str | None = "nerel",
+        validation: ValidationPolicies = ValidationPolicies(),
+        show_type_signatures: bool = False,
     ):
         """
         Initialize a new :class:`ArtifactsExtractorLLM`.
@@ -48,18 +49,34 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         :param icl_config: ICL configuration (optional).
         :param do_validation: Whether to perform additional LLM-based validation of artifacts.
         :param language: Output text language.
-        :param entity_types: List of entity types to guide extraction prompts.
-        :param relation_types: List of relation types to guide extraction prompts.
+        :param ontology: Vocabulary the extraction is restricted to: an
+            :class:`~ragu.triplet.ontology.Ontology`, the name of a built-in one, or
+            ``None`` to let the model invent its own type labels. The same object
+            drives both the prompt and the validation of what comes back, so the two
+            cannot drift apart.
+        :param validation: What to do about artifacts that violate the ontology.
+            Ignored when ``ontology`` is ``None``.
+        :param show_type_signatures: Render each predicate in the prompt with its
+            ``[DOMAIN -> RANGE]`` signature. Without it the model cannot know which
+            endpoint types a predicate accepts, and produces relations the validator
+            then has to discard.
         """
         _PROMPTS = ["artifact_extraction", "artifact_validation"]
-        super().__init__(prompts=_PROMPTS)
+        super().__init__(prompts=_PROMPTS, ontology=ontology, validation=validation)
 
         self.llm = llm
         self.embedder = embedder
         self.do_validation = do_validation
         self.language = language if language else Settings.language
-        self.entity_types = ", ".join(entity_types) if entity_types else None
-        self.relation_types = ", ".join(relation_types) if relation_types else None
+        self.show_type_signatures = show_type_signatures
+        self.entity_types = (
+            self.ontology.render_entity_types() if self.ontology else None
+        )
+        self.relation_types = (
+            self.ontology.render_relation_types(with_signatures=show_type_signatures)
+            if self.ontology
+            else None
+        )
 
         self.icl_manager: InContextLearningManager | None = None
         if icl_config and icl_config.enabled:
@@ -81,21 +98,21 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
     async def _extract_artifacts(
         self,
         context: List[str],
-    ) -> List[ArtifactsModel]:
+    ) -> List[ArtifactsModel | None]:
         """
         Run artifact extraction for a batch of texts.
 
         :param context: Chunk texts.
-        :return: Per-chunk extracted artifacts.
+        :return: Per-chunk extracted artifacts, ``None`` where the LLM call failed.
         """
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
             await self.icl_manager.initialize()
-            examples_list = await self.icl_manager.batch_select_examples(
+            examples_list = list(await self.icl_manager.batch_select_examples(
                 query_texts=context,
                 task="artifact_extraction",
                 num_examples=self.icl_manager.config.num_examples
-            )
+            ))
         else:
             examples_list = [None] * len(context)
 
@@ -109,15 +126,15 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             language=self.language,
             entity_types=self.entity_types,
             relation_types=self.relation_types,
+            type_signatures=self.show_type_signatures,
         )
 
         result_list = await self.llm.batch_chat_completion(
             [c.to_openai() for c in conversations],
-            output_schema=instruction.pydantic_model or str,
+            output_schema=instruction.pydantic_model,
             continue_on_error=True,
             desc="Extracting a knowledge graph from chunks",
         )
-        result_list = cast(list[ArtifactsModel | None], result_list)
 
         for i, artifacts in enumerate(result_list):
             if artifacts is not None:
@@ -133,22 +150,22 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
     async def _validate_artifacts(
         self,
         context: List[str],
-        artifacts: List[ArtifactsModel],
-    ) -> List[ArtifactsModel]:
+        artifacts: List[ArtifactsModel | None],
+    ) -> List[ArtifactsModel | None]:
         """
         Run artifact validation for a batch of texts and their extracted artifacts.
 
         :param context: Chunk texts.
         :param artifacts: Per-chunk extracted artifacts from extraction stage.
-        :return: Per-chunk validated artifacts.
+        :return: Per-chunk validated artifacts, ``None`` where the LLM call failed.
         """
         examples_list: List[List[dict[str, Any]] | None] = []
         if self.icl_manager:
-            examples_list = await self.icl_manager.batch_select_examples(
+            examples_list = list(await self.icl_manager.batch_select_examples(
                 query_texts=context,
                 task="artifact_validation",
                 num_examples=self.icl_manager.config.num_examples
-            )
+            ))
         else:
             examples_list = [None] * len(context)
 
@@ -163,16 +180,16 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             context=context,
             entity_types=self.entity_types,
             relation_types=self.relation_types,
+            type_signatures=self.show_type_signatures,
             language=self.language,
         )
 
         result_list = await self.llm.batch_chat_completion(
             [c.to_openai() for c in conversations],
-            output_schema=instruction.pydantic_model or str,
+            output_schema=instruction.pydantic_model,
             continue_on_error=True,
             desc="Validation of extracted artifacts",
         )
-        result_list = cast(list[ArtifactsModel | None], result_list)
 
         for i, artifacts_validated in enumerate(result_list):
             if artifacts_validated is not None:
@@ -230,17 +247,21 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                     type(e).__name__, e,
                 )
 
+        entities_per_chunk, relations_per_chunk = self._apply_ontology(
+            [artifacts.entities if artifacts else [] for artifacts in result_list],
+            [artifacts.relations if artifacts else [] for artifacts in result_list],
+            stage="artifacts",
+        )
+
         entities_result: List[Entity] = []
         relations_result: List[Relation] = []
 
-        for artifacts, chunk in zip(result_list, chunks):
-
-            if artifacts is None:
-                continue
-
+        for chunk_entities, chunk_relations, chunk in zip(
+            entities_per_chunk, relations_per_chunk, chunks
+        ):
             current_chunk_entities: List[Entity] = []
 
-            for entity_model in artifacts.entities:
+            for entity_model in chunk_entities:
                 entity = Entity(
                     entity_name=entity_model.entity_name,
                     entity_type=entity_model.entity_type or "UNKNOWN",
@@ -254,7 +275,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
             entities_result.extend(current_chunk_entities)
             entity_by_name = {e.entity_name: e for e in current_chunk_entities}
 
-            for relation in artifacts.relations:
+            for relation in chunk_relations:
                 subject_name = relation.source_entity
                 object_name = relation.target_entity
                 if not (subject_name and object_name):
@@ -263,16 +284,17 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
                 object_entity = entity_by_name.get(object_name)
 
                 if subject_entity and object_entity:
-                    relation = Relation(
-                        subject_name=subject_name,
-                        object_name=object_name,
-                        subject_id=subject_entity.id,
-                        object_id=object_entity.id,
-                        relation_type=relation.relation_type or "UNKNOWN",
-                        description=relation.description,
-                        relation_strength=float(relation.relationship_strength),
-                        source_chunk_id=[chunk.id],
+                    relations_result.append(
+                        Relation(
+                            subject_name=subject_name,
+                            object_name=object_name,
+                            subject_id=subject_entity.id,
+                            object_id=object_entity.id,
+                            relation_type=relation.relation_type or "UNKNOWN",
+                            description=relation.description,
+                            relation_strength=float(relation.relationship_strength),
+                            source_chunk_id=[chunk.id],
+                        )
                     )
-                    relations_result.append(relation)
 
         return entities_result, relations_result

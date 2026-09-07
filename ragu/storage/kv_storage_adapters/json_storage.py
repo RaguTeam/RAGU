@@ -90,7 +90,7 @@ class JsonKVStorage(BaseKVStorage[dict[str, T]]):
         return set([s for s in data if s not in self.data])
 
     @override
-    async def upsert(self, data: dict[str, dict[str, T]]):
+    async def upsert(self, data: dict[str, dict[str, T]]) -> None:
         """
         Insert or update one or more key-value pairs in the store.
 
@@ -110,25 +110,25 @@ class JsonKVStorage(BaseKVStorage[dict[str, T]]):
             self.data.pop(id_, None)
 
     @override
-    async def drop(self):
+    async def drop(self) -> None:
         """
         Remove all records from the store (in-memory only).
         """
         self.data = {}
 
-    async def index_start_callback(self):
+    async def index_start_callback(self) -> None:
         """
         Pre-index hook for interface compatibility.
         """
         pass
 
-    async def query_done_callback(self):
+    async def query_done_callback(self) -> None:
         """
         Post-query hook for interface compatibility.
         """
         pass
 
-    async def index_done_callback(self):
+    async def index_done_callback(self) -> None:
         """
         Persist the current in-memory data to disk.
         """
