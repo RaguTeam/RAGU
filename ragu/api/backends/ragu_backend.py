@@ -32,6 +32,7 @@ from ragu.api.errors import BackendExecutionError, ServiceNotReadyError
 from ragu.api.mapping import extract_sources, to_outcome
 from ragu.api.models import ChildEngineReport, EngineReport, SearchMode
 from ragu.common.logger import logger
+from ragu.models.embedder import Embedder
 from ragu.models.llm import LLM
 from ragu.search_engine.base_engine import BaseEngine
 from ragu.search_engine.global_search import GlobalSearchParams
@@ -95,9 +96,10 @@ class RaguBackend(SearchBackend):
     def __init__(self, settings: ServiceSettings):
         super().__init__(settings)
         self.graph: KnowledgeGraph | None = None
-        self._engines: dict[SearchMode, BaseEngine[Any, Any]] = {}
+        self._engines: dict[tuple[SearchMode, str], BaseEngine[Any, Any]] = {}
         self._clients: list[CachedAsyncOpenAI] = []
         self._llm: LLM | None = None
+        self._embedder: Embedder | None = None
 
     async def startup(self) -> None:
         """
@@ -173,23 +175,11 @@ class RaguBackend(SearchBackend):
 
         self.graph = graph
         self._llm = llm
-        self._engines = {
-            "global": GlobalSearchEngine(
-                llm=llm, knowledge_graph=graph, language=settings.language
-            ),
-            "local": LocalSearchEngine(
-                llm=llm,
-                knowledge_graph=graph,
-                embedder=embedder,
-                language=settings.language,
-            ),
-            "naive": NaiveSearchEngine(
-                llm=llm,
-                knowledge_graph=graph,
-                embedder=embedder,
-                language=settings.language,
-            ),
-        }
+        self._embedder = embedder
+        # Warm the default language so a misconfigured engine fails at startup
+        # rather than on the first request.
+        for mode in ("global", "local", "naive"):
+            self._leaf_engine(mode, settings.language)
         self._stats = await self._measure(graph)
 
         if self._stats.is_empty:
@@ -226,6 +216,7 @@ class RaguBackend(SearchBackend):
         self._clients.clear()
         self.graph = None
         self._llm = None
+        self._embedder = None
         self._engines = {}
         self._stats = None
 
@@ -280,15 +271,67 @@ class RaguBackend(SearchBackend):
             community_summaries=len(summaries),
         )
 
+    def _build_engine(self, mode: SearchMode, language: str) -> BaseEngine[Any, Any]:
+        """
+        Construct one leaf engine for a mode in a language.
+
+        :param mode: ``global``, ``local`` or ``naive``.
+        :param language: Answer language baked into the engine.
+        :return: The engine.
+        """
+        graph, llm, embedder = self._require_loaded()
+        if mode == "global":
+            return GlobalSearchEngine(
+                llm=llm, knowledge_graph=graph, language=language
+            )
+        engine_cls = LocalSearchEngine if mode == "local" else NaiveSearchEngine
+        return engine_cls(
+            llm=llm, knowledge_graph=graph, embedder=embedder, language=language
+        )
+
+    def _leaf_engine(self, mode: SearchMode, language: str) -> BaseEngine[Any, Any]:
+        """
+        Return a cached leaf engine, building it on first use.
+
+        The engines bake ``language`` in at construction — every engine reads
+        ``self.language`` when it renders the answer prompt — so a per-request
+        language means a per-language engine. They are cached because with
+        ``tokenizer_llm_backend="local"`` the constructor loads a HuggingFace
+        tokenizer, which is far too expensive to repeat per request.
+
+        :param mode: Leaf mode to build.
+        :param language: Answer language.
+        :return: The engine for that pair.
+        """
+        key = (mode, language)
+        engine = self._engines.get(key)
+        if engine is None:
+            engine = self._build_engine(mode, language)
+            # A client picks the language, so the cache is bounded: drop the
+            # oldest entry rather than growing without limit.
+            while len(self._engines) >= self.settings.engine_cache_size:
+                self._engines.pop(next(iter(self._engines)))
+            self._engines[key] = engine
+        return engine
+
+    def _require_loaded(self) -> tuple[KnowledgeGraph, LLM, Embedder]:
+        """
+        Return the graph and models built at startup.
+
+        :raises ServiceNotReadyError: If the backend has not started.
+        """
+        if self.graph is None or self._llm is None or self._embedder is None:
+            raise ServiceNotReadyError("Knowledge graph is not loaded yet.")
+        return self.graph, self._llm, self._embedder
+
     def _engine_for(self, call: SearchCall) -> tuple[Any, tuple[RecordingEngine, ...]]:
         """
         Build the engine that answers this call.
 
-        Every mode but ``mix`` uses the engine cached at startup. ``mix`` is
-        assembled per request: ``MixSearchEngine`` reads its children's
-        parameters from the constructor — ``batch_search`` ignores its ``params``
-        argument and ``batch_query`` reads only ``ensemble_responses`` — so the
-        ensemble cannot be built once and parameterized later.
+        ``mix`` is assembled per request: ``MixSearchEngine`` reads its
+        children's parameters from the constructor — ``batch_search`` ignores its
+        ``params`` argument and ``batch_query`` reads only ``ensemble_responses``
+        — so the ensemble cannot be built once and parameterized later.
 
         :param call: The resolved request.
         :return: The engine, and the recording proxies of its children if any.
@@ -300,13 +343,14 @@ class RaguBackend(SearchBackend):
                 "Knowledge graph is not loaded yet.", mode=call.mode
             )
         self.require_capability(call.mode)
+        language = call.language or self.settings.language
 
         if call.mode != "mix":
-            return self._engines[call.mode], ()
+            return self._leaf_engine(call.mode, language), ()
 
         children = (
-            RecordingEngine(self._engines["local"], "local"),
-            RecordingEngine(self._engines["naive"], "naive"),
+            RecordingEngine(self._leaf_engine("local", language), "local"),
+            RecordingEngine(self._leaf_engine("naive", language), "naive"),
         )
         engine = MixSearchEngine(
             llm=self._require_llm(),
@@ -315,7 +359,7 @@ class RaguBackend(SearchBackend):
                 self.bound_params(call.local_params or LocalParams()),
                 self.bound_params(call.naive_params or NaiveSearchParams()),
             ],
-            language=self.settings.language,
+            language=language,
         )
         return engine, children
 

@@ -18,6 +18,18 @@ Capability = Literal["entity_graph", "community_summaries", "vector_index"]
 
 CAPABILITIES: frozenset[str] = frozenset(get_args(Capability))
 
+# The value is interpolated into the answer prompt ("Provide the answer in the
+# following language: {{ language }}"), so it is a prompt-injection surface: it
+# is constrained to a plain language name rather than accepted as free text.
+LanguageField = Field(
+    default=None,
+    min_length=2,
+    max_length=32,
+    pattern=r"^[A-Za-z][A-Za-z \-]*$",
+    description="Answer language, e.g. 'russian'. Defaults to RAGU_API_LANGUAGE.",
+)
+
+
 
 class GlobalSearchRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -27,6 +39,7 @@ class GlobalSearchRequest(BaseModel):
         default_factory=GlobalSearchParams,
         description="GlobalSearchEngine retrieval parameters: min_cluster_size",
     )
+    language: str | None = LanguageField
 
 
 class LocalSearchRequest(BaseModel):
@@ -41,6 +54,7 @@ class LocalSearchRequest(BaseModel):
         description="LocalSearchEngine retrieval parameters: top_k, rerank_top_k, "
         "use_summary, use_chunks",
     )
+    language: str | None = LanguageField
 
 
 class NaiveSearchRequest(BaseModel):
@@ -54,6 +68,7 @@ class NaiveSearchRequest(BaseModel):
         default_factory=NaiveSearchParams,
         description="NaiveSearchEngine retrieval parameters: top_k, rerank_top_k",
     )
+    language: str | None = LanguageField
 
 
 class MixSearchRequest(BaseModel):
@@ -77,6 +92,7 @@ class MixSearchRequest(BaseModel):
         default_factory=NaiveSearchParams,
         description="Parameters for the naive child engine",
     )
+    language: str | None = LanguageField
 
 
 class ChildEngineReport(BaseModel):
@@ -216,16 +232,19 @@ class BatchQueries(BaseModel):
 
 class GlobalBatchRequest(BatchQueries):
     params: GlobalSearchParams = Field(default_factory=GlobalSearchParams)
+    language: str | None = LanguageField
 
 
 class LocalBatchRequest(BatchQueries):
     use_query_plan: bool = Field(default=True)
     params: LocalParams = Field(default_factory=LocalParams)
+    language: str | None = LanguageField
 
 
 class NaiveBatchRequest(BatchQueries):
     use_query_plan: bool = Field(default=True)
     params: NaiveSearchParams = Field(default_factory=NaiveSearchParams)
+    language: str | None = LanguageField
 
 
 class MixBatchRequest(BatchQueries):
@@ -233,6 +252,7 @@ class MixBatchRequest(BatchQueries):
     params: MixQueryParams = Field(default_factory=MixQueryParams)
     local_params: LocalParams = Field(default_factory=LocalParams)
     naive_params: NaiveSearchParams = Field(default_factory=NaiveSearchParams)
+    language: str | None = LanguageField
 
 
 class BatchSearchItem(BaseModel):

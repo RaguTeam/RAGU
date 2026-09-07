@@ -191,6 +191,8 @@ class SearchCall:
     :param use_query_plan: Whether to decompose the query first. Ignored by
         retrieval: ``QueryPlanEngine.batch_search`` delegates straight to the
         wrapped engine and does no planning.
+    :param language: Answer language for this request. ``None`` falls back to
+        the service default.
     """
 
     mode: SearchMode
@@ -199,6 +201,7 @@ class SearchCall:
     local_params: LocalParams | None = None
     naive_params: NaiveSearchParams | None = None
     use_query_plan: bool = False
+    language: str | None = None
 
     @property
     def query(self) -> str:

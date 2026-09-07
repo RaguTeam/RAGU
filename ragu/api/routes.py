@@ -170,6 +170,7 @@ def _call(mode: SearchMode, payload: Any) -> SearchCall:
         local_params=getattr(payload, "local_params", None),
         naive_params=getattr(payload, "naive_params", None),
         use_query_plan=getattr(payload, "use_query_plan", False),
+        language=getattr(payload, "language", None),
     )
 
 
@@ -306,6 +307,7 @@ def _batch_call(mode: SearchMode, payload: Any) -> SearchCall:
         local_params=getattr(payload, "local_params", None),
         naive_params=getattr(payload, "naive_params", None),
         use_query_plan=getattr(payload, "use_query_plan", False),
+        language=getattr(payload, "language", None),
     )
 
 

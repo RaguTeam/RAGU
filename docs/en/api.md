@@ -73,6 +73,7 @@ Service settings are `RAGU_API_*` environment variables, read by
 | `RAGU_API_RATE_MIN_DELAY` | — | Minimum delay between LLM calls, seconds |
 | `RAGU_API_RATE_MAX_SIMULTANEOUS` | — | Maximum simultaneous LLM calls |
 | `RAGU_API_LLM_CACHE` | — | Path to the LLM response cache; unset disables caching |
+| `RAGU_API_ENGINE_CACHE_SIZE` | `32` | How many (mode, language) engines to keep built |
 | `RAGU_API_MAX_BATCH_SIZE` | `50` | Maximum number of queries a /batch route accepts |
 | `RAGU_API_MAX_TOP_K` | `100` | Ceiling applied to a client-supplied `top_k` / `rerank_top_k` |
 | `RAGU_API_MIN_CLUSTER_SIZE_FLOOR` | `1` | Floor applied to global `min_cluster_size` |
@@ -160,6 +161,22 @@ When a query plan ran, `sources` carries the evidence of **every** subquery,
 deduplicated, not only that of the final one — the intermediate answers are
 returned in `subqueries`, so their evidence is returned with them.
 
+
+### Answer language
+
+Every request that generates an answer takes an optional `language`; without it
+the service default (`RAGU_API_LANGUAGE`) applies.
+
+This is a per-request parameter and not a deployment setting because the engines
+bake the language in at construction — each one reads it when it renders the
+answer prompt — so a language fixed at startup means a Russian question against
+an English corpus is answered in English. Engines are therefore cached per
+`(mode, language)`; `RAGU_API_ENGINE_CACHE_SIZE` bounds that cache, since the
+client chooses the language.
+
+The value is interpolated into the prompt, so it is constrained to a plain
+language name (`^[A-Za-z][A-Za-z \-]*$`, 2–32 characters) rather than accepted
+as free text.
 
 ### Retrieval without generation
 

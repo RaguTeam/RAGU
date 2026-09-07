@@ -60,6 +60,12 @@ class ServiceSettings(BaseSettings):
         description="Upper bound applied to a client-supplied top_k / rerank_top_k; "
         "requests above it are clamped",
     )
+    engine_cache_size: int = Field(
+        default=32,
+        gt=0,
+        description="How many (mode, language) engines to keep built. Clients choose "
+        "the language, so the cache is bounded.",
+    )
     max_batch_size: int = Field(
         default=50,
         gt=0,
