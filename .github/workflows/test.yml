@@ -28,8 +28,10 @@ jobs:
         run: pip install uv
 
       - name: Install package with test dependencies
+        # The `api` extra is required: tests/api/ opens with
+        # pytest.importorskip("fastapi") and is silently skipped without it.
         run: |
-          uv pip install --system -e ".[test]"
+          uv pip install --system -e ".[api,test]"
 
       - name: Test import
         run: python -c "import ragu; print(ragu.__version__)"

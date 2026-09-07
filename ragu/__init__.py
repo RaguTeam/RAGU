@@ -13,6 +13,9 @@ from ragu.graph.index import StorageArguments
 from ragu.common.env import Env
 from ragu.common.global_parameters import Settings
 
+# Model clients
+from ragu.models import CachedAsyncOpenAI, EmbedderOpenAI, LLMOpenAI
+
 # Search engines
 from ragu.search_engine import (
     LocalSearchEngine,
@@ -49,6 +52,9 @@ __all__ = [
     "RaguLmArtifactExtractor",
     "Env",
     "Settings",
+    "CachedAsyncOpenAI",
+    "EmbedderOpenAI",
+    "LLMOpenAI",
     "SimpleChunker",
     "SmartSemanticChunker",
 ]

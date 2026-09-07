@@ -2,37 +2,91 @@
 Adapter over the RAGU engines.
 """
 
-import logging
-from collections.abc import Mapping
-from dataclasses import replace
+import asyncio
+import os
+from collections.abc import AsyncIterator
 from typing import Any
 
+from ragu import (
+    CachedAsyncOpenAI,
+    EmbedderOpenAI,
+    Env,
+    GlobalSearchEngine,
+    KnowledgeGraph,
+    LLMOpenAI,
+    LocalSearchEngine,
+    MixSearchEngine,
+    NaiveSearchEngine,
+    Settings,
+)
 from ragu.api.backends.base import (
-    GLOBAL_UNAVAILABLE_MESSAGE,
-    LOCAL_UNAVAILABLE_MESSAGE,
-    NAIVE_UNAVAILABLE_MESSAGE,
+    GraphStats,
+    SearchStreamEvent,
+    RetrieveOutcome,
     SearchBackend,
+    SearchCall,
     SearchOutcome,
 )
 from ragu.api.config import ServiceSettings
-from ragu.api.errors import (
-    BackendExecutionError,
-    CapabilityUnavailableError,
-    ServiceNotReadyError,
-)
-from ragu.api.models import SourceItem, SubqueryItem
+from ragu.api.errors import BackendExecutionError, ServiceNotReadyError
+from ragu.api.mapping import extract_sources, to_outcome
+from ragu.api.models import ChildEngineReport, EngineReport, SearchMode
+from ragu.common.logger import logger
+from ragu.models.embedder import Embedder
+from ragu.models.llm import LLM
+from ragu.search_engine.base_engine import BaseEngine
 from ragu.search_engine.global_search import GlobalSearchParams
 from ragu.search_engine.local_search import LocalParams
+from ragu.search_engine.mix_search import MixQueryParams
 from ragu.search_engine.naive_search import NaiveSearchParams
 from ragu.search_engine.query_plan import QueryPlanEngine
 
-logger = logging.getLogger(__name__)
 
-_NO_EVIDENCE = {
-    "global": (GLOBAL_UNAVAILABLE_MESSAGE, "community_summaries"),
-    "local": (LOCAL_UNAVAILABLE_MESSAGE, "entity_graph"),
-    "naive": (NAIVE_UNAVAILABLE_MESSAGE, None),
-}
+class RecordingEngine:
+    """
+    Child-engine proxy that remembers whether the child actually contributed.
+
+    ``MixSearchEngine`` is constructed with ``allow_partial_failures=True``: a
+    child that raises is logged and dropped from the ensemble, so from the
+    outside "graph and chunks" is indistinguishable from "chunks only". This
+    records the failure on the way past, before the ensemble swallows it.
+    """
+
+    def __init__(self, engine: BaseEngine[Any, Any], mode: SearchMode):
+        self.engine = engine
+        self.mode = mode
+        self.error: str | None = None
+        self.called = False
+
+    @property
+    def llm(self) -> LLM:
+        return self.engine.llm
+
+    async def batch_search(self, queries: list[str], params: Any = None) -> Any:
+        return await self._record(self.engine.batch_search, queries, params)
+
+    async def batch_query(self, queries: list[str], params: Any = None) -> Any:
+        return await self._record(self.engine.batch_query, queries, params)
+
+    async def _record(self, call: Any, queries: list[str], params: Any) -> Any:
+        self.called = True
+        try:
+            return await call(queries, params)
+        except Exception as exc:
+            self.error = f"{type(exc).__name__}: {exc}"
+            raise
+
+    def report(self) -> ChildEngineReport:
+        """
+        Describe what this child did, for the response's engine report.
+        """
+        return ChildEngineReport(
+            engine=type(self.engine).__name__,
+            mode=self.mode,
+            ok=self.called and self.error is None,
+            error=self.error,
+        )
+
 
 class RaguBackend(SearchBackend):
     """
@@ -40,33 +94,24 @@ class RaguBackend(SearchBackend):
     """
 
     def __init__(self, settings: ServiceSettings):
-        self.settings = settings
-        self.graph: Any = None
-        self._engines: dict[str, Any] = {}
-
-    @property
-    def graph_loaded(self) -> bool:
-        return self.graph is not None
+        super().__init__(settings)
+        self.graph: KnowledgeGraph | None = None
+        self._engines: dict[tuple[SearchMode, str], BaseEngine[Any, Any]] = {}
+        self._clients: list[CachedAsyncOpenAI] = []
+        self._llm: LLM | None = None
+        self._embedder: Embedder | None = None
 
     async def startup(self) -> None:
-        try:
-            from ragu import (
-                GlobalSearchEngine,
-                KnowledgeGraph,
-                LocalSearchEngine,
-                NaiveSearchEngine,
-                Settings,
-            )
-            from ragu.common.env import Env
-            from ragu.models.embedder import EmbedderOpenAI
-            from ragu.models.llm import LLMOpenAI
-            from ragu.models.openai import CachedAsyncOpenAI
-        except ImportError as exc:  # pragma: no cover - depends on the deployment env
-            raise ServiceNotReadyError(
-                "The 'ragu' package is not importable. Install it or run the service with RAGU_API_BACKEND=stub."
-            ) from exc
+        """
+        Load the graph and build one engine per search mode.
 
+        :raises ServiceNotReadyError: If credentials, the embedder endpoint or
+            the storage folder make the graph unusable.
+        """
         settings = self.settings
+
+        self._require_storage_folder(settings.storage_folder)
+
         if settings.settings_file:
             Settings.load(settings.settings_file)
         Settings.storage_folder = settings.storage_folder
@@ -87,14 +132,15 @@ class RaguBackend(SearchBackend):
             rate_max_simultaneous=settings.rate_max_simultaneous,
             cache=settings.llm_cache,
         )
-        embedder_client = (
-            llm_client
-            if not env.embedder_base_url
-            else CachedAsyncOpenAI(
+        self._clients.append(llm_client)
+
+        embedder_client = llm_client
+        if env.embedder_base_url:
+            embedder_client = CachedAsyncOpenAI(
                 base_url=env.embedder_base_url,
                 api_key=env.embedder_api_key or env.llm_api_key,
             )
-        )
+            self._clients.append(embedder_client)
 
         llm = LLMOpenAI(client=llm_client, model_name=env.llm_model_name)
         embedder = EmbedderOpenAI(
@@ -113,8 +159,14 @@ class RaguBackend(SearchBackend):
                 ) from exc
 
         try:
-            graph = KnowledgeGraph(
-                llm=llm, embedder=embedder, language=settings.language
+            # Constructing the graph opens every storage and reads the whole
+            # graph file, which takes minutes on a large corpus. Off the event
+            # loop, so /health keeps answering while it happens.
+            graph = await asyncio.to_thread(
+                KnowledgeGraph,
+                llm=llm,
+                embedder=embedder,
+                language=settings.language,
             )
         except Exception as exc:
             raise ServiceNotReadyError(
@@ -122,248 +174,316 @@ class RaguBackend(SearchBackend):
             ) from exc
 
         self.graph = graph
-        self._engines = {
-            "global": GlobalSearchEngine(
-                llm=llm, knowledge_graph=graph, language=settings.language
-            ),
-            "local": LocalSearchEngine(
-                llm=llm,
-                knowledge_graph=graph,
-                embedder=embedder,
-                language=settings.language,
-            ),
-            "naive": NaiveSearchEngine(
-                llm=llm,
-                knowledge_graph=graph,
-                embedder=embedder,
-                language=settings.language,
-            ),
-        }
+        self._llm = llm
+        self._embedder = embedder
+        # Warm the default language so a misconfigured engine fails at startup
+        # rather than on the first request.
+        for mode in ("global", "local", "naive"):
+            self._leaf_engine(mode, settings.language)
+        self._stats = await self._measure(graph)
+
+        if self._stats.is_empty:
+            raise ServiceNotReadyError(
+                f"The graph at '{settings.storage_folder}' is empty: no entities, chunks or "
+                "community summaries. Point RAGU_API_STORAGE_FOLDER at a built graph."
+            )
+
         logger.info(
-            f"Graph loaded from '{settings.storage_folder}' (language={settings.language})"
+            "Graph loaded from '{}' (language={}): {}",
+            settings.storage_folder,
+            settings.language,
+            self._stats,
         )
 
-    async def _query(
-        self, mode: str, 
-        query: str, 
-        params: Any, 
-        *, 
-        use_query_plan: bool
-    ) -> SearchOutcome:
+    async def shutdown(self) -> None:
+        """
+        Close the graph storages and the model clients.
+
+        File-backed storages do nothing here, but server-backed ones (Neo4j,
+        remote Qdrant) and the HTTP pool behind every model client stay open
+        until closed.
+        """
+        if self.graph is not None:
+            try:
+                await self.graph.index.close()
+            except Exception:
+                logger.exception("Failed to close the graph index")
+        for client in self._clients:
+            try:
+                await client.client.close()
+            except Exception:
+                logger.exception("Failed to close a model client")
+        self._clients.clear()
+        self.graph = None
+        self._llm = None
+        self._embedder = None
+        self._engines = {}
+        self._stats = None
+
+    @staticmethod
+    def _require_storage_folder(storage_folder: str) -> None:
+        """
+        Reject a storage folder that holds no graph.
+
+        ``Index.__init__`` calls ``Settings.init_storage_folder()``, which
+        *creates* the folder when it is missing. Without this check a typo in
+        ``RAGU_API_STORAGE_FOLDER`` produces an empty directory and a backend
+        that looks healthy while every search comes back empty.
+
+        :param storage_folder: Folder the service was pointed at.
+        :raises ServiceNotReadyError: If it is missing, not a directory, or empty.
+        """
+        if not os.path.isdir(storage_folder):
+            raise ServiceNotReadyError(
+                f"Storage folder '{storage_folder}' does not exist. Set "
+                "RAGU_API_STORAGE_FOLDER to the folder a build run produced; the service "
+                "serves a prebuilt graph and never builds one."
+            )
+        if not os.listdir(storage_folder):
+            raise ServiceNotReadyError(
+                f"Storage folder '{storage_folder}' is empty. Set RAGU_API_STORAGE_FOLDER "
+                "to the folder a build run produced."
+            )
+
+    @staticmethod
+    async def _measure(graph: KnowledgeGraph) -> GraphStats:
+        """
+        Count what each search mode has to read.
+
+        Vector-store ids are used rather than materialized entities: the counts
+        only decide which modes can run, and listing ids stays cheap on a large
+        graph.
+
+        :param graph: The loaded graph.
+        :return: Sizes of the stores behind the three search modes.
+        """
+        index = graph.index
+        entities, relations, chunks, summaries = await asyncio.gather(
+            index.nodes_vector_db.get_all_ids(),
+            index.edges_vector_db.get_all_ids(),
+            index.chunks_kv_storage.all_keys(),
+            index.community_summary_kv_storage.all_keys(),
+        )
+        return GraphStats(
+            entities=len(entities),
+            relations=len(relations),
+            chunks=len(chunks),
+            community_summaries=len(summaries),
+        )
+
+    def _build_engine(self, mode: SearchMode, language: str) -> BaseEngine[Any, Any]:
+        """
+        Construct one leaf engine for a mode in a language.
+
+        :param mode: ``global``, ``local`` or ``naive``.
+        :param language: Answer language baked into the engine.
+        :return: The engine.
+        """
+        graph, llm, embedder = self._require_loaded()
+        if mode == "global":
+            return GlobalSearchEngine(
+                llm=llm, knowledge_graph=graph, language=language
+            )
+        engine_cls = LocalSearchEngine if mode == "local" else NaiveSearchEngine
+        return engine_cls(
+            llm=llm, knowledge_graph=graph, embedder=embedder, language=language
+        )
+
+    def _leaf_engine(self, mode: SearchMode, language: str) -> BaseEngine[Any, Any]:
+        """
+        Return a cached leaf engine, building it on first use.
+
+        The engines bake ``language`` in at construction — every engine reads
+        ``self.language`` when it renders the answer prompt — so a per-request
+        language means a per-language engine. They are cached because with
+        ``tokenizer_llm_backend="local"`` the constructor loads a HuggingFace
+        tokenizer, which is far too expensive to repeat per request.
+
+        :param mode: Leaf mode to build.
+        :param language: Answer language.
+        :return: The engine for that pair.
+        """
+        key = (mode, language)
+        engine = self._engines.get(key)
+        if engine is None:
+            engine = self._build_engine(mode, language)
+            # A client picks the language, so the cache is bounded: drop the
+            # oldest entry rather than growing without limit.
+            while len(self._engines) >= self.settings.engine_cache_size:
+                self._engines.pop(next(iter(self._engines)))
+            self._engines[key] = engine
+        return engine
+
+    def _require_loaded(self) -> tuple[KnowledgeGraph, LLM, Embedder]:
+        """
+        Return the graph and models built at startup.
+
+        :raises ServiceNotReadyError: If the backend has not started.
+        """
+        if self.graph is None or self._llm is None or self._embedder is None:
+            raise ServiceNotReadyError("Knowledge graph is not loaded yet.")
+        return self.graph, self._llm, self._embedder
+
+    def _engine_for(self, call: SearchCall) -> tuple[Any, tuple[RecordingEngine, ...]]:
+        """
+        Build the engine that answers this call.
+
+        ``mix`` is assembled per request: ``MixSearchEngine`` reads its
+        children's parameters from the constructor — ``batch_search`` ignores its
+        ``params`` argument and ``batch_query`` reads only ``ensemble_responses``
+        — so the ensemble cannot be built once and parameterized later.
+
+        :param call: The resolved request.
+        :return: The engine, and the recording proxies of its children if any.
+        :raises ServiceNotReadyError: If the graph is not loaded.
+        :raises CapabilityUnavailableError: If the graph cannot serve the mode.
+        """
         if not self.graph_loaded:
-            raise ServiceNotReadyError("Knowledge graph is not loaded yet.", mode=mode)
-        engine = self._engines[mode]
+            raise ServiceNotReadyError(
+                "Knowledge graph is not loaded yet.", mode=call.mode
+            )
+        self.require_capability(call.mode)
+        language = call.language or self.settings.language
+
+        if call.mode != "mix":
+            return self._leaf_engine(call.mode, language), ()
+
+        children = (
+            RecordingEngine(self._leaf_engine("local", language), "local"),
+            RecordingEngine(self._leaf_engine("naive", language), "naive"),
+        )
+        engine = MixSearchEngine(
+            llm=self._require_llm(),
+            engines=list(children),
+            engine_params=[
+                self.bound_params(call.local_params or LocalParams()),
+                self.bound_params(call.naive_params or NaiveSearchParams()),
+            ],
+            language=language,
+        )
+        return engine, children
+
+    def _report(
+        self,
+        call: SearchCall,
+        engine_name: str,
+        children: tuple[RecordingEngine, ...],
+        *,
+        query_plan: bool,
+    ) -> EngineReport:
+        reports = [child.report() for child in children]
+        return EngineReport(
+            requested=call.mode,
+            used=engine_name,
+            query_plan=query_plan,
+            degraded=any(not report.ok for report in reports),
+            children=reports,
+        )
+
+    async def stream(self, call: SearchCall) -> AsyncIterator[SearchStreamEvent]:
+        engine, children = self._engine_for(call)
+        engine_name = type(engine).__name__
+        params = self.bound_params(call.params) if call.params is not None else None
+        if call.use_query_plan:
+            engine = QueryPlanEngine(engine)
+
+        started = False
         try:
-            if use_query_plan:
-                engine = QueryPlanEngine(engine)
-            response = await engine.query(query, params)
+            async for event in engine.stream_query(call.query, params):
+                if not started:
+                    started = True
+                    yield SearchStreamEvent(
+                        "meta",
+                        {
+                            "query": call.query,
+                            "mode": call.mode,
+                            "sources": [
+                                source.model_dump()
+                                for source in extract_sources(event.retrieval)
+                            ],
+                            "engines": self._report(
+                                call,
+                                engine_name,
+                                children,
+                                query_plan=call.use_query_plan,
+                            ).model_dump(),
+                        },
+                    )
+                if event.delta:
+                    yield SearchStreamEvent("delta", {"text": event.delta})
         except Exception as exc:
-            logger.exception(f"RAGU {mode} search failed")
-            raise BackendExecutionError(
-                f"{mode} search failed: {exc}", mode=mode
-            ) from exc
-
-        outcome = to_outcome(response)
-        if not outcome.sources:
-            # TODO: when the builder records graph metadata (entity/chunk counts,
-            # make_community_summary), read it at startup and refuse an
-            # unsupported mode before spending a generation call on it.
-            raise CapabilityUnavailableError(
-                _NO_EVIDENCE[mode][0],
-                mode=mode,
-                missing_capability=_NO_EVIDENCE[mode][1],
+            logger.exception("RAGU {} stream failed", call.mode)
+            yield SearchStreamEvent(
+                "error",
+                {"code": "INTERNAL_ERROR", "message": f"The {call.mode} search engine failed."},
             )
-        return outcome
+            return
 
-    def _capped(self, params: Any) -> Any:
+        yield SearchStreamEvent(
+            "done",
+            {
+                "engines": self._report(
+                    call, engine_name, children, query_plan=call.use_query_plan
+                ).model_dump()
+            },
+        )
+
+    async def search(self, call: SearchCall) -> list[SearchOutcome]:
+        engine, children = self._engine_for(call)
+        engine_name = type(engine).__name__
+        params = self.bound_params(call.params) if call.params is not None else None
+
+        try:
+            if call.use_query_plan:
+                engine = QueryPlanEngine(engine)
+            responses = await engine.batch_query(list(call.queries), params)
+        except Exception as exc:
+            logger.exception("RAGU {} search failed", call.mode)
+            raise BackendExecutionError(mode=call.mode, detail=str(exc)) from exc
+
+        report = self._report(
+            call, engine_name, children, query_plan=call.use_query_plan
+        )
+        outcomes = []
+        for response in responses:
+            answer, sources, subqueries = to_outcome(
+                response, used_query_plan=call.use_query_plan
+            )
+            outcomes.append(
+                SearchOutcome(
+                    answer=answer,
+                    sources=sources,
+                    subqueries=subqueries,
+                    engines=report,
+                )
+            )
+        return outcomes
+
+    async def retrieve(self, call: SearchCall) -> list[RetrieveOutcome]:
+        engine, children = self._engine_for(call)
+        params = self.bound_params(call.params) if call.params is not None else None
+
+        try:
+            # No QueryPlanEngine here: its batch_search delegates straight to the
+            # wrapped engine, so wrapping would only imply planning that does not
+            # happen.
+            retrievals = await engine.batch_search(list(call.queries), params)
+        except Exception as exc:
+            logger.exception("RAGU {} retrieval failed", call.mode)
+            raise BackendExecutionError(mode=call.mode, detail=str(exc)) from exc
+
+        report = self._report(call, type(engine).__name__, children, query_plan=False)
+        return [
+            RetrieveOutcome(sources=extract_sources(retrieval), engines=report)
+            for retrieval in retrievals
+        ]
+
+    def _require_llm(self) -> LLM:
         """
-        Clamp client-supplied ``top_k`` to what this service will serve.
+        Return the LLM built at startup.
 
-        The engine parameter classes are plain dataclasses with no bounds, and
-        they now arrive straight from the request body, so an unbounded
-        ``top_k`` would otherwise reach the retriever.
+        :raises ServiceNotReadyError: If the backend has not started.
         """
-        top_k = getattr(params, "top_k", None)
-        if isinstance(top_k, int) and top_k > self.settings.max_top_k:
-            logger.info(f"Clamping top_k {top_k} to {self.settings.max_top_k}")
-            return replace(params, top_k=self.settings.max_top_k)
-        return params
-
-    async def search_global(
-        self, 
-        query: str,
-        *, 
-        params: GlobalSearchParams
-    ) -> SearchOutcome:
-        return await self._query("global", query, params, use_query_plan=False)
-
-    async def search_local(
-        self, 
-        query: str, 
-        *, 
-        use_query_plan: bool, 
-        params: LocalParams
-    ) -> SearchOutcome:
-        return await self._query(
-            "local", query, self._capped(params), use_query_plan=use_query_plan
-        )
-
-    async def search_naive(
-        self, 
-        query: str, 
-        *, 
-        use_query_plan: bool, 
-        params: NaiveSearchParams
-    ) -> SearchOutcome:
-        return await self._query(
-            "naive", query, self._capped(params), use_query_plan=use_query_plan
-        )
-
-def _field(item: Any, name: str, default: Any = None) -> Any:
-    """
-    Read a field from an engine result item, dict or object alike.
-    """
-    if isinstance(item, Mapping):
-        return item.get(name, default)
-    return getattr(item, name, default)
-
-
-_KNOWN_RESULT_FIELDS = ("insights", "entities", "relations", "summaries", "chunks")
-
-
-def _sources_from_result(result: Any) -> list[SourceItem]:
-    """
-    Flatten an engine-specific retrieval result into flat sources.
-
-    Handles the three result types the engines return today
-    (``LocalSearchResult``, ``NaiveSearchResult``, ``GlobalSearchResult``) and
-    leaves anything else to the caller's fallback.
-    """
-    sources: list[SourceItem] = []
-
-    for index, insight in enumerate(getattr(result, "insights", []) or [], start=1):
-        sources.append(
-            SourceItem(
-                id=f"insight_{index}",
-                type="community_summary",
-                content=str(_field(insight, "response", "")),
-                score=_as_score(_field(insight, "rating")),
-            )
-        )
-
-    for entity in getattr(result, "entities", []) or []:
-        sources.append(
-            SourceItem(
-                id=str(getattr(entity, "id", ""))
-                or str(getattr(entity, "entity_name", "entity")),
-                type="entity",
-                content=f"{getattr(entity, 'entity_name', '')} — {getattr(entity, 'description', '')}".strip(
-                    " —"
-                ),
-            )
-        )
-
-    for relation in getattr(result, "relations", []) or []:
-        sources.append(
-            SourceItem(
-                id=str(getattr(relation, "id", "")) or "relation",
-                type="relation",
-                content=(
-                    f"{getattr(relation, 'subject_name', '')} "
-                    f"{getattr(relation, 'relation_type', '')} "
-                    f"{getattr(relation, 'object_name', '')}: {getattr(relation, 'description', '')}"
-                ).strip(),
-            )
-        )
-
-    for index, summary in enumerate(getattr(result, "summaries", []) or [], start=1):
-        sources.append(
-            SourceItem(
-                id=str(_field(summary, "id", "")) or f"summary_{index}",
-                type="community_summary",
-                content=str(_field(summary, "summary", summary)),
-            )
-        )
-
-    scores = list(getattr(result, "scores", []) or [])
-    for index, chunk in enumerate(getattr(result, "chunks", []) or []):
-        sources.append(
-            SourceItem(
-                id=str(getattr(chunk, "id", "")) or f"chunk_{index + 1}",
-                type="chunk",
-                content=str(getattr(chunk, "content", chunk)),
-                score=_as_score(scores[index]) if index < len(scores) else None,
-            )
-        )
-
-    return sources
-
-
-def _as_score(value: Any) -> float | None:
-    return (
-        float(value)
-        if isinstance(value, (int, float)) and not isinstance(value, bool)
-        else None
-    )
-
-
-def extract_sources(retrieval: Any) -> list[SourceItem]:
-    """Convert a ``SearchEngineRetrieve`` into flat sources."""
-    if retrieval is None:
-        return []
-
-    result = getattr(retrieval, "result", None)
-    if any(hasattr(result, field) for field in _KNOWN_RESULT_FIELDS):
-        return _sources_from_result(result)
-
-    # Unknown result type (a new engine, or GST): keep the rendered context as
-    # one source rather than dropping the evidence.
-    to_text = getattr(retrieval, "to_text", None)
-    text = to_text() if callable(to_text) else None
-    if text and text.strip():
-        return [SourceItem(id="retrieval_context", type="context", content=str(text))]
-    return []
-
-
-def extract_subqueries(payload: Any) -> list[SubqueryItem]:
-    """
-    Pull the query plan's intermediate answers out of the payload.
-
-    ``QueryPlanEngine.batch_query`` sets ``payload`` to ``{subquery_id:
-    SearchEngineResponse}``; the streaming path nests the same mapping under
-    ``answers``.
-    """
-    if not isinstance(payload, dict):
-        return []
-
-    answers = (
-        payload.get("answers") if isinstance(payload.get("answers"), dict) else payload
-    )
-
-    subqueries = []
-    for item in answers.values():
-        query = getattr(item, "query", None)
-        if not query:
-            continue
-        subqueries.append(
-            SubqueryItem(
-                query=str(query), answer=_response_text(getattr(item, "response", ""))
-            )
-        )
-    return subqueries
-
-
-def _response_text(response: Any) -> str:
-    """Engines may answer with a pydantic model instead of a string."""
-    if response is None:
-        return ""
-    dump = getattr(response, "model_dump_json", None)
-    return dump() if callable(dump) else str(response)
-
-
-def to_outcome(response: Any) -> SearchOutcome:
-    return SearchOutcome(
-        answer=_response_text(getattr(response, "response", "")),
-        sources=extract_sources(getattr(response, "retrieval", None)),
-        subqueries=extract_subqueries(getattr(response, "payload", None)),
-    )
+        if self._llm is None:
+            raise ServiceNotReadyError("Knowledge graph is not loaded yet.", mode="mix")
+        return self._llm

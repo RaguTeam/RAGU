@@ -60,8 +60,10 @@ USER ragu:ragu
 
 EXPOSE 8020
 
+# /health/ready answers 503 until the graph is loaded, so -f is enough; the
+# 10-minute start period covers loading a large graph.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=600s --retries=3 \
-    CMD curl -fs http://localhost:8020/health | grep -q '"graph_loaded":true' || exit 1
+    CMD curl -fs http://localhost:8020/health/ready || exit 1
 
 ENTRYPOINT ["python", "-m", "ragu.api"]
 CMD ["--host", "0.0.0.0", "--port", "8020"]
