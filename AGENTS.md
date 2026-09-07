@@ -44,6 +44,13 @@ Query -> SearchEngine.a_search() -> retrieval context
 
 The full public API is re-exported from `ragu/__init__.py`. Top-level subpackages: `chunker`, `common`, `graph`, `models`, `search_engine`, `storage`, `triplet`, `utils`.
 
+`ragu/api/` is a FastAPI service that serves a **prebuilt** graph over HTTP (it never builds one). It ships inside the wheel behind the `api` extra and is documented in `docs/{en,ru}/api.md`; deployment and package internals live in `ragu/api/README.md`. `tests/api/` opens with `pytest.importorskip("fastapi")`, so the `api` extra has to be installed for it to run at all:
+
+```bash
+uv sync --frozen --extra api --extra test
+pytest tests/api
+```
+
 ---
 
 ## Development Commands
@@ -94,6 +101,7 @@ After modifying code, the agent **must**:
 | `Settings` field / token limit | `ragu/common/README.md` (+ serialization list if user-configurable) |
 | `CachedAsyncOpenAI` / `LLMOpenAI` / `EmbedderOpenAI` parameter | `ragu/models/README.md` |
 | Chunker / builder / extractor / search engine | matching `ragu/<sub>/README.md` + re-export |
+| HTTP route, `RAGU_API_*` setting, error code | `docs/{en,ru}/api.md` (deployment: `ragu/api/README.md`) |
 | Storage adapter | `ragu/storage/<sub>/README.md` |
 | Public symbol | `ragu/__init__.py` (+ subpackage `__init__.py`) |
 

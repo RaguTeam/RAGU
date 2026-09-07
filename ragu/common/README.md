@@ -165,6 +165,19 @@ generator = BatchGenerator([1, 2, 3, 4, 5], batch_size=2)
 print(list(generator.get_batches()))
 ```
 
+### logger
+
+loguru logger shared by the whole package; stdlib `logging` is never used
+directly. `set_level` re-adds the stdout sink at a different level (a loguru
+sink cannot be re-levelled in place).
+
+```python
+from ragu.common.logger import logger, set_level
+
+set_level("debug")
+logger.debug("Retrieved {} chunks", 12)
+```
+
 ### get_cache
 
 Disk cache helper that returns a mutable mapping backed by `diskcache`.

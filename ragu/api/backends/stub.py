@@ -5,42 +5,76 @@ Serves deterministic canned answers without a real graph, so the agent side can
 be exercised end-to-end without building a knowledge graph.
 """
 
-import logging
+from collections.abc import AsyncIterator
 
 from ragu.api.backends.base import (
-    GLOBAL_UNAVAILABLE_MESSAGE,
-    LOCAL_UNAVAILABLE_MESSAGE,
-    NAIVE_UNAVAILABLE_MESSAGE,
+    GraphStats,
+    SearchStreamEvent,
+    RetrieveOutcome,
     SearchBackend,
+    SearchCall,
     SearchOutcome,
 )
 from ragu.api.config import ServiceSettings
-from ragu.api.errors import CapabilityUnavailableError
-from ragu.api.models import SourceItem, SubqueryItem
+from ragu.api.models import (
+    ChildEngineReport,
+    EngineReport,
+    SearchMode,
+    SourceItem,
+    SubqueryItem,
+)
+from ragu.common.logger import logger
 from ragu.search_engine.global_search import GlobalSearchParams
 from ragu.search_engine.local_search import LocalParams
+from ragu.search_engine.mix_search import MixQueryParams
 from ragu.search_engine.naive_search import NaiveSearchParams
 
-logger = logging.getLogger(__name__)
+# How a simulated missing capability shows up in the graph sizes the base class
+# reads. Driving the stub through the same GraphStats the real backend measures
+# keeps both backends on one capability code path instead of two.
+_EMPTY_STORE_FOR_CAPABILITY = {
+    "community_summaries": "community_summaries",
+    "entity_graph": "entities",
+    "vector_index": "chunks",
+}
+
+_FULL_STATS = GraphStats(
+    entities=1, relations=1, chunks=1, community_summaries=1
+)
 
 
 class StubBackend(SearchBackend):
     """Canned backend. Which modes fail is driven by
-    ``RAGU_STUB_MISSING_CAPABILITIES``."""
+    ``RAGU_API_STUB_MISSING_CAPABILITIES``."""
 
     def __init__(self, settings: ServiceSettings | None = None):
-        self.settings = settings or ServiceSettings(backend="stub")
+        super().__init__(settings or ServiceSettings(backend="stub"))
         self._missing = self.settings.missing_capabilities()
-        self._loaded = False
-
-    @property
-    def graph_loaded(self) -> bool:
-        return self._loaded
 
     async def startup(self) -> None:
-        self._loaded = True
+        self._stats = self._simulated_stats()
         logger.warning(
             "StubBackend started: canned answers only, no real knowledge graph"
+        )
+
+    def _simulated_stats(self) -> GraphStats:
+        """
+        Build graph sizes that reproduce the configured missing capabilities.
+
+        :return: Sizes where each simulated-missing store counts zero.
+        """
+        empty = {
+            _EMPTY_STORE_FOR_CAPABILITY[capability]
+            for capability in self._missing
+            if capability in _EMPTY_STORE_FOR_CAPABILITY
+        }
+        return GraphStats(
+            entities=0 if "entities" in empty else _FULL_STATS.entities,
+            relations=_FULL_STATS.relations,
+            chunks=0 if "chunks" in empty else _FULL_STATS.chunks,
+            community_summaries=(
+                0 if "community_summaries" in empty else _FULL_STATS.community_summaries
+            ),
         )
 
     @staticmethod
@@ -49,83 +83,113 @@ class StubBackend(SearchBackend):
             return []
         return [SubqueryItem(query=query, answer=f"stub answer for '{query}'")]
 
-    async def search_global(
-        self, 
-        query: str, 
-        *, 
-        params: GlobalSearchParams
-    ) -> SearchOutcome:
-        if "community_summaries" in self._missing:
-            raise CapabilityUnavailableError(
-                GLOBAL_UNAVAILABLE_MESSAGE,
-                mode="global",
-                missing_capability="community_summaries",
-            )
-        return SearchOutcome(
-            answer=f"[stub global] {query}",
-            sources=[
+    def _sources_for(self, call: SearchCall) -> list[SourceItem]:
+        """
+        Canned retrieval for one mode, shaped by the request parameters.
+        """
+        if call.mode == "global":
+            params = self.bound_params(call.params or GlobalSearchParams())
+            return [
                 SourceItem(
                     id="community_1",
                     type="community_summary",
                     content=f"stub community summary (min_cluster_size={params.min_cluster_size})",
                 )
-            ],
-        )
+            ]
 
-    async def search_local(
-        self, 
-        query: str, 
-        *, 
-        use_query_plan: bool, 
-        params: LocalParams
-    ) -> SearchOutcome:
-        if "entity_graph" in self._missing:
-            raise CapabilityUnavailableError(
-                LOCAL_UNAVAILABLE_MESSAGE,
-                mode="local",
-                missing_capability="entity_graph",
-            )
-        sources = [SourceItem(id="entity_1", type="entity", content="stub entity")]
-        if params.use_chunks:
-            sources.append(
-                SourceItem(id="chunk_1", type="chunk", content="stub chunk", score=0.87)
-            )
-        if params.use_summary:
-            sources.append(
-                SourceItem(
-                    id="community_1",
-                    type="community_summary",
-                    content="stub community summary",
+        if call.mode == "local":
+            params = self.bound_params(call.params or LocalParams())
+            sources = [SourceItem(id="entity_1", type="entity", content="stub entity")]
+            if params.use_chunks:
+                sources.append(
+                    SourceItem(
+                        id="chunk_1", type="chunk", content="stub chunk", score=0.87
+                    )
                 )
-            )
-        return SearchOutcome(
-            answer=f"[stub local] {query}",
-            sources=sources,
-            subqueries=self._subqueries(query, use_query_plan),
-        )
+            if params.use_summary:
+                sources.append(
+                    SourceItem(
+                        id="community_1",
+                        type="community_summary",
+                        content="stub community summary",
+                    )
+                )
+            return sources
 
-    async def search_naive(
-        self, 
-        query: str, 
-        *, 
-        use_query_plan: bool, 
-        params: NaiveSearchParams
-    ) -> SearchOutcome:
-        if "vector_index" in self._missing:
-            raise CapabilityUnavailableError(
-                NAIVE_UNAVAILABLE_MESSAGE, mode="naive", missing_capability=None
-            )
-        sources = [
+        if call.mode == "mix":
+            naive_params = self.bound_params(call.naive_params or NaiveSearchParams())
+            return [
+                SourceItem(id="entity_1", type="entity", content="stub entity")
+            ] + self._chunks(naive_params.top_k)
+
+        params = self.bound_params(call.params or NaiveSearchParams())
+        return self._chunks(params.top_k)
+
+    @staticmethod
+    def _chunks(top_k: int) -> list[SourceItem]:
+        return [
             SourceItem(
                 id=f"chunk_{i}",
                 type="chunk",
                 content=f"stub chunk {i}",
                 score=round(0.9 - i / 100, 2),
             )
-            for i in range(1, params.top_k + 1)
+            for i in range(1, top_k + 1)
         ]
-        return SearchOutcome(
-            answer=f"[stub naive] {query}",
-            sources=sources,
-            subqueries=self._subqueries(query, use_query_plan),
+
+    def _children_for(self, call: SearchCall) -> list[ChildEngineReport]:
+        if call.mode != "mix":
+            return []
+        return [
+            ChildEngineReport(engine="LocalSearchEngine", mode="local", ok=True),
+            ChildEngineReport(engine="NaiveSearchEngine", mode="naive", ok=True),
+        ]
+
+    def _report(self, call: SearchCall, *, query_plan: bool) -> EngineReport:
+        children = self._children_for(call)
+        return EngineReport(
+            requested=call.mode,
+            used="StubBackend",
+            query_plan=query_plan,
+            degraded=any(not child.ok for child in children),
+            children=children,
         )
+
+    async def stream(self, call: SearchCall) -> AsyncIterator[SearchStreamEvent]:
+        self.require_capability(call.mode)
+        report = self._report(call, query_plan=call.use_query_plan)
+        yield SearchStreamEvent(
+            "meta",
+            {
+                "query": call.query,
+                "mode": call.mode,
+                "sources": [
+                    source.model_dump() for source in self._sources_for(call)
+                ],
+                "engines": report.model_dump(),
+            },
+        )
+        for word in f"[stub {call.mode}] {call.query}".split(" "):
+            yield SearchStreamEvent("delta", {"text": word + " "})
+        yield SearchStreamEvent("done", {"engines": report.model_dump()})
+
+    async def search(self, call: SearchCall) -> list[SearchOutcome]:
+        self.require_capability(call.mode)
+        report = self._report(call, query_plan=call.use_query_plan)
+        return [
+            SearchOutcome(
+                answer=f"[stub {call.mode}] {query}",
+                sources=self._sources_for(call),
+                subqueries=self._subqueries(query, call.use_query_plan),
+                engines=report,
+            )
+            for query in call.queries
+        ]
+
+    async def retrieve(self, call: SearchCall) -> list[RetrieveOutcome]:
+        self.require_capability(call.mode)
+        report = self._report(call, query_plan=False)
+        return [
+            RetrieveOutcome(sources=self._sources_for(call), engines=report)
+            for _ in call.queries
+        ]
