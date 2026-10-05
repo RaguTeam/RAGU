@@ -1,0 +1,806 @@
+{
+  "metadata": {
+    "file_suffix": "html",
+    "producer": {
+      "name": "mineru",
+      "version": "4.0.10"
+    },
+    "document": {
+      "title": "The Transistor: History, Physics and Materials",
+      "languages": [
+        "en"
+      ],
+      "page_count": 1,
+      "page_count_kind": "logical"
+    }
+  },
+  "extensions": {
+    "mineru": {
+      "tier": "flash",
+      "parse_mode": "txt"
+    }
+  },
+  "pages": [
+    {
+      "page_idx": 0,
+      "blocks": [
+        {
+          "type": "doc_title",
+          "index": 0,
+          "content": [
+            {
+              "type": "text",
+              "content": "The Transistor: History, Physics and Materials"
+            }
+          ],
+          "anchor": "html-fe1f6f741c0dc2fbc810",
+          "level": 1
+        },
+        {
+          "type": "text",
+          "index": 1,
+          "content": [
+            {
+              "type": "text",
+              "content": "A short technical overview prepared as a sample document for document parsing.",
+              "styles": [
+                "italic"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 2,
+          "content": [
+            {
+              "type": "text",
+              "content": "1. History"
+            }
+          ],
+          "anchor": "html-6db0e8ee4c37ff31e0ac",
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 3,
+          "content": [
+            {
+              "type": "text",
+              "content": "The first working transistor, a "
+            },
+            {
+              "type": "text",
+              "content": "point-contact transistor",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": ", was demonstrated in December 1947 at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://en.wikipedia.org/wiki/Bell_Labs",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Bell Labs"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": " by "
+            },
+            {
+              "type": "text",
+              "content": "John Bardeen",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " and "
+            },
+            {
+              "type": "text",
+              "content": "Walter Brattain",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". Their colleague "
+            },
+            {
+              "type": "text",
+              "content": "William Shockley",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " developed the theory of the more robust "
+            },
+            {
+              "type": "text",
+              "content": "bipolar junction transistor",
+              "styles": [
+                "italic"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " in 1948. The three shared the Nobel Prize in Physics in 1956."
+            },
+            {
+              "type": "text",
+              "content": "1",
+              "styles": [
+                "superscript"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "content": [
+            {
+              "type": "text",
+              "content": "The transistor replaced the vacuum tube as the basic switching and amplifying element of electronics, making computers smaller, cheaper and far more reliable."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 5,
+          "content": [
+            {
+              "type": "text",
+              "content": "1.1 Key milestones"
+            }
+          ],
+          "anchor": "html-6a5662424359a3fe4fdb",
+          "level": 3
+        },
+        {
+          "type": "table",
+          "index": 6,
+          "content": [
+            {
+              "type": "table_body",
+              "index": 6,
+              "content": "<table>  <thead> <tr><th>Year</th><th>Event</th><th>Organisation</th><th>People</th></tr> </thead> <tbody> <tr><td>1947</td><td>Point-contact transistor demonstrated</td><td>Bell Labs</td><td>J. Bardeen, W. Brattain</td></tr> <tr><td>1948</td><td>Theory of the junction transistor</td><td>Bell Labs</td><td>W. Shockley</td></tr> <tr><td>1954</td><td>Commercial silicon transistors</td><td>Texas Instruments</td><td>G. Teal</td></tr> <tr><td>1958</td><td>First integrated circuit</td><td>Texas Instruments</td><td>J. Kilby</td></tr> <tr><td>1959</td><td>MOSFET invented</td><td>Bell Labs</td><td>M. Atalla, D. Kahng</td></tr> <tr><td>1959</td><td>Planar silicon integrated circuit</td><td>Fairchild Semiconductor</td><td>R. Noyce</td></tr> <tr><td>1965</td><td>Moore's law formulated</td><td>Fairchild Semiconductor</td><td>G. Moore</td></tr> </tbody> </table>"
+            },
+            {
+              "type": "table_caption",
+              "index": 7,
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Table 1. Milestones in transistor technology"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 8,
+          "content": [
+            {
+              "type": "text",
+              "content": "2. Device physics"
+            }
+          ],
+          "anchor": "html-de043ef78b713bcf8aae",
+          "level": 2
+        },
+        {
+          "type": "paragraph_title",
+          "index": 9,
+          "content": [
+            {
+              "type": "text",
+              "content": "2.1 The p–n junction"
+            }
+          ],
+          "anchor": "html-b35763de6c084b4078ce",
+          "level": 3
+        },
+        {
+          "type": "text",
+          "index": 10,
+          "content": [
+            {
+              "type": "text",
+              "content": "The current through an ideal p–n junction diode is described by the "
+            },
+            {
+              "type": "text",
+              "content": "Shockley diode equation",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": ":"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "index": 11,
+          "content": "I={I}_{S}({e}^{\\frac{{V}_{D}}{n{V}_{T}}}-1)"
+        },
+        {
+          "type": "text",
+          "index": 12,
+          "content": [
+            {
+              "type": "text",
+              "content": "where:"
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "index": 13,
+          "content": [
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "- "
+                },
+                {
+                  "type": "text",
+                  "content": "I",
+                  "styles": [
+                    "italic"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": "S",
+                  "styles": [
+                    "subscript"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": " — reverse saturation current;"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "- "
+                },
+                {
+                  "type": "text",
+                  "content": "V",
+                  "styles": [
+                    "italic"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": "D",
+                  "styles": [
+                    "subscript"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": " — voltage across the diode;"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "- "
+                },
+                {
+                  "type": "text",
+                  "content": "n",
+                  "styles": [
+                    "italic"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": " — ideality factor, typically between 1 and 2;"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "- "
+                },
+                {
+                  "type": "text",
+                  "content": "V",
+                  "styles": [
+                    "italic"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": "T",
+                  "styles": [
+                    "subscript"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": " — thermal voltage, given by "
+                },
+                {
+                  "type": "equation_inline",
+                  "content": "{V}_{T}=\\frac{kT}{q}\\approx 25.85\\text{mV}"
+                },
+                {
+                  "type": "text",
+                  "content": " at "
+                },
+                {
+                  "type": "text",
+                  "content": "T",
+                  "styles": [
+                    "italic"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": " = 300 K."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 14,
+          "content": [
+            {
+              "type": "text",
+              "content": "2.2 The MOSFET"
+            }
+          ],
+          "anchor": "html-ed54e6755f373033fb6e",
+          "level": 3
+        },
+        {
+          "type": "text",
+          "index": 15,
+          "content": [
+            {
+              "type": "text",
+              "content": "In saturation ("
+            },
+            {
+              "type": "text",
+              "content": "V",
+              "styles": [
+                "italic"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "DS",
+              "styles": [
+                "subscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " ≥ "
+            },
+            {
+              "type": "text",
+              "content": "V",
+              "styles": [
+                "italic"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "GS",
+              "styles": [
+                "subscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " − "
+            },
+            {
+              "type": "text",
+              "content": "V",
+              "styles": [
+                "italic"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "th",
+              "styles": [
+                "subscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "), the drain current of a long-channel n-type MOSFET follows the square law:"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "index": 16,
+          "content": "{I}_{D}=\\frac{1}{2}{\\mu }_{n}{C}_{ox}\\frac{W}{L}{({V}_{GS}-{V}_{th})}^{2}"
+        },
+        {
+          "type": "text",
+          "index": 17,
+          "content": [
+            {
+              "type": "text",
+              "content": "Shrinking the channel length "
+            },
+            {
+              "type": "text",
+              "content": "L",
+              "styles": [
+                "italic"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " increases the current and switching speed, which is the physical basis of "
+            },
+            {
+              "type": "text",
+              "content": "Moore's law",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In its simplest form, the number of transistors on a chip doubles every period "
+            },
+            {
+              "type": "text",
+              "content": "T",
+              "styles": [
+                "italic"
+              ]
+            },
+            {
+              "type": "text",
+              "content": ":"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "index": 18,
+          "content": "N(t)={N}_{0}⋅{2}^{t/T}"
+        },
+        {
+          "type": "paragraph_title",
+          "index": 19,
+          "content": [
+            {
+              "type": "text",
+              "content": "3. Semiconductor materials"
+            }
+          ],
+          "anchor": "html-9e4a8fe50ced04698578",
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 20,
+          "content": [
+            {
+              "type": "text",
+              "content": "Silicon dominates digital electronics, while compound semiconductors are used where higher electron mobility or a wider band gap is required."
+            },
+            {
+              "type": "text",
+              "content": "2",
+              "styles": [
+                "superscript"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "index": 21,
+          "content": [
+            {
+              "type": "table_body",
+              "index": 21,
+              "content": "<table>  <thead> <tr> <th rowspan=\"2\">Group</th> <th rowspan=\"2\">Material</th> <th colspan=\"3\">Electrical properties</th> <th rowspan=\"2\">Typical applications</th> </tr> <tr> <th>Band gap, eV</th> <th>Electron mobility, cm²/(V·s)</th> <th>Breakdown field, MV/cm</th> </tr> </thead> <tbody> <tr><td rowspan=\"2\">Elemental</td><td>Si</td><td>1.12</td><td>1400</td><td>0.3</td><td>CPUs, memory, solar cells</td></tr> <tr><td>Ge</td><td>0.66</td><td>3900</td><td>0.1</td><td>Early transistors, photodetectors</td></tr> <tr><td rowspan=\"3\">Compound</td><td>GaAs</td><td>1.42</td><td>8500</td><td>0.4</td><td>RF amplifiers, LEDs</td></tr> <tr><td>GaN</td><td>3.4</td><td>1000</td><td>3.3</td><td>Power electronics, blue LEDs</td></tr> <tr><td>4H-SiC</td><td>3.26</td><td>900</td><td>2.8</td><td>EV inverters, high-voltage switches</td></tr> </tbody> </table>"
+            },
+            {
+              "type": "table_caption",
+              "index": 22,
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Table 2. Properties of common semiconductors at 300 K (approximate values)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 23,
+          "content": [
+            {
+              "type": "text",
+              "content": "eV\n0\n1\n2\n3\nSi\nGe\nGaAs\nGaN\n4H-SiC"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 24,
+          "content": [
+            {
+              "type": "text",
+              "content": "Figure 1. Band gap of common semiconductors at 300 K. Blue: elemental, orange: compound."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 25,
+          "content": [
+            {
+              "type": "text",
+              "content": "4. Computing a thermal voltage"
+            }
+          ],
+          "anchor": "html-a07b5096648033ecaa68",
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 26,
+          "content": [
+            {
+              "type": "text",
+              "content": "The thermal voltage from Section 2.1 can be computed directly from physical constants:"
+            }
+          ]
+        },
+        {
+          "type": "code",
+          "index": 27,
+          "content": [
+            {
+              "type": "code_body",
+              "index": 27,
+              "content": "k = 1.380649e-23    # Boltzmann constant, J/K\nq = 1.602176634e-19 # elementary charge, C\nT = 300.0           # temperature, K\n\nv_t = k * T / q\nprint(f\"V_T = {v_t * 1e3:.2f} mV\")  # V_T = 25.85 mV"
+            }
+          ],
+          "sub_type": "code",
+          "guess_lang": "python"
+        },
+        {
+          "type": "paragraph_title",
+          "index": 28,
+          "content": [
+            {
+              "type": "text",
+              "content": "5. Summary"
+            }
+          ],
+          "anchor": "html-c66e5d8468c0876e3497",
+          "level": 2
+        },
+        {
+          "type": "list",
+          "index": 29,
+          "content": [
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "1. The transistor was invented at Bell Labs in 1947–1948."
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "2. Two main device families exist:"
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "content": [
+                {
+                  "type": "text",
+                  "content": [
+                    {
+                      "type": "text",
+                      "content": "- bipolar junction transistors (BJT), controlled by base current;"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": [
+                    {
+                      "type": "text",
+                      "content": "- field-effect transistors (FET), controlled by gate voltage:"
+                    }
+                  ]
+                },
+                {
+                  "type": "list",
+                  "content": [
+                    {
+                      "type": "text",
+                      "content": [
+                        {
+                          "type": "text",
+                          "content": "- JFET;"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "content": [
+                        {
+                          "type": "text",
+                          "content": "- MOSFET — the basis of modern CMOS logic."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "3. Material choice trades off mobility, band gap and cost."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 30,
+          "content": [
+            {
+              "type": "text",
+              "content": "Glossary"
+            }
+          ],
+          "anchor": "html-f190afd8339a7788ab18",
+          "level": 3
+        },
+        {
+          "type": "text",
+          "index": 31,
+          "content": [
+            {
+              "type": "text",
+              "content": "Band gap"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 32,
+          "content": [
+            {
+              "type": "text",
+              "content": "Energy difference between the top of the valence band and the bottom of the conduction band."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 33,
+          "content": [
+            {
+              "type": "text",
+              "content": "Mobility"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 34,
+          "content": [
+            {
+              "type": "text",
+              "content": "How quickly a charge carrier moves through a material under an electric field."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 35,
+          "content": [
+            {
+              "type": "text",
+              "content": "CMOS"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 36,
+          "content": [
+            {
+              "type": "text",
+              "content": "Complementary metal–oxide–semiconductor logic built from paired n-type and p-type MOSFETs."
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "index": 37,
+          "content": [
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "1. The 1956 Nobel Prize in Physics was awarded “for their researches on semiconductors and their discovery of the transistor effect”. ↩"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "2. Mobility and breakdown values depend on doping and crystal quality; the table lists typical figures. ↩"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "is_full_document": true,
+  "schema": "docvortex.middle",
+  "schema_version": "2.0"
+}

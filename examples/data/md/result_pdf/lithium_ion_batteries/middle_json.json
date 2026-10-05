@@ -1,0 +1,640 @@
+{
+  "metadata": {
+    "file_suffix": "docx",
+    "producer": {
+      "name": "mineru",
+      "version": "4.0.10"
+    },
+    "document": {
+      "title": "Lithium-Ion Batteries: Chemistry, Materials and Performance",
+      "authors": [
+        "RAGU examples"
+      ],
+      "created_at": "2026-10-05T18:33:26.828Z",
+      "modified_at": "2026-10-05T18:33:26.832Z"
+    }
+  },
+  "extensions": {
+    "mineru": {
+      "tier": "flash",
+      "parse_mode": "txt"
+    }
+  },
+  "pages": [
+    {
+      "page_idx": 0,
+      "blocks": [
+        {
+          "type": "doc_title",
+          "index": 0,
+          "content": [
+            {
+              "type": "text",
+              "content": "Lithium-Ion Batteries: Chemistry, Materials and Performance"
+            }
+          ],
+          "level": 1
+        },
+        {
+          "type": "text",
+          "index": 1,
+          "content": [
+            {
+              "type": "text",
+              "content": "A short technical overview prepared as a sample document for document parsing.",
+              "styles": [
+                "italic"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 2,
+          "content": [
+            {
+              "type": "text",
+              "content": "1. History"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 3,
+          "content": [
+            {
+              "type": "text",
+              "content": "The first rechargeable lithium cell was built in the 1970s at "
+            },
+            {
+              "type": "text",
+              "content": "Exxon",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " by "
+            },
+            {
+              "type": "text",
+              "content": "M. Stanley Whittingham",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": ", who used a titanium disulfide cathode. In 1980 "
+            },
+            {
+              "type": "text",
+              "content": "John B. Goodenough",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " showed that lithium cobalt oxide gives a much higher voltage, and in 1985 "
+            },
+            {
+              "type": "text",
+              "content": "Akira Yoshino",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " at Asahi Kasei replaced the reactive lithium metal anode with carbon. The three shared the "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://www.nobelprize.org/prizes/chemistry/2019/summary/",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Nobel Prize in Chemistry 2019"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "content": [
+            {
+              "type": "text",
+              "content": "Lithium-ion batteries made portable electronics and modern electric vehicles possible by combining high energy density with long cycle life.",
+              "styles": [
+                "italic"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 5,
+          "content": [
+            {
+              "type": "text",
+              "content": "1.1 Key milestones"
+            }
+          ],
+          "level": 3
+        },
+        {
+          "type": "text",
+          "index": 6,
+          "content": [
+            {
+              "type": "text",
+              "content": "Table 1. Milestones in lithium-ion battery technology",
+              "styles": [
+                "bold"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "index": 7,
+          "content": [
+            {
+              "type": "table_body",
+              "index": 7,
+              "content": "<table><thead><tr><th><p><strong>Year</strong></p></th><th><p><strong>Event</strong></p></th><th><p><strong>Organisation</strong></p></th><th><p><strong>People</strong></p></th></tr></thead><tbody><tr><td><p>1976</p></td><td><p>Lithium metal / TiS₂ rechargeable cell</p></td><td><p>Exxon</p></td><td><p>M. S. Whittingham</p></td></tr><tr><td><p>1980</p></td><td><p>LiCoO₂ cathode proposed</p></td><td><p>University of Oxford</p></td><td><p>J. B. Goodenough</p></td></tr><tr><td><p>1985</p></td><td><p>Carbon anode, first practical Li-ion prototype</p></td><td><p>Asahi Kasei</p></td><td><p>A. Yoshino</p></td></tr><tr><td><p>1991</p></td><td><p>First commercial Li-ion cell</p></td><td><p>Sony</p></td><td><p>—</p></td></tr><tr><td><p>1997</p></td><td><p>LiFePO₄ (olivine) cathode reported</p></td><td><p>University of Texas at Austin</p></td><td><p>J. B. Goodenough, A. K. Padhi</p></td></tr><tr><td><p>2019</p></td><td><p>Nobel Prize in Chemistry</p></td><td><p>Royal Swedish Academy of Sciences</p></td><td><p>Goodenough, Whittingham, Yoshino</p></td></tr></tbody></table>"
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 8,
+          "content": [
+            {
+              "type": "text",
+              "content": "2. Electrochemistry"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "paragraph_title",
+          "index": 9,
+          "content": [
+            {
+              "type": "text",
+              "content": "2.1 Electrode reactions"
+            }
+          ],
+          "level": 3
+        },
+        {
+          "type": "text",
+          "index": 10,
+          "content": [
+            {
+              "type": "text",
+              "content": "During discharge, lithium ions leave the graphite anode and are inserted into the cathode. For a LiCoO₂ / graphite cell:"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 11,
+          "content": [
+            {
+              "type": "text",
+              "content": "Cathode:",
+              "styles": [
+                "bold"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "index": 12,
+          "content": "Li_{1-x}CoO_{2} + xLi^{+} + xe^{-} \\rightleftharpoons LiCoO_{2}"
+        },
+        {
+          "type": "text",
+          "index": 13,
+          "content": [
+            {
+              "type": "text",
+              "content": "Anode:",
+              "styles": [
+                "bold"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "index": 14,
+          "content": "Li_{x}C_{6} \\rightleftharpoons C_{6} + xLi^{+} + xe^{-}"
+        },
+        {
+          "type": "paragraph_title",
+          "index": 15,
+          "content": [
+            {
+              "type": "text",
+              "content": "2.2 Capacity and energy"
+            }
+          ],
+          "level": 3
+        },
+        {
+          "type": "text",
+          "index": 16,
+          "content": [
+            {
+              "type": "text",
+              "content": "The theoretical specific capacity of an electrode material follows from Faraday's law:"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "index": 17,
+          "content": "Q_{th} = \\frac{nF}{3.6M}"
+        },
+        {
+          "type": "text",
+          "index": 18,
+          "content": [
+            {
+              "type": "text",
+              "content": "where:"
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "index": 19,
+          "content": [
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "- n — number of electrons transferred per formula unit;"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "- F — Faraday constant, 96 485 C/mol;"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "- M — molar mass of the active material, g/mol;"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "- the factor 3.6 converts C/g to mAh/g."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 20,
+          "content": [
+            {
+              "type": "text",
+              "content": "The energy delivered by a cell is the integral of voltage over the charge passed:"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "index": 21,
+          "content": "E = \\int_{0}^{Q}V\\left(q\\right) dq \\approx V_{avg} \\cdot Q"
+        },
+        {
+          "type": "text",
+          "index": 22,
+          "content": [
+            {
+              "type": "text",
+              "content": "The charge or discharge current is often expressed as a "
+            },
+            {
+              "type": "text",
+              "content": "C-rate",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": ": at 1C a cell is fully discharged in one hour, at 2C in 30 minutes, and in general:"
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "index": 23,
+          "content": "I = C \\cdot Q_{nom},  t = \\frac{1}{C} h"
+        },
+        {
+          "type": "paragraph_title",
+          "index": 24,
+          "content": [
+            {
+              "type": "text",
+              "content": "3. Cathode materials"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 25,
+          "content": [
+            {
+              "type": "text",
+              "content": "The cathode largely determines cell voltage, capacity, cost and safety. Cobalt-rich layered oxides offer high energy density, while LiFePO₄ trades capacity for thermal stability and cycle life."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 26,
+          "content": [
+            {
+              "type": "text",
+              "content": "Table 2. Common cathode materials (approximate values)",
+              "styles": [
+                "bold"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "index": 27,
+          "content": [
+            {
+              "type": "table_body",
+              "index": 27,
+              "content": "<table><thead><tr><th rowspan=\"2\"><p><strong>Structure</strong></p></th><th rowspan=\"2\"><p><strong>Material</strong></p></th><th rowspan=\"2\"><p><strong>Nominal cell voltage, V</strong></p></th><th colspan=\"2\"><p><strong>Specific capacity, mAh/g</strong></p></th><th rowspan=\"2\"><p><strong>Typical applications</strong></p></th></tr><tr><th><p><strong>Theoretical</strong></p></th><th><p><strong>Practical</strong></p></th></tr></thead><tbody><tr><td rowspan=\"2\"><p>Layered oxide</p></td><td><p>LiCoO₂ (LCO)</p></td><td><p>3.7</p></td><td><p>274</p></td><td><p>≈ 150</p></td><td><p>Phones, laptops</p></td></tr><tr><td><p>NMC811</p></td><td><p>3.7</p></td><td><p>≈ 275</p></td><td><p>≈ 200</p></td><td><p>Electric vehicles</p></td></tr><tr><td><p>Spinel</p></td><td><p>LiMn₂O₄ (LMO)</p></td><td><p>3.7</p></td><td><p>148</p></td><td><p>≈ 110</p></td><td><p>Power tools</p></td></tr><tr><td><p>Olivine</p></td><td><p>LiFePO₄ (LFP)</p></td><td><p>3.2</p></td><td><p>170</p></td><td><p>≈ 160</p></td><td><p>EVs, stationary storage</p></td></tr></tbody></table>"
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "index": 28,
+          "content": [
+            {
+              "type": "image_body",
+              "index": 28,
+              "image_path": "images/page_0_image_28.png",
+              "content": "Theoretical and practical specific capacity of cathode materials"
+            },
+            {
+              "type": "image_caption",
+              "index": 29,
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Figure 1. Theoretical vs practical specific capacity of cathode materials.",
+                  "styles": [
+                    "italic"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 30,
+          "content": [
+            {
+              "type": "text",
+              "content": "4. Computing theoretical capacity"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 31,
+          "content": [
+            {
+              "type": "text",
+              "content": "The formula from Section 2.2 in Python:"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 32,
+          "content": [
+            {
+              "type": "text",
+              "content": "F = 96485.0  # Faraday constant, C/mol"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 33,
+          "content": [
+            {
+              "type": "text",
+              "content": "def theoretical_capacity(molar_mass: float, n: int = 1) -> float:"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 34,
+          "content": [
+            {
+              "type": "text",
+              "content": "return n * F / (3.6 * molar_mass)  # mAh/g"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 35,
+          "content": [
+            {
+              "type": "text",
+              "content": "print(f\"LiFePO4: {theoretical_capacity(157.76):.1f} mAh/g\")  # 169.9 mAh/g"
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 36,
+          "content": [
+            {
+              "type": "text",
+              "content": "5. Summary"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "list",
+          "index": 37,
+          "content": [
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "1. Lithium-ion technology was developed between 1976 and 1991 and commercialised by Sony."
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "2. A cell consists of:"
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "content": [
+                {
+                  "type": "text",
+                  "content": [
+                    {
+                      "type": "text",
+                      "content": "- a graphite anode;"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": [
+                    {
+                      "type": "text",
+                      "content": "- a transition-metal oxide or phosphate cathode;"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": [
+                    {
+                      "type": "text",
+                      "content": "- a liquid electrolyte with a lithium salt, usually LiPF₆."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "3. Cathode choice trades off energy density, cost, safety and cycle life."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 38,
+          "content": [
+            {
+              "type": "text",
+              "content": "Glossary"
+            }
+          ],
+          "level": 3
+        },
+        {
+          "type": "text",
+          "index": 39,
+          "content": [
+            {
+              "type": "text",
+              "content": "Specific capacity",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " — charge stored per unit mass of active material, mAh/g."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 40,
+          "content": [
+            {
+              "type": "text",
+              "content": "Intercalation",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " — reversible insertion of ions into a host crystal structure without destroying it."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 41,
+          "content": [
+            {
+              "type": "text",
+              "content": "SEI",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " — solid electrolyte interphase, a passivation layer formed on the anode during the first cycles."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "is_full_document": true,
+  "schema": "docvortex.middle",
+  "schema_version": "2.0"
+}

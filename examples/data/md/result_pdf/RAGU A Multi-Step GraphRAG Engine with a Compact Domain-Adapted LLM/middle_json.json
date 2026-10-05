@@ -1,0 +1,3798 @@
+{
+  "metadata": {
+    "file_suffix": "pdf",
+    "producer": {
+      "name": "mineru",
+      "version": "4.0.10"
+    },
+    "document": {
+      "title": "RAGU: A Multi-Step GraphRAG Engine with a Compact Domain-Adapted LLM",
+      "authors": [
+        "Mikhail Komarov; Ivan Bondarenko; Stanislav Shtuka; Oleg Sedukhin; Roman Shuvalov; Yana Dementyeva; Matvey Solovyov; Nikolay O. Nikitin"
+      ],
+      "identifiers": [
+        "https://arxiv.org/abs/2607.11683v1"
+      ],
+      "creator_application": "arXiv GenPDF (tex2pdf:8def8d8)",
+      "producer_application": "pikepdf 8.15.1",
+      "page_count": 10,
+      "page_count_kind": "physical"
+    }
+  },
+  "extensions": {
+    "mineru": {
+      "tier": "standard",
+      "parse_mode": "txt"
+    },
+    "docvortex_layout": {
+      "version": 1,
+      "pages": [
+        {
+          "page_idx": 0,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        },
+        {
+          "page_idx": 1,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        },
+        {
+          "page_idx": 2,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        },
+        {
+          "page_idx": 3,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        },
+        {
+          "page_idx": 4,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        },
+        {
+          "page_idx": 5,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        },
+        {
+          "page_idx": 6,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        },
+        {
+          "page_idx": 7,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        },
+        {
+          "page_idx": 8,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        },
+        {
+          "page_idx": 9,
+          "width_pt": 595.2760009765625,
+          "height_pt": 841.8900146484375
+        }
+      ]
+    }
+  },
+  "pages": [
+    {
+      "page_idx": 0,
+      "blocks": [
+        {
+          "type": "aside_text",
+          "index": 0,
+          "bbox": [
+            0.03,
+            0.376,
+            0.067,
+            0.784
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "arXiv:2607.11683v1 [cs.CL] 13 Jul 2026"
+            }
+          ]
+        },
+        {
+          "type": "doc_title",
+          "index": 1,
+          "bbox": [
+            0.287,
+            0.09,
+            0.713,
+            0.131
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "RAGU: A Multi-Step GraphRAG Engine with a Compact Domain-Adapted LLM"
+            }
+          ],
+          "level": 1
+        },
+        {
+          "type": "text",
+          "index": 2,
+          "bbox": [
+            0.14,
+            0.145,
+            0.86,
+            0.18
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Mikhail Komarov",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "1,∗",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "Ivan Bondarenko",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "2,∗",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " "
+            },
+            {
+              "type": "text",
+              "content": "Stanislav Shtuka",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "1,3",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " "
+            },
+            {
+              "type": "text",
+              "content": "Oleg Sedukhin",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "† "
+            },
+            {
+              "type": "text",
+              "content": "Roman Shuvalov",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "1",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " "
+            },
+            {
+              "type": "text",
+              "content": "Yana Dementyeva",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "2",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " "
+            },
+            {
+              "type": "text",
+              "content": "Matvey Solovyov",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "1",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " "
+            },
+            {
+              "type": "text",
+              "content": "Nikolay O. Nikitin",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "1",
+              "styles": [
+                "superscript"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 3,
+          "bbox": [
+            0.149,
+            0.183,
+            0.853,
+            0.234
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "1",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "ITMO University "
+            },
+            {
+              "type": "text",
+              "content": "2",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "Novosibirsk State University "
+            },
+            {
+              "type": "text",
+              "content": "3",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "Far Eastern Federal University †Independent Researcher ∗Equal contribution i.bondarenko@g.nsu.ru"
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 4,
+          "bbox": [
+            0.262,
+            0.261,
+            0.343,
+            0.277
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Abstract"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 5,
+          "bbox": [
+            0.141,
+            0.283,
+            0.462,
+            0.81
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Graph retrieval-augmented generation (GraphRAG) enhances large language models with structured knowledge, yet existing systems construct knowledge graphs in a single extraction pass, producing noisy entities and brittle retrieval. RAGU, an open-source modular GraphRAG engine, addresses this by separating extraction from consolidation: entities and relations pass through two-stage typed extraction, DBSCAN-backed deduplication, LLM summarization, and Leiden community detection. A key insight motivates a compact extractor: the skills an in-pipeline LLM needs—comprehension, extraction, reasoning over context—are language skills that grow only weakly with model size, unlike factual world knowledge. Accordingly, we train Meno-Lite-0.1, a 7 B model optimized for language skills, which outperforms Qwen2.5-32B on knowledgegraph construction (+12.5% relative harmonic mean) and matches it on English GraphRAG tasks. On GraphRAG-Bench (Medical), RAGU retrieves the most complete context at every factoid level (evidence recall up to 0.84 vs. ≤0.76) and overtakes HippoRAG 2 on synthesis tasks; on multi-hop factoid QA, the apparent HippoRAG 2 advantage is shown to be largely an answer-format artifact. RAGU is installable via pip install graph_ragu, runs on a single GPU, and is released under MIT license. The source code is publicly available at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/RaguTeam/RAGU",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://github.com/RaguTeam/RAGU"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ", and the Meno-Lite-0.1 model can be obtained from "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://huggingface.co/bond005/meno-lite-0.1",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://huggingface.co/bond005/meno-lite-0.1"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 6,
+          "bbox": [
+            0.115,
+            0.817,
+            0.262,
+            0.833
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "1 Introduction"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 7,
+          "bbox": [
+            0.113,
+            0.842,
+            0.492,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Retrieval-augmented generation (RAG) grounds large language models (LLMs) in external knowledge (Lewis et al., 2020; Gao et al., 2023). Traditional RAG retrieves flat chunks without capturing cross-document entity relationships. Graph"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 8,
+          "bbox": [
+            0.508,
+            0.262,
+            0.886,
+            0.343
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "RAG (GraphRAG) (Edge et al., 2024; Guo et al., 2025; Gutiérrez et al., 2025) addresses this by building a knowledge graph and using graph traversal during retrieval, but practical adoption faces three obstacles."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 9,
+          "bbox": [
+            0.508,
+            0.35,
+            0.888,
+            0.432
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Obstacle 1: Single-pass extraction.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Current systems treat knowledge graph construction as a single LLM extraction pass, producing noisy, duplicated entities with no mechanism to consolidate information across chunks."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 10,
+          "bbox": [
+            0.508,
+            0.439,
+            0.888,
+            0.617
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Obstacle 2: Dependence on expensive LLMs.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Extraction quality determines graph quality, so practitioners default to large API models (GPT-4-class). This rests on a false premise: the capabilities an LLM needs inside a RAG pipeline—comprehension, extraction, reasoning over context—are language skills, not factual recall. As we show next, language skills grow weakly with model size, while world knowledge scales steeply. A compact, skill-oriented model is therefore sufficient."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 11,
+          "bbox": [
+            0.508,
+            0.624,
+            0.887,
+            0.737
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Obstacle 3: Engineering immaturity.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Many open-source frameworks suffer from installation failures or unsafe code paths (e.g., eval() on raw LLM output). A GraphRAG engine should be both semantically strong and engineerable: installable, testable, and deployable on cost-effective hardware."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 12,
+          "bbox": [
+            0.507,
+            0.745,
+            0.888,
+            0.924
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Language/World Knowledge Hypothesis.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " We hypothesize that "
+            },
+            {
+              "type": "text",
+              "content": "world knowledge",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " scales nearlinearly with parameter count, whereas "
+            },
+            {
+              "type": "text",
+              "content": "language skills",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " scale markedly more slowly. Figure 1 tests this on the Qwen2.5-Instruct family (Yang et al., 2024): on CheGeKa (Taktasheva et al., 2022) (world-knowledge quiz), F1 increases 21.1× from 0.5 B to 72 B, while on MultiQ (all facts in-context), it increases only 4×. In a GraphRAG pipeline, the LLM extracts entities, summarizes descriptions, and generates answers from context—all language"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page_idx": 1,
+      "blocks": [
+        {
+          "type": "chart",
+          "index": 0,
+          "bbox": [
+            0.116,
+            0.083,
+            0.485,
+            0.206
+          ],
+          "content": [
+            {
+              "type": "chart_body",
+              "index": 0,
+              "bbox": [
+                0.116,
+                0.083,
+                0.485,
+                0.206
+              ],
+              "image_path": "images/page_1_chart_0.jpg",
+              "content": ""
+            },
+            {
+              "type": "chart_caption",
+              "index": 1,
+              "bbox": [
+                0.113,
+                0.217,
+                0.49,
+                0.304
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Figure 1: Effect of model size on world-knowledge (CheGeKa) vs. language-skill (MultiQ) tasks in the Qwen2.5-Instruct family (F1 scores on MERA (Fenogenova et al., 2024)). CheGeKa F1 grows 21.1× from 0.5 B to 72 B; MultiQ only 4×. Log-linear slopes: 0.65 vs. 0.26."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 2,
+          "bbox": [
+            0.114,
+            0.318,
+            0.49,
+            0.349
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "skills. This prediction motivates a compact extractor."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "text",
+          "index": 3,
+          "bbox": [
+            0.114,
+            0.351,
+            0.49,
+            0.383
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "We address all three obstacles with two artifacts, released under open licenses:"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "bbox": [
+            0.115,
+            0.385,
+            0.491,
+            0.497
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "1. "
+            },
+            {
+              "type": "text",
+              "content": "Meno-Lite-0.1",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": ", a 7 B model fine-tuned from RuadaptQwen2.5-7B (Tikhomirov and Chernyshev, 2025) for RAG-oriented language skills over the NEREL schema (Loukachevitch et al., 2021). It outperforms Qwen2.5-32B on KG construction (+12.5% harmonic mean) and rivals models up to ∼4× larger."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 5,
+          "bbox": [
+            0.113,
+            0.498,
+            0.49,
+            0.626
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "2. "
+            },
+            {
+              "type": "text",
+              "content": "RAGU",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": ", a modular multi-step GraphRAG engine whose pipeline separates extraction from consolidation—two-stage typed extraction, DBSCAN-backed summarization, Leiden community detection—yielding cleaner and more connected knowledge graphs. It is installable via pip install graph_ragu and runs on a single GPU."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 6,
+          "bbox": [
+            0.112,
+            0.628,
+            0.49,
+            0.727
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "RAGU differs from prior systems—Microsoft GraphRAG (Edge et al., 2024), LightRAG (Guo et al., 2025), HippoRAG 2 (Gutiérrez et al., 2025), Wikontic (Chepurova et al., 2026)—by introducing an explicit multi-step consolidation stage and by targeting engineering maturity."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 7,
+          "bbox": [
+            0.115,
+            0.741,
+            0.318,
+            0.759
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "2 System Description"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "paragraph_title",
+          "index": 8,
+          "bbox": [
+            0.114,
+            0.771,
+            0.412,
+            0.788
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "2.1 Multi-Step Graph Construction"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 9,
+          "bbox": [
+            0.114,
+            0.795,
+            0.49,
+            0.828
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "RAGU processes documents through six configurable stages (Figure 2):"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 10,
+          "bbox": [
+            0.112,
+            0.841,
+            0.492,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Step 1: Chunking.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Three strategies: SimpleChunker (fixed-size overlapping chunks), SemanticTextChunker (embedding-based split points), and SmartSemanticChunker (cross-encoder reranking)."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 11,
+          "bbox": [
+            0.507,
+            0.085,
+            0.888,
+            0.28
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Step 2: Two-stage extraction.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Unlike singlepass systems, RAGU separates entity extraction (Stage 1) from relation extraction (Stage 2). Entities are first extracted and validated against the NEREL schema (29 entity types, 49 relation types), then fed back as constraints: every source_entity and target_entity in a relation must match a validated entity name. This eliminates spurious entity–relation mismatches. Optional in-context-learning (ICL) examples are injected at both stages, selected by semantic, BM25, hybrid, or random strategies."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 12,
+          "bbox": [
+            0.507,
+            0.287,
+            0.887,
+            0.417
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Step 3: Consolidation.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " EntitySummarizer groups entities by (name, type) and—for entities with many duplicate mentions—applies DBSCAN clustering and LLM summarization. RelationSummarizer follows the same pattern. Reducing noise before community detection produces a cleaner graph—the step absent from single-pass systems like LightRAG."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 13,
+          "bbox": [
+            0.508,
+            0.425,
+            0.888,
+            0.522
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Steps 4–6: Community detection, summarization, refinement.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Hierarchical Leiden clustering partitions the deduplicated graph; an LLM generates structured community reports (title, summary, findings); pluggable modules (e.g., RemoveIsolatedNodes) optionally refine."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 14,
+          "bbox": [
+            0.51,
+            0.532,
+            0.68,
+            0.548
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "2.2 Search Engines"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 15,
+          "bbox": [
+            0.508,
+            0.553,
+            0.888,
+            0.683
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "RAGU provides five engines: "
+            },
+            {
+              "type": "text",
+              "content": "LocalSearch",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " (vectorsimilarity entity retrieval expanded to relations and chunks), "
+            },
+            {
+              "type": "text",
+              "content": "GlobalSearch",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " (LLM-rated community summarization), "
+            },
+            {
+              "type": "text",
+              "content": "NaiveSearch",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " (standard vector RAG), "
+            },
+            {
+              "type": "text",
+              "content": "MixSearch",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " (parallel multi-engine), and "
+            },
+            {
+              "type": "text",
+              "content": "QueryPlanEngine",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " (DAG decomposition). All support cross-encoder reranking and hybrid dense+sparse retrieval via Qdrant."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 16,
+          "bbox": [
+            0.51,
+            0.692,
+            0.789,
+            0.709
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "2.3 Engineering and Deployment"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 17,
+          "bbox": [
+            0.507,
+            0.713,
+            0.888,
+            0.924
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "RAGU is a production-ready Python package (see Appendix A for a comparison with HippoRAG 2). (i) A three-tier storage abstraction (graph/KV/vector) with lifecycle callbacks enables backend swapping (NetworkX→Neo4j, NanoVDB→Qdrant). (ii) An async-first API with bounded concurrency provides production-safe throughput. (iii) Structured LLM outputs are validated through Pydantic v2, removing manual JSON post-processing and preventing code injection. (iv) Incremental upsert/update/delete with deterministic hash-based IDs and merge policies, plus a consistency auditor verifying cross-store integrity. ∼374 tests and a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page_idx": 2,
+      "blocks": [
+        {
+          "type": "image",
+          "index": 0,
+          "bbox": [
+            0.122,
+            0.084,
+            0.876,
+            0.195
+          ],
+          "content": [
+            {
+              "type": "image_body",
+              "index": 0,
+              "bbox": [
+                0.122,
+                0.084,
+                0.876,
+                0.195
+              ],
+              "image_path": "images/page_2_image_0.jpg",
+              "content": ""
+            },
+            {
+              "type": "image_caption",
+              "index": 1,
+              "bbox": [
+                0.113,
+                0.21,
+                0.885,
+                0.27
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Figure 2: End-to-end indexing pipeline. Documents are chunked, entities and relations are extracted under the NEREL schema, deduplicated and summarized, then grouped into communities via Leiden clustering. All artifacts persist across three swappable storage tiers (graph database, key-value store, vector store). Solid arrows indicate data flow between pipeline stages; dashed arrows indicate artifacts produced at each stage."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 2,
+          "bbox": [
+            0.113,
+            0.294,
+            0.49,
+            0.343
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "deterministic mock LLM server enable CI without API keys. The system supports single-GPU deployment with a 7 B extraction model."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "paragraph_title",
+          "index": 3,
+          "bbox": [
+            0.114,
+            0.354,
+            0.412,
+            0.37
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "2.4 Compact Model: Meno-Lite-0.1"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "bbox": [
+            0.112,
+            0.377,
+            0.492,
+            0.699
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Meno-Lite-0.1 (Bondarenko et al., 2026) is derived from RuadaptQwen2.5-7B-Lite-Beta (Tikhomirov and Chernyshev, 2025) through continued pre-training (1.3B tokens, Russian+English educational/scientific texts) and supervised fine-tuning (50M tokens) covering NEREL-based extraction (Loukachevitch et al., 2021), multi-hop QA (Tang and Yang, 2024; Katsis et al., 2025), and query logs. The critical distinction from generalpurpose LLMs: instructions teach the model to use context rather than recall facts—investing compute in language skills, not world knowledge. Key properties: 128K context window (passkey retrieval 0.98 at 128K), 47% better tokenizer efficiency than vanilla Qwen2.5 on Russian text (3.77 vs. 2.57 chars/token), and single-consumer-GPU deployment via vLLM (Kwon et al., 2023). The model and training details are documented in the public model card at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://huggingface.co/bond005/meno-lite-0.1",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://huggingface.co/bond005/meno-lite-0.1"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 5,
+          "bbox": [
+            0.114,
+            0.712,
+            0.246,
+            0.728
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "3 Evaluation"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "paragraph_title",
+          "index": 6,
+          "bbox": [
+            0.114,
+            0.739,
+            0.21,
+            0.755
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "3.1 Setup"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 7,
+          "bbox": [
+            0.112,
+            0.761,
+            0.492,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "We evaluate on four GraphRAG benchmarks: GraphRAG-Bench (Xiang et al., 2026) (Medical domain; four difficulty levels: fact retrieval, complex reasoning, contextual summarize, creative generation), BioASQ (Krithara et al., 2023), MuSiQue (Trivedi et al., 2022), and 2WikiMulti-HopQA (Ho et al., 2020). All systems use the same answer-generation LLM (gpt-4o-mini), isolating graph construction quality. Graph construction LLMs are varied as independent variables: Meno-"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 8,
+          "bbox": [
+            0.507,
+            0.294,
+            0.887,
+            0.408
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Lite-0.1 (7 B) and gpt-oss-20b or Qwen2.5-7B as the second index LLM. Metrics include Answer Correctness (AC; LLM-judge), ROUGE-L, Coverage, Faithfulness, Evidence Recall (ER), and Context Relevancy. LLM-as-judge evaluations use google/gemini-3-flash-preview, ensuring no evaluator–generator overlap."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 9,
+          "bbox": [
+            0.509,
+            0.418,
+            0.768,
+            0.434
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "3.2 GraphRAG-Bench Results"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 10,
+          "bbox": [
+            0.507,
+            0.439,
+            0.888,
+            0.712
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Table 1 and Figure 3 reveal a cross-over. On the two factoid levels, HippoRAG 2 leads: its personalized PageRank pins down single facts (AC 72.4 vs. 54.2 for RAGU on Fact Retrieval, ∆=−18.2 pp). As tasks demand broad synthesis rather than chain-following, the gap closes monotonically—Complex Reasoning (−14.7 pp), Contextual Summarize (−0.9 pp, parity)—and reverses on Creative Generation, where RAGU wins AC (59.0 vs. 56.9) and Faithfulness (34.2 vs. 26.6). On Coverage, the metric that directly rewards retrieving all relevant material, RAGU leads throughout (57.4 vs. 34.7 on Creative Generation). LightRAG is weakest at every level, confirming that single-pass free-form extraction produces a structurally poorer graph than typed multi-step consolidation."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 11,
+          "bbox": [
+            0.507,
+            0.713,
+            0.888,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Retrieval results confirm the mechanism: RAGU attains the highest Evidence Recall at every factoid level (84 vs. ≤76% for competitors), directly supporting the consolidation hypothesis. That HippoRAG 2 nonetheless wins factoid AC despite lower Evidence Recall reflects the precision of its chain traversal on single-fact queries. Ablation results (Appendix B) show that the ICL and validation toggles each shift AC by at most ∼1.5 pp, so the gap to competitors cannot be attributed to those options; it reflects the aggregate effect of RAGU’s structural choices. Across extraction LLMs from 3 B to 14 B, AC varies by at most ∼1.5 pp, confirm-"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page_idx": 3,
+      "blocks": [
+        {
+          "type": "table",
+          "index": 1,
+          "bbox": [
+            0.174,
+            0.152,
+            0.825,
+            0.282
+          ],
+          "content": [
+            {
+              "type": "table_caption",
+              "index": 0,
+              "bbox": [
+                0.113,
+                0.083,
+                0.886,
+                0.141
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Table 1: Generation quality on GraphRAG-Bench (Medical domain). AC = Answer Correctness, Cov = Coverage, Faith = Faithfulness (all ×100). All systems use bge-large-en-v1.5 for embeddings and gpt-4o-mini for answer generation; only the graph-construction LLM varies. RAGU rows use ICL = 1 and Val = yes. Best per column in bold."
+                }
+              ]
+            },
+            {
+              "type": "table_body",
+              "index": 1,
+              "bbox": [
+                0.174,
+                0.152,
+                0.825,
+                0.282
+              ],
+              "image_path": "images/page_3_table_1.jpg",
+              "content": "<table><tr><td rowspan=\"2\">System</td><td rowspan=\"2\">Index LLM</td><td>Fact Retr.</td><td>Complex Reas.</td><td colspan=\"2\">Contextual Summ.</td><td colspan=\"3\">Creative Gen.</td></tr><tr><td>AC</td><td>AC</td><td>AC</td><td>Cov</td><td>AC</td><td>Cov</td><td>Faith</td></tr><tr><td>LightRAG</td><td>Qwen2.5-7B</td><td>25.9</td><td>20.3</td><td>22.1</td><td>51.0</td><td>14.2</td><td>3.1</td><td>23.1</td></tr><tr><td>LightRAG</td><td>Meno-Lite-0.1</td><td>26.2</td><td>20.2</td><td>22.6</td><td>51.2</td><td>14.4</td><td>3.9</td><td>27.6</td></tr><tr><td>HippoRAG 2</td><td>Qwen2.5-7B</td><td>72.7</td><td>67.9</td><td>64.6</td><td>51.6</td><td>57.2</td><td>33.2</td><td>31.5</td></tr><tr><td>HippoRAG 2</td><td>Meno-Lite-0.1</td><td>72.4</td><td>68.4</td><td>65.0</td><td>51.7</td><td>56.9</td><td>34.7</td><td>26.6</td></tr><tr><td>RAGU</td><td>Qwen2.5-7B</td><td>54.1</td><td>54.6</td><td>64.9</td><td>73.2</td><td>58.1</td><td>56.4</td><td>35.1</td></tr><tr><td>RAGU</td><td>Meno-Lite-0.1</td><td>54.2</td><td>53.7</td><td>64.1</td><td>71.1</td><td>59.0</td><td>57.4</td><td>34.2</td></tr></table>"
+            }
+          ]
+        },
+        {
+          "type": "chart",
+          "index": 2,
+          "bbox": [
+            0.125,
+            0.301,
+            0.872,
+            0.555
+          ],
+          "content": [
+            {
+              "type": "chart_body",
+              "index": 2,
+              "bbox": [
+                0.125,
+                0.301,
+                0.872,
+                0.555
+              ],
+              "image_path": "images/page_3_chart_2.jpg",
+              "content": ""
+            },
+            {
+              "type": "chart_caption",
+              "index": 3,
+              "bbox": [
+                0.112,
+                0.573,
+                0.885,
+                0.632
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Figure 3: Cross-over by task complexity on GraphRAG-Bench (Medical). All three systems use Meno-Lite-0.1 (7 B) as the index LLM and gpt-4o-mini for answer generation. (a) Answer Correctness: RAGU trails HippoRAG 2 on Fact Retrieval, but the gap closes and RAGU leads on Creative Generation. (b) Evidence Recall: RAGU retrieves the most complete context on all factoid levels. Task difficulty increases left to right."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "bbox": [
+            0.114,
+            0.656,
+            0.476,
+            0.673
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "ing that model size does not affect graph quality."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "paragraph_title",
+          "index": 5,
+          "bbox": [
+            0.114,
+            0.688,
+            0.341,
+            0.704
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "3.3 Multi-Hop QA Results"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 6,
+          "bbox": [
+            0.113,
+            0.711,
+            0.491,
+            0.889
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "These benchmarks are pure factoid QA with short gold answers, for which answer format strongly affects overlap-based metrics. We therefore report two answer-generation protocols (Table 2): (a) each system’s default verbose prompt, and (b) a terse prompt that forces a single direct answer. HippoRAG 2 appears in both panels unchanged because its default prompt already emits terse output, making it a format anchor; NaiveRAG is RAGU’s NaiveSearchEngine and therefore shares our generation prompt."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 7,
+          "bbox": [
+            0.113,
+            0.89,
+            0.49,
+            0.922
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Under the verbose protocol (a), HippoRAG 2 dominates every column (AC up to 74.1 vs. 56.0 for"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 8,
+          "bbox": [
+            0.507,
+            0.656,
+            0.887,
+            0.882
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "RAGU on BioASQ). This gap, however, is largely a format artifact: verbose answers mismatch the terse gold references, depressing both ROUGE-L (12 vs. 49) and Answer Correctness. Once format is controlled (b), the picture changes substantially. RAGU ties and slightly exceeds HippoRAG 2 on BioASQ AC (72.9 vs. 72.4) and closes the 2Wiki-MultiHopQA gap from −19.3 pp to −5.5 pp (58.0 vs. 63.5). HippoRAG 2 retains a genuine lead only on MuSiQue (54.4 vs. 40.1), the hardest multi-hop benchmark, where its personalized PageRank follows reasoning chains that consolidated retrieval does not surface—and where terseness even hurts the other systems’ Answer Correctness."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 9,
+          "bbox": [
+            0.508,
+            0.89,
+            0.886,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "The refined picture is one of complementary strengths rather than outright dominance: Hip-"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page_idx": 4,
+      "blocks": [
+        {
+          "type": "table",
+          "index": 1,
+          "bbox": [
+            0.116,
+            0.265,
+            0.485,
+            0.45
+          ],
+          "content": [
+            {
+              "type": "table_caption",
+              "index": 0,
+              "bbox": [
+                0.113,
+                0.083,
+                0.491,
+                0.255
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Table 2: Multi-hop QA under two answer-generation protocols. AC = Answer Correctness, RL = ROUGE-L (×100). All systems use gte-multilingual-base for embeddings and gpt-4o-mini for answer generation; only the graph-construction LLM varies (GPT = gptoss-20b, Ours = Meno-Lite-0.1). (a) Verbose generation prompts (each system’s default). (b) Terse prompts forcing a single direct answer; HippoRAG 2 is unchanged across panels as its default already produces terse output. NaiveRAG is RAGU’s NaiveSearchEngine and shares our generation prompt. Best AC per column in bold."
+                }
+              ]
+            },
+            {
+              "type": "table_body",
+              "index": 1,
+              "bbox": [
+                0.116,
+                0.265,
+                0.485,
+                0.45
+              ],
+              "image_path": "images/page_4_table_1.jpg",
+              "content": "<table><tr><td rowspan=\"2\">System</td><td colspan=\"2\">BioASQ</td><td colspan=\"2\">MuSiQue</td><td colspan=\"2\">2WikiMultiHop</td></tr><tr><td>AC</td><td>RL</td><td>AC</td><td>RL</td><td>AC</td><td>RL</td></tr><tr><td colspan=\"7\">(a) Verbose generation prompt</td></tr><tr><td>NaiveRAG</td><td>55.3</td><td>12.4</td><td>41.7</td><td>6.9</td><td>43.5</td><td>12.0</td></tr><tr><td>LightRAG (GPT)</td><td>43.9</td><td>6.5</td><td>34.5</td><td>3.8</td><td>36.2</td><td>8.2</td></tr><tr><td>HippoRAG 2 (GPT)</td><td>74.1</td><td>48.8</td><td>56.3</td><td>42.7</td><td>65.9</td><td>54.7</td></tr><tr><td>RAGU (GPT)</td><td>56.0</td><td>12.2</td><td>43.5</td><td>7.6</td><td>46.6</td><td>13.2</td></tr><tr><td>RAGU (Ours)</td><td>54.5</td><td>12.1</td><td>42.0</td><td>7.4</td><td>45.2</td><td>12.9</td></tr><tr><td colspan=\"7\">(b) Terse generation prompt</td></tr><tr><td>NaiveRAG</td><td>71.7</td><td>49.2</td><td>36.6</td><td>24.7</td><td>53.7</td><td>45.2</td></tr><tr><td>LightRAG (GPT)</td><td>63.9</td><td>42.9</td><td>26.0</td><td>12.1</td><td>44.3</td><td>35.7</td></tr><tr><td>HippoRAG 2 (GPT)</td><td>72.4</td><td>48.8</td><td>54.4</td><td>42.6</td><td>63.5</td><td>54.7</td></tr><tr><td>RAGU (GPT)</td><td>72.9</td><td>48.7</td><td>40.1</td><td>26.5</td><td>58.0</td><td>49.6</td></tr><tr><td>RAGU (Ours)</td><td>72.8</td><td>48.2</td><td>40.7</td><td>27.5</td><td>55.1</td><td>46.3</td></tr></table>"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "index": 3,
+          "bbox": [
+            0.118,
+            0.546,
+            0.484,
+            0.643
+          ],
+          "content": [
+            {
+              "type": "table_caption",
+              "index": 2,
+              "bbox": [
+                0.114,
+                0.463,
+                0.49,
+                0.536
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Table 3: IE benchmark (knowledge-graph construction). NER = entity recognition (F1), RE = relation extraction (F1), Def = entity definition (chrF++), RDef = relation definition (chrF++), HM = harmonic mean of all four tasks."
+                }
+              ]
+            },
+            {
+              "type": "table_body",
+              "index": 3,
+              "bbox": [
+                0.118,
+                0.546,
+                0.484,
+                0.643
+              ],
+              "image_path": "images/page_4_table_3.jpg",
+              "content": "<table><tbody><tr><td>Model</td><td>Size</td><td>NER Def RE RDef HM</td></tr><tr><td>Meno-Lite-0.1</td><td>7B</td><td>0.504 0.527 0.347 0.558 0.468</td></tr><tr><td>Qwen2.5-32B</td><td>32B</td><td>0.536 0.528 0.239 0.599 0.416</td></tr><tr><td>gemma-3-27b</td><td>27B</td><td>0.544 0.482 0.224 0.583 0.396</td></tr><tr><td>Qwen2.5-14B</td><td>14B</td><td>0.510 0.518 0.222 0.583 0.396</td></tr><tr><td>Qwen2.5-7B</td><td>7B</td><td>0.477 0.479 0.192 0.541 0.356</td></tr><tr><td>T-lite-1.0</td><td>7B</td><td>0.466 0.464 0.174 0.533 0.336</td></tr></tbody></table>"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "bbox": [
+            0.113,
+            0.658,
+            0.492,
+            0.82
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "poRAG 2 excels at chain-following multi-hop and single-fact precision, while RAGU is competitive on factoid QA once format is controlled and superior on context-breadth tasks. Notably, RAGU achieves this with a locally served 7 B extraction model (Meno-Lite-0.1) versus HippoRAG 2’s larger 20 B gpt-oss-20b; the gap between RAGU with GPT and with Meno-Lite-0.1 is minimal (1–2 pp), confirming Meno-Lite-0.1 as a drop-in replacement."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "paragraph_title",
+          "index": 5,
+          "bbox": [
+            0.114,
+            0.834,
+            0.304,
+            0.85
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "3.4 Model Evaluation"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 6,
+          "bbox": [
+            0.114,
+            0.858,
+            0.49,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Table 3 confirms the prediction: Meno-Lite-0.1 achieves the highest harmonic mean on our IE benchmark (Bondarenko, 2026a), outperforming Qwen2.5-32B by 12.5% relative—driven by rela-"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 7,
+          "bbox": [
+            0.507,
+            0.085,
+            0.887,
+            0.184
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "tion extraction (F1 0.347 vs. 0.239), the sub-task most dependent on language comprehension. On MERA (Fenogenova et al., 2024), Meno-Lite-0.1 scores 0.555 overall with near-perfect passkey retrieval (0.98 at 128 K tokens, LIBRA (Churin et al., 2025)), confirming robust long-context handling."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "text",
+          "index": 8,
+          "bbox": [
+            0.507,
+            0.192,
+            0.888,
+            0.386
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Fine-tuning payoff vs. pipeline robustness.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Meno-Lite-0.1’s large standalone extraction edge compresses to ≤1 pp on end-to-end GraphRAG-Bench QA—and does so in every pipeline we tested (HippoRAG, LightRAG, and our own). This is not a failure of the fine-tuning but evidence that graph-RAG QA quality is largely robust to extractor choice once consolidation is present: Meno-Lite-0.1 contributes 32B-class extraction at 7 B cost, while the consolidation pipeline contributes downstream robustness, making the two artifacts complementary."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 9,
+          "bbox": [
+            0.51,
+            0.397,
+            0.676,
+            0.414
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "4 Demonstration"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 10,
+          "bbox": [
+            0.508,
+            0.423,
+            0.885,
+            0.473
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Case study.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " We illustrate RAGU’s pipeline on a single sentence about Dennis Ritchie, produced by the bundled example script:"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 11,
+          "bbox": [
+            0.545,
+            0.482,
+            0.85,
+            0.556
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Dennis Ritchie, the creator of the C programming language, and the co-creator of the Unix operating system, died on October 12, 2011, at the age of 70. His father, Alistair E. Ritchie, worked for many years at Bell Laboratories in Murray Hill, New Jersey."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 12,
+          "bbox": [
+            0.508,
+            0.569,
+            0.886,
+            0.634
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Extraction.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " The two-stage extractor identifies 9 typed entities under the NEREL schema (Table 4). Stage 2 then extracts 8 relations, all constrained to this validated entity set (Table 5)."
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "index": 14,
+          "bbox": [
+            0.536,
+            0.665,
+            0.86,
+            0.798
+          ],
+          "content": [
+            {
+              "type": "table_caption",
+              "index": 13,
+              "bbox": [
+                0.519,
+                0.649,
+                0.873,
+                0.664
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Table 4: Entities extracted from the Ritchie passage."
+                }
+              ]
+            },
+            {
+              "type": "table_body",
+              "index": 14,
+              "bbox": [
+                0.536,
+                0.665,
+                0.86,
+                0.798
+              ],
+              "image_path": "images/page_4_table_14.jpg",
+              "content": "<table><tbody><tr><td>Entity</td><td>NEREL Type</td></tr><tr><td>Dennis Ritchie</td><td>PERSON</td></tr><tr><td>Alistair E. Ritchie</td><td>PERSON</td></tr><tr><td>C Programming Language</td><td>PRODUCT</td></tr><tr><td>Unix Operating System</td><td>PRODUCT</td></tr><tr><td>Bell Laboratories</td><td>ORGANIZATION</td></tr><tr><td>October 12, 2011</td><td>DATE</td></tr><tr><td>70</td><td>AGE</td></tr><tr><td>Murray Hill</td><td>DISTRICT</td></tr><tr><td>New Jersey</td><td>STATE_OR_PROV</td></tr></tbody></table>"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "index": 16,
+          "bbox": [
+            0.513,
+            0.853,
+            0.882,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "table_caption",
+              "index": 15,
+              "bbox": [
+                0.509,
+                0.816,
+                0.883,
+                0.846
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Table 5: Relations extracted from the Ritchie passage (5 of 8 shown)."
+                }
+              ]
+            },
+            {
+              "type": "table_body",
+              "index": 16,
+              "bbox": [
+                0.513,
+                0.853,
+                0.882,
+                0.923
+              ],
+              "image_path": "images/page_4_table_16.jpg",
+              "content": "<table><tbody><tr><td>Source</td><td>Target</td><td>Relation</td></tr><tr><td>Dennis Ritchie</td><td>C Programming Language</td><td>WORKS_AS</td></tr><tr><td>Dennis Ritchie</td><td>Unix Operating System</td><td>WORKS_AS</td></tr><tr><td>Dennis Ritchie</td><td>October 12, 2011</td><td>DATE_OF_DEATH</td></tr><tr><td>Alistair E. Ritchie</td><td>Dennis Ritchie</td><td>PARENT_OF</td></tr><tr><td>Bell Laboratories</td><td>Murray Hill</td><td>LOCATED_IN</td></tr></tbody></table>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page_idx": 5,
+      "blocks": [
+        {
+          "type": "image",
+          "index": 0,
+          "bbox": [
+            0.144,
+            0.083,
+            0.458,
+            0.286
+          ],
+          "content": [
+            {
+              "type": "image_body",
+              "index": 0,
+              "bbox": [
+                0.144,
+                0.083,
+                0.458,
+                0.286
+              ],
+              "image_path": "images/page_5_image_0.jpg",
+              "content": ""
+            },
+            {
+              "type": "image_caption",
+              "index": 1,
+              "bbox": [
+                0.113,
+                0.297,
+                0.491,
+                0.357
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Figure 4: Knowledge graph built from the Ritchie passage. Nodes are typed entities; edges are typed relations. Two communities emerge: Ritchie’s professional legacy and the Bell Labs geographic cluster."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 2,
+          "bbox": [
+            0.112,
+            0.364,
+            0.491,
+            0.495
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Community detection.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Leiden clustering partitions the 9-entity graph (Figure 4) into two communities: one centred on Dennis Ritchie and his creations (5 entities, 4 relations), the other linking Bell Laboratories, Murray Hill, New Jersey, and Alistair Ritchie through spatial and professional ties (4 entities, 3 relations). An LLM generates a structured summary for each."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 3,
+          "bbox": [
+            0.112,
+            0.501,
+            0.491,
+            0.55
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Multi-hop retrieval.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Using the built graph, RAGU’s LocalSearchEngine answers questions that require traversing multiple edges:"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "bbox": [
+            0.149,
+            0.552,
+            0.455,
+            0.579
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Q:",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Where did the father of the creator of the C programming language work?"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 5,
+          "bbox": [
+            0.149,
+            0.579,
+            0.455,
+            0.605
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "A:",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Alistair E. Ritchie. . . worked at "
+            },
+            {
+              "type": "text",
+              "content": "Bell Laboratories",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 6,
+          "bbox": [
+            0.15,
+            0.607,
+            0.455,
+            0.633
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Q:",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " What did the person who died on October 12, 2011, create?"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 7,
+          "bbox": [
+            0.149,
+            0.633,
+            0.455,
+            0.671
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "A:",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Dennis Ritchie. . . created the "
+            },
+            {
+              "type": "text",
+              "content": "C programming language",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " and co-created the "
+            },
+            {
+              "type": "text",
+              "content": "Unix operating system",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 8,
+          "bbox": [
+            0.112,
+            0.677,
+            0.491,
+            0.855
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Availability.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " RAGU is installable via pip install graph_ragu; full API documentation and examples are at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/RaguTeam/RAGU",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://github.com/RaguTeam/RAGU"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ".A demonstration video is available at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://youtu.be/bicJDMJuQfg",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://youtu.be/bicJDMJuQfg"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". The RAGU system is released under the MIT license (code at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/RaguTeam/RAGU",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://github.com/RaguTeam/RAGU"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "),and the Meno-Lite-0.1 model is distributed under Apache 2.0 at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://huggingface.co/bond005/meno-lite-0.1",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://huggingface.co/bond005/meno-lite-0.1"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 9,
+          "bbox": [
+            0.114,
+            0.864,
+            0.25,
+            0.882
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "5 Conclusion"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 10,
+          "bbox": [
+            0.112,
+            0.89,
+            0.49,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "We argued that the LLM inside a RAG pipeline needs language skills—not world knowledge—and"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 11,
+          "bbox": [
+            0.507,
+            0.086,
+            0.888,
+            0.345
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "that these skills scale weakly with model size. RAGU operationalizes this insight via a modular multi-step pipeline that retrieves the most complete context at every factoid level of GraphRAG-Bench and overtakes HippoRAG 2 on synthesis tasks (Creative Generation AC and Coverage); HippoRAG 2 conversely excels at retrieval precision—leading single-fact AC and chain-following multi-hop reasoning on MuSiQue. The wider multi-hop gap seen under verbose prompts is largely an answerformat artifact. Practically: prefer RAGU when answers must synthesize broad context (summarization, creative generation, long-form QA) under a single-GPU budget, and prefer chain-traversal systems for precise multi-hop fact lookup. Both artifacts are released under open-source licenses."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "paragraph_title",
+          "index": 12,
+          "bbox": [
+            0.508,
+            0.355,
+            0.618,
+            0.372
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Limitations"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 13,
+          "bbox": [
+            0.507,
+            0.382,
+            0.886,
+            0.447
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "First, our scaling evidence rests on a single model family (Qwen2.5) and select tasks; although robust across six model sizes, it is a well-supported hypothesis rather than a universal theorem."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 14,
+          "bbox": [
+            0.507,
+            0.447,
+            0.888,
+            0.657
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Second, Meno-Lite-0.1 trades parametric factual recall for contextual grounding and should not serve as a standalone knowledge base; its multi-hop reasoning degrades beyond 32K tokens, typical of 7 B-class models. We also note a distributionaloverlap caveat on our IE benchmark (Bondarenko, 2026a): the supervised fine-tuning of Meno-Lite-0.1 uses the train and validation splits of NEREL, whereas the benchmark uses only the held-out test split with different instruction wordings; the overlap is confined to the annotation schema and text domain, not to the benchmark documents—but a residual advantage cannot be fully ruled out."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 15,
+          "bbox": [
+            0.507,
+            0.657,
+            0.888,
+            0.788
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Finally, RAGU’s default NetworkX graph backend—a swappable BaseGraphStorage adapter—does not by itself scale to massive corpora (millions of nodes), so such deployments require a dedicated graph-database adapter. Final graph quality remains sensitive to the extraction LLM: weak base models introduce structural noise that consolidation cannot fully rectify."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 16,
+          "bbox": [
+            0.509,
+            0.798,
+            0.664,
+            0.816
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Ethics Statement"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 17,
+          "bbox": [
+            0.507,
+            0.825,
+            0.888,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Data Provenance and Licensing.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " The RAGU system is released under the MIT license, while the Meno-Lite-0.1 model is distributed under Apache 2.0. Meno-Lite-0.1 was trained exclusively on publicly available datasets that are cited in the References—including educational"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page_idx": 6,
+      "blocks": [
+        {
+          "type": "text",
+          "index": 0,
+          "bbox": [
+            0.112,
+            0.086,
+            0.492,
+            0.295
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "web corpora (FineWeb-Edu), Russian-language academic texts (RuLM), information-extraction datasets (Loukachevitch et al., 2021), multi-hop QA benchmarks (Tang and Yang, 2024; Katsis et al., 2025), and synthetic instructions generated with GPT-4o-mini. No personally identifiable information was included in any training or evaluation corpus. The IE benchmark is a test-only derivative of the human-annotated NEREL corpus (Bondarenko, 2026b) and is released under an MIT license; its integration into the LM Evaluation Harness (Gao et al., 2024) enables standardized, reproducible evaluation."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "paragraph_title",
+          "index": 1,
+          "bbox": [
+            0.113,
+            0.303,
+            0.491,
+            0.319
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Environmental Impact and Democratization."
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 2,
+          "bbox": [
+            0.112,
+            0.314,
+            0.492,
+            0.69
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "A central design goal of this work is to make high-quality GraphRAG accessible beyond large industrial laboratories. Because the languageknowledge hypothesis (§1) predicts—and our experiments confirm—that a 7 B model suffices for extraction, RAGU+Meno-Lite-0.1 runs on a single consumer GPU, rather than the multi-GPU clusters required by frontier models. This is not an aspirational claim but a measured consequence: graph construction processes ∼8 k tokens/document at ∼2 k tok/s, costing ∼$0.001/doc on rented GPUs— roughly two orders of magnitude less than the ∼$0.10/doc of commercial API-based alternatives (Appendix C). At corpus scale (100 k documents), the difference is ∼$100 (local GPU) vs. ∼$10 000 (commercial API). The lower compute footprint translates directly into lower energy consumption and CO"
+            },
+            {
+              "type": "text",
+              "content": "2",
+              "styles": [
+                "subscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " emissions per document indexed. Furthermore, by supporting both English and Russian through Settings.language and by training on Russian-language corpora, RAGU lowers the barrier for non-English-speaking users and underrepresented language communities."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 3,
+          "bbox": [
+            0.112,
+            0.696,
+            0.492,
+            0.924
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Potential Misuse.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Like any RAG system, RAGU can amplify biases present in its indexing corpus: if the source documents contain prejudiced or factually incorrect content, the extracted knowledge graph will reflect those biases, and generated answers may inherit them. Meno-Lite-0.1 additionally inherits biases from its pretraining and finetuning corpora. We recommend domain-specific evaluation before deployment in sensitive applications (healthcare, legal, news). Meno-Lite-0.1 deliberately trades parametric factual recall for context-grounded skills and should not be used as a standalone knowledge base, reducing the risk of confident hallucination but increasing dependence"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "bbox": [
+            0.506,
+            0.085,
+            0.887,
+            0.183
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "on corpus quality. On the engineering side, RAGU validates all LLM outputs through Pydantic models rather than executing raw model responses (unlike systems that use eval()), which eliminates a class of code-injection attacks from adversarial model output."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "text",
+          "index": 5,
+          "bbox": [
+            0.507,
+            0.192,
+            0.888,
+            0.387
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Bias and Fairness.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " The NEREL schema (Loukachevitch et al., 2021) underlying RAGU’s extraction was developed for Russian news text; its entity and relation types reflect that domain. Applying RAGU to other languages or domains may require schema adaptation. The IE benchmark similarly reflects Russian-language text characteristics (e.g., heavy inflection, addressed by Snowball stemming in the metric). Users should be aware of potential performance degradation when operating outside the schema’s design domain."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 6,
+          "bbox": [
+            0.507,
+            0.395,
+            0.889,
+            0.639
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Transparency and Reproducibility.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " All code, model weights, and benchmark data are publicly released under open licenses. The repository ships ∼374 automated tests and a deterministic mock LLM server, enabling full regression testing without API keys or GPU resources—a property that, to our knowledge, no other open-source GraphRAG framework provides. Every domain object (entity, relation, chunk) carries a deterministic MD5 identifier, allowing any retrieved result to be traced back to its source text. The IE benchmark is integrated into the public LM Evaluation Harness repository under the nerel-bench task group, ensuring that any causal LLM can be evaluated under identical conditions."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 7,
+          "bbox": [
+            0.509,
+            0.65,
+            0.676,
+            0.668
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Acknowledgments"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 8,
+          "bbox": [
+            0.507,
+            0.676,
+            0.888,
+            0.823
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "RAGU development was supported by GitVerse, Cloud.ru, and Habr through the “Code Without Borders” open-source grant program (first place, AI Innovation)"
+            },
+            {
+              "type": "text",
+              "content": "1",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "and by Yandex through the Yandex Open Source grant program (Mikhail Komarov, first place, Artificial Intelligence track)."
+            },
+            {
+              "type": "text",
+              "content": "2",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " We thank Kirill Novgorodtsev for the web frontend (built with the $mol framework)"
+            },
+            {
+              "type": "text",
+              "content": "3",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "and Yaroslav Svetlov for the backend of the RAGU demo website."
+            },
+            {
+              "type": "text",
+              "content": "4",
+              "styles": [
+                "superscript"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "page_footnote",
+          "index": 9,
+          "bbox": [
+            0.528,
+            0.844,
+            0.874,
+            0.86
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "1",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://habr.com/ru/specials/979702/",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://habr.com/ru/specials/979702/"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "page_footnote",
+          "index": 10,
+          "bbox": [
+            0.508,
+            0.858,
+            0.879,
+            0.883
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "2",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://habr.com/ru/companies/yandex/articles/1040282/",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://habr.com/ru/companies/yandex/ articles/1040282/"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "page_footnote",
+          "index": 11,
+          "bbox": [
+            0.53,
+            0.882,
+            0.855,
+            0.897
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "3",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/hyoo-ru/mam_mol",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://github.com/hyoo-ru/mam_mol"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "page_footnote",
+          "index": 12,
+          "bbox": [
+            0.507,
+            0.896,
+            0.879,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "4",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://raguteam.github.io/web/#!api=https%3A%2F%2Fragu-back.duckdns.org",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://raguteam.github.io/web/#!api= https%3A%2F%2Fragu-back.duckdns.org"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page_idx": 7,
+      "blocks": [
+        {
+          "type": "paragraph_title",
+          "index": 0,
+          "bbox": [
+            0.115,
+            0.084,
+            0.216,
+            0.1
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "References"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "ref_text",
+          "index": 1,
+          "bbox": [
+            0.117,
+            0.107,
+            0.49,
+            0.186
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Ivan Bondarenko. 2026a. Nerel-bench: A benchmark for evaluating llms on russian knowledge graph construction tasks. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://huggingface.co/datasets/bond005/NEREL_instruct",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://huggingface.co/datasets/bond005/NEREL_instruct"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". Integrated into the LM Evaluation Harness under the nerel-bench task group."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 2,
+          "bbox": [
+            0.115,
+            0.195,
+            0.49,
+            0.249
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Ivan Bondarenko. 2026b. Nerel-instruct: An instruction-based dataset for russian information extraction. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://huggingface.co/datasets/bond005/NEREL_instruct",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://huggingface.co/datasets/bond005/NEREL_instruct"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 3,
+          "bbox": [
+            0.117,
+            0.258,
+            0.49,
+            0.376
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Ivan Bondarenko, Roman Derunets, Oleg Sedukhin, Mikhail Komarov, Ivan Chernov, and Mikhail Kulakov. 2026. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.18653/v1/2026.semeval-1.216",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "RaguTeam at SemEval-2026 task 8: Meno and Friends in a judge-orchestrated LLM ensemble for faithful multi-turn response generation"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Proceedings of the 20th International Workshop on Semantic Evaluation (2026), pages 1678–1694, San Diego, California, USA. Association for Computational Linguistics."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 4,
+          "bbox": [
+            0.117,
+            0.385,
+            0.49,
+            0.491
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Alla Chepurova, Aydar Bulatov, Mikhail Burtsev, and Yuri Kuratov. 2026. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.18653/v1/2026.eacl-long.388",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Wikontic: Constructing Wikidata-aligned, ontology-aware knowledge graphs with large language models"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Proceedings of the 19th Conference of the European Chapter of the Association for Computational Linguistics (Volume 1: Long Papers), pages 8304–8319, Rabat, Morocco. Association for Computational Linguistics."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 5,
+          "bbox": [
+            0.117,
+            0.499,
+            0.491,
+            0.605
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Igor Churin, Murat Apishev, Maria Tikhonova, Denis Shevelev, Aydar Bulatov, Yuri Kuratov, Sergei Averkiev, and Alena Fenogenova. 2025. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.18653/v1/2025.codi-1.1",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Long context benchmark for the Russian language"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Proceedings of the 6th Workshop on Computational Approaches to Discourse, Context and Document-Level Inferences (CODI 2025), pages 1–13, Suzhou, China. Association for Computational Linguistics."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 6,
+          "bbox": [
+            0.116,
+            0.614,
+            0.49,
+            0.68
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Darren Edge, Ha Trinh, Newman Cheng, Joshua Bradley, Alex Chao, Apurva Mody, Steven Truitt, and Jonathan Larson. 2024. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://arxiv.org/abs/2404.16130",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "From local to global: A graph RAG approach to query-focused summarization"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". arXiv preprint arXiv:2404.16130."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 7,
+          "bbox": [
+            0.117,
+            0.688,
+            0.491,
+            0.86
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Alena Fenogenova, Artem Chervyakov, Nikita Martynov, Anastasia Kozlova, Maria Tikhonova, Albina Akhmetgareeva, Anton Emelyanov, Denis Shevelev, Pavel Lebedev, Leonid Sinev, Ulyana Isaeva, Katerina Kolomeytseva, Daniil Moskovskiy, Elizaveta Goncharova, Nikita Savushkin, Polina Mikhailova, Anastasia Minaeva, Denis Dimitrov, Alexander Panchenko, and Sergey Markov. 2024. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.18653/v1/2024.acl-long.534",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "MERA: A comprehensive LLM evaluation in Russian"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 9920–9948, Bangkok, Thailand. Association for Computational Linguistics."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 8,
+          "bbox": [
+            0.116,
+            0.868,
+            0.49,
+            0.921
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Leo Gao, Jonathan Tow, Baber Abbasi, Stella Biderman, Sid Black, Anthony DiPofi, Charles Foster, Laurence Golding, Jeffrey Hsu, Alain Le Noac’h, Haonan Li, Kyle McDonell, Niklas Muennighoff,"
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 9,
+          "bbox": [
+            0.527,
+            0.086,
+            0.885,
+            0.14
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Chris Ociepa, Jason Phang, Laria Reynolds, Hailey Schoelkopf, Aviya Skowron, Lintang Sutawika, and 5 others. 2024. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.5281/zenodo.5371628",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "The language model evaluation harness"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "ref_text",
+          "index": 10,
+          "bbox": [
+            0.512,
+            0.148,
+            0.885,
+            0.214
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Yunfan Gao, Yun Xiong, Xinyu Gao, Kangxiang Jia, Jinliu Pan, Yuxi Bi, Yi Dai, Jiawei Sun, and Haofen Wang. 2023. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://arxiv.org/abs/2312.10997",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Retrieval-augmented generation for large language models: A survey"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". arXiv preprint arXiv:2312.10997."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 11,
+          "bbox": [
+            0.511,
+            0.224,
+            0.886,
+            0.304
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Zirui Guo, Lianghao Xia, Yanhua Yu, Tu Ao, and Chao Huang. 2025. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.18653/v1/2025.findings-emnlp.568",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "LightRAG: Simple and fast retrievalaugmented generation"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Findings of the Association for Computational Linguistics: EMNLP 2025, pages 10746–10761, Suzhou, China. Association for Computational Linguistics."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 12,
+          "bbox": [
+            0.511,
+            0.313,
+            0.885,
+            0.378
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Bernal Jiménez Gutiérrez, Yiheng Shu, Weijian Qi, Sizhe Zhou, and Yu Su. 2025. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://openreview.net/forum?id=LWH8yn4HS2",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "From RAG to memory: Non-parametric continual learning for large language models"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Forty-second International Conference on Machine Learning."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 13,
+          "bbox": [
+            0.511,
+            0.388,
+            0.886,
+            0.48
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Xanh Ho, Anh-Khoa Duong Nguyen, Saku Sugawara, and Akiko Aizawa. 2020. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.18653/v1/2020.coling-main.580",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Constructing a multi-hop QA dataset for comprehensive evaluation of reasoning steps"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Proceedings of the 28th International Conference on Computational Linguistics, pages 6609–6625, Barcelona, Spain (Online). International Committee on Computational Linguistics."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 14,
+          "bbox": [
+            0.512,
+            0.489,
+            0.886,
+            0.581
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Yannis Katsis, Sara Rosenthal, Kshitij Fadnis, Chulaka Gunasekara, Young-Suk Lee, Lucian Popa, Vraj Shah, Huaiyu Zhu, Danish Contractor, and Marina Danilevsky. 2025. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.1162/TACL.a.19",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "mtrag: A multi-turn conversational benchmark for evaluating retrieval-augmented generation systems"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". Transactions of the Association for Computational Linguistics, 13:784–808."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 15,
+          "bbox": [
+            0.511,
+            0.59,
+            0.886,
+            0.644
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Anastasia Krithara, Anastasios Nentidis, Konstantinos Bougiatiotis, and Georgios Paliouras. 2023. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.1038/s41597-023-02068-4",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Bioasqqa: A manually curated corpus for biomedical question answering"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". Scientific Data, 10:170."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 16,
+          "bbox": [
+            0.511,
+            0.652,
+            0.886,
+            0.733
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao Yu, Joseph E. Gonzalez, Hao Zhang, and Ion Stoica. 2023. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.1145/3600006.3613165",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Efficient memory management for large language model serving with PagedAttention"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Proc. 29th ACM Symp. Operating Systems Principles (SOSP)."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 17,
+          "bbox": [
+            0.512,
+            0.741,
+            0.886,
+            0.858
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin, Naman Goyal, Heinrich Küttler, Mike Lewis, Wen-tau Yih, Tim Rocktäschel, Sebastian Riedel, and Douwe Kiela. 2020. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://proceedings.neurips.cc/paper_files/paper/2020/file/6b493230205f780e1bc26945df7481e5-Paper.pdf",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Retrieval-augmented generation for knowledgeintensive NLP tasks"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Proceedings of the 34th International Conference on Neural Information Processing Systems, NIPS ’20, Red Hook, NY, USA. Curran Associates Inc."
+            }
+          ]
+        },
+        {
+          "type": "ref_text",
+          "index": 18,
+          "bbox": [
+            0.511,
+            0.868,
+            0.885,
+            0.921
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Natalia Loukachevitch, Ekaterina Artemova, Tatiana Batura, Pavel Braslavski, Ilia Denisov, Vladimir Ivanov, Suresh Manandhar, Alexander Pugachev, and Elena Tutubalina. 2021. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://aclanthology.org/2021.ranlp-1.100/",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "NEREL: A russian dataset"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page_idx": 8,
+      "blocks": [
+        {
+          "type": "text",
+          "index": 0,
+          "bbox": [
+            0.129,
+            0.086,
+            0.492,
+            0.153
+          ],
+          "content": [
+            {
+              "type": "hyperlink",
+              "url": "https://aclanthology.org/2021.ranlp-1.100/",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "with nested named entities, relations and events"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2021), pages 876–885, Held Online. IN-COMA Ltd."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 1,
+          "bbox": [
+            0.114,
+            0.163,
+            0.492,
+            0.219
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "OpenAI. 2026. OpenAI API pricing. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://openai.com/api/pricing/",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://openai.com/api/pricing/"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". Accessed Jun. 2026; gpt-4o $2.50/$10 per M input/output tokens, gpt-4o-mini $0.15/$0.60 per M."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 2,
+          "bbox": [
+            0.115,
+            0.227,
+            0.492,
+            0.375
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Ekaterina Taktasheva, Alena Fenogenova, Denis Shevelev, Nadezhda Katricheva, Maria Tikhonova, Albina Akhmetgareeva, Oleg Zinkevich, Anastasiia Bashmakova, Svetlana Iordanskaia, Valentina Kurenshchikova, Alena Spiridonova, Ekaterina Artemova, Tatiana Shavrina, and Vladislav Mikhailov. 2022. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.18653/v1/2022.findings-emnlp.183",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "TAPE: Assessing few-shot Russian language understanding"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Findings of the Association for Computational Linguistics: EMNLP 2022, pages 2472–2497, Abu Dhabi, United Arab Emirates. Association for Computational Linguistics."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 3,
+          "bbox": [
+            0.115,
+            0.383,
+            0.49,
+            0.44
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Yixuan Tang and Yi Yang. 2024. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://openreview.net/forum?id=t4eB3zYWBK",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "MultiHop-RAG: Benchmarking retrieval-augmented generation for multi-hop queries"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In Proceedings of the Conference on Language Modeling (COLM 2024)."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "bbox": [
+            0.115,
+            0.448,
+            0.492,
+            0.53
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Mikhail Tikhomirov and Daniil Chernyshev. 2025. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.1134/S1064562425700322",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Ruadapt: Cost-effective large language model lingual adaptation"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". Doklady Mathematics, 112. Model checkpoint: "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://huggingface.co/RefalMachine/RuadaptQwen2.5-7B-Lite-Beta",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "https://huggingface.co/RefalMachine/RuadaptQwen2.5-7B-Lite-Beta"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 5,
+          "bbox": [
+            0.114,
+            0.539,
+            0.492,
+            0.608
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Harsh Trivedi, Niranjan Balasubramanian, Tushar Khot, and Ashish Sabharwal. 2022. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://doi.org/10.1162/tacl_a_00475",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "MuSiQue: Multi-hop questions via single-hop question composition"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". Transactions of the Association for Computational Linguistics, 10:539–554."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 6,
+          "bbox": [
+            0.114,
+            0.616,
+            0.492,
+            0.699
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Zhishang Xiang, Chuanjie Wu, Qinggang Zhang, Shengyuan Chen, Zijin Hong, Xiao Huang, and Jinsong Su. 2026. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://openreview.net/pdf?id=i9q9xDMjG7",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "When to use graphs in RAG: A comprehensive analysis for graph retrieval-augmented generation"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". In International Conference on Learning Representations (ICLR 2026)."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 7,
+          "bbox": [
+            0.115,
+            0.708,
+            0.492,
+            0.802
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "An Yang, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chengyuan Li, Dayiheng Liu, Fei Huang, Haoran Wei, Huan Lin, Jian Yang, Jianhong Tu, Jianwei Zhang, Jianxin Yang, Jiaxi Yang, Jingren Zhou, Junyang Lin, Kai Dang, and 23 others. 2024. "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://arxiv.org/abs/2412.15115",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Qwen2.5 technical report"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ". arXiv preprint arXiv:2412.15115."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 8,
+          "bbox": [
+            0.114,
+            0.814,
+            0.374,
+            0.833
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "A Engineering Comparison"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 9,
+          "bbox": [
+            0.112,
+            0.841,
+            0.492,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Industrial adoption of GraphRAG is constrained less by retrieval quality than by the engineering discipline of available implementations. Table 6 compares RAGU with HippoRAG 2 along the production risks we encountered while benchmark-"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 10,
+          "bbox": [
+            0.507,
+            0.085,
+            0.886,
+            0.151
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "ing open-source GraphRAG frameworks."
+            },
+            {
+              "type": "text",
+              "content": "5",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Both systems are open-source and support incremental indexing; the differences lie in how each handles failure, migration, and change."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "text",
+          "index": 11,
+          "bbox": [
+            0.507,
+            0.155,
+            0.886,
+            0.201
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Table 6: Engineering comparison between RAGU and HippoRAG 2, organized by the production risk each property addresses."
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "index": 12,
+          "bbox": [
+            0.508,
+            0.21,
+            0.885,
+            0.603
+          ],
+          "content": [
+            {
+              "type": "table_body",
+              "index": 12,
+              "bbox": [
+                0.508,
+                0.21,
+                0.885,
+                0.603
+              ],
+              "image_path": "images/page_8_table_12.jpg",
+              "content": "<table><tr><td>RAGU</td><td>HippoRAG 2</td></tr><tr><td colspan=\"2\">Silent data loss on crash</td></tr><tr><td>Lifecycle callbacks at every storage tier</td><td>No shared flush protocol</td></tr><tr><td colspan=\"2\">Backend migration cost</td></tr><tr><td>Three swappable tiers behind one interface</td><td>ConcreteParquet/Pickle/SQLite;pipeline rewrite required</td></tr><tr><td colspan=\"2\">API-bound throughput</td></tr><tr><td>Native async with semaphore-bounded batching and rate limits</td><td>Synchronous core;thread-pool parallelism</td></tr><tr><td colspan=\"2\">Code execution from LLM output</td></tr><tr><td>Pydantic-validated structured outputs</td><td>eval() on raw LLM responses</td></tr><tr><td colspan=\"2\">Transient failure recovery</td></tr><tr><td>tenacity retry; per-chunk error isolation</td><td>Broad except; assertFalse as control flow</td></tr><tr><td colspan=\"2\">Regression detection</td></tr><tr><td>~374 tests; deterministic mock LLM server</td><td>Demo scripts requiring liveAPI keys; no pytest, no CI</td></tr><tr><td colspan=\"2\">Incremental maintenance</td></tr><tr><td>Explicit upsert/update/delete; merge policies; consistency auditor</td><td>Hash dedup; file-existence checks</td></tr><tr><td colspan=\"2\">Reproducible deployment</td></tr><tr><td>Loose version constraints; optional GPU extras</td><td>Hard-pinned torch+vllm;CUDA-locked</td></tr><tr><td colspan=\"2\">Modularity</td></tr><tr><td>Thirteen abstract base classes; constructor injection</td><td>Monolithic indexing class (~1.6k lines)</td></tr></table>"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 13,
+          "bbox": [
+            0.507,
+            0.613,
+            0.888,
+            0.808
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Two entries deserve emphasis because they shape failure modes in production. HippoRAG 2 parses model output through Python’s eval() applied to a regex-filtered substring of the raw LLM response—an arbitrary-code-execution surface should the model emit hostile content, and a source of opaque exceptions far from the call site on any syntactic deviation. It also relies on assert for control flow: the offline indexing path terminates with assert False (HippoRAG.py:216), so under python -O the assertion is stripped and the offline path silently"
+            }
+          ]
+        },
+        {
+          "type": "page_footnote",
+          "index": 14,
+          "bbox": [
+            0.507,
+            0.812,
+            0.886,
+            0.923
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "5",
+              "styles": [
+                "superscript"
+              ]
+            },
+            {
+              "type": "text",
+              "content": "We focus on HippoRAG 2 as the most architecturally comparable system—recent, academic, actively maintained; similar observations apply to several other frameworks in our survey. All file:line references in this appendix point to commit d437bfb1 of OSU-NLP-Group/HippoRAG (2025-09-04, HEAD of main at the time of analysis; package version hipporag 2.0.0-alpha.4), so the comparison is reproducible against a fixed snapshot rather than a moving target."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page_idx": 9,
+      "blocks": [
+        {
+          "type": "text",
+          "index": 0,
+          "bbox": [
+            0.113,
+            0.085,
+            0.489,
+            0.118
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "proceeds into indexing without the online vLLM server the rest of the pipeline expects."
+            }
+          ],
+          "continues_prev": true
+        },
+        {
+          "type": "text",
+          "index": 1,
+          "bbox": [
+            0.112,
+            0.118,
+            0.492,
+            0.297
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "The cumulative effect is felt at migration time. Moving RAGU from a single-machine prototype (NetworkX, NanoVDB) to a production stack (Neo4j, Qdrant with hybrid retrieval) requires changing two constructor arguments; the same migration in a system without storage abstractions requires reimplementing the indexing pipeline. Likewise, the mock LLM server reduces a full CI run from dollars of API calls to seconds of CPU time, which is what makes continuous regression testing affordable on a GraphRAG codebase at all."
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 2,
+          "bbox": [
+            0.112,
+            0.306,
+            0.492,
+            0.631
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Provenance.",
+              "styles": [
+                "bold"
+              ]
+            },
+            {
+              "type": "text",
+              "content": " Every HippoRAG 2 claim is verifiable against the pinned commit. Key anchors (paths relative to repository root): eval() on raw LLM output at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/src/hipporag/information_extraction/openie_openai.py#L36",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "openie_openai.py:36,88"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "; assert False at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/src/hipporag/HippoRAG.py#L216",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "HippoRAG.py:216"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": " and "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/src/hipporag/embedding_model/__init__.py#L30",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "embedding_model/__init__.py:30"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "; bare except at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/src/hipporag/information_extraction/openie_openai.py#L63",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "openie_openai.py: 63,112"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "; monolithic class HippoRAG (1611 lines) at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/src/hipporag/HippoRAG.py",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "HippoRAG.py"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "; concrete storage backends (Parquet at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/src/hipporag/embedding_store.py#L40",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "embedding_store.py:40"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ", Pickle at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/src/hipporag/HippoRAG.py#L183",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "HippoRAG.py:183"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": ", SQLite at "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/src/hipporag/llm/transformers_llm.py#L37",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "transformers_llm.py:37"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "); no shared flush between EmbeddingStore._save_data and HippoRAG.save_igraph ("
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/src/hipporag/HippoRAG.py#L1088",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "HippoRAG. py:1088"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": "); no pytest or .github/ in the repository; "
+            },
+            {
+              "type": "hyperlink",
+              "url": "https://github.com/OSU-NLP-Group/HippoRAG/blob/d437bfb1805278b81e20c82357ed3f7d90f14901/requirements.txt#L3",
+              "content": [
+                {
+                  "type": "text",
+                  "content": "requirements.txt:3,5"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "content": " hard-pins vllm and torch. These choices are reasonable for reproducing the HippoRAG 2 paper’s own experiments; the trade-offs above matter mainly outside that setting."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 3,
+          "bbox": [
+            0.114,
+            0.642,
+            0.486,
+            0.66
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "B GraphRAG-Bench Ablation Summary"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 4,
+          "bbox": [
+            0.113,
+            0.669,
+            0.49,
+            0.719
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Table 7 reports generation AC for selected RAGU configurations. Full generation and retrieval results for all 11 configurations are in the repository."
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "index": 6,
+          "bbox": [
+            0.145,
+            0.779,
+            0.458,
+            0.882
+          ],
+          "content": [
+            {
+              "type": "table_caption",
+              "index": 5,
+              "bbox": [
+                0.114,
+                0.734,
+                0.489,
+                0.778
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Table 7: Generation AC (×100) for selected RAGU configurations on GraphRAG-Bench Medical (ICL = 1, Val = yes unless noted)."
+                }
+              ]
+            },
+            {
+              "type": "table_body",
+              "index": 6,
+              "bbox": [
+                0.145,
+                0.779,
+                0.458,
+                0.882
+              ],
+              "image_path": "images/page_9_table_6.jpg",
+              "content": "<table><tr><td>ICL</td><td>Val</td><td>LLM</td><td>FR</td><td>CR</td><td>CS</td><td>CG</td></tr><tr><td>0</td><td>no</td><td>Qwen2.5-3B</td><td>53.1</td><td>53.1</td><td>63.8</td><td>58.2</td></tr><tr><td>0</td><td>no</td><td>Qwen2.5-7B</td><td>54.3</td><td>53.4</td><td>64.1</td><td>58.2</td></tr><tr><td>0</td><td>no</td><td>Meno-Lite-0.1</td><td>54.3</td><td>54.0</td><td>63.9</td><td>58.8</td></tr><tr><td>1</td><td>no</td><td>Qwen2.5-14B</td><td>53.9</td><td>54.2</td><td>65.6</td><td>59.1</td></tr><tr><td>1</td><td>yes</td><td>Qwen2.5-7B</td><td>54.1</td><td>54.6</td><td>64.9</td><td>58.1</td></tr><tr><td>1</td><td>yes</td><td>Meno-Lite-0.1</td><td>54.2</td><td>53.7</td><td>64.1</td><td>59.0</td></tr></table>"
+            },
+            {
+              "type": "table_caption",
+              "index": 7,
+              "bbox": [
+                0.115,
+                0.89,
+                0.49,
+                0.923
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Key observations: model size (3B–14B) shifts AC by ≤1.5 pp; ICL and validation each contribute"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "index": 8,
+          "bbox": [
+            0.508,
+            0.085,
+            0.885,
+            0.119
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "<1 pp; Meno-Lite-0.1 and Qwen2.5-7B are within 1 pp in every configuration."
+            }
+          ]
+        },
+        {
+          "type": "paragraph_title",
+          "index": 9,
+          "bbox": [
+            0.509,
+            0.128,
+            0.67,
+            0.146
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "C Cost Analysis"
+            }
+          ],
+          "level": 2
+        },
+        {
+          "type": "text",
+          "index": 10,
+          "bbox": [
+            0.507,
+            0.154,
+            0.889,
+            0.526
+          ],
+          "content": [
+            {
+              "type": "text",
+              "content": "Table 8 reports graph-construction (indexing) cost, a one-time per-document operation, separate from answer generation (query-time, recurring). All systems share the same answer-generation model (gpt-4o-mini via API), so query-time cost is a common baseline. For construction, MS-GraphRAG uses a commercial gpt-4o API (priced at $2.50/M input tokens (OpenAI, 2026)); the remaining systems run a local model under vLLM (Kwon et al., 2023)— LightRAG and HippoRAG 2 use gpt-oss-20b, and RAGU uses Meno-Lite-0.1—billed at a fixed GPU-hour rate (∼$0.001/doc on rented GPUs at ∼$1/h and ∼2 k tok/s; near zero on owned hardware). At corpus scale (100 k documents), construction cost is ∼$10 000 for MS-GraphRAG vs. roughly $100 for RAGU+Meno-Lite-0.1, with LightRAG and HippoRAG 2 in the same GPU-cost class. Token volumes are averaged empirical measurements; the MS-GraphRAG figure reflects the token intensity of its global indexing approach (Edge et al., 2024). Note that volumes are computed with each model’s own tokenizer and are not directly comparable across systems."
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "index": 12,
+          "bbox": [
+            0.511,
+            0.634,
+            0.882,
+            0.694
+          ],
+          "content": [
+            {
+              "type": "table_caption",
+              "index": 11,
+              "bbox": [
+                0.507,
+                0.54,
+                0.886,
+                0.627
+              ],
+              "content": [
+                {
+                  "type": "text",
+                  "content": "Table 8: Approximate graph-construction (indexing) token volume and cost per document; query-time answer generation (gpt-4o-mini, common to all systems) is omitted. ∗ marks empirical measurements from our experiments; the unmarked MS-GraphRAG count is an order-of-magnitude estimate."
+                }
+              ]
+            },
+            {
+              "type": "table_body",
+              "index": 12,
+              "bbox": [
+                0.511,
+                0.634,
+                0.882,
+                0.694
+              ],
+              "image_path": "images/page_9_table_12.jpg",
+              "content": "<table><tbody><tr><td>System</td><td>Indexing model</td><td>Tokens/doc</td><td>Cost/doc</td></tr><tr><td>MS-GraphRAG (global)</td><td>gpt-4o (API)</td><td>∼40k</td><td>∼$0.10</td></tr><tr><td>HippoRAG2</td><td>gpt-oss-20b (local)</td><td>∼6k<sup>∗</sup></td><td>fixed GPU</td></tr><tr><td>LightRAG</td><td>gpt-oss-20b (local)</td><td>∼8k<sup>∗</sup></td><td>fixed GPU</td></tr><tr><td>RAGU+Meno-Lite-0.1</td><td>Meno-Lite-0.1 (local)</td><td>∼8k<sup>∗</sup></td><td>fixed GPU</td></tr></tbody></table>"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "is_full_document": true,
+  "schema": "docvortex.middle",
+  "schema_version": "2.0"
+}
