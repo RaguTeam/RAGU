@@ -12,7 +12,7 @@ services:
       MINERU_MODEL_SOURCE: local
     entrypoint: ["vllm", "serve"]
     command:
-      - /root/.mineru/models/
+      - /root/.mineru/models/MinerU2.5-Pro-2605-1.2B
       - --served-model-name=mineru
       - --host=0.0.0.0
       - --port=30000
