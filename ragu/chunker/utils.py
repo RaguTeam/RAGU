@@ -1,10 +1,21 @@
+import base64
+import mimetypes
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from ragu.utils.ragu_utils import compute_mdhash_id
 
 DESCRIPTION_LIMIT = 1000
+CONTEXT_SIZE = 500
+CONTENT_LIMIT = 8000
+DESCRIPTION_PROMPT = (
+    "You describe a table, formula, code block or image from a document for semantic search. "
+    "Write 2-4 sentences: what the object shows or computes, its key variables, columns or values, "
+    "and the conclusion it supports. Use the caption and the surrounding text. "
+    "Write in the language of the document. Return only the description."
+)
 FIRST_H1 = re.compile(r"^#[ \t]+(.+?)[ \t#]*$", re.MULTILINE)
 HEADING = re.compile(r"^#{1,2}[ \t]+(.+?)[ \t#]*$", re.MULTILINE)
 HTML_TABLE = re.compile(r"<table\b.*?</table>", re.DOTALL | re.IGNORECASE)
@@ -87,14 +98,44 @@ def mask(text: str, spans: list[Span]) -> str:
     return text
 
 
-def cut(text: str, start: int, end: int, spans: list[Span]) -> str:
-    parts, position = [], start
+def cut(text: str, start: int, end: int, spans: list[Span]) -> tuple[str, list[tuple[int, int]]]:
+    bounds, position = [], start
     for span in spans:
         # TODO: leave a reference to the object chunk in place of the cut-out object
-        parts.append(text[position:span.start])
+        bounds.append((position, max(position, span.start)))
         position = max(position, span.end)
-    parts.append(text[position:end])
-    return EXTRA_NEWLINES.sub("\n\n", "".join(parts)).strip()
+    bounds.append((position, end))
+    return "".join(text[a:b] for a, b in bounds), bounds
+
+
+def original_position(bounds: list[tuple[int, int]], offset: int) -> int:
+    for a, b in bounds:
+        if offset < b - a:
+            return a + offset
+        offset -= b - a
+    return bounds[-1][1]
+
+
+def clean(text: str) -> str:
+    return EXTRA_NEWLINES.sub("\n\n", text).strip()
+
+
+def description_request(chunk: Any, context: str, folder: str | None) -> str | list[dict[str, Any]]:
+    fields = (
+        ("Object type", type(chunk).__name__.removesuffix("Chunk").lower()),
+        ("Document", chunk.metadata.get("document_title")),
+        ("Section", chunk.metadata.get("section")),
+        ("Caption", chunk.metadata.get("caption")),
+        ("Surrounding text", context),
+        ("Content", chunk.content[:CONTENT_LIMIT]),
+    )
+    text = "\n\n".join(f"{label}: {value}" for label, value in fields if value)
+    image = Path(folder, chunk.content) if folder and type(chunk).__name__ == "ImageChunk" else None
+    if image is None or not image.is_file():
+        return text
+    mime = mimetypes.guess_type(image.name)[0] or "image/jpeg"
+    url = f"data:{mime};base64,{base64.b64encode(image.read_bytes()).decode()}"
+    return [{"type": "text", "text": text}, {"type": "image_url", "image_url": {"url": url}}]
 
 
 def sections(masked: str) -> list[tuple[str | None, int, int, int]]:

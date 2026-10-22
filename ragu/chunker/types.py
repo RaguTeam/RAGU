@@ -13,6 +13,7 @@ class Document:
     structured_content: dict[str, Any] | None = None
     title: str | None = None
     id: str = "auto"
+    folder: str | None = None
 
     def __post_init__(self) -> None:
         if self.id == "auto":
@@ -26,6 +27,7 @@ class Document:
         return cls(
             (Path(folder) / "markdown.md").read_text(encoding="utf-8"),
             json.loads(structure.read_text(encoding="utf-8")) if structure.is_file() else None,
+            folder=str(folder),
         )
 
 
@@ -66,7 +68,7 @@ class ObjectChunk(Chunk):
         self.id = typed_id(self)
 
     def describe(self) -> str:
-        # TODO: describe tables, formulas, code and images with a VLM
+        # NOTE: placeholder; MarkdownChunker.a_split replaces it with an LLM description
         description = join(self.metadata.get("caption"), self.summary()) or self.metadata.get("section") or self.content
         self.metadata["description"] = description
         return description
@@ -89,21 +91,11 @@ class TableChunk(ObjectChunk):
     def summary(self) -> str:
         return table_text(self.content)
 
-    def to_embed(self) -> str:
-        # TODO 
-        return "TABLE DESCRIPTION"
-    
-
 
 @dataclass(slots=True)
 class FormulaChunk(ObjectChunk):
     def body(self) -> str:
         return f"$$\n{self.content}\n$$"
-
-    def to_embed(self) -> str:
-        # TODO 
-        return "FORMULA DESCRIPTION"
-    
 
 
 @dataclass(slots=True)
@@ -114,11 +106,6 @@ class CodeChunk(ObjectChunk):
     def body(self) -> str:
         return f"```{self.metadata.get('language', '')}\n{self.content}\n```"
 
-    def to_embed(self) -> str:
-        # TODO 
-        return "CODE DESCRIPTION"
-
-
 
 @dataclass(slots=True)
 class ImageChunk(ObjectChunk):
@@ -128,7 +115,3 @@ class ImageChunk(ObjectChunk):
     def body(self) -> str:
         description = self.metadata.get("description", "")
         return "" if description in (self.metadata.get("caption"), self.metadata.get("section")) else description
-    
-    def to_embed(self) -> str:
-        # TODO 
-        return "IMAGE DESCRIPTION"
