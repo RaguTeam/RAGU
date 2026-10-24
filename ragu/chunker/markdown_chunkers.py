@@ -1,16 +1,17 @@
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Any
 
 from chonkie import BaseChunker as ChonkieChunker
-from chonkie import MarkdownChef, RecursiveChunker, SemanticChunker, SentenceTransformerEmbeddings
+from chonkie import MarkdownChef, MarkdownDocument, RecursiveChunker, SemanticChunker, SentenceTransformerEmbeddings
 
 from ragu.chunker.base_chunker import BaseChunker
 from ragu.chunker.types import Chunk, CodeChunk, Document, FormulaChunk, ImageChunk, ObjectChunk, TableChunk, TextChunk
 from ragu.chunker.utils import (
-    CONTEXT_SIZE,
     DESCRIPTION_PROMPT,
     FORMULA,
     HTML_TABLE,
+    Section,
     Span,
     clean,
     cut,
@@ -22,8 +23,16 @@ from ragu.chunker.utils import (
     original_position,
     resolve,
     sections,
+    surrounding_text,
 )
 from ragu.models.llm import LLM
+
+
+@dataclass(slots=True)
+class _Item:
+    position: int
+    chunk: Chunk
+    context: str = ""
 
 
 class MarkdownChunker(BaseChunker):
@@ -34,94 +43,91 @@ class MarkdownChunker(BaseChunker):
         self.chef = MarkdownChef()
 
     def split(self, documents: str | Document | Sequence[str | Document]) -> list[Chunk]:
-        return [chunk for document in _documents(documents) for chunk, _ in self._split(document)]
+        return [item.chunk for document in _documents(documents) for item in self._split(document)]
 
     async def a_split(self, documents: str | Document | Sequence[str | Document]) -> list[Chunk]:
         chunks: list[Chunk] = []
         for document in _documents(documents):
-            pairs = self._split(document)
+            items = self._split(document)
             if self.llm:
-                await self._describe(document, pairs)
-            chunks.extend(chunk for chunk, _ in pairs)
+                await self._describe(document, items)
+            chunks.extend(item.chunk for item in items)
         return chunks
 
-    async def _describe(self, document: Document, pairs: list[tuple[Chunk, str]]) -> None:
+    async def _describe(self, document: Document, items: list[_Item]) -> None:
         assert self.llm is not None
-        targets = [(chunk, context) for chunk, context in pairs if isinstance(chunk, ObjectChunk)]
-
+        targets = [item for item in items if isinstance(item.chunk, ObjectChunk)]
         if not targets:
             return
-        
+
         conversations: list[Any] = [
             [{"role": "system", "content": DESCRIPTION_PROMPT},
-             {"role": "user", "content": description_request(chunk, context, document.folder)}]
-            for chunk, context in targets
+             {"role": "user", "content": description_request(item.chunk, item.context, document.folder)}]
+            for item in targets
         ]
         results = await self.llm.batch_chat_completion(
             conversations, continue_on_error=True, desc="Describing tables, formulas, code and images"
         )
-
-        for (chunk, _), result in zip(targets, results, strict=True):
+        for item, result in zip(targets, results, strict=True):
             if result and result.strip():
-                chunk.metadata["description"] = result.strip()
+                item.chunk.metadata["description"] = result.strip()
 
-    def _split(self, document: Document) -> list[tuple[Chunk, str]]:
-        text = document.content
-        spans = self._find_objects(text)
+    def _split(self, document: Document) -> list[_Item]:
+        spans = self._find_objects(document.content)
         captions = mineru_captions(document.structured_content)
-        items: list[tuple[int, Chunk, str]] = []
 
-        for section, start, body_start, end in sections(mask(text, spans)):
-            metadata = {"document_title": document.title, "section": section}
-            metadata = {key: value for key, value in metadata.items() if value}
-            inner = [span for span in spans if start <= span.start < end]
-            section_text, bounds = cut(text, body_start, end, inner)
-
-            for piece in self.text_chunker.chunk(section_text) if section_text.strip() else []:
-                if content := clean(piece.text):
-                    chunk = TextChunk(content, 0, document.id, metadata=dict(metadata))
-                    offset = piece.start_index + len(piece.text) - len(piece.text.lstrip())
-                    items.append((original_position(bounds, offset), chunk, ""))
-
-            for span in inner:
-                obj = span.chunk_cls(span.content, 0, document.id, metadata={**metadata, **span.metadata})
-                if caption := captions.get(normalize(span.content)):
-                    obj.metadata["caption"] = caption
-
-                obj.describe()
-                context = clean(text[max(body_start, span.start - CONTEXT_SIZE):span.start]
-                                + "\n\n" + text[span.end:min(end, span.end + CONTEXT_SIZE)])
-                items.append((span.start, obj, context))
-
-        items.sort(key=lambda item: item[0])
+        items = [
+            item
+            for section in sections(mask(document.content, spans))
+            for item in self._section_items(document, section, spans, captions)
+        ]
+        items.sort(key=lambda item: item.position)
         for index, item in enumerate(items):
-            item[1].chunk_order_idx = index
+            item.chunk.chunk_order_idx = index
+        return items
 
-        return [(item[1], item[2]) for item in items]
+    def _section_items(
+        self, document: Document, section: Section, spans: list[Span], captions: dict[str, str]
+    ) -> list[_Item]:
+        metadata = {"document_title": document.title, "section": section.title}
+        metadata = {key: value for key, value in metadata.items() if value}
+        inner = [span for span in spans if section.start <= span.start < section.end]
+        return [
+            *self._text_items(document, section, inner, metadata),
+            *(self._object_item(document, section, span, metadata, captions) for span in inner),
+        ]
+
+    def _text_items(
+        self, document: Document, section: Section, spans: list[Span], metadata: dict[str, Any]
+    ) -> list[_Item]:
+        text, bounds = cut(document.content, section.body_start, section.end, spans)
+        if not text.strip():
+            return []
+
+        items = []
+        for piece in self.text_chunker.chunk(text):
+            if content := clean(piece.text):
+                offset = piece.start_index + len(piece.text) - len(piece.text.lstrip())
+                chunk = TextChunk(content, 0, document.id, metadata=dict(metadata))
+                items.append(_Item(original_position(bounds, offset), chunk))
+        return items
+
+    @staticmethod
+    def _object_item(
+        document: Document, section: Section, span: Span, metadata: dict[str, Any], captions: dict[str, str]
+    ) -> _Item:
+        chunk = span.chunk_cls(span.content, 0, document.id, metadata={**metadata, **span.metadata})
+        if caption := captions.get(normalize(span.content)):
+            chunk.metadata["caption"] = caption
+        chunk.describe()
+        return _Item(span.start, chunk, surrounding_text(document.content, span, section))
 
     def _find_objects(self, text: str) -> list[Span]:
+        # Code goes first so that "#" and "$$" inside it are ignored; formulas are searched with code and tables masked.
         parsed = self.chef.parse(text + "\n")
-        size = len(text)
-        code = resolve([
-            Span(block.start_index, min(block.end_index, size), CodeChunk, block.content,
-                 {"language": block.language} if block.language else {})
-            for block in parsed.code
-        ])
-        blocks = resolve(
-            code
-            + [Span(table.start_index, min(table.end_index, size), TableChunk, table.content.strip())
-               for table in parsed.tables]
-            + [Span(match.start(), match.end(), TableChunk, match.group(0))
-               for match in HTML_TABLE.finditer(mask(text, code))]
-        )
-        return resolve(
-            blocks
-            + [Span(match.start(), match.end(), FormulaChunk, match.group(1).strip())
-               for match in FORMULA.finditer(mask(text, blocks))]
-            + [Span(image.start_index, min(image.end_index, size), ImageChunk, image.content,
-                    image_caption(text, image.start_index))
-               for image in parsed.images]
-        )
+        code = resolve(_code_spans(parsed, text))
+        blocks = resolve(code + _table_spans(parsed, text, code))
+        return resolve(blocks + _formula_spans(text, blocks) + _image_spans(parsed, text))
 
 
 class RecursiveMarkdownChunker(MarkdownChunker):
@@ -150,3 +156,38 @@ def _documents(documents: str | Document | Sequence[str | Document]) -> list[Doc
     if isinstance(documents, (str, Document)):
         documents = [documents]
     return [document if isinstance(document, Document) else Document(document) for document in documents]
+
+
+def _code_spans(parsed: MarkdownDocument, text: str) -> list[Span]:
+    return [
+        Span(block.start_index, min(block.end_index, len(text)), CodeChunk, block.content,
+             {"language": block.language} if block.language else {})
+        for block in parsed.code
+    ]
+
+
+def _table_spans(parsed: MarkdownDocument, text: str, code: list[Span]) -> list[Span]:
+    pipe = [
+        Span(table.start_index, min(table.end_index, len(text)), TableChunk, table.content.strip())
+        for table in parsed.tables
+    ]
+    html = [
+        Span(match.start(), match.end(), TableChunk, match.group(0))
+        for match in HTML_TABLE.finditer(mask(text, code))
+    ]
+    return pipe + html
+
+
+def _formula_spans(text: str, blocks: list[Span]) -> list[Span]:
+    return [
+        Span(match.start(), match.end(), FormulaChunk, match.group(1).strip())
+        for match in FORMULA.finditer(mask(text, blocks))
+    ]
+
+
+def _image_spans(parsed: MarkdownDocument, text: str) -> list[Span]:
+    return [
+        Span(image.start_index, min(image.end_index, len(text)), ImageChunk, image.content,
+             image_caption(text, image.start_index))
+        for image in parsed.images
+    ]

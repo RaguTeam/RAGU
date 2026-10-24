@@ -2,6 +2,7 @@ import base64
 import mimetypes
 import re
 from dataclasses import dataclass, field
+from typing import NamedTuple
 from pathlib import Path
 from typing import Any
 
@@ -138,10 +139,23 @@ def description_request(chunk: Any, context: str, folder: str | None) -> str | l
     return [{"type": "text", "text": text}, {"type": "image_url", "image_url": {"url": url}}]
 
 
-def sections(masked: str) -> list[tuple[str | None, int, int, int]]:
+class Section(NamedTuple):
+    title: str | None
+    start: int
+    body_start: int
+    end: int
+
+
+def sections(masked: str) -> list[Section]:
     headings = list(HEADING.finditer(masked))
     starts = [match.start() for match in headings] + [len(masked)]
-    return [(None, 0, 0, starts[0])] + [
-        (match.group(1).strip("*_ ") or None, match.start(), match.end(), end)
+    return [Section(None, 0, 0, starts[0])] + [
+        Section(match.group(1).strip("*_ ") or None, match.start(), match.end(), end)
         for match, end in zip(headings, starts[1:], strict=True)
     ]
+
+
+def surrounding_text(text: str, span: Span, section: Section) -> str:
+    before = text[max(section.body_start, span.start - CONTEXT_SIZE):span.start]
+    after = text[span.end:min(section.end, span.end + CONTEXT_SIZE)]
+    return clean(f"{before}\n\n{after}")
