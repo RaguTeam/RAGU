@@ -287,3 +287,10 @@ Dependency answers:
 {% endfor %}
 Rewrite the subquery and return the result as valid JSON matching the provided schema.
 """
+
+DEFAULT_OBJECT_DESCRIPTION_PROMPT = """
+You describe a table, formula, code block or image from a document for semantic search.
+Write 2-4 sentences: what the object shows or computes, its key variables, columns or values,
+and the conclusion it supports. Use the caption and the surrounding text.
+Write in the language of the document. Return only the description.
+"""

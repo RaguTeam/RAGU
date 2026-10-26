@@ -11,12 +11,6 @@ from ragu.utils.ragu_utils import compute_mdhash_id
 DESCRIPTION_LIMIT = 1000
 CONTEXT_SIZE = 500
 CONTENT_LIMIT = 8000
-DESCRIPTION_PROMPT = (
-    "You describe a table, formula, code block or image from a document for semantic search. "
-    "Write 2-4 sentences: what the object shows or computes, its key variables, columns or values, "
-    "and the conclusion it supports. Use the caption and the surrounding text. "
-    "Write in the language of the document. Return only the description."
-)
 FIRST_H1 = re.compile(r"^#[ \t]+(.+?)[ \t#]*$", re.MULTILINE)
 HEADING = re.compile(r"^#{1,2}[ \t]+(.+?)[ \t#]*$", re.MULTILINE)
 HTML_TABLE = re.compile(r"<table\b.*?</table>", re.DOTALL | re.IGNORECASE)

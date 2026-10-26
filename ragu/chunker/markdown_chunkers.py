@@ -8,7 +8,6 @@ from chonkie import MarkdownChef, MarkdownDocument, RecursiveChunker, SemanticCh
 from ragu.chunker.base_chunker import BaseChunker
 from ragu.chunker.types import Chunk, CodeChunk, Document, FormulaChunk, ImageChunk, ObjectChunk, TableChunk, TextChunk
 from ragu.chunker.utils import (
-    DESCRIPTION_PROMPT,
     FORMULA,
     HTML_TABLE,
     Section,
@@ -25,6 +24,7 @@ from ragu.chunker.utils import (
     sections,
     surrounding_text,
 )
+from ragu.common.base import RaguGenerativeModule
 from ragu.models.llm import LLM
 
 
@@ -35,9 +35,9 @@ class _Item:
     context: str = ""
 
 
-class MarkdownChunker(BaseChunker):
+class MarkdownChunker(BaseChunker, RaguGenerativeModule):
     def __init__(self, text_chunker: ChonkieChunker, llm: LLM | None = None) -> None:
-        super().__init__()
+        RaguGenerativeModule.__init__(self, prompts=["object_description"])
         self.text_chunker = text_chunker
         self.llm = llm
         self.chef = MarkdownChef()
@@ -60,9 +60,9 @@ class MarkdownChunker(BaseChunker):
         if not targets:
             return
 
+        system = self.get_prompt("object_description").messages.to_openai()
         conversations: list[Any] = [
-            [{"role": "system", "content": DESCRIPTION_PROMPT},
-             {"role": "user", "content": description_request(item.chunk, item.context, document.folder)}]
+            [*system, {"role": "user", "content": description_request(item.chunk, item.context, document.folder)}]
             for item in targets
         ]
         results = await self.llm.batch_chat_completion(
