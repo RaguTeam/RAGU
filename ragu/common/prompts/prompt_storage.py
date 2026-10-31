@@ -36,6 +36,7 @@ from ragu.common.prompts.default_templates import (
     DEFAULT_QUERY_DECOMPOSITION_PROMPT,
     DEFAULT_QUERY_REWRITE_PROMPT,
     DEFAULT_RAGU_LM_SYSTEM_PROMPT,
+    DEFAULT_OBJECT_DESCRIPTION_PROMPT,
 )
 from ragu.common.prompts.few_shot import (
     FewShotFormatter,
@@ -284,5 +285,15 @@ DEFAULT_PROMPT_TEMPLATES: dict[str, RAGUInstruction] = {
         ),
         pydantic_model=RewriteQuery,
         description="Prompt for rewriting a subquery using answers from its dependencies.",
+    ),
+
+    "object_description": RAGUInstruction(
+        messages=ChatMessages.from_messages(
+            [
+                SystemMessage(content=DEFAULT_OBJECT_DESCRIPTION_PROMPT),
+            ]
+        ),
+        pydantic_model=str,
+        description="Prompt for describing tables, formulas, code blocks and images extracted by the Markdown chunker.",
     ),
 }

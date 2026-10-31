@@ -1,0 +1,97 @@
+# docker compose --profile openai-server --profile api --profile webui up -d
+name: MinerU
+
+services:
+  mineru-openai-server:
+    image: mineru:4.0
+    container_name: mineru-openai-server
+    restart: always
+    ports:
+      - 30000:30000
+    environment:
+      MINERU_MODEL_SOURCE: local
+    entrypoint: ["vllm", "serve"]
+    command:
+      - /root/.mineru/models/MinerU2.5-Pro-2605-1.2B
+      - --served-model-name=mineru
+      - --host=0.0.0.0
+      - --port=30000
+      - --max-model-len=4096
+      - --gpu-memory-utilization=0.17
+      - --max-num-seqs=32
+      - --max-cudagraph-capture-size=32
+      - --logits-processor=mineru_vl_utils:MinerULogitsProcessor
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    ipc: host
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:30000/health || exit 1"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]  # Modify for multiple GPUs: ["0", "1"]
+              capabilities: [gpu]
+  mineru-api:
+    image: mineru:4.0
+    container_name: mineru-api
+    restart: always
+    ports:
+      - 8000:8000
+    environment:
+      MINERU_MODEL_SOURCE: local
+    entrypoint: ["mineru-kit"]
+    command:
+      - api-server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --vlm-server-url
+      - http://mineru-openai-server:30000/v1/
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    ipc: host
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/v1/health || exit 1"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]  # Modify for multiple GPUs: ["0", "1"]
+              capabilities: [gpu]
+
+  mineru-webui:
+    image: mineru:4.0
+    container_name: mineru-webui
+    restart: always
+    ports:
+      - 7860:7860
+    environment:
+      MINERU_MODEL_SOURCE: local
+    entrypoint: ["mineru-kit"]
+    command: 
+      - webui
+      - --server-name
+      - 0.0.0.0
+      - --server-port
+      - "7860"
+      - --api-url
+      - http://mineru-api:8000
+      # --no-enable-api  # Disable the Gradio event API.
+      # --api-server-tier standard  # Configure the managed V1 API server capability tier.
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]  # Modify for multiple GPUs: ["0", "1"]
+              capabilities: [gpu]

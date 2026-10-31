@@ -46,6 +46,8 @@ dependencies = [
     "scikit-learn>=1.7.2,<2",
     "requests>=2.33.1,<3",
     "neo4j>=5.26.0,<7",
+    "mineru>=4.0,<5",
+    "chonkie>=1.7,<2",
 ]
 
 [project.urls]

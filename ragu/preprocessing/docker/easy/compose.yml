@@ -1,0 +1,49 @@
+# docker compose --profile openai-server --profile api --profile webui up -d
+name: MinerU
+
+services:
+  mineru-api:
+    image: mineru:light
+    container_name: mineru-api
+    restart: always
+    ports:
+      - 8000:8000
+    environment:
+      MINERU_MODEL_SOURCE: local
+    entrypoint: ["mineru-kit"]
+    command:
+      - api-server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    ipc: host
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/v1/health || exit 1"]
+
+  mineru-webui:
+    image: mineru:light
+    container_name: mineru-webui
+    restart: always
+    ports:
+      - 7860:7860
+    environment:
+      MINERU_MODEL_SOURCE: local
+    entrypoint: ["mineru-kit"]
+    command: 
+      - webui
+      - --server-name
+      - 0.0.0.0
+      - --server-port
+      - "7860"
+      - --api-url
+      - http://mineru-api:8000
+      # --no-enable-api  # Disable the Gradio event API.
+      # --api-server-tier standard  # Configure the managed V1 API server capability tier.
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    ipc: host

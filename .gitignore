@@ -188,3 +188,6 @@ paper*/
 
 # Local LLM/embedding cache
 cache/
+
+# MinerU parsing result
+examples/data/md/result/

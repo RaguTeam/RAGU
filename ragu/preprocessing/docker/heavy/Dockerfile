@@ -1,0 +1,27 @@
+# Use the official vllm image for gpu with Volta、Turing、Ampere、Ada Lovelace、Hopper、Blackwell architecture (7.0 <= Compute Capability <= 12.1)
+# The default base image uses vLLM 0.21.0 with CUDA 13.0. For CUDA 12.9 environments, switch to the commented cu129 image below.
+# Compute Capability version query (https://developer.nvidia.com/cuda-gpus)
+# support x86_64 architecture and ARM(AArch64) architecture
+FROM vllm/vllm-openai:v0.21.0
+# FROM vllm/vllm-openai:v0.21.0-cu129
+
+# Install libgl for opencv support
+RUN apt-get update && \
+    apt-get install -y \
+        libgl1 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install MinerU 4 with Torch; reuse vLLM from the base image.
+RUN python3 -m pip install -U 'mineru[torch]>=4.0,<5' --break-system-packages && \
+    python3 -m pip cache purge
+
+# Keep build-time model downloads and runtime selection aligned, including builds without a GPU.
+ENV MINERU_MODEL_SMALL_BACKEND=torch \
+    MINERU_MODEL_VLM_ENGINE=vllm
+
+# Download the Torch bundle and original VLM weights.
+RUN /bin/bash -c "mineru-kit models download --tier standard --small-backend torch --vlm-engine vllm -s huggingface"
+
+# Set the entry point to activate the virtual environment and run the command line tool
+ENTRYPOINT ["/bin/bash", "-c", "export MINERU_MODEL_SOURCE=local && exec \"$@\"", "--"]
