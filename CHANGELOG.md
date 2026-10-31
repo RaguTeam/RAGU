@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Sparse vectors and hybrid retrieval in `NanoVectorDBStorage`, so hybrid search
+  works without a Qdrant server. Set `sparse_type` (`bm25`, `bm42`, `splade`,
+  `custom`), as on `QdrantVectorDBStorage`: points keep their sparse
+  embeddings, and dense + sparse queries fuse both rankings the way Qdrant
+  does — reciprocal-rank fusion by default, distribution-based score fusion via
+  `hybrid_query_type="dbsf"`, IDF-weighted query terms for `bm25` / `bm42`.
+  Indexes built without sparse vectors load unchanged, and dense-only stores
+  keep writing the same file layout.
+
 ## [0.1.0] - 2026-09-08
 
 ### Added

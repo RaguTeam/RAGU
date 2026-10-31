@@ -297,7 +297,8 @@ asyncio.run(main())
 
 Default local vector DB adapter.
 
-- Purpose: lightweight dense vector storage for local development and tests.
+- Purpose: lightweight dense or dense+sparse hybrid vector storage for local development and tests.
+- Sparse support: pass `sparse_type` (`bm25`, `bm42`, `splade`, `custom`); hybrid queries match the Qdrant adapter. See [vdb_storage_adapters/README.md](vdb_storage_adapters/README.md#nanovectordbstorage).
 
 ```python
 import tempfile

@@ -12,14 +12,18 @@ text -> Embedder/SparseEmbedder -> Point -> vector DB -> EmbeddingHit
 
 ## Overview
 
-Vector adapters implement `BaseVectorStorage`. RAGU ships a lightweight local adapter and a Qdrant adapter for production-style dense and hybrid retrieval.
+Vector adapters implement `BaseVectorStorage`. RAGU ships a lightweight local adapter and a Qdrant adapter for production-style retrieval. Both support dense-only and hybrid dense+sparse retrieval with the same query semantics.
 
 ## Key Components
 
 ### NanoVectorDBStorage
 
-- Purpose: default local dense vector storage.
+- Purpose: default local vector storage (a single JSON file, brute-force search).
 - Used for: development, tests, small examples.
+- Important parameters: `embedding_dim`, `metric` (`cosine` / `dot`), `score_threshold`, `sparse_type`.
+- Sparse modes: `bm25`, `bm42`, `splade`, `custom` — same names and scoring as Qdrant. `bm25` / `bm42` weight query terms by IDF over the stored sparse vectors; `splade` / `custom` use a plain dot product.
+- Hybrid queries follow the Qdrant adapter: the dense and sparse searches each fetch `top_k` candidates, results are fused by reciprocal-rank fusion (default) or distribution-based score fusion (`hybrid_query_type="dbsf"`, or a Qdrant `FusionQuery`), and hits carry the fused score. `score_threshold` filters the dense branch only.
+- Backward compatible: indexes written without sparse vectors load with any `sparse_type`; their points take part in the dense branch only until they are re-upserted with sparse vectors.
 
 ### QdrantVectorDBStorage
 
@@ -144,7 +148,49 @@ async def main():
 asyncio.run(main())
 ```
 
-### Example 4 - Pipeline usage
+### Example 4 - Local hybrid storage without a Qdrant server
+
+```python
+import asyncio
+import numpy as np
+
+from ragu.storage.types import Point, SparseEmbedding
+from ragu.storage.vdb_storage_adapters.nano_vdb import NanoVectorDBStorage
+
+
+async def main():
+    storage = NanoVectorDBStorage(
+        embedding_dim=3,
+        storage_folder="./storage",
+        filename="hybrid_vectors.json",
+        sparse_type="bm25",
+    )
+    await storage.upsert([
+        Point(
+            id="chunk-1",
+            dense_embedding=np.array([0.1, 0.2, 0.3]),
+            sparse_embedding=SparseEmbedding(indices=[10, 25], values=[0.8, 0.4]),
+            metadata={"content": "Hybrid retrieval uses dense and sparse vectors."},
+        )
+    ])
+    await storage.index_done_callback()
+
+    hits = await storage.query(
+        [Point(
+            dense_embedding=np.array([0.1, 0.2, 0.3]),
+            sparse_embedding=SparseEmbedding(indices=[10], values=[0.8]),
+        )],
+        top_k=1,
+    )
+    print(hits)
+
+
+asyncio.run(main())
+```
+
+To use it in a pipeline, pass `StorageArguments(vdb_storage_kwargs={"sparse_type": "bm25"})` together with a sparse embedder.
+
+### Example 5 - Pipeline usage
 
 ```python
 from ragu import BuilderArguments, KnowledgeGraph, StorageArguments
@@ -182,6 +228,11 @@ graph = KnowledgeGraph(
 
 ## Configuration
 
+NanoVectorDB modes:
+
+- dense only: `sparse_type=None` (default; sparse payloads are ignored with a warning)
+- hybrid: `sparse_type="bm25"`, `"bm42"`, `"splade"` or `"custom"`
+
 Qdrant modes:
 
 - dense only: `sparse_type=None`
@@ -199,4 +250,6 @@ Qdrant modes:
 
 - Dense vector dimensions must match `Embedder.dim`.
 - Existing Qdrant collections are schema-validated on first use.
-- Qdrant hybrid queries use reciprocal-rank fusion.
+- Hybrid queries use reciprocal-rank fusion by default on both adapters.
+- A NanoVectorDB index built with one `sparse_type` refuses to open with another; sparse vectors from different models are not comparable. Opening it with `sparse_type=None` is allowed: sparse vectors are kept on disk but not used.
+- Within one upsert batch with `sparse_type` set, either every point carries a sparse embedding or none does, as in Qdrant.

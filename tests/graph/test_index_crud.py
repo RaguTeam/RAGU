@@ -1160,3 +1160,28 @@ def test_embedding_dim_conflicting_with_the_embedder_is_rejected(tmp_path, monke
             arguments=StorageArguments(vdb_storage_kwargs={"embedding_dim": mock_embedder.dim + 1}),
             embedder=mock_embedder,
         )
+
+
+@pytest.mark.asyncio
+async def test_nano_vdb_with_sparse_type_stores_and_queries_sparse_vectors(
+    tmp_path, monkeypatch, mock_embedder, mock_sparse_embedder, sample_entities
+):
+    """End to end: a sparse-configured NanoVDB keeps entity sparse vectors and answers hybrid queries."""
+    from ragu.common.global_parameters import Settings
+    monkeypatch.setattr(Settings, "storage_folder", str(tmp_path / "storage"))
+    index = Index(
+        embedder=mock_embedder,
+        arguments=StorageArguments(vdb_storage_kwargs={"sparse_type": "splade"}),
+        sparse_embedder=mock_sparse_embedder,
+    )
+    await index.upsert_nodes(sample_entities)
+
+    stored = await index.nodes_vector_db.get_points_by_ids(["ent-1", "ent-2"])
+    assert [point.sparse_embedding.indices for point in stored if point is not None] == [[1, 2], [3, 4]]
+
+    # Both entities share the dense vector, so only the sparse branch can separate them.
+    hits = (await index.nodes_vector_db.query(
+        [Point(dense_embedding=np.array([0.1] * 128), sparse_embedding=SparseEmbedding(indices=[3], values=[1.0]))],
+        top_k=2,
+    ))[0]
+    assert [hit.id for hit in hits][0] == "ent-2"

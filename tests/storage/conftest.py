@@ -28,6 +28,15 @@ def _make_nano_storage(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     )
 
 
+def _make_nano_sparse_storage(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    return NanoVectorDBStorage(
+        embedding_dim=3,
+        filename=str(tmp_path / "vdb.json"),
+        cosine_threshold=0.0,
+        sparse_type="bm42",
+    )
+
+
 def _make_qdrant_dense_storage(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     QdrantVectorDBStorage = load_qdrant_storage(monkeypatch)
     return QdrantVectorDBStorage(
@@ -50,6 +59,11 @@ ALL_VDB_CASES = [
         name="nano",
         factory=_make_nano_storage,
         supports_sparse=False,
+    ),
+    VDBBackendCase(
+        name="nano-bm42",
+        factory=_make_nano_sparse_storage,
+        supports_sparse=True,
     ),
     VDBBackendCase(
         name="qdrant-dense",
