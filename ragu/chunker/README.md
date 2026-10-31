@@ -127,11 +127,12 @@ Chunkers for MinerU Markdown in `ragu.chunker.markdown_chunkers` (require `chonk
 - The rest is divided into sections by `#` / `##` headings and split by chonkie `RecursiveChunker` or `SemanticChunker` into `TextChunk`.
 - `metadata`: `document_title` and `section`; objects also get `caption` (from `structured_content.json`) and `description`.
 - `to_embed()` returns the text for the embedding model, `to_llm()` the text for the answer context.
-- Chunks keep the document order: an object follows the text chunk it stood in.
+- Chunks keep the document order: text is split independently before and after each object.
 - `split()` writes a placeholder `description`; `await a_split()` with `llm=` generates it with the model (images are sent as pictures).
+- Local images attached during `a_split()` must resolve inside the document folder, including symlink targets; paths outside it raise `ValueError`. Missing images use a text-only request.
 - `Document.from_mineru(folder)` loads `markdown.md` and `structured_content.json`.
 
-Example: [`examples/markdown_chunking_example.ipynb`](../../examples/markdown_chunking_example.ipynb).
+Example: [`examples/markdown_chunking_example.ipynb`](../../examples/preprocessing/markdown_chunking_example.ipynb).
 
 ## Data Flow
 

@@ -23,6 +23,16 @@ MINERU_OBJECT_TYPES = frozenset({"table", "equation", "code", "image", "chart"})
 
 @dataclass(slots=True)
 class Span:
+    """
+    An object's half-open source range, content and chunk metadata.
+
+    :param start: Inclusive start offset in the source Markdown.
+    :param end: Exclusive end offset in the source Markdown.
+    :param chunk_cls: Chunk class used to represent the object.
+    :param content: Extracted object content.
+    :param metadata: Object-specific metadata.
+    """
+
     start: int
     end: int
     chunk_cls: type
@@ -63,6 +73,12 @@ def normalize(text: str) -> str:
 
 
 def mineru_captions(structured_content: dict[str, Any] | None) -> dict[str, str]:
+    """
+    Map normalized MinerU object content and image paths to captions.
+
+    :param structured_content: Optional MinerU structured content.
+    :return: Captions keyed by normalized object content or image path.
+    """
     captions = {}
     for page in (structured_content or {}).get("pages", []):
         for block in page.get("blocks", []):
@@ -80,6 +96,12 @@ def image_caption(text: str, start: int) -> dict[str, str]:
 
 
 def resolve(spans: list[Span]) -> list[Span]:
+    """
+    Keep non-overlapping ranges, preferring earlier starts and longer ties.
+
+    :param spans: Candidate object ranges.
+    :return: Non-overlapping ranges sorted by source position.
+    """
     resolved: list[Span] = []
     for span in sorted(spans, key=lambda item: (item.start, -item.end)):
         if not resolved or span.start >= resolved[-1].end:
@@ -93,29 +115,20 @@ def mask(text: str, spans: list[Span]) -> str:
     return text
 
 
-def cut(text: str, start: int, end: int, spans: list[Span]) -> tuple[str, list[tuple[int, int]]]:
-    bounds, position = [], start
-    for span in spans:
-        # TODO: leave a reference to the object chunk in place of the cut-out object
-        bounds.append((position, max(position, span.start)))
-        position = max(position, span.end)
-    bounds.append((position, end))
-    return "".join(text[a:b] for a, b in bounds), bounds
-
-
-def original_position(bounds: list[tuple[int, int]], offset: int) -> int:
-    for a, b in bounds:
-        if offset < b - a:
-            return a + offset
-        offset -= b - a
-    return bounds[-1][1]
-
-
 def clean(text: str) -> str:
     return EXTRA_NEWLINES.sub("\n\n", text).strip()
 
 
 def description_request(chunk: Any, context: str, folder: str | None) -> str | list[dict[str, Any]]:
+    """
+    Build an LLM request, attaching only images inside the document folder.
+
+    :param chunk: Object chunk to describe.
+    :param context: Surrounding text used to interpret the object.
+    :param folder: Document folder for local images, or ``None`` for text-only requests.
+    :return: Plain text or a list of text and image message parts.
+    :raises ValueError: If an image path resolves outside the document folder.
+    """
     fields = (
         ("Object type", type(chunk).__name__.removesuffix("Chunk").lower()),
         ("Document", chunk.metadata.get("document_title")),
@@ -125,8 +138,13 @@ def description_request(chunk: Any, context: str, folder: str | None) -> str | l
         ("Content", chunk.content[:CONTENT_LIMIT]),
     )
     text = "\n\n".join(f"{label}: {value}" for label, value in fields if value)
-    image = Path(folder, chunk.content) if folder and type(chunk).__name__ == "ImageChunk" else None
-    if image is None or not image.is_file():
+    if not folder or type(chunk).__name__ != "ImageChunk":
+        return text
+    root = Path(folder).resolve()
+    image = (root / chunk.content).resolve()
+    if not image.is_relative_to(root):
+        raise ValueError(f"Image path must stay within the document folder: {chunk.content}")
+    if not image.is_file():
         return text
     mime = mimetypes.guess_type(image.name)[0] or "image/jpeg"
     url = f"data:{mime};base64,{base64.b64encode(image.read_bytes()).decode()}"
@@ -134,6 +152,15 @@ def description_request(chunk: Any, context: str, folder: str | None) -> str | l
 
 
 class Section(NamedTuple):
+    """
+    A heading and the source ranges of its heading and body.
+
+    :param title: Section heading, or ``None`` for text before the first heading.
+    :param start: Inclusive section start offset.
+    :param body_start: Start offset of the text after the heading.
+    :param end: Exclusive section end offset.
+    """
+
     title: str | None
     start: int
     body_start: int
@@ -141,6 +168,12 @@ class Section(NamedTuple):
 
 
 def sections(masked: str) -> list[Section]:
+    """
+    Locate H1/H2 sections after object contents have been masked.
+
+    :param masked: Markdown with object ranges replaced by spaces.
+    :return: Section titles and source ranges, including the initial preamble.
+    """
     headings = list(HEADING.finditer(masked))
     starts = [match.start() for match in headings] + [len(masked)]
     return [Section(None, 0, 0, starts[0])] + [
