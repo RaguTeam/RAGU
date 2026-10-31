@@ -54,8 +54,9 @@ print(graph.language)
 Graph node dataclass.
 
 - Purpose: semantic node extracted from source chunks.
-- Important fields: `entity_name`, `entity_type`, `description`, `source_chunk_id`, `documents_id`, `clusters`, `id`.
+- Important fields: `entity_name`, `entity_type`, `description`, `source_chunk_id`, `documents_id`, `clusters`, `id`, `metainfo`.
 - ID behavior: defaults to `ent-...` hash of name and type.
+- `metainfo`: optional `dict[str, Any]` (default `{}`) for any extra information about the entity — provenance, confidence, external ids. It is not part of the id, is persisted by every storage backend, and is shallow-merged when duplicate entities are combined (`merge_metainfo`: the richest record wins on conflicting keys). Keep values JSON-serializable; the default GML (NetworkX) backend additionally requires keys that are valid identifiers (`[A-Za-z][A-Za-z0-9_]*`) and does not accept `None` values.
 - Extension point: `Entity` is the base graph model for RAGU entities and can be inherited to add domain-specific fields or methods. Custom entity classes should preserve the `Node` contract used by storage adapters.
 
 > NOTE: custom entity extraction is not supported in RAGU versions 0.0.1 and 0.0.2.
@@ -69,9 +70,10 @@ entity = Entity(
     entity_type="Language",
     description="A programming language.",
     source_chunk_id=["chunk-1"],
+    metainfo={"source": "wikipedia", "confidence": 0.95},
 )
 
-print(entity.id, entity.to_text())
+print(entity.id, entity.to_text(), entity.metainfo)
 ```
 
 ```python
@@ -103,8 +105,9 @@ print(entity.sku, entity.to_text())
 Directed graph edge dataclass.
 
 - Purpose: semantic edge between two entities.
-- Important fields: `subject_id`, `object_id`, `subject_name`, `object_name`, `relation_type`, `description`, `relation_strength`, `source_chunk_id`.
+- Important fields: `subject_id`, `object_id`, `subject_name`, `object_name`, `relation_type`, `description`, `relation_strength`, `source_chunk_id`, `metainfo`.
 - ID behavior: defaults to `rel-...` hash of subject, object, and relation type.
+- `metainfo`: optional `dict[str, Any]` (default `{}`), same contract as `Entity.metainfo`.
 - Extension point: `Relation` is the base graph model for RAGU relations and can be inherited to add domain-specific edge metadata. Custom relation classes should preserve the `Edge` contract used by storage adapters.
 
 > NOTE: custom relation extraction is not supported in RAGU versions 0.0.1 and 0.0.2.

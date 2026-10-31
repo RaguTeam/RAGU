@@ -4,7 +4,8 @@ from ragu.graph.types import (
     Entity,
     Relation,
     Community,
-    CommunitySummary
+    CommunitySummary,
+    merge_metainfo,
 )
 
 
@@ -404,3 +405,91 @@ class TestTypeContracts:
             Community(level=0, cluster_id=1, entities=[], relations=[], id="")
         with pytest.raises(ValueError, match="CommunitySummary id"):
             CommunitySummary(id="", summary="s")
+
+
+class TestMetainfo:
+    """Tests for the optional ``metainfo`` field on Entity and Relation."""
+
+    @staticmethod
+    def _entity(**kwargs) -> Entity:
+        return Entity(
+            entity_name="Alice",
+            entity_type="PERSON",
+            description="desc",
+            source_chunk_id=["chunk-1"],
+            **kwargs,
+        )
+
+    @staticmethod
+    def _relation(**kwargs) -> Relation:
+        return Relation(
+            subject_id="ent-1",
+            object_id="ent-2",
+            subject_name="Alice",
+            object_name="Bob",
+            relation_type="KNOWS",
+            description="Alice knows Bob",
+            **kwargs,
+        )
+
+    def test_defaults_to_empty_dict(self):
+        assert self._entity().metainfo == {}
+        assert self._relation().metainfo == {}
+
+    def test_default_is_not_shared_between_instances(self):
+        first, second = self._entity(), self._entity()
+        first.metainfo["source"] = "wiki"
+
+        assert second.metainfo == {}
+
+    def test_metainfo_is_stored_as_given(self):
+        payload = {"source": "wiki", "confidence": 0.9, "nested": {"k": [1, 2]}}
+
+        assert self._entity(metainfo=payload).metainfo == payload
+        assert self._relation(metainfo=payload).metainfo == payload
+
+    def test_metainfo_does_not_affect_id(self):
+        assert self._entity().id == self._entity(metainfo={"a": 1}).id
+        assert self._relation().id == self._relation(metainfo={"a": 1}).id
+
+    def test_metainfo_is_serialized(self):
+        payload = {"source": "wiki"}
+
+        assert self._entity(metainfo=payload).to_dict()["metainfo"] == payload
+        assert self._relation(metainfo=payload).to_dict()["metainfo"] == payload
+
+    def test_round_trip_through_dict(self):
+        entity = self._entity(metainfo={"source": "wiki"})
+        relation = self._relation(metainfo={"weight": 2})
+
+        assert Entity(**entity.to_dict()) == entity
+        assert Entity(**entity.to_dict()).metainfo == {"source": "wiki"}
+        assert Relation(**relation.to_dict()) == relation
+        assert Relation(**relation.to_dict()).metainfo == {"weight": 2}
+
+    def test_legacy_payload_without_metainfo_loads(self):
+        """Records persisted before the field existed carry no ``metainfo`` key."""
+        entity_payload = self._entity().to_dict()
+        relation_payload = self._relation().to_dict()
+        del entity_payload["metainfo"]
+        del relation_payload["metainfo"]
+
+        assert Entity(**entity_payload).metainfo == {}
+        assert Relation(**relation_payload).metainfo == {}
+
+
+class TestMergeMetainfo:
+    def test_empty_input(self):
+        assert merge_metainfo([]) == {}
+
+    def test_earlier_entries_take_precedence(self):
+        merged = merge_metainfo([{"a": 1, "shared": "first"}, {"b": 2, "shared": "second"}])
+
+        assert merged == {"a": 1, "b": 2, "shared": "first"}
+
+    def test_returns_a_new_dict(self):
+        source = {"a": 1}
+        merged = merge_metainfo([source])
+        merged["b"] = 2
+
+        assert source == {"a": 1}

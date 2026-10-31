@@ -352,3 +352,58 @@ def test_merge_relations_rejects_different_ids():
 
     with pytest.raises(ValueError, match="different IDs"):
         default_merge_relations_policy([rel1, rel2])
+
+
+def test_merge_entities_merges_metainfo_richest_wins():
+    primary = Entity(
+        id="ent-1",
+        entity_name="Alice",
+        entity_type="Person",
+        description="Engineer",
+        source_chunk_id=["chunk-1", "chunk-2"],
+        metainfo={"source": "wiki", "confidence": 0.9},
+    )
+    secondary = Entity(
+        id="ent-1",
+        entity_name="Alice",
+        entity_type="Person",
+        description="Researcher",
+        source_chunk_id=["chunk-3"],
+        metainfo={"source": "news", "lang": "en"},
+    )
+
+    merged = default_merge_entities_policy([secondary, primary])
+
+    assert merged.metainfo == {"source": "wiki", "confidence": 0.9, "lang": "en"}
+    # Inputs are not mutated.
+    assert primary.metainfo == {"source": "wiki", "confidence": 0.9}
+    assert secondary.metainfo == {"source": "news", "lang": "en"}
+
+
+def test_merge_relations_merges_metainfo_richest_wins():
+    primary = Relation(
+        id="rel-1",
+        subject_id="ent-1",
+        object_id="ent-2",
+        subject_name="Alice",
+        object_name="Bob",
+        relation_type="KNOWS",
+        description="Alice knows Bob",
+        source_chunk_id=["chunk-1", "chunk-2"],
+        metainfo={"evidence": "strong"},
+    )
+    secondary = Relation(
+        id="rel-1",
+        subject_id="ent-1",
+        object_id="ent-2",
+        subject_name="Alice",
+        object_name="Bob",
+        relation_type="KNOWS",
+        description="They met",
+        source_chunk_id=["chunk-3"],
+        metainfo={"evidence": "weak", "year": 2020},
+    )
+
+    merged = default_merge_relations_policy([secondary, primary])
+
+    assert merged.metainfo == {"evidence": "strong", "year": 2020}

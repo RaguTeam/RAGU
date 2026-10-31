@@ -332,3 +332,96 @@ async def test_relation_summarizer_without_llm_client_at_all():
 
     assert len(result) == 1
     assert "Description 0" in result[0].description
+
+
+def test_entity_group_entities_merges_metainfo():
+    grouped = EntitySummarizer.group_entities(
+        [
+            Entity(
+                entity_name="Alice",
+                entity_type="Person",
+                description="First",
+                source_chunk_id=["chunk-1"],
+                metainfo={"source": "wiki", "shared": "first"},
+            ),
+            Entity(
+                entity_name="Alice",
+                entity_type="Person",
+                description="Second",
+                source_chunk_id=["chunk-2"],
+                metainfo={"lang": "en", "shared": "second"},
+            ),
+            Entity(
+                entity_name="Bob",
+                entity_type="Person",
+                description="Bob",
+                source_chunk_id=["chunk-3"],
+            ),
+        ]
+    )
+
+    by_name = {row["entity_name"]: row["metainfo"] for _, row in grouped.iterrows()}
+    assert by_name["Alice"] == {"source": "wiki", "shared": "first", "lang": "en"}
+    assert by_name["Bob"] == {}
+
+
+@pytest.mark.asyncio
+async def test_entity_summarizer_run_keeps_metainfo():
+    summarizer = EntitySummarizer(
+        llm=AsyncMock(),
+        use_llm_summarization=False,
+        use_clustering=False,
+        embedder=AsyncMock(),
+        summarize_only_if_more_than=1,
+    )
+    entities = [
+        Entity(
+            entity_name="Alice",
+            entity_type="Person",
+            description="First",
+            source_chunk_id=["chunk-1"],
+            metainfo={"source": "wiki"},
+        ),
+        Entity(
+            entity_name="Alice",
+            entity_type="Person",
+            description="Second",
+            source_chunk_id=["chunk-2"],
+            metainfo={"lang": "en"},
+        ),
+    ]
+
+    result = await summarizer.run(entities)
+
+    assert len(result) == 1
+    assert result[0].metainfo == {"source": "wiki", "lang": "en"}
+
+
+def test_relation_group_relations_merges_metainfo():
+    grouped = RelationSummarizer.group_relations(
+        [
+            Relation(
+                subject_id="ent-1",
+                object_id="ent-2",
+                subject_name="ent-1",
+                object_name="ent-2",
+                relation_type="KNOWS",
+                description="A knows B",
+                source_chunk_id=["chunk-1"],
+                metainfo={"evidence": "strong"},
+            ),
+            Relation(
+                subject_id="ent-1",
+                object_id="ent-2",
+                subject_name="ent-1",
+                object_name="ent-2",
+                relation_type="KNOWS",
+                description="A knows B",
+                source_chunk_id=["chunk-2"],
+                metainfo={"evidence": "weak", "year": 2020},
+            ),
+        ]
+    )
+
+    assert len(grouped) == 1
+    assert grouped.iloc[0]["metainfo"] == {"evidence": "strong", "year": 2020}
