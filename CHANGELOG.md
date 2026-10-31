@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- `metainfo: dict[str, Any]` on `Entity` and `Relation` (default `{}`), a
+  free-form place for additional information — provenance, confidence,
+  external identifiers — that does not take part in the identity hash. It is
+  persisted by every storage backend (GML, Neo4j, NanoVectorDB, Qdrant) and
+  carried through entity / relation merging and summarization, where duplicate
+  records are shallow-merged with `merge_metainfo` (the richest record wins on
+  conflicting keys). Graphs persisted before this field existed load unchanged
+  with an empty `metainfo`.
+
 ## [0.1.0] - 2026-09-08
 
 ### Added

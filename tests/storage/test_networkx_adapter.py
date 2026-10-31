@@ -178,3 +178,67 @@ async def test_index_done_callback_persists_and_reloads(tmp_path, entities, rela
     assert nodes[0] is not None
     assert nodes[0].entity_type == "Person"
     assert edges[0]
+
+
+@pytest.mark.asyncio
+async def test_metainfo_persists_and_reloads(tmp_path, entities, relation):
+    path = str(tmp_path / "graph.gml")
+    storage = NetworkXStorage(filename=path, node_cls=Entity, edge_cls=Relation)
+    entities["alice"].metainfo = {"source": "wiki", "score": 0.5, "tags": ["a", "b"]}
+    relation.metainfo = {"evidence": "chunk-1"}
+
+    await storage.upsert_nodes(list(entities.values()))
+    await storage.upsert_edges([relation])
+    await storage.index_done_callback()
+
+    reloaded = NetworkXStorage(filename=path, node_cls=Entity, edge_cls=Relation)
+    alice, bob = await reloaded.get_nodes(["ent-1", "ent-2"])
+    edge = (await reloaded.get_edges([("ent-1", "ent-2", "rel-1")]))[0][0]
+
+    assert alice is not None and alice.metainfo == {"source": "wiki", "score": 0.5, "tags": ["a", "b"]}
+    assert bob is not None and bob.metainfo == {}
+    assert edge.metainfo == {"evidence": "chunk-1"}
+
+
+@pytest.mark.asyncio
+async def test_legacy_gml_without_metainfo_loads(tmp_path):
+    """Graphs persisted before ``metainfo`` existed must still load, with an empty dict."""
+    import networkx as nx
+
+    graph = nx.MultiDiGraph()
+    graph.add_node(
+        "ent-1",
+        entity_name="Alice",
+        entity_type="Person",
+        description="Engineer",
+        source_chunk_id=["chunk-1"],
+        documents_id=["doc-1"],
+    )
+    graph.add_node(
+        "ent-2",
+        entity_name="Bob",
+        entity_type="Person",
+        description="Scientist",
+        source_chunk_id=["chunk-2"],
+        documents_id=["doc-1"],
+    )
+    graph.add_edge(
+        "ent-1",
+        "ent-2",
+        key="rel-1",
+        subject_name="Alice",
+        object_name="Bob",
+        relation_type="KNOWS",
+        description="Alice knows Bob",
+        relation_strength=0.9,
+        source_chunk_id=["chunk-1"],
+    )
+    path = str(tmp_path / "legacy.gml")
+    nx.write_gml(graph, path)
+
+    storage = NetworkXStorage(filename=path, node_cls=Entity, edge_cls=Relation)
+    alice = (await storage.get_nodes(["ent-1"]))[0]
+    edge = (await storage.get_edges([("ent-1", "ent-2", "rel-1")]))[0][0]
+
+    assert alice is not None and alice.metainfo == {}
+    assert edge.metainfo == {}

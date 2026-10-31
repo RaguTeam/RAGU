@@ -17,12 +17,30 @@ Modules overview
   community detection or summarization.
 """
 
-from typing import List
+from typing import Any, ClassVar, Iterable, List, Mapping
 from dataclasses import dataclass, field
-from typing import ClassVar
 
 from ragu.storage.types import ClusterInfo, Edge, Node
 from ragu.utils.ragu_utils import compute_mdhash_id
+
+
+def merge_metainfo(metainfos: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
+    """
+    Shallow-merge several ``metainfo`` dictionaries into a new one.
+
+    Earlier mappings take precedence: a key present in more than one of them
+    keeps the value of the first mapping that defines it. The default merge
+    policies pass the richest record first, so its metainfo wins on conflicts
+    while keys only the other records know about are still kept.
+
+    :param metainfos: Dictionaries to merge, in order of decreasing precedence.
+    :return: A new dictionary; the inputs are left untouched.
+    """
+    merged: dict[str, Any] = {}
+    for metainfo in metainfos:
+        for key, value in metainfo.items():
+            merged.setdefault(key, value)
+    return merged
 
 
 @dataclass(slots=True)
@@ -37,6 +55,12 @@ class Entity(Node):
     :param documents_id: Identifiers of documents containing this entity.
     :param clusters: List of cluster memberships from community detection.
     :param id: Unique identifier; auto-generated if not provided.
+    :param metainfo: Free-form additional information about the entity
+        (provenance, confidence, external identifiers, ...). Not part of the
+        identity hash. Persisted as-is by every storage backend, so values
+        should stay JSON-serializable; the GML (NetworkX) backend additionally
+        requires keys to be identifiers (``[A-Za-z][A-Za-z0-9_]*``) and
+        rejects ``None`` values.
     :raises ValueError: If an explicitly provided ``id`` is empty.
     """
     entity_name: str
@@ -46,6 +70,7 @@ class Entity(Node):
     documents_id: list[str] = field(default_factory=list[str])
     clusters: list[ClusterInfo] = field(default_factory=list[ClusterInfo])
     id: str = 'auto'
+    metainfo: dict[str, Any] = field(default_factory=dict[str, Any])
 
     label_field: ClassVar[str] = "entity_type"
 
@@ -88,6 +113,8 @@ class Relation(Edge):
     :param relation_strength: Numerical weight of the relation (default: 1.0).
     :param source_chunk_id: Identifiers of chunks where this relation was extracted.
     :param id: Unique identifier; auto-generated if not provided.
+    :param metainfo: Free-form additional information about the relation. Same
+        contract as :attr:`Entity.metainfo`.
     :raises ValueError: If an explicitly provided ``id`` is empty.
     """
     subject_id: str
@@ -101,6 +128,7 @@ class Relation(Edge):
 
     label_field: ClassVar[str] = "relation_type"
     id: str = 'auto'
+    metainfo: dict[str, Any] = field(default_factory=dict[str, Any])
 
     def __post_init__(self) -> None:
         """

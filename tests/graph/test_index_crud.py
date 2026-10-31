@@ -1160,3 +1160,26 @@ def test_embedding_dim_conflicting_with_the_embedder_is_rejected(tmp_path, monke
             arguments=StorageArguments(vdb_storage_kwargs={"embedding_dim": mock_embedder.dim + 1}),
             embedder=mock_embedder,
         )
+
+
+@pytest.mark.asyncio
+async def test_metainfo_round_trips_through_graph_and_vector_storage(index, sample_entities, sample_relations):
+    """``metainfo`` is written to both the graph backend and the vector payload."""
+    sample_entities[0].metainfo = {"source": "wiki", "confidence": 0.9}
+    sample_relations[0].metainfo = {"evidence": "chunk-1"}
+
+    await index.upsert_nodes(sample_entities)
+    await index.upsert_edges(sample_relations)
+
+    alice, bob = await index.get_nodes(["ent-1", "ent-2"])
+    assert alice is not None and alice.metainfo == {"source": "wiki", "confidence": 0.9}
+    assert bob is not None and bob.metainfo == {}
+
+    relation = (await index.get_edges([("ent-1", "ent-2", "rel-1")]))[0][0]
+    assert relation.metainfo == {"evidence": "chunk-1"}
+
+    node_point = (await index.nodes_vector_db.get_points_by_ids(["ent-1"]))[0]
+    assert node_point is not None and node_point.metadata["metainfo"] == {"source": "wiki", "confidence": 0.9}
+
+    edge_point = (await index.edges_vector_db.get_points_by_ids(["rel-1"]))[0]
+    assert edge_point is not None and edge_point.metadata["metainfo"] == {"evidence": "chunk-1"}

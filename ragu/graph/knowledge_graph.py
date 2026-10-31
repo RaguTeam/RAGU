@@ -25,7 +25,7 @@ from ragu.graph.graph_builder_pipeline import (
     BuilderArguments,
     GraphBuilderModule
 )
-from ragu.graph.types import Community, Entity, Relation, CommunitySummary
+from ragu.graph.types import Community, Entity, Relation, CommunitySummary, merge_metainfo
 from ragu.models.embedder import Embedder
 from ragu.models.sparse_embedder import SparseEmbedder
 from ragu.models.llm import LLM
@@ -75,7 +75,7 @@ def _unique_description_fragments(descriptions: Iterable[str]) -> List[str]:
 def default_merge_entities_policy(entities: List[Entity]) -> Entity:
     """
     Default merge policy for entities (class Entity).
-    Default policy = concatenate unique descriptions, merge source_chunk_ids, docs ids and clusters.
+    Default policy = concatenate unique descriptions, merge source_chunk_ids, docs ids, clusters and metainfo.
 
     :param entities: Entities to merge.
     :return: Merged entities.
@@ -135,13 +135,14 @@ def default_merge_entities_policy(entities: List[Entity]) -> Entity:
         source_chunk_id=sorted(all_chunks),
         documents_id=sorted(all_docs),
         clusters=deduplicated_clusters,
+        metainfo=merge_metainfo(entity.metainfo for entity in by_richness),
     )
 
 # TODO: add an ability to pass merge policy into KG
 def default_merge_relations_policy(relations: List[Relation]) -> Relation:
     """
     Default merge policy for relations (class Relation).
-    Default policy = concatenate descriptions, merge source_chunk_ids, docs ids and clusters.
+    Default policy = concatenate descriptions, merge source_chunk_ids and metainfo, average strength.
 
     :param relations: Relations to merge.
     :return: New single relation.
@@ -179,6 +180,7 @@ def default_merge_relations_policy(relations: List[Relation]) -> Relation:
         description=" ".join(descriptions),
         relation_strength=avg_strength,
         source_chunk_id=sorted(all_chunks),
+        metainfo=merge_metainfo(relation.metainfo for relation in by_richness),
     )
 
 
@@ -657,7 +659,8 @@ class KnowledgeGraph:
                     entity_type=node.entity_type,
                     source_chunk_id=node.source_chunk_id,
                     documents_id=node.documents_id,
-                    clusters=[]),
+                    clusters=[],
+                    metainfo=node.metainfo),
                 entities
             )
         )

@@ -10,7 +10,7 @@ from ragu.common.global_parameters import Settings
 from ragu.common.base import RaguGenerativeModule
 from ragu.common.logger import logger
 from ragu.common.prompts.default_models import RelationDescriptionModel, EntityDescriptionModel
-from ragu.graph.types import Entity, Relation
+from ragu.graph.types import Entity, Relation, merge_metainfo
 
 from ragu.common.prompts.prompt_storage import RAGUInstruction, require_prompt_schema
 from ragu.common.prompts.messages import ChatMessages, render
@@ -179,6 +179,7 @@ class EntitySummarizer(RaguGenerativeModule):
             documents_id=("documents_id", lambda s: list(set(
                 chain.from_iterable(v if isinstance(v, (list, tuple, set)) else [v] for v in s)))
             ),
+            metainfo=("metainfo", merge_metainfo),
         ).reset_index()
 
         return grouped_entities
@@ -391,6 +392,7 @@ class RelationSummarizer(RaguGenerativeModule):
             source_chunk_id=("source_chunk_id", lambda s: list(set(
                 chain.from_iterable(v if isinstance(v, (list, tuple, set)) else [v] for v in s)))
             ),
+            metainfo=("metainfo", merge_metainfo),
             duplicate_count=("description", "count"),
         ).reset_index()
 

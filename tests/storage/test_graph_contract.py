@@ -22,6 +22,7 @@ def _entity(name: str, entity_type: str = "PERSON", **kwargs) -> Entity:
         source_chunk_id=kwargs.pop("source_chunk_id", ["chunk-1"]),
         documents_id=kwargs.pop("documents_id", []),
         clusters=kwargs.pop("clusters", []),
+        metainfo=kwargs.pop("metainfo", {}),
     )
 
 
@@ -175,3 +176,24 @@ async def test_graph_contract_deleting_a_missing_edge_is_tolerated(graph_storage
     await graph_storage.delete_edges([("Alice", "nobody", None)])
 
     assert await graph_storage.get_all_edges() == []
+
+
+@pytest.mark.asyncio
+async def test_graph_contract_metainfo_round_trip(graph_storage):
+    """``metainfo`` is a free-form dict and must survive a write/read cycle."""
+    node_meta = {"source": "wiki", "confidence": 0.9, "aliases": ["Ally"], "nested": {"k": 1}}
+    edge_meta = {"evidence": "page 3", "weight": 2}
+    await graph_storage.upsert_nodes([
+        _entity("Alice", metainfo=node_meta),
+        _entity("Acme", "ORGANIZATION"),
+    ])
+    relation = _relation("Alice", "Acme")
+    relation.metainfo = edge_meta
+    await graph_storage.upsert_edges([relation])
+
+    alice, acme = await graph_storage.get_nodes(["Alice", "Acme"])
+    edge = (await graph_storage.get_edges([("Alice", "Acme", "rel-1")]))[0][0]
+
+    assert alice is not None and alice.metainfo == node_meta
+    assert acme is not None and acme.metainfo == {}
+    assert edge.metainfo == edge_meta
