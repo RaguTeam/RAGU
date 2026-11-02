@@ -333,9 +333,11 @@ An online update can overlap with retrieval through the same `KnowledgeGraph` in
 
 The protected set includes cascade effects. Removing a node protects its incident relations until their graph and vector records are removed. Removing a source chunk protects the referring nodes and relations and the incident relations of those nodes. Edge writes protect their endpoints, preventing a relation from being added while an endpoint is being removed. Validation, merge, vectorization, changes to all affected stores, and persistence complete inside the write scope.
 
-Local search holds a read scope over the selected neighborhood through reranking and context assembly, then releases it before LLM answer generation. Global search protects the summaries and community metadata while loading its context, and naive search protects matched chunks while resolving their contents. A custom retrieval workflow can use `a_read_lock` to keep a known set stable across several awaited reads. The API and a single usage example are documented in [Concurrent Access](../../ragu/graph/README.md#concurrent-access).
+Vector candidates are queried again under their element read locks, retrying with an expanded scope if new candidates appear. Returned scores and vector metadata therefore correspond to the resolved graph or chunk records. Local search holds a read scope over the selected neighborhood through reranking and context assembly; if an anchor changes before that scope starts, retrieval is repeated. It releases the scope before LLM answer generation. Global search protects the summaries and community metadata while loading its context, and naive search protects matched chunks while resolving their contents. A custom retrieval workflow can use `a_read_lock` to keep a known set stable across several awaited reads. The API and a single usage example are documented in [Concurrent Access](../../ragu/graph/README.md#concurrent-access).
 
 These guarantees apply to one shared `Index` within one process, including asyncio tasks and threads when the selected clients support that usage. Separate indexes or processes require external coordination. Direct adapter mutations bypass this protocol. Whole-index maintenance uses a wider scope, and locks do not add transactional rollback if a backend operation fails.
+
+Storage lifecycles begin after validation and vectorization; successfully started backends are finalized before releasing the locks, even on errors or cancellation. Independent batches can overlap, so shared adapters must support concurrent batches.
 
 ---
 

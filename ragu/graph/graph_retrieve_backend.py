@@ -1,4 +1,6 @@
-from typing import Dict, List, NamedTuple
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from typing import Dict, List, Literal, NamedTuple
 
 import numpy as np
 from ragu.chunker.types import Chunk
@@ -6,7 +8,7 @@ from ragu.graph.types import Entity, Relation
 from ragu.models.embedder import Embedder
 from ragu.models.scorer import Scorer
 from ragu.models.sparse_embedder import SparseEmbedder
-from ragu.storage.base_storage import EdgeSpec
+from ragu.storage.base_storage import BaseVectorStorage, EdgeSpec
 from ragu.storage.types import Point, EmbeddingHit, SparseEmbedding, DenseEmbedding
 
 from ragu.graph.knowledge_graph import KnowledgeGraph
@@ -69,6 +71,41 @@ class GraphRetriever:
         self.sparse_embedder = sparse_embedder
         self.reranker = reranker
 
+    @staticmethod
+    def _hit_selection(
+        per_query_hits: List[List[EmbeddingHit]],
+        kind: Literal["node_ids", "edge_specs", "chunk_ids"],
+    ) -> set[str] | set[EdgeSpec]:
+        if kind != "edge_specs":
+            return {hit.id for hits in per_query_hits for hit in hits}
+        return {
+            (str(subject), str(object_id), hit.id)
+            for hits in per_query_hits for hit in hits
+            if (subject := hit.metadata.get("subject_id"))
+            and (object_id := hit.metadata.get("object_id"))
+        }
+
+    @asynccontextmanager
+    async def _locked_hits(
+        self,
+        storage: BaseVectorStorage,
+        points: List[Point],
+        top_k: int,
+        kind: Literal["node_ids", "edge_specs", "chunk_ids"],
+    ) -> AsyncIterator[List[List[EmbeddingHit]]]:
+        """Repeat candidate selection under its complete element read scope."""
+        hits = await storage.query(points, top_k=top_k)
+        selection = self._hit_selection(hits, kind)
+        while True:
+            async with self.knowledge_graph.index.a_read_lock(**{kind: selection}):
+                refreshed = await storage.query(points, top_k=top_k)
+                checked = self._hit_selection(refreshed, kind)
+                if checked.issubset(selection):
+                    yield refreshed
+                    return
+            # Never expand a held scope: another writer may own the new IDs.
+            selection.update(checked)
+
     async def query_entities(
         self,
         queries: List[str],
@@ -77,10 +114,11 @@ class GraphRetriever:
         """
         Find entities matching a batch of free-text queries.
 
-        Embeddings, the vector search, and entity resolution are each performed
-        once for the whole batch: query vectors are encoded together, the vector
-        DB is queried in a single call, and matched ids are deduplicated across
-        all queries before a single node lookup.
+        Query vectors are encoded once for the whole batch. Vector candidates
+        are selected, then queried again under their shared element locks so
+        hit metadata and scores match the resolved entities. If new candidates
+        appear, the scope is released and retried with the expanded selection.
+        Matched ids are deduplicated before a single batched node lookup.
 
         :param queries: Search query texts.
         :param top_k: Maximum number of results per query.
@@ -91,14 +129,9 @@ class GraphRetriever:
             return []
 
         points = await self.build_query_vectors(queries)
-        per_query_hits = await self.knowledge_graph.index.nodes_vector_db.query(
-            points,
-            top_k=top_k,
-        )
-
-        unique_ids = list({hit.id for hits in per_query_hits for hit in hits})
         index = self.knowledge_graph.index
-        async with index.a_read_lock(node_ids=unique_ids):
+        async with self._locked_hits(index.nodes_vector_db, points, top_k, "node_ids") as per_query_hits:
+            unique_ids = list({hit.id for hits in per_query_hits for hit in hits})
             entities = await index.graph_backend.get_nodes(unique_ids)
             entity_by_id: Dict[str, Entity] = {
                 entity_id: entity
@@ -127,9 +160,10 @@ class GraphRetriever:
         """
         Find relations matching a batch of free-text queries.
 
-        Hits missing endpoint metadata are skipped. Edge specifications are
-        deduplicated across all queries so relations are resolved in a single
-        lookup.
+        Hits missing endpoint metadata are skipped. Vector selection is repeated
+        under the matched relations' read scope, retrying with a larger scope
+        when new candidates appear. Query vectors are encoded once, and edge
+        specifications are deduplicated before a single relation lookup.
 
         :param queries: Search query texts.
         :param top_k: Maximum number of results per query.
@@ -140,25 +174,17 @@ class GraphRetriever:
             return []
 
         points = await self.build_query_vectors(queries)
-        per_query_hits = await self.knowledge_graph.index.edges_vector_db.query(
-            points,
-            top_k=top_k,
-        )
-
-        unique_specs: Dict[str, EdgeSpec] = {}
-        for hits in per_query_hits:
-            for hit in hits:
-                subject_id = hit.metadata.get("subject_id")
-                object_id = hit.metadata.get("object_id")
-                if not subject_id or not object_id:
-                    continue
-                if hit.id not in unique_specs:
-                    unique_specs[hit.id] = (str(subject_id), str(object_id), hit.id)
-
-        spec_ids = list(unique_specs)
-        specs = [unique_specs[spec_id] for spec_id in spec_ids]
         index = self.knowledge_graph.index
-        async with index.a_read_lock(edge_specs=specs):
+        async with self._locked_hits(index.edges_vector_db, points, top_k, "edge_specs") as per_query_hits:
+            unique_specs: Dict[str, EdgeSpec] = {}
+            for hits in per_query_hits:
+                for hit in hits:
+                    subject_id = hit.metadata.get("subject_id")
+                    object_id = hit.metadata.get("object_id")
+                    if subject_id and object_id and hit.id not in unique_specs:
+                        unique_specs[hit.id] = (str(subject_id), str(object_id), hit.id)
+            spec_ids = list(unique_specs)
+            specs = [unique_specs[spec_id] for spec_id in spec_ids]
             relation_by_id: Dict[str, Relation] = {}
             if specs:
                 relation_groups = await index.graph_backend.get_edges(specs)
@@ -190,7 +216,9 @@ class GraphRetriever:
         """
         Search chunk vectors for a batch of queries and resolve matched chunks.
 
-        Chunk ids are deduplicated across all queries before a single KV lookup.
+        Query vectors are encoded once. Vector selection is repeated under the
+        matched chunks' read scope, retrying if new candidates appear. Chunk ids
+        are deduplicated across all queries before a single KV lookup.
 
         :param queries: Search query texts.
         :param top_k: Maximum number of hits per query.
@@ -201,14 +229,9 @@ class GraphRetriever:
             return []
 
         points = await self.build_query_vectors(queries)
-        per_query_hits = await self.knowledge_graph.index.chunks_vector_db.query(
-            points,
-            top_k=top_k,
-        )
-
-        unique_ids = list({hit.id for hits in per_query_hits for hit in hits})
         index = self.knowledge_graph.index
-        async with index.a_read_lock(chunk_ids=unique_ids):
+        async with self._locked_hits(index.chunks_vector_db, points, top_k, "chunk_ids") as per_query_hits:
+            unique_ids = list({hit.id for hits in per_query_hits for hit in hits})
             chunk_data_list = await index.chunks_kv_storage.get_by_ids(unique_ids)
             data_by_id: Dict[str, dict] = {
                 chunk_id: chunk_data

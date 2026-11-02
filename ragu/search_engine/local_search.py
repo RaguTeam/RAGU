@@ -219,40 +219,48 @@ class LocalSearchEngine(BaseEngine[LocalParams, LocalSearchRetrieve]):
             return []
 
         params = params or LocalParams()
-        entity_results = await self.retriever.query_entities(queries, top_k=params.top_k)
+        while True:
+            entity_results = await self.retriever.query_entities(queries, top_k=params.top_k)
 
-        index = self.knowledge_graph.index
-        entity_ids = list(dict.fromkeys(
-            entity.id for entities, _ in entity_results for entity in entities
-        ))
-        async with index.a_read_lock(node_ids=entity_ids, include_neighbors=True):
-            # Vector candidates can change before the neighborhood scope starts.
-            current_entities = await index.graph_backend.get_nodes(entity_ids)
-            current_by_id = {
-                entity.id: entity for entity in current_entities if entity is not None
-            }
-            entity_results = [
-                (
-                    [current_by_id[entity.id] for entity in entities if entity.id in current_by_id],
-                    [hit for entity, hit in zip(entities, hits) if entity.id in current_by_id],
+            index = self.knowledge_graph.index
+            entity_ids = list(dict.fromkeys(
+                entity.id for entities, _ in entity_results for entity in entities
+            ))
+            async with index.a_read_lock(node_ids=entity_ids, include_neighbors=True):
+                # Vector candidates can change before the neighborhood scope starts.
+                current_entities = await index.graph_backend.get_nodes(entity_ids)
+                current_by_id = {
+                    entity.id: entity for entity in current_entities if entity is not None
+                }
+                if any(
+                    entity.id in current_by_id
+                    and entity.to_dict() != current_by_id[entity.id].to_dict()
+                    for entities, _ in entity_results for entity in entities
+                ):
+                    # Retry vector scoring after releasing this neighborhood scope.
+                    continue
+                entity_results = [
+                    (
+                        [current_by_id[entity.id] for entity in entities if entity.id in current_by_id],
+                        [hit for entity, hit in zip(entities, hits) if entity.id in current_by_id],
+                    )
+                    for entities, hits in entity_results
+                ]
+                ranked_entities = await _gather_scoped(*[
+                    self._rank_entities(query, entities, params.rerank_top_k)
+                    for query, (entities, _) in zip(queries, entity_results)
+                ])
+
+                edges_by_entity, neighbor_chunks = await _prefetch_entity_edges(
+                    [entity.id for entities in ranked_entities for entity in entities if entity and entity.id],
+                    self.knowledge_graph,
                 )
-                for entities, hits in entity_results
-            ]
-            ranked_entities = await _gather_scoped(*[
-                self._rank_entities(query, entities, params.rerank_top_k)
-                for query, (entities, _) in zip(queries, entity_results)
-            ])
 
-            edges_by_entity, neighbor_chunks = await _prefetch_entity_edges(
-                [entity.id for entities in ranked_entities for entity in entities if entity and entity.id],
-                self.knowledge_graph,
-            )
-
-            return list(await _gather_scoped(*[
-                self._assemble(query, entities, entity_hits, ranked, edges_by_entity, neighbor_chunks)
-                for query, (entities, entity_hits), ranked
-                in zip(queries, entity_results, ranked_entities)
-            ]))
+                return list(await _gather_scoped(*[
+                    self._assemble(query, entities, entity_hits, ranked, edges_by_entity, neighbor_chunks)
+                    for query, (entities, entity_hits), ranked
+                    in zip(queries, entity_results, ranked_entities)
+                ]))
 
     async def _rank_entities(
         self,

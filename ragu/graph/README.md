@@ -477,6 +477,8 @@ asyncio.run(main())
 
 A write scope covers validation, reading existing values, merging, vectorization, graph/vector/KV changes, reverse-index updates, and persistence callbacks. Deleting a node also locks its incident relations and their endpoints until the corresponding graph and vector records have been removed. Deleting a chunk locks the referring nodes and relations, including incident relations of the deleted nodes. Edge writes protect their endpoints, so a new relation cannot appear during deletion of an endpoint. Community deletion protects its summary as well.
 
+Storage lifecycles start after validation and vectorization. Every successfully started backend is finalized before the element locks are released, including on failure or cancellation. A batch's start, writes, and finalization run in the same asyncio task, preserving task-local adapter state. Batches on unrelated elements may overlap, so adapters must support concurrent batches when shared this way.
+
 The affected set is discovered before acquiring the locks. RAGU acquires that set atomically, then checks it again; if the cascade has grown, it releases the set and retries. A waiting writer delays later conflicting readers, while unrelated requests can pass it. This avoids acquiring only part of a cascade and waiting for another operation that holds the remaining elements.
 
 ### Keeping Multiple Reads Consistent
@@ -513,7 +515,9 @@ async def read_pair(
 
 The context manager is asynchronous: use `async with`, and perform the protected calls in the same task. Nested scopes can reuse an already protected subset. Expanding a held set or upgrading a read lock to a write lock raises `ValueError`; include all required IDs in the outer scope instead. Locks are released on normal completion, exceptions, and cancellation.
 
-`LocalSearchEngine` keeps its selected neighborhood protected through reranking and context assembly. It releases the read scope before generating the LLM answer. Global search protects summary collection while loading its context; naive search resolves matched chunk IDs under their read scope. Other elements remain available for online updates during these reads. Whole-index operations, such as consistency checking, reindexing, and closing, use a wider scope because they inspect or replace data across the index.
+`GraphRetriever` embeds each query batch once, discovers vector candidates, and repeats the vector search under their element read locks. If the repeated search returns additional candidates, it releases the scope and retries with the expanded set. This keeps returned scores and vector metadata consistent with the resolved graph or chunk records. A stable selection requires two vector queries.
+
+`LocalSearchEngine` keeps its selected neighborhood protected through reranking and context assembly. If an anchor changes between vector retrieval and acquiring the neighborhood scope, it repeats retrieval before assembling the context. It releases the read scope before generating the LLM answer. Global search protects summary collection while loading its context; naive search resolves matched chunk IDs under their read scope. Other elements remain available for online updates during these reads. Whole-index operations, such as consistency checking, reindexing, and closing, use a wider scope because they inspect or replace data across the index.
 
 ### Scope of the Guarantee
 

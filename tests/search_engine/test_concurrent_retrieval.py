@@ -202,8 +202,13 @@ async def test_retriever_filters_vector_candidates_deleted_before_resolution(onl
     (a, _, _), _, _, _ = await _populate_neighborhood(graph)
     retriever = GraphRetriever(graph, graph.embedder)
 
+    deleted = False
+
     async def stale_hits(*args, **kwargs):
-        await graph.delete_entities([a.id])
+        nonlocal deleted
+        if not deleted:
+            deleted = True
+            await graph.delete_entities([a.id])
         return [[EmbeddingHit(id=a.id, distance=0.9)]]
 
     graph.index.nodes_vector_db.query = stale_hits
@@ -211,6 +216,144 @@ async def test_retriever_filters_vector_candidates_deleted_before_resolution(onl
 
     assert entities == []
     assert hits == []
+
+
+@pytest.mark.parametrize("kind", ["entity", "relation", "chunk"])
+async def test_retriever_refreshes_scores_and_payloads_after_concurrent_update(online_graph, monkeypatch, kind):
+    graph = online_graph
+    (a, _, _), chunks, relation, _ = await _populate_neighborhood(graph)
+    graph.embedder.batch_embed_text.side_effect = lambda texts, **kwargs: [
+        [1.0, 0.0, 0.0, 0.0] if "Updated" in text else [0.1] * 4
+        for text in texts
+    ]
+    retriever = GraphRetriever(graph, graph.embedder)
+    if kind == "entity":
+        storage = graph.index.nodes_vector_db
+        retrieve = retriever.query_entities
+        item_id, field = a.id, "description"
+
+        async def update():
+            await graph.update_entities([replace(a, description="Updated entity")])
+    elif kind == "relation":
+        storage = graph.index.edges_vector_db
+        retrieve = retriever.query_relations
+        item_id, field = relation.id, "description"
+
+        async def update():
+            await graph.update_relations([replace(relation, description="Updated relation")])
+    else:
+        storage = graph.index.chunks_vector_db
+        retrieve = retriever.query_chunks
+        item_id, field = chunks[0].id, "content"
+
+        async def update():
+            updated = replace(chunks[0], content="Updated chunk")
+            updated.id = chunks[0].id
+            await graph.index.upsert_chunks([updated])
+
+    selected = asyncio.Event()
+    release = asyncio.Event()
+    query = storage.query
+    query_count = 0
+
+    async def paused_query(*args, **kwargs):
+        nonlocal query_count
+        query_count += 1
+        hits = await query(*args, **kwargs)
+        if query_count == 1:
+            selected.set()
+            await release.wait()
+        return hits
+
+    monkeypatch.setattr(storage, "query", paused_query)
+    reading = asyncio.create_task(retrieve(["query"]))
+    await asyncio.wait_for(selected.wait(), 2)
+    try:
+        await update()
+    finally:
+        release.set()
+    items, hits = (await asyncio.wait_for(reading, 2))[0]
+    item, hit = next((item, hit) for item, hit in zip(items, hits) if item.id == item_id)
+
+    assert getattr(item, field).startswith("Updated")
+    assert hit.metadata[field] == getattr(item, field)
+    assert hit.distance == pytest.approx(0.5)
+    assert query_count == 2
+
+
+async def test_retriever_locks_candidates_discovered_during_revalidation(online_graph, monkeypatch):
+    graph = online_graph
+    (a, b, _), _, _, _ = await _populate_neighborhood(graph)
+    retriever = GraphRetriever(graph, graph.embedder)
+    query_count = 0
+
+    async def changing_candidates(*args, **kwargs):
+        nonlocal query_count
+        query_count += 1
+        entity = a if query_count == 1 else b
+        return [[EmbeddingHit(id=entity.id, distance=1.0, metadata=entity.to_dict())]]
+
+    entered = asyncio.Event()
+    release = asyncio.Event()
+    get_nodes = graph.index.graph_backend.get_nodes
+
+    async def paused_resolution(ids):
+        entered.set()
+        await release.wait()
+        return await get_nodes(ids)
+
+    monkeypatch.setattr(graph.index.nodes_vector_db, "query", changing_candidates)
+    monkeypatch.setattr(graph.index.graph_backend, "get_nodes", paused_resolution)
+    reading = asyncio.create_task(retriever.query_entities(["query"]))
+    await asyncio.wait_for(entered.wait(), 2)
+    attempted = asyncio.Event()
+
+    async def update_candidate():
+        attempted.set()
+        await graph.update_entities([replace(b, description="Changed after retrieval")])
+
+    writing = asyncio.create_task(update_candidate())
+    try:
+        await asyncio.wait_for(attempted.wait(), 2)
+        assert not writing.done()
+    finally:
+        release.set()
+        results, _ = await asyncio.wait_for(asyncio.gather(reading, writing), 3)
+
+    assert query_count == 3
+    assert results[0].entities[0].id == b.id
+    assert results[0].entities[0].description == b.description
+
+
+async def test_local_retrieval_repeats_scoring_when_seed_changes_before_neighborhood_scope(online_graph):
+    graph = online_graph
+    (a, _, _), chunks, _, _ = await _populate_neighborhood(graph)
+    graph.embedder.batch_embed_text.side_effect = lambda texts, **kwargs: [
+        [1.0, 0.0, 0.0, 0.0] if "Updated" in text else [0.1] * 4
+        for text in texts
+    ]
+    engine = LocalSearchEngine(SimpleNamespace(), graph, graph.embedder)
+    retrieve = engine.retriever.query_entities
+    retrieve_count = 0
+
+    async def candidates_then_update(*args, **kwargs):
+        nonlocal retrieve_count
+        retrieve_count += 1
+        entities, hits = (await retrieve(*args, **kwargs))[0]
+        selected = [(entity, hit) for entity, hit in zip(entities, hits) if entity.id == a.id]
+        if retrieve_count == 1:
+            await graph.update_entities([
+                replace(a, description="Updated entity", source_chunk_id=[chunks[2].id]),
+            ])
+        return [([entity for entity, _ in selected], [hit for _, hit in selected])]
+
+    engine.retriever.query_entities = candidates_then_update
+    result = await asyncio.wait_for(engine.search("query"), 3)
+
+    assert retrieve_count == 2
+    assert result.result.entities[0].description == "Updated entity"
+    assert [chunk.id for chunk in result.result.chunks] == [chunks[2].id]
+    assert result.metrics["entities"][0]["relevance_score"] == pytest.approx(0.5)
 
 
 async def test_global_summary_scope_ends_before_llm_processing(online_graph):
