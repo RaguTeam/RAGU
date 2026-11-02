@@ -107,6 +107,73 @@ async def test_completed_adapter_call_does_not_leave_child_tasks_with_a_live_lea
     assert snapshots[0].description == "Updated"
 
 
+@pytest.mark.parametrize("failure", [False, True])
+async def test_adapter_guard_waits_for_entered_child_calls_and_their_cleanup(tmp_path, failure):
+    sibling_entered = asyncio.Event()
+    cleanup_entered = asyncio.Event()
+    cleanup_release = asyncio.Event()
+    cleanup_public_entered = asyncio.Event()
+    probe_attempted = asyncio.Event()
+    probe_entered = asyncio.Event()
+
+    class DelegatingNetworkX(NetworkXStorage):
+        @override
+        async def get_nodes(self, ids):
+            if ids == ["fail"]:
+                await sibling_entered.wait()
+                raise ValueError("Delegated read failed")
+            if ids == ["slow"]:
+                sibling_entered.set()
+                try:
+                    if failure:
+                        await asyncio.Event().wait()
+                finally:
+                    cleanup_entered.set()
+                    await cleanup_release.wait()
+                    await self.get_nodes(["cleanup"])
+                return []
+            if ids == ["cleanup"]:
+                cleanup_public_entered.set()
+            else:
+                probe_entered.set()
+            return []
+
+        @override
+        async def upsert_nodes(self, nodes):
+            if failure:
+                await asyncio.gather(self.get_nodes(["fail"]), self.get_nodes(["slow"]))
+            else:
+                self.child = asyncio.create_task(self.get_nodes(["slow"]))
+                await sibling_entered.wait()
+
+    storage = DelegatingNetworkX(str(tmp_path / "graph.gml"), Entity, Relation)
+    _guard_storage(storage)
+    writing = asyncio.create_task(storage.upsert_nodes([]))
+    await asyncio.wait_for(cleanup_entered.wait(), 2)
+
+    async def probe():
+        probe_attempted.set()
+        return await storage.get_nodes(["probe"])
+
+    reading = asyncio.create_task(probe())
+    try:
+        await asyncio.wait_for(probe_attempted.wait(), 2)
+        assert not writing.done()
+        assert not probe_entered.is_set()
+    finally:
+        cleanup_release.set()
+        results = await asyncio.wait_for(asyncio.gather(writing, reading, return_exceptions=True), 2)
+
+    if failure:
+        assert isinstance(results[0], ValueError)
+        assert str(results[0]) == "Delegated read failed"
+    else:
+        assert results[0] is None
+    assert results[1] == []
+    assert cleanup_public_entered.is_set()
+    assert probe_entered.is_set()
+
+
 class _LifecycleKV(JsonKVStorage):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

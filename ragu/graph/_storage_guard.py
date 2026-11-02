@@ -1,8 +1,11 @@
 """Short adapter-call guards for backends with shared in-memory state."""
 
+import asyncio
+import threading
+from concurrent.futures import Future
 from contextvars import ContextVar
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import wraps
 from inspect import iscoroutinefunction
 from typing import Any
@@ -14,6 +17,53 @@ from ragu.storage.base_storage import BaseStorage
 @dataclass(slots=True)
 class _StorageLease:
     active: bool = True
+    pending: dict[Future[None], asyncio.Task[Any]] = field(default_factory=dict)
+    mutex: Any = field(default_factory=threading.Lock)
+
+    def borrow(self) -> Future[None] | None:
+        """Register an internal call only while its enclosing guard is live."""
+        task = asyncio.current_task()
+        assert task is not None
+        with self.mutex:
+            if not self.active:
+                return None
+            completed: Future[None] = Future()
+            self.pending[completed] = task
+            return completed
+
+    def release(self, completed: Future[None]) -> None:
+        with self.mutex:
+            self.pending.pop(completed)
+        completed.set_result(None)
+
+    def _cancel(self) -> None:
+        with self.mutex:
+            tasks = set(self.pending.values())
+        for task in tasks:
+            if not task.done():
+                task.get_loop().call_soon_threadsafe(task.cancel)
+
+    async def finish(self, cancel: bool = False) -> None:
+        """Finish delegated calls before the outer guard can be released."""
+        interrupted = False
+        while True:
+            with self.mutex:
+                completed = list(self.pending)
+                if not completed:
+                    self.active = False
+                    break
+            if cancel:
+                self._cancel()
+            waiting = asyncio.gather(*[asyncio.wrap_future(call) for call in completed])
+            while True:
+                try:
+                    await asyncio.shield(waiting)
+                    break
+                except asyncio.CancelledError:
+                    interrupted = cancel = True
+                    self._cancel()
+        if interrupted:
+            raise asyncio.CancelledError
 
 
 def _guard_storage(storage: BaseStorage) -> None:
@@ -36,10 +86,14 @@ def _guard_storage(storage: BaseStorage) -> None:
         @wraps(method)
         async def call(*args: Any, **kwargs: Any) -> Any:
             inherited = current_lease.get()
-            if inherited is not None and inherited.active:
+            borrowed = None if inherited is None else inherited.borrow()
+            if borrowed is not None:
                 # Public adapter methods may delegate to each other, including
                 # through child tasks. They share the enclosing adapter call.
-                return await method(*args, **kwargs)
+                try:
+                    return await method(*args, **kwargs)
+                finally:
+                    inherited.release(borrowed)
             async with locks.hold({("backend", "*"): write}):
                 lease = _StorageLease()
                 token = current_lease.set(lease)
@@ -47,7 +101,12 @@ def _guard_storage(storage: BaseStorage) -> None:
                     # Adapters may retain payloads or return live containers.
                     if write:
                         args, kwargs = deepcopy((args, kwargs))
-                    result = await method(*args, **kwargs)
+                    try:
+                        result = await method(*args, **kwargs)
+                    except BaseException:
+                        await lease.finish(cancel=True)
+                        raise
+                    await lease.finish()
                     return result if write else deepcopy(result)
                 finally:
                     lease.active = False
