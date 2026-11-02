@@ -65,9 +65,9 @@ class _IndexConcurrency:
         if name == "delete_chunks":
             return (self.graph_backend, self.nodes_vector_db, self.edges_vector_db,
                     self.chunks_kv_storage, self.chunks_vector_db)
-        if name in {"upsert_communities", "update_communities"}:
+        if name == "upsert_communities":
             return (self.community_kv_storage,)
-        if name in {"upsert_summaries", "update_summaries", "delete_summaries"}:
+        if name in {"upsert_summaries", "delete_summaries"}:
             return (self.community_summary_kv_storage,)
         if name == "delete_communities":
             return self.community_kv_storage, self.community_summary_kv_storage
