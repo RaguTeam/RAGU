@@ -89,7 +89,7 @@ async def test_node_delete_rediscovers_edges_inserted_while_waiting(index, monke
         return groups
 
     async def pause_delete_flush():
-        if asyncio.current_task().get_name() == delete_task_name:
+        if await index.graph_backend.get_nodes(["a"]) == [None]:
             cleanup_entered.set()
             await cleanup_release.wait()
         await original_flush()

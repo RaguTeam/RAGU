@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 import os
 import threading
 from collections import defaultdict
+from collections.abc import Awaitable, Callable
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional, Set, Type, cast
 
@@ -16,6 +18,7 @@ from ragu.graph._storage_guard import _guard_storage
 from ragu.models.embedder import Embedder
 from ragu.models.sparse_embedder import SparseEmbedder
 from ragu.storage.base_storage import (
+    BaseStorage,
     BaseKVStorage,
     BaseVectorStorage,
     BaseGraphStorage,
@@ -228,6 +231,65 @@ class Index(_IndexConcurrency):
             self.community_summary_kv_storage, self.community_kv_storage,
         )
 
+    async def _indexing(
+        self, operation: Callable[[], Awaitable[None]], *storages: BaseStorage,
+    ) -> None:
+        """Run a balanced batch in one task and retain locks until it finishes."""
+        finalizing = False
+
+        async def run_batch() -> None:
+            nonlocal finalizing
+            started: list[BaseStorage] = []
+            error: BaseException | None = None
+            try:
+                for storage in storages:
+                    await storage.index_start_callback()
+                    started.append(storage)
+                await operation()
+            except BaseException as exc:
+                error = exc
+            finalizing = True
+            try:
+                await self._finish_indexing(started)
+            except BaseException as cleanup_error:
+                if error is not None:
+                    raise error from cleanup_error
+                raise
+            if error is not None:
+                raise error
+
+        # The caller owns the element grants. All adapter work uses the same
+        # child task so adapters can keep task-local state for concurrent batches.
+        batch = asyncio.create_task(run_batch())
+        interrupted = False
+        cancellation_sent = False
+        while True:
+            try:
+                await asyncio.shield(batch)
+                break
+            except asyncio.CancelledError:
+                interrupted = True
+                if batch.done():
+                    batch.result()
+                    break
+                if not finalizing and not cancellation_sent:
+                    batch.cancel()
+                    cancellation_sent = True
+        if interrupted:
+            raise asyncio.CancelledError
+
+    async def _finish_indexing(self, storages: list[BaseStorage]) -> None:
+        """Finalize every started backend even if another finalizer fails."""
+        first_error: BaseException | None = None
+        for storage in storages:
+            try:
+                await storage.index_done_callback()
+            except BaseException as exc:
+                if first_error is None:
+                    first_error = exc
+        if first_error is not None:
+            raise first_error
+
     def _require_embedder(self) -> Embedder:
         """
         Return the configured embedder or fail with an actionable error.
@@ -292,15 +354,15 @@ class Index(_IndexConcurrency):
             ) for node, dense, sparse in zip(nodes_to_upsert, dense_embeddings, sparse_embeddings)
         ]
 
-        await self.graph_backend.upsert_nodes(nodes_to_upsert)
-        await self.nodes_vector_db.upsert(vdb_data)
+        async def write() -> None:
+            await self.graph_backend.upsert_nodes(nodes_to_upsert)
+            await self.nodes_vector_db.upsert(vdb_data)
 
-        await self.graph_backend.index_done_callback()
-        await self.nodes_vector_db.index_done_callback()
-        await self._update_reverse_indexes(
-            deleted_node_ids=existing_ids,
-            nodes=nodes_to_upsert,
-        )
+            await self._update_reverse_indexes(
+                deleted_node_ids=existing_ids,
+                nodes=nodes_to_upsert,
+            )
+        await self._indexing(write, self.graph_backend, self.nodes_vector_db)
         return self
 
     @_index_locked
@@ -353,16 +415,15 @@ class Index(_IndexConcurrency):
                 metadata=node.to_dict()
             ) for node, dense, sparse in zip(nodes_to_update, dense_embeddings, sparse_embeddings)
         ]
-        await self.graph_backend.upsert_nodes(nodes_to_update)
-        await self.nodes_vector_db.upsert(vdb_data)
+        async def write() -> None:
+            await self.graph_backend.upsert_nodes(nodes_to_update)
+            await self.nodes_vector_db.upsert(vdb_data)
 
-        await self.graph_backend.index_done_callback()
-        await self.nodes_vector_db.index_done_callback()
-
-        await self._update_reverse_indexes(
-            deleted_node_ids=node_ids,
-            nodes=nodes_to_update,
-        )
+            await self._update_reverse_indexes(
+                deleted_node_ids=node_ids,
+                nodes=nodes_to_update,
+            )
+        await self._indexing(write, self.graph_backend, self.nodes_vector_db)
         return self
 
     @_index_locked
@@ -416,15 +477,15 @@ class Index(_IndexConcurrency):
             ) for edge, dense, sparse in zip(edges_to_upsert, dense_embeddings, sparse_embeddings)
         ]
 
-        await self.graph_backend.upsert_edges(edges_to_upsert)
-        await self.edges_vector_db.upsert(vdb_data)
+        async def write() -> None:
+            await self.graph_backend.upsert_edges(edges_to_upsert)
+            await self.edges_vector_db.upsert(vdb_data)
 
-        await self.graph_backend.index_done_callback()
-        await self.edges_vector_db.index_done_callback()
-        await self._update_reverse_indexes(
-            deleted_edge_ids=existing_edge_ids,
-            edges=edges_to_upsert,
-        )
+            await self._update_reverse_indexes(
+                deleted_edge_ids=existing_edge_ids,
+                edges=edges_to_upsert,
+            )
+        await self._indexing(write, self.graph_backend, self.edges_vector_db)
         return self
 
     @_index_locked
@@ -489,15 +550,15 @@ class Index(_IndexConcurrency):
             ) for edge, dense, sparse in zip(edges_to_update, dense_embeddings, sparse_embeddings)
         ]
 
-        await self.graph_backend.upsert_edges(edges_to_update)
-        await self.edges_vector_db.upsert(vdb_data)
+        async def write() -> None:
+            await self.graph_backend.upsert_edges(edges_to_update)
+            await self.edges_vector_db.upsert(vdb_data)
 
-        await self.graph_backend.index_done_callback()
-        await self.edges_vector_db.index_done_callback()
-        await self._update_reverse_indexes(
-            deleted_edge_ids=list(incoming_by_id.keys()),
-            edges=edges_to_update,
-        )
+            await self._update_reverse_indexes(
+                deleted_edge_ids=list(incoming_by_id.keys()),
+                edges=edges_to_update,
+            )
+        await self._indexing(write, self.graph_backend, self.edges_vector_db)
         return self
 
     @_index_locked
@@ -521,8 +582,6 @@ class Index(_IndexConcurrency):
             chunk_id = cast(str, chunk_dict.pop("id"))
             kv_data[chunk_id] = chunk_dict
 
-        await self.chunks_kv_storage.upsert(kv_data)
-
         dense_embeddings = await embedder.batch_embed_text(
             [c.content for c in chunks],
             desc="Chunks vectorization"
@@ -537,10 +596,10 @@ class Index(_IndexConcurrency):
             metadata={"content": c.content, "doc_id": c.doc_id}
         ) for c, dense, sparse in zip(chunks, dense_embeddings, sparse_embeddings)]
 
-        await self.chunks_vector_db.upsert(vdb_data)
-        await self.chunks_vector_db.index_done_callback()
-
-        await self.chunks_kv_storage.index_done_callback()
+        async def write() -> None:
+            await self.chunks_kv_storage.upsert(kv_data)
+            await self.chunks_vector_db.upsert(vdb_data)
+        await self._indexing(write, self.chunks_kv_storage, self.chunks_vector_db)
         return self
 
     @_index_locked
@@ -563,8 +622,9 @@ class Index(_IndexConcurrency):
             }
             for c in communities
         }
-        await self.community_kv_storage.upsert(kv_data)
-        await self.community_kv_storage.index_done_callback()
+        async def write() -> None:
+            await self.community_kv_storage.upsert(kv_data)
+        await self._indexing(write, self.community_kv_storage)
         return self
 
     @_index_locked
@@ -579,8 +639,9 @@ class Index(_IndexConcurrency):
             return self
 
         kv_data = {s.id: s.summary for s in summaries}
-        await self.community_summary_kv_storage.upsert(kv_data) # type: ignore
-        await self.community_summary_kv_storage.index_done_callback()
+        async def write() -> None:
+            await self.community_summary_kv_storage.upsert(kv_data) # type: ignore
+        await self._indexing(write, self.community_summary_kv_storage)
         return self
 
     @_index_locked
@@ -599,18 +660,17 @@ class Index(_IndexConcurrency):
         edges_by_node = await self.graph_backend.get_all_edges_for_nodes(node_ids)
         edge_ids = self._unique_edge_ids_from_grouped(edges_by_node)
 
-        await self.graph_backend.delete_nodes(node_ids)
-        await self.nodes_vector_db.delete(node_ids)
+        async def write() -> None:
+            await self.graph_backend.delete_nodes(node_ids)
+            await self.nodes_vector_db.delete(node_ids)
 
-        await self.edges_vector_db.delete(edge_ids)
-        await self.edges_vector_db.index_done_callback()
+            await self.edges_vector_db.delete(edge_ids)
 
-        await self.graph_backend.index_done_callback()
-        await self.nodes_vector_db.index_done_callback()
-        await self._update_reverse_indexes(
-            deleted_node_ids=node_ids,
-            deleted_edge_ids=edge_ids,
-        )
+            await self._update_reverse_indexes(
+                deleted_node_ids=node_ids,
+                deleted_edge_ids=edge_ids,
+            )
+        await self._indexing(write, self.graph_backend, self.nodes_vector_db, self.edges_vector_db)
         return self
 
     @_index_locked
@@ -627,14 +687,14 @@ class Index(_IndexConcurrency):
         existing_edges = await self.graph_backend.get_edges(edge_specs)
         found_edge_ids = [edge.id for group in existing_edges for edge in group]
 
-        await self.graph_backend.delete_edges(edge_specs)
+        async def write() -> None:
+            await self.graph_backend.delete_edges(edge_specs)
 
-        if found_edge_ids:
-            await self.edges_vector_db.delete(found_edge_ids)
+            if found_edge_ids:
+                await self.edges_vector_db.delete(found_edge_ids)
 
-        await self.graph_backend.index_done_callback()
-        await self.edges_vector_db.index_done_callback()
-        await self._update_reverse_indexes(deleted_edge_ids=found_edge_ids)
+            await self._update_reverse_indexes(deleted_edge_ids=found_edge_ids)
+        await self._indexing(write, self.graph_backend, self.edges_vector_db)
         return self
 
     @_index_locked
@@ -669,32 +729,32 @@ class Index(_IndexConcurrency):
                 for edge in all_edges if edge.id in deleted_edge_ids
             ]
 
-        if delete_specs:
-            await self.graph_backend.delete_edges(delete_specs)
-
-        if node_ids:
-            await self.graph_backend.delete_nodes(node_ids)
-            await self.nodes_vector_db.delete(node_ids)
-
-        if edge_ids:
-            await self.edges_vector_db.delete(edge_ids)
-
-        await self.chunks_kv_storage.delete(chunk_ids)
-        await self.chunks_vector_db.delete(chunk_ids)
-
-        await self.chunks_kv_storage.index_done_callback()
-        await self.chunks_vector_db.index_done_callback()
+        storages: list[BaseStorage] = [self.chunks_kv_storage, self.chunks_vector_db]
         if node_ids or edge_ids:
-            await self.graph_backend.index_done_callback()
+            storages.append(self.graph_backend)
         if node_ids:
-            await self.nodes_vector_db.index_done_callback()
+            storages.append(self.nodes_vector_db)
         if edge_ids:
-            await self.edges_vector_db.index_done_callback()
-        await self._update_reverse_indexes(
-            deleted_chunk_ids=chunk_ids,
-            deleted_node_ids=node_ids,
-            deleted_edge_ids=edge_ids,
-        )
+            storages.append(self.edges_vector_db)
+        async def write() -> None:
+            if delete_specs:
+                await self.graph_backend.delete_edges(delete_specs)
+
+            if node_ids:
+                await self.graph_backend.delete_nodes(node_ids)
+                await self.nodes_vector_db.delete(node_ids)
+
+            if edge_ids:
+                await self.edges_vector_db.delete(edge_ids)
+
+            await self.chunks_kv_storage.delete(chunk_ids)
+            await self.chunks_vector_db.delete(chunk_ids)
+            await self._update_reverse_indexes(
+                deleted_chunk_ids=chunk_ids,
+                deleted_node_ids=node_ids,
+                deleted_edge_ids=edge_ids,
+            )
+        await self._indexing(write, *storages)
         return self
 
     @_index_locked
@@ -708,11 +768,11 @@ class Index(_IndexConcurrency):
         if not community_ids:
             return self
 
-        await self.community_kv_storage.delete(community_ids)
-        await self.community_summary_kv_storage.delete(community_ids)
+        async def write() -> None:
+            await self.community_kv_storage.delete(community_ids)
+            await self.community_summary_kv_storage.delete(community_ids)
 
-        await self.community_kv_storage.index_done_callback()
-        await self.community_summary_kv_storage.index_done_callback()
+        await self._indexing(write, self.community_kv_storage, self.community_summary_kv_storage)
         return self
 
     @_index_locked
@@ -812,8 +872,11 @@ class Index(_IndexConcurrency):
     @_index_locked
     async def delete_summaries(self, summary_ids: List[str]) -> "Index":
         """Delete summaries while holding their exclusive element grants."""
-        await self.community_summary_kv_storage.delete(summary_ids)
-        await self.community_summary_kv_storage.index_done_callback()
+        if not summary_ids:
+            return self
+        async def write() -> None:
+            await self.community_summary_kv_storage.delete(summary_ids)
+        await self._indexing(write, self.community_summary_kv_storage)
         return self
 
     @_index_locked

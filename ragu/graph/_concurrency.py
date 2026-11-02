@@ -22,8 +22,6 @@ def _index_locked(method: Any) -> Any:
         bound = method_signature.bind(self, *args, **kwargs)
         data = next((value for name, value in bound.arguments.items() if name != "self"), ())
         async with self._operation_lock(method.__name__, data):
-            for storage in self._write_storages(method.__name__):
-                await storage.index_start_callback()
             return await method(self, *args, **kwargs)
     return call
 
@@ -52,26 +50,6 @@ class _IndexConcurrency:
 
     def _init_concurrency(self) -> None:
         self._element_locks = _ElementLocks()
-
-    def _write_storages(self, name: str) -> tuple:
-        if name in {"upsert_nodes", "update_nodes"}:
-            return self.graph_backend, self.nodes_vector_db
-        if name in {"upsert_edges", "update_edges", "delete_edges"}:
-            return self.graph_backend, self.edges_vector_db
-        if name == "delete_nodes":
-            return self.graph_backend, self.nodes_vector_db, self.edges_vector_db
-        if name in {"upsert_chunks"}:
-            return self.chunks_kv_storage, self.chunks_vector_db
-        if name == "delete_chunks":
-            return (self.graph_backend, self.nodes_vector_db, self.edges_vector_db,
-                    self.chunks_kv_storage, self.chunks_vector_db)
-        if name == "upsert_communities":
-            return (self.community_kv_storage,)
-        if name in {"upsert_summaries", "delete_summaries"}:
-            return (self.community_summary_kv_storage,)
-        if name == "delete_communities":
-            return self.community_kv_storage, self.community_summary_kv_storage
-        return ()
 
     @asynccontextmanager
     async def _planned_lock(

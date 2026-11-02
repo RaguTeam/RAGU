@@ -668,20 +668,20 @@ class KnowledgeGraph:
 
         await self.update_entities(entities)
 
-        await self.index.community_kv_storage.index_start_callback()
-        await self.index.community_summary_kv_storage.index_start_callback()
-        await self.index.community_kv_storage.drop()
-        await self.index.community_summary_kv_storage.drop()
+        async def drop_communities() -> None:
+            await self.index.community_kv_storage.drop()
+            await self.index.community_summary_kv_storage.drop()
+
+        await self.index._indexing(
+            drop_communities, self.index.community_kv_storage,
+            self.index.community_summary_kv_storage,
+        )
 
         if communities:
             await self.upsert_communities(communities)
-        else:
-            await self.index.community_kv_storage.index_done_callback()
 
         if summaries:
             await self.upsert_summaries(summaries)
-        else:
-            await self.index.community_summary_kv_storage.index_done_callback()
 
         return self
 
