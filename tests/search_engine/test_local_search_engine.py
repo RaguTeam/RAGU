@@ -19,6 +19,15 @@ def _make_embedder_mock():
     return SimpleNamespace(embed_text=AsyncMock(return_value=[0.0] * 3))
 
 
+def _mock_stored_entities(monkeypatch, knowledge_graph, entities):
+    by_id = {entity.id: entity for entity in entities}
+    monkeypatch.setattr(
+        knowledge_graph.index.graph_backend,
+        "get_nodes",
+        AsyncMock(side_effect=lambda ids: [by_id.get(entity_id) for entity_id in ids]),
+    )
+
+
 @pytest.mark.asyncio
 async def test_local_search_collects_entities_relations_chunks_and_summaries(real_kg, kg_fixture_ids):
     entity_ids = kg_fixture_ids["entity_ids"]
@@ -55,6 +64,7 @@ async def test_local_search_reranks_entities_relations_summaries_and_chunks(monk
     llm = SimpleNamespace(chat_completion=AsyncMock())
     entity_a = Entity(entity_name="Alpha", entity_type="Person", description="First entity", source_chunk_id=["chunk-a"], documents_id=["doc-a"])
     entity_b = Entity(entity_name="Beta", entity_type="Place", description="Second entity", source_chunk_id=["chunk-b"], documents_id=["doc-b"])
+    _mock_stored_entities(monkeypatch, real_kg, [entity_a, entity_b])
     relation_a = Relation(
         subject_id=entity_a.id,
         object_id=entity_b.id,
@@ -149,6 +159,7 @@ async def test_local_query_returns_raw_result_when_no_response_attr(monkeypatch,
 async def test_local_search_rerank_top_k_truncates_entities_before_derivation(monkeypatch, real_kg):
     entity_a = Entity(entity_name="Alpha", entity_type="Person", description="d", source_chunk_id=["c"], documents_id=["doc-a"])
     entity_b = Entity(entity_name="Beta", entity_type="Place", description="d", source_chunk_id=["c"], documents_id=["doc-b"])
+    _mock_stored_entities(monkeypatch, real_kg, [entity_a, entity_b])
 
     # Reranker reverses the order -> [entity_b, entity_a]; rerank_top_k=1 keeps [entity_b].
     reranker = SimpleNamespace(

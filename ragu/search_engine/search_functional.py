@@ -43,7 +43,9 @@ async def _prefetch_entity_edges(
         for edge in edges
         if edge and entity_id in (edge.subject_id, edge.object_id)
     ))
-    neighbors = await knowledge_graph.index.get_nodes(neighbor_ids)
+    # Local search already holds the complete neighborhood read scope, including
+    # these neighbors. Child tasks must not acquire another element lock set.
+    neighbors = await knowledge_graph.index.graph_backend.get_nodes(neighbor_ids)
 
     return edges_by_entity, {
         neighbor.id: neighbor.source_chunk_id for neighbor in neighbors if neighbor is not None

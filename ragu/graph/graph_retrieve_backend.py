@@ -97,25 +97,27 @@ class GraphRetriever:
         )
 
         unique_ids = list({hit.id for hits in per_query_hits for hit in hits})
-        entities = await self.knowledge_graph.index.get_nodes(unique_ids)
-        entity_by_id: Dict[str, Entity] = {
-            entity_id: entity
-            for entity_id, entity in zip(unique_ids, entities)
-            if entity is not None
-        }
+        index = self.knowledge_graph.index
+        async with index.a_read_lock(node_ids=unique_ids):
+            entities = await index.graph_backend.get_nodes(unique_ids)
+            entity_by_id: Dict[str, Entity] = {
+                entity_id: entity
+                for entity_id, entity in zip(unique_ids, entities)
+                if entity is not None
+            }
 
-        results: List[EntityHits] = []
-        for hits in per_query_hits:
-            filtered_entities: List[Entity] = []
-            filtered_hits: List[EmbeddingHit] = []
-            for hit in hits:
-                entity = entity_by_id.get(hit.id)
-                if entity is None:
-                    continue
-                filtered_entities.append(entity)
-                filtered_hits.append(hit)
-            results.append(EntityHits(filtered_entities, filtered_hits))
-        return results
+            results: List[EntityHits] = []
+            for hits in per_query_hits:
+                filtered_entities: List[Entity] = []
+                filtered_hits: List[EmbeddingHit] = []
+                for hit in hits:
+                    entity = entity_by_id.get(hit.id)
+                    if entity is None:
+                        continue
+                    filtered_entities.append(entity)
+                    filtered_hits.append(hit)
+                results.append(EntityHits(filtered_entities, filtered_hits))
+            return results
 
     async def query_relations(
         self,
@@ -153,31 +155,32 @@ class GraphRetriever:
                 if hit.id not in unique_specs:
                     unique_specs[hit.id] = (str(subject_id), str(object_id), hit.id)
 
-        relation_by_id: Dict[str, Relation] = {}
-        if unique_specs:
-            spec_ids = list(unique_specs.keys())
-            relation_groups = await self.knowledge_graph.index.get_edges(
-                [unique_specs[spec_id] for spec_id in spec_ids]
-            )
-            # Specs come from edge ids, so each group holds at most one relation.
-            relation_by_id = {
-                spec_id: group[0]
-                for spec_id, group in zip(spec_ids, relation_groups)
-                if group
-            }
+        spec_ids = list(unique_specs)
+        specs = [unique_specs[spec_id] for spec_id in spec_ids]
+        index = self.knowledge_graph.index
+        async with index.a_read_lock(edge_specs=specs):
+            relation_by_id: Dict[str, Relation] = {}
+            if specs:
+                relation_groups = await index.graph_backend.get_edges(specs)
+                # Specs come from edge ids, so each group holds at most one relation.
+                relation_by_id = {
+                    spec_id: group[0]
+                    for spec_id, group in zip(spec_ids, relation_groups)
+                    if group
+                }
 
-        results: List[RelationHits] = []
-        for hits in per_query_hits:
-            filtered_relations: List[Relation] = []
-            aligned_hits: List[EmbeddingHit] = []
-            for hit in hits:
-                relation = relation_by_id.get(hit.id)
-                if relation is None:
-                    continue
-                filtered_relations.append(relation)
-                aligned_hits.append(hit)
-            results.append(RelationHits(filtered_relations, aligned_hits))
-        return results
+            results: List[RelationHits] = []
+            for hits in per_query_hits:
+                filtered_relations: List[Relation] = []
+                aligned_hits: List[EmbeddingHit] = []
+                for hit in hits:
+                    relation = relation_by_id.get(hit.id)
+                    if relation is None:
+                        continue
+                    filtered_relations.append(relation)
+                    aligned_hits.append(hit)
+                results.append(RelationHits(filtered_relations, aligned_hits))
+            return results
 
     async def query_chunks(
         self,
@@ -204,32 +207,34 @@ class GraphRetriever:
         )
 
         unique_ids = list({hit.id for hits in per_query_hits for hit in hits})
-        chunk_data_list = await self.knowledge_graph.index.chunks_kv_storage.get_by_ids(unique_ids)
-        data_by_id: Dict[str, dict] = {
-            chunk_id: chunk_data
-            for chunk_id, chunk_data in zip(unique_ids, chunk_data_list)
-            if chunk_data is not None
-        }
+        index = self.knowledge_graph.index
+        async with index.a_read_lock(chunk_ids=unique_ids):
+            chunk_data_list = await index.chunks_kv_storage.get_by_ids(unique_ids)
+            data_by_id: Dict[str, dict] = {
+                chunk_id: chunk_data
+                for chunk_id, chunk_data in zip(unique_ids, chunk_data_list)
+                if chunk_data is not None
+            }
 
-        results: List[ChunkHits] = []
-        for hits in per_query_hits:
-            chunks: List[Chunk] = []
-            filtered_hits: List[EmbeddingHit] = []
-            for hit in hits:
-                chunk_data = data_by_id.get(hit.id)
-                if chunk_data is None:
-                    continue
-                chunk = Chunk(
-                    content=chunk_data.get("content", ""),
-                    chunk_order_idx=chunk_data.get("chunk_order_idx", 0),
-                    doc_id=chunk_data.get("doc_id", ""),
-                    num_tokens=chunk_data.get("num_tokens"),
-                )
-                setattr(chunk, "id", hit.id)
-                chunks.append(chunk)
-                filtered_hits.append(hit)
-            results.append(ChunkHits(chunks, filtered_hits))
-        return results
+            results: List[ChunkHits] = []
+            for hits in per_query_hits:
+                chunks: List[Chunk] = []
+                filtered_hits: List[EmbeddingHit] = []
+                for hit in hits:
+                    chunk_data = data_by_id.get(hit.id)
+                    if chunk_data is None:
+                        continue
+                    chunk = Chunk(
+                        content=chunk_data.get("content", ""),
+                        chunk_order_idx=chunk_data.get("chunk_order_idx", 0),
+                        doc_id=chunk_data.get("doc_id", ""),
+                        num_tokens=chunk_data.get("num_tokens"),
+                    )
+                    setattr(chunk, "id", hit.id)
+                    chunks.append(chunk)
+                    filtered_hits.append(hit)
+                results.append(ChunkHits(chunks, filtered_hits))
+            return results
 
     async def find_similar_entities(
         self,

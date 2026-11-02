@@ -1,7 +1,7 @@
 # Partially based on https://github.com/gusye1234/nano-graphrag/blob/main/nano_graphrag/
 import asyncio
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable
 from dataclasses import dataclass, field
 from textwrap import dedent
 from typing import Any, Dict, List, Literal
@@ -39,6 +39,19 @@ from ragu.search_engine.search_functional import (
     _rerank_items,
     _prefetch_entity_edges,
 )
+
+
+async def _gather_scoped(*awaitables: Awaitable[Any]) -> list[Any]:
+    """Finish or cancel every child before releasing the enclosing read scope."""
+    tasks = [asyncio.ensure_future(awaitable) for awaitable in awaitables]
+    try:
+        return list(await asyncio.gather(*tasks))
+    except BaseException:
+        for task in tasks:
+            if not task.done():
+                task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        raise
 
 
 @dataclass
@@ -208,21 +221,38 @@ class LocalSearchEngine(BaseEngine[LocalParams, LocalSearchRetrieve]):
         params = params or LocalParams()
         entity_results = await self.retriever.query_entities(queries, top_k=params.top_k)
 
-        ranked_entities = await asyncio.gather(*[
-            self._rank_entities(query, entities, params.rerank_top_k)
-            for query, (entities, _) in zip(queries, entity_results)
-        ])
+        index = self.knowledge_graph.index
+        entity_ids = list(dict.fromkeys(
+            entity.id for entities, _ in entity_results for entity in entities
+        ))
+        async with index.a_read_lock(node_ids=entity_ids, include_neighbors=True):
+            # Vector candidates can change before the neighborhood scope starts.
+            current_entities = await index.graph_backend.get_nodes(entity_ids)
+            current_by_id = {
+                entity.id: entity for entity in current_entities if entity is not None
+            }
+            entity_results = [
+                (
+                    [current_by_id[entity.id] for entity in entities if entity.id in current_by_id],
+                    [hit for entity, hit in zip(entities, hits) if entity.id in current_by_id],
+                )
+                for entities, hits in entity_results
+            ]
+            ranked_entities = await _gather_scoped(*[
+                self._rank_entities(query, entities, params.rerank_top_k)
+                for query, (entities, _) in zip(queries, entity_results)
+            ])
 
-        edges_by_entity, neighbor_chunks = await _prefetch_entity_edges(
-            [entity.id for entities in ranked_entities for entity in entities if entity and entity.id],
-            self.knowledge_graph,
-        )
+            edges_by_entity, neighbor_chunks = await _prefetch_entity_edges(
+                [entity.id for entities in ranked_entities for entity in entities if entity and entity.id],
+                self.knowledge_graph,
+            )
 
-        return list(await asyncio.gather(*[
-            self._assemble(query, entities, entity_hits, ranked, edges_by_entity, neighbor_chunks)
-            for query, (entities, entity_hits), ranked
-            in zip(queries, entity_results, ranked_entities)
-        ]))
+            return list(await _gather_scoped(*[
+                self._assemble(query, entities, entity_hits, ranked, edges_by_entity, neighbor_chunks)
+                for query, (entities, entity_hits), ranked
+                in zip(queries, entity_results, ranked_entities)
+            ]))
 
     async def _rank_entities(
         self,
@@ -285,7 +315,7 @@ class LocalSearchEngine(BaseEngine[LocalParams, LocalSearchRetrieve]):
 
         # Derive related items from the reduced entity set (document ids are a
         # set union, independent of entity order).
-        relations, relevant_chunks, summaries, documents_id = await asyncio.gather(
+        relations, relevant_chunks, summaries, documents_id = await _gather_scoped(
             _find_most_related_edges_from_entities(entities, edges_by_entity),
             _find_most_related_text_unit_from_entities(
                 entities, self.knowledge_graph, edges_by_entity, neighbor_chunks
@@ -298,7 +328,7 @@ class LocalSearchEngine(BaseEngine[LocalParams, LocalSearchRetrieve]):
         summaries = [summary for summary in summaries if summary is not None]
 
         # 4. Rerank the derived items.
-        relations, summaries, relevant_chunks = await asyncio.gather(
+        relations, summaries, relevant_chunks = await _gather_scoped(
             _rerank_items(
                 query,
                 relations,

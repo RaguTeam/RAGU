@@ -151,6 +151,11 @@ class GlobalSearchEngine(BaseEngine[GlobalSearchParams, GlobalSearchRetrieve]):
         :param min_cluster_size: Minimum number of entities a community must contain.
         :return: Summaries of the communities that passed the size filter.
         """
+        async with self.knowledge_graph.index.a_read_lock(all_summaries=True):
+            return await self._read_community_summaries(min_cluster_size)
+
+    async def _read_community_summaries(self, min_cluster_size: int) -> List[str]:
+        """Resolve summaries and community metadata within the active read scope."""
         summary_storage = self.knowledge_graph.index.community_summary_kv_storage
         community_ids = await summary_storage.all_keys()
         summaries = await summary_storage.get_by_ids(community_ids)

@@ -22,7 +22,7 @@ The module exists to keep graph construction and graph persistence independent f
 High-level facade for build, CRUD, reindexing, and storage access.
 
 - Purpose: orchestrates chunking, extraction, graph construction, vectorization, and persistence.
-- Important methods: `build_from_docs`, `upsert_entities`, `upsert_relations`, `get_entities`, `get_relations`, `get_chunks`, `reindex_community`, `reindex_descriptions`, `reindex_graph`.
+- Important methods: `build_from_docs`, `upsert_entities`, `upsert_relations`, `get_entities`, `get_relations`, `get_chunks`, `a_read_lock`, `reindex_community`, `reindex_descriptions`, `reindex_graph`.
 - Important parameters: `llm`, `embedder`, optional `sparse_embedder`, `chunker`, `artifact_extractor`, `builder_settings`, `storage_settings`.
 
 ```python
@@ -413,7 +413,8 @@ asyncio.run(main())
 Storage coordinator.
 
 - Purpose: keeps graph backend, vector DBs, chunk KV, community KV, and summary KV in sync.
-- Important methods: `upsert_nodes`, `upsert_edges`, `upsert_chunks`, `delete_chunks`, `check_consistency`.
+- Important methods: `upsert_nodes`, `upsert_edges`, `upsert_chunks`, `delete_chunks`, `a_read_lock`, `check_consistency`.
+- Coordinated reads and updates also include `get_summaries`, `delete_summaries`, `update_communities`, `update_summaries`, and `edges_degrees`; the matching `KnowledgeGraph` methods delegate to them.
 - Storage defaults: `NetworkXStorage`, `JsonKVStorage`, `NanoVectorDBStorage`.
 
 ```python
@@ -469,6 +470,60 @@ async def main():
 
 asyncio.run(main())
 ```
+
+## Concurrent Access
+
+`KnowledgeGraph` and its `Index` share element-level reader/writer locks. Reads of the same elements can run together. A write waits for readers and writers of its affected elements, while operations on unrelated elements can continue. Synchronization is implemented above the storage adapters and is enabled automatically for the facade's CRUD methods.
+
+A write scope covers validation, reading existing values, merging, vectorization, graph/vector/KV changes, reverse-index updates, and persistence callbacks. Deleting a node also locks its incident relations and their endpoints until the corresponding graph and vector records have been removed. Deleting a chunk locks the referring nodes and relations, including incident relations of the deleted nodes. Edge writes protect their endpoints, so a new relation cannot appear during deletion of an endpoint. Community deletion protects its summary as well.
+
+The affected set is discovered before acquiring the locks. RAGU acquires that set atomically, then checks it again; if the cascade has grown, it releases the set and retries. A waiting writer delays later conflicting readers, while unrelated requests can pass it. This avoids acquiring only part of a cascade and waiting for another operation that holds the remaining elements.
+
+### Keeping Multiple Reads Consistent
+
+Each read method protects its own operation and returns a detached snapshot. Use `a_read_lock` to keep selected elements stable across several awaited reads:
+
+```python
+from ragu import KnowledgeGraph
+from ragu.graph.types import Entity
+
+
+async def read_pair(
+    graph: KnowledgeGraph,
+    first_id: str,
+    second_id: str,
+) -> tuple[Entity | None, Entity | None]:
+    async with graph.a_read_lock(node_ids=[first_id, second_id]):
+        first = (await graph.get_entities([first_id]))[0]
+        second = (await graph.get_entities([second_id]))[0]
+        return first, second
+```
+
+`KnowledgeGraph.a_read_lock` delegates to `Index.a_read_lock`; both accept the following keyword arguments:
+
+| Argument | Protected data |
+| --- | --- |
+| `node_ids=()` | Selected nodes. |
+| `edge_specs=()` | Relations specified by `(subject_id, object_id, relation_id)` and their endpoints; `relation_id=None` selects the whole directed pair. |
+| `chunk_ids=()` | Selected source chunks. |
+| `community_ids=()` | Selected communities and the elements needed to reconstruct them. |
+| `summary_ids=()` | Selected community summaries. |
+| `include_neighbors=False` | When enabled, expands selected nodes to their retrieval neighborhood, including relations, neighboring nodes, source chunks, communities, and summaries. |
+| `all_summaries=False` | When enabled, protects all community summaries and the community metadata used to filter them. |
+
+The context manager is asynchronous: use `async with`, and perform the protected calls in the same task. Nested scopes can reuse an already protected subset. Expanding a held set or upgrading a read lock to a write lock raises `ValueError`; include all required IDs in the outer scope instead. Locks are released on normal completion, exceptions, and cancellation.
+
+`LocalSearchEngine` keeps its selected neighborhood protected through reranking and context assembly. It releases the read scope before generating the LLM answer. Global search protects summary collection while loading its context; naive search resolves matched chunk IDs under their read scope. Other elements remain available for online updates during these reads. Whole-index operations, such as consistency checking, reindexing, and closing, use a wider scope because they inspect or replace data across the index.
+
+### Scope of the Guarantee
+
+Share one `KnowledgeGraph`/`Index` instance within one process. The lock manager supports concurrent asyncio tasks and threads with separate event loops; a chosen adapter or model client may impose additional restrictions on sharing its own connections across threads or loops. Independently constructed indexes and separate processes do not share locks.
+
+RAGU also guards individual adapter calls and persistence callbacks so that shared-memory backends can safely inspect or modify their internal structures. These short guards do not cover embedding or LLM calls. Direct access to `index.graph_backend`, vector stores, or KV stores bypasses the element-level protocol; use the facade methods or an appropriate read scope for compound reads, and use facade methods for mutations.
+
+Locks coordinate concurrent access; they do not provide transactional rollback across graph, vector, and KV stores. A backend failure or cancellation can still require the existing consistency checks and recovery procedures.
+
+The conceptual workflow is described in [English](../../docs/en/ragu_components.md#concurrent-reads-and-online-updates) and [Russian](../../docs/ru/ragu_components.md#конкурентное-чтение-и-онлайн-обновления).
 
 ## Data Flow
 
