@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from collections import Counter, defaultdict
+from contextlib import AbstractAsyncContextManager
 from typing import (
     Any,
     Dict,
@@ -30,6 +31,7 @@ from ragu.models.embedder import Embedder
 from ragu.models.sparse_embedder import SparseEmbedder
 from ragu.models.llm import LLM
 from ragu.graph.index import Index, StorageArguments
+from ragu.graph._concurrency import _graph_locked
 from ragu.storage.types import ClusterInfo
 from ragu.triplet.base_artifact_extractor import BaseArtifactExtractor
 from ragu.storage.base_storage import EdgeSpec
@@ -258,6 +260,23 @@ class KnowledgeGraph:
 
         # Report of the most recent build_from_docs() run, None before the first build.
 
+    def a_read_lock(
+        self,
+        node_ids: Iterable[str] = (),
+        edge_specs: Iterable[EdgeSpec] = (),
+        chunk_ids: Iterable[str] = (),
+        community_ids: Iterable[str] = (),
+        summary_ids: Iterable[str] = (),
+        include_neighbors: bool = False,
+        all_summaries: bool = False,
+    ) -> AbstractAsyncContextManager[None]:
+        """Protect a multi-step read; see :meth:`Index.a_read_lock` for parameters."""
+        return self.index.a_read_lock(
+            node_ids=node_ids, edge_specs=edge_specs, chunk_ids=chunk_ids,
+            community_ids=community_ids, summary_ids=summary_ids,
+            include_neighbors=include_neighbors, all_summaries=all_summaries,
+        )
+
     async def build_from_docs(self, docs: List[str]) -> "KnowledgeGraph":
         """
         Build graph and vector context from a list of input documents.
@@ -289,22 +308,23 @@ class KnowledgeGraph:
         is_vector_only = self.builder_settings.build_only_vector_context
         should_store_communities = self.make_community_summary and not is_vector_only
 
-        if should_store_communities and communities:
-            entities, communities, summaries = await self._reindex_cluster_ids(
-                entities,
-                communities,
-                summaries,
-            )
-
+        operations = [("upsert_chunks", chunks)]
         if not is_vector_only:
-            await self.upsert_entities(entities)
-            await self.upsert_relations(relations)
-
-        await self.index.upsert_chunks(chunks)
-
+            operations.extend([("upsert_nodes", entities), ("upsert_edges", relations)])
         if should_store_communities:
-            await self.index.upsert_communities(communities)
-            await self.upsert_summaries(summaries)
+            operations.extend([("upsert_communities", communities), ("upsert_summaries", summaries)])
+        async with self.index._operation_lock("build", operations):
+            if should_store_communities and communities:
+                entities, communities, summaries = await self._reindex_cluster_ids(
+                    entities, communities, summaries,
+                )
+            if not is_vector_only:
+                await self.upsert_entities(entities)
+                await self.upsert_relations(relations)
+            await self.index.upsert_chunks(chunks)
+            if should_store_communities:
+                await self.index.upsert_communities(communities)
+                await self.upsert_summaries(summaries)
 
         build_summary = (
             f"entities: {len(entities)}, relations: {len(relations)}, "
@@ -321,6 +341,7 @@ class KnowledgeGraph:
 
         return self
 
+    @_graph_locked
     async def upsert_entities(self, entities: List[Entity]) -> "KnowledgeGraph":
         """
         Add entities to the knowledge graph.
@@ -387,6 +408,7 @@ class KnowledgeGraph:
         await self.index.delete_nodes(entity_ids)
         return self
 
+    @_graph_locked
     async def upsert_relations(self, relations: List[Relation]) -> "KnowledgeGraph":
         """
         Add one or more relations to the knowledge graph.
@@ -453,7 +475,7 @@ class KnowledgeGraph:
         :param edge_specs: Edge specifications ``(subject_id, object_id, relation_id)``.
         :return: Degree sums in the same order as input specs.
         """
-        return await self.index.graph_backend.edges_degrees(edge_specs)
+        return await self.index.edges_degrees(edge_specs)
 
     async def get_relations(self, edge_specs: List[EdgeSpec]) -> List[List[Relation]]:
         """
@@ -515,17 +537,7 @@ class KnowledgeGraph:
         if duplicate_ids:
             raise ValueError(f"Cannot update duplicated community IDs in one request: {duplicate_ids}")
 
-        community_ids = [community.id for community in communities]
-        existing_communities = await self.index.community_kv_storage.get_by_ids(community_ids)
-        missing_ids = [
-            community_id
-            for community_id, existing in zip(community_ids, existing_communities)
-            if existing is None
-        ]
-        if missing_ids:
-            raise ValueError(f"Cannot update non-existent communities: {missing_ids}")
-
-        await self.index.upsert_communities(communities)
+        await self.index.update_communities(communities)
         return self
 
     async def delete_communities(self, community_ids: List[str]) -> "KnowledgeGraph":
@@ -564,17 +576,7 @@ class KnowledgeGraph:
         if duplicate_ids:
             raise ValueError(f"Cannot update duplicated summary IDs in one request: {duplicate_ids}")
 
-        summary_ids = [summary.id for summary in summaries]
-        existing_summaries = await self.index.community_summary_kv_storage.get_by_ids(summary_ids)
-        missing_ids = [
-            summary_id
-            for summary_id, existing in zip(summary_ids, existing_summaries)
-            if existing is None
-        ]
-        if missing_ids:
-            raise ValueError(f"Cannot update non-existent summaries: {missing_ids}")
-
-        await self.index.upsert_summaries(summaries)
+        await self.index.update_summaries(summaries)
         return self
 
     async def get_summaries(self, summary_ids: List[str]) -> List[CommunitySummary | None]:
@@ -585,12 +587,7 @@ class KnowledgeGraph:
         :return: Matching summary or list of summaries, preserving input order
             and using ``None`` for missing IDs.
         """
-        results = await self.index.community_summary_kv_storage.get_by_ids(summary_ids)
-        summaries = [
-            None if summary is None else CommunitySummary(id=summary_id, summary=summary)
-            for summary_id, summary in zip(summary_ids, results)
-        ]
-        return summaries
+        return await self.index.get_summaries(summary_ids)
 
     async def delete_summaries(self, summary_ids: List[str]) -> "KnowledgeGraph":
         """
@@ -599,8 +596,7 @@ class KnowledgeGraph:
         :param summary_ids: IDs of the summaries to delete.
         :return: Self for method chaining.
         """
-        await self.index.community_summary_kv_storage.delete(summary_ids)
-        await self.index.community_summary_kv_storage.index_done_callback()
+        await self.index.delete_summaries(summary_ids)
         return self
 
     async def _deduplicate_chunks_by_id(self, chunks: List[Chunk]) -> List[Chunk]:
@@ -635,6 +631,7 @@ class KnowledgeGraph:
 
         return unique_chunks
 
+    @_graph_locked
     async def reindex_community(self) -> "KnowledgeGraph":
         """
         Run clusterization and community summarization in knowledge graph.
@@ -671,6 +668,8 @@ class KnowledgeGraph:
 
         await self.update_entities(entities)
 
+        await self.index.community_kv_storage.index_start_callback()
+        await self.index.community_summary_kv_storage.index_start_callback()
         await self.index.community_kv_storage.drop()
         await self.index.community_summary_kv_storage.drop()
 
@@ -687,6 +686,7 @@ class KnowledgeGraph:
         return self
 
     # TODO: add an ability to summarize any of Entity/Relation (or Node/Edge) child types.
+    @_graph_locked
     async def reindex_descriptions(
         self,
         summarize_only_more_than: Optional[int] = None,
@@ -782,6 +782,7 @@ class KnowledgeGraph:
 
         return self
 
+    @_graph_locked
     async def reindex_graph(self) -> "KnowledgeGraph":
         """
         Reindex item descriptions and clusters. Useful after upserting a new graph into an existing one.

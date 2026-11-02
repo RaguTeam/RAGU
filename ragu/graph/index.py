@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import threading
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional, Set, Type, cast
@@ -10,6 +11,8 @@ from ragu.chunker.types import Chunk
 from ragu.common.global_parameters import DEFAULT_FILENAMES
 from ragu.common.global_parameters import Settings
 from ragu.graph.types import Community, CommunitySummary, Entity, Relation
+from ragu.graph._concurrency import _IndexConcurrency, _index_locked
+from ragu.graph._storage_guard import _guard_storage
 from ragu.models.embedder import Embedder
 from ragu.models.sparse_embedder import SparseEmbedder
 from ragu.storage.base_storage import (
@@ -99,7 +102,7 @@ class ConsistencyReport:
         return self.to_text()
 
 
-class Index:
+class Index(_IndexConcurrency):
     """
     Coordinates graph, vector, and KV storage for graph nodes and edges.
 
@@ -135,6 +138,7 @@ class Index:
         # Reverse indexes for cascade operations
         self._chunk_to_nodes: Dict[str, Set[str]] = defaultdict(set)
         self._chunk_to_edges: Dict[str, Set[str]] = defaultdict(set)
+        self._reverse_indexes_mutex = threading.RLock()
 
         summary_kv_kwargs = self._build_storage_kwargs(
             storage_folder,
@@ -213,6 +217,16 @@ class Index:
             edge_cls=edge_t,
             **graph_kwargs
         )
+        self._init_concurrency()
+        for storage in self._storages():
+            _guard_storage(storage)
+
+    def _storages(self) -> tuple:
+        return (
+            self.graph_backend, self.nodes_vector_db, self.edges_vector_db,
+            self.chunks_vector_db, self.chunks_kv_storage,
+            self.community_summary_kv_storage, self.community_kv_storage,
+        )
 
     def _require_embedder(self) -> Embedder:
         """
@@ -228,6 +242,7 @@ class Index:
             )
         return self.embedder
 
+    @_index_locked
     async def upsert_nodes(self, nodes: List[Entity]) -> "Index":
         """
         Insert or replace nodes in graph and vector DB by ID.
@@ -288,6 +303,7 @@ class Index:
         )
         return self
 
+    @_index_locked
     async def update_nodes(self, nodes: List[Entity]) -> "Index":
         """
         Update nodes by ID using replace semantics.
@@ -349,6 +365,7 @@ class Index:
         )
         return self
 
+    @_index_locked
     async def upsert_edges(self, edges: List[Relation]) -> "Index":
         """
         Insert edges in graph and vector DB.
@@ -410,6 +427,7 @@ class Index:
         )
         return self
 
+    @_index_locked
     async def update_edges(self, edges: List[Relation]) -> "Index":
         """
         Update edges by exact edge spec using replace semantics.
@@ -482,6 +500,7 @@ class Index:
         )
         return self
 
+    @_index_locked
     async def upsert_chunks(self, chunks: List[Chunk]) -> "Index":
         """
         Insert or update chunks into KV storage (and optionally vector DB).
@@ -524,6 +543,7 @@ class Index:
         await self.chunks_kv_storage.index_done_callback()
         return self
 
+    @_index_locked
     async def upsert_communities(self, communities: List[Community]) -> "Index":
         """
         Insert or update communities into KV storage.
@@ -547,6 +567,7 @@ class Index:
         await self.community_kv_storage.index_done_callback()
         return self
 
+    @_index_locked
     async def upsert_summaries(self, summaries: List[CommunitySummary]) -> "Index":
         """
         Insert or update community summaries into KV storage.
@@ -562,6 +583,7 @@ class Index:
         await self.community_summary_kv_storage.index_done_callback()
         return self
 
+    @_index_locked
     async def delete_nodes(self, node_ids: List[str]) -> "Index":
         """
         Delete nodes from graph and vector DB.
@@ -591,6 +613,7 @@ class Index:
         )
         return self
 
+    @_index_locked
     async def delete_edges(self, edge_specs: List[EdgeSpec]) -> "Index":
         """
         Delete edges from graph and vector DB.
@@ -614,6 +637,7 @@ class Index:
         await self._update_reverse_indexes(deleted_edge_ids=found_edge_ids)
         return self
 
+    @_index_locked
     async def delete_chunks(self, chunk_ids: List[str]) -> "Index":
         """
         Delete chunks from KV and vector storage.
@@ -624,9 +648,12 @@ class Index:
         if not chunk_ids:
             return self
 
-        affected_nodes = await self._find_nodes_by_chunk_ids(chunk_ids)
+        deleted_chunks = set(chunk_ids)
+        all_nodes = await self.graph_backend.get_all_nodes()
+        affected_nodes = [node for node in all_nodes if deleted_chunks.intersection(node.source_chunk_id)]
         node_ids = [node.id for node in affected_nodes]
-        edge_ids = await self._find_edge_ids_by_chunk_ids(chunk_ids)
+        all_edges = await self.graph_backend.get_all_edges()
+        edge_ids = [edge.id for edge in all_edges if deleted_chunks.intersection(edge.source_chunk_id)]
 
         if node_ids:
             edges_by_node = await self.graph_backend.get_all_edges_for_nodes(node_ids)
@@ -636,7 +663,11 @@ class Index:
         delete_specs: List[EdgeSpec] = []
         if edge_ids:
             # TODO: remove full scan here
-            delete_specs = await self.get_edge_specs_by_ids(set(edge_ids))
+            deleted_edge_ids = set(edge_ids)
+            delete_specs = [
+                (edge.subject_id, edge.object_id, edge.id)
+                for edge in all_edges if edge.id in deleted_edge_ids
+            ]
 
         if delete_specs:
             await self.graph_backend.delete_edges(delete_specs)
@@ -653,8 +684,9 @@ class Index:
 
         await self.chunks_kv_storage.index_done_callback()
         await self.chunks_vector_db.index_done_callback()
-        if node_ids:
+        if node_ids or edge_ids:
             await self.graph_backend.index_done_callback()
+        if node_ids:
             await self.nodes_vector_db.index_done_callback()
         if edge_ids:
             await self.edges_vector_db.index_done_callback()
@@ -665,6 +697,7 @@ class Index:
         )
         return self
 
+    @_index_locked
     async def delete_communities(self, community_ids: List[str]) -> "Index":
         """
         Delete communities and their summaries from KV storage.
@@ -682,6 +715,7 @@ class Index:
         await self.community_summary_kv_storage.index_done_callback()
         return self
 
+    @_index_locked
     async def get_nodes(self, node_ids: List[str]) -> List[Optional[Entity]]:
         """
         Retrieve nodes by their IDs.
@@ -691,6 +725,7 @@ class Index:
         """
         return await self.graph_backend.get_nodes(node_ids)
 
+    @_index_locked
     async def get_edges(self, edge_specs: List[EdgeSpec]) -> List[List[Relation]]:
         """
         Retrieve edges by specs, one result list per spec.
@@ -705,6 +740,7 @@ class Index:
         """
         return await self.graph_backend.get_edges(edge_specs)
 
+    @_index_locked
     async def get_chunks(self, chunk_ids: List[str]) -> List[Optional[Chunk]]:
         """
         Retrieve chunks by their IDs.
@@ -721,6 +757,7 @@ class Index:
                 result.append(Chunk(**chunk_dict))
         return result
 
+    @_index_locked
     async def get_communities(self, community_ids: List[str]) -> List[Optional[Community]]:
         """
         Retrieve communities by their IDs, reconstructing from stored metadata.
@@ -758,6 +795,51 @@ class Index:
 
         return communities
 
+    @_index_locked
+    async def edges_degrees(self, edge_specs: List[EdgeSpec]) -> List[int]:
+        """Return endpoint degree sums under a shared element scope."""
+        return await self.graph_backend.edges_degrees(edge_specs)
+
+    @_index_locked
+    async def get_summaries(self, summary_ids: List[str]) -> List[CommunitySummary | None]:
+        """Retrieve detached summaries aligned with the supplied IDs."""
+        values = await self.community_summary_kv_storage.get_by_ids(summary_ids)
+        return [
+            None if value is None else CommunitySummary(id=item_id, summary=value)
+            for item_id, value in zip(summary_ids, values)
+        ]
+
+    @_index_locked
+    async def delete_summaries(self, summary_ids: List[str]) -> "Index":
+        """Delete summaries while holding their exclusive element grants."""
+        await self.community_summary_kv_storage.delete(summary_ids)
+        await self.community_summary_kv_storage.index_done_callback()
+        return self
+
+    @_index_locked
+    async def update_communities(self, communities: List[Community]) -> "Index":
+        """Replace existing communities after an atomic existence check."""
+        ids = [community.id for community in communities]
+        if len(set(ids)) != len(ids):
+            raise ValueError("Cannot update duplicated community IDs in one request")
+        rows = await self.community_kv_storage.get_by_ids(ids)
+        missing = [item_id for item_id, row in zip(ids, rows) if row is None]
+        if missing:
+            raise ValueError(f"Cannot update non-existent communities: {missing}")
+        return await self.upsert_communities(communities)
+
+    @_index_locked
+    async def update_summaries(self, summaries: List[CommunitySummary]) -> "Index":
+        """Replace existing summaries after an atomic existence check."""
+        ids = [summary.id for summary in summaries]
+        if len(set(ids)) != len(ids):
+            raise ValueError("Cannot update duplicated summary IDs in one request")
+        rows = await self.community_summary_kv_storage.get_by_ids(ids)
+        missing = [item_id for item_id, row in zip(ids, rows) if row is None]
+        if missing:
+            raise ValueError(f"Cannot update non-existent summaries: {missing}")
+        return await self.upsert_summaries(summaries)
+
     async def _validate_edge_endpoints_exist(self, edges: List[Relation]) -> None:
         """
         Validate that all edge endpoints exist as nodes.
@@ -779,6 +861,7 @@ class Index:
                 f"Cannot insert/update edges referencing non-existent nodes: {missing_ids}"
             )
 
+    @_index_locked
     async def get_edge_specs_by_ids(
         self,
         edge_ids: Set[str],
@@ -818,6 +901,19 @@ class Index:
         :param deleted_edge_ids: Edge IDs removed from the graph.
         :param deleted_chunk_ids: Chunk IDs removed from KV/vector storage.
         """
+        with self._reverse_indexes_mutex:
+            self._apply_reverse_indexes(
+                nodes, edges, deleted_node_ids, deleted_edge_ids, deleted_chunk_ids,
+            )
+
+    def _apply_reverse_indexes(
+        self,
+        nodes: List[Entity] | None = None,
+        edges: List[Relation] | None = None,
+        deleted_node_ids: List[str] | None = None,
+        deleted_edge_ids: List[str] | None = None,
+        deleted_chunk_ids: List[str] | None = None,
+    ) -> None:
         if deleted_chunk_ids:
             for chunk_id in deleted_chunk_ids:
                 self._chunk_to_nodes.pop(chunk_id, None)
@@ -853,16 +949,12 @@ class Index:
 
         Used as fallback for cold-start consistency with preloaded graphs.
         """
-        self._chunk_to_nodes.clear()
-        self._chunk_to_edges.clear()
-
         all_nodes: List[Entity] = await self.graph_backend.get_all_nodes()
         all_edges: List[Relation] = await self.graph_backend.get_all_edges()
-
-        await self._update_reverse_indexes(
-            nodes=all_nodes,
-            edges=all_edges,
-        )
+        with self._reverse_indexes_mutex:
+            self._chunk_to_nodes.clear()
+            self._chunk_to_edges.clear()
+            self._apply_reverse_indexes(nodes=all_nodes, edges=all_edges)
 
     async def _find_nodes_by_chunk_ids(self, chunk_ids: List[str]) -> List[Entity]:
         """
@@ -958,6 +1050,7 @@ class Index:
         )
         return kwargs
 
+    @_index_locked
     async def close(self) -> None:
         """
         Release resources held by every backend this index owns.
@@ -980,6 +1073,7 @@ class Index:
         ):
             await storage.close()
 
+    @_index_locked
     async def check_consistency(self) -> ConsistencyReport:
         """
         Audit cross-storage graph consistency and collect invariant violations.
