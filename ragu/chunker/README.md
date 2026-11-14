@@ -237,3 +237,20 @@ External:
 - `doc_id` is currently derived from the whole document hash inside chunkers.
 - `SimpleChunker.max_chunk_size` is measured in characters, not tokens.
 - Semantic chunkers load local ML models and may require GPU-compatible configuration.
+
+### Typed chunk persistence
+
+`Chunk.to_dict()` / `Chunk.from_dict()` preserve the chunk ID, concrete type,
+source references and metadata. Untyped legacy records load as `Chunk`.
+Markdown object IDs depend on the document, object type and content; identical objects in one document share an ID.
+`BaseChunker.a_split(documents)` provides the async pipeline entry point.
+Its default implementation delegates string batches to `split()`. It splits
+`Document` inputs individually and preserves their document IDs; subclasses
+override it when they need asynchronous operations, such as LLM calls.
+The graph filters previously processed documents before calling the chunker;
+chunkers do not accept or manage storage identifiers.
+Public document and chunk types and Markdown chunkers are exported from
+`ragu.chunker` and `ragu`.
+
+For tables and formulas represented as graph entities, see
+[table and formula metanodes](../graph/README.md#table-and-formula-metanodes).

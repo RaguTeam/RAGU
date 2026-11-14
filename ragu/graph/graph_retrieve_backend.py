@@ -219,13 +219,7 @@ class GraphRetriever:
                 chunk_data = data_by_id.get(hit.id)
                 if chunk_data is None:
                     continue
-                chunk = Chunk(
-                    content=chunk_data.get("content", ""),
-                    chunk_order_idx=chunk_data.get("chunk_order_idx", 0),
-                    doc_id=chunk_data.get("doc_id", ""),
-                    num_tokens=chunk_data.get("num_tokens"),
-                )
-                setattr(chunk, "id", hit.id)
+                chunk = Chunk.from_dict(chunk_data, hit.id)
                 chunks.append(chunk)
                 filtered_hits.append(hit)
             results.append(ChunkHits(chunks, filtered_hits))

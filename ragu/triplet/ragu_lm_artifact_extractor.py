@@ -134,7 +134,7 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
 
         conversations: List[ChatMessages] = render(
             instruction.messages,
-            text=[ctx.chunk.content for ctx in contexts]
+            text=[ctx.chunk.to_llm() for ctx in contexts]
         )
 
         if not conversations:
@@ -171,7 +171,7 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
 
             chunk_conversations: List[ChatMessages] = render(
                 instruction.messages,
-                source_text=ctx.chunk.content,
+                source_text=ctx.chunk.to_llm(),
                 source_entity=ctx.raw_entities,
             )
 
@@ -205,7 +205,7 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
             chunk_conversations: List[ChatMessages] = render(
                 instruction.messages,
                 normalized_entity=ctx.normalized_entities,
-                source_text=ctx.chunk.content,
+                source_text=ctx.chunk.to_llm(),
             )
 
             for conversation, entity_name in zip(chunk_conversations, ctx.normalized_entities):
@@ -253,7 +253,7 @@ class RaguLmArtifactExtractor(BaseArtifactExtractor):
                 instruction.messages,
                 first_normalized_entity=first_entities,
                 second_normalized_entity=second_entities,
-                source_text=ctx.chunk.content,
+                source_text=ctx.chunk.to_llm(),
             )
 
             for conversation, (subject, obj) in zip(chunk_conversations, entity_pairs):

@@ -145,7 +145,7 @@ class TwoStageArtifactsExtractorLLM(BaseArtifactExtractor):
 
         entities_result: List[Entity] = []
         relations_result: List[Relation] = []
-        context: List[str] = [chunk.content for chunk in chunks]
+        context: List[str] = [chunk.to_llm() for chunk in chunks]
 
         try:
             entity_results = await self._extract_entities(context)

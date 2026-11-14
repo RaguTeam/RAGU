@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter, defaultdict
+from collections.abc import Sequence
 from typing import (
     Any,
     Dict,
@@ -16,7 +18,8 @@ from typing import (
 import pandas as pd
 
 from ragu.chunker.base_chunker import BaseChunker
-from ragu.chunker.types import Chunk
+from ragu.chunker.types import Chunk, Document
+from ragu.utils.ragu_utils import compute_mdhash_id
 from ragu.common.logger import logger
 from ragu.common.global_parameters import Settings
 from ragu.graph.builder_modules import RemoveIsolatedNodes
@@ -256,23 +259,48 @@ class KnowledgeGraph:
         self.remove_isolated_nodes = self.builder_settings.remove_isolated_nodes
         self.vectorize_chunks = self.builder_settings.vectorize_chunks
 
-        # Report of the most recent build_from_docs() run, None before the first build.
-
-    async def build_from_docs(self, docs: List[str]) -> "KnowledgeGraph":
+    async def build_from_docs(self, docs: Sequence[str | Document]) -> "KnowledgeGraph":
         """
         Build graph and vector context from a list of input documents.
 
         :param docs: Input documents to process.
         :return: "KnowledgeGraph" for method chaining.
         """
-        chunks = self.pipeline.chunker.split(docs) if self.pipeline.chunker else \
-            [Chunk(doc, i, doc_id=f"doc_{i}") for i, doc in enumerate(docs)]
+        documents = await self._deduplicate_documents_by_hash(docs)
+        if not documents:
+            return self
+        docs = list(documents.values())
+        if self.pipeline.chunker:
+            chunks = await self.pipeline.chunker.a_split(docs)
+        else:
+            chunks = [
+                Chunk(
+                    content=doc.content if isinstance(doc, Document) else doc,
+                    chunk_order_idx=i,
+                    doc_id=doc.id if isinstance(doc, Document) else f"doc_{i}"
+                )
+                for i, doc in enumerate(docs)
+            ]
         logger.debug(f'Got {len(chunks)} chunks')
+
+        document_records: dict[str, dict[str, list[str]]] = {}
+        all_chunk_ids = [chunk.id for chunk in chunks]
+        chunk_ids_by_document: dict[str, list[str]] = defaultdict(list)
+
+        for chunk in chunks:
+            chunk_ids_by_document[chunk.doc_id].append(chunk.id)
+
+        for document_hash, doc in documents.items():
+            document = doc if isinstance(doc, Document) else Document(doc)
+            document_records[document_hash] = {
+                "chunk_ids": chunk_ids_by_document.get(document.id, all_chunk_ids),
+            }
 
         chunks = await self._deduplicate_chunks_by_id(chunks)
         logger.debug(f'Got {len(chunks)} chunks after deduplicating')
 
         if not chunks:
+            await self._store_document_hashes(document_records)
             logger.warning("Nothing to build.")
             return self
 
@@ -284,7 +312,6 @@ class KnowledgeGraph:
         logger.debug(f"Extracted {len(relations)} relations")
         logger.debug(f"Extracted {len(communities)} communities")
         logger.debug(f"Extracted {len(chunks)} chunks")
-        
 
         is_vector_only = self.builder_settings.build_only_vector_context
         should_store_communities = self.make_community_summary and not is_vector_only
@@ -305,6 +332,8 @@ class KnowledgeGraph:
         if should_store_communities:
             await self.index.upsert_communities(communities)
             await self.upsert_summaries(summaries)
+
+        await self._store_document_hashes(document_records)
 
         build_summary = (
             f"entities: {len(entities)}, relations: {len(relations)}, "
@@ -602,6 +631,40 @@ class KnowledgeGraph:
         await self.index.community_summary_kv_storage.delete(summary_ids)
         await self.index.community_summary_kv_storage.index_done_callback()
         return self
+
+    async def _deduplicate_documents_by_hash(
+        self, docs: Sequence[str | Document]
+    ) -> dict[str, str | Document]:
+        """
+        Filter processed and repeated documents before chunking or LLM calls.
+
+        :param docs: Source strings or documents.
+        :return: New documents keyed by their deterministic input hash.
+        """
+        existing_hashes = set(await self.index.documents_kv_storage.all_keys())
+        unique: dict[str, str | Document] = {}
+        for doc in docs:
+            document = doc if isinstance(doc, Document) else Document(doc)
+            payload = json.dumps({
+                "content": document.content,
+                "id": document.id,
+                "title": document.title,
+                "structured_content": document.structured_content,
+            }, ensure_ascii=False, sort_keys=True)
+            document_hash = compute_mdhash_id(payload, prefix="doc-")
+            if document_hash not in existing_hashes:
+                unique.setdefault(document_hash, doc)
+        return unique
+
+    async def _store_document_hashes(self, records: dict[str, dict[str, list[str]]]) -> None:
+        """
+        Persist completion markers after graph, chunk and vector writes succeed.
+
+        :param records: Document hashes mapped to their source chunk identifiers.
+        """
+        await self.index.documents_kv_storage.index_start_callback()
+        await self.index.documents_kv_storage.upsert(records)
+        await self.index.documents_kv_storage.index_done_callback()
 
     async def _deduplicate_chunks_by_id(self, chunks: List[Chunk]) -> List[Chunk]:
         """

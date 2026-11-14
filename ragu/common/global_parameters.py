@@ -10,6 +10,7 @@ from loguru import logger
 DEFAULT_FILENAMES = {
     "community_kv_storage_name": "kv_community.json",
     "chunks_kv_storage_name": "kv_chunks.json",
+    "documents_kv_storage_name": "kv_documents.json",
     "entity_vdb_name": "vdb_entity.json",
     "relation_vdb_name": "vdb_relation.json",
     "chunk_vdb_name": "vdb_chunk.json",

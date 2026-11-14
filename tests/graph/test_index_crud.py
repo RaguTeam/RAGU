@@ -1095,7 +1095,7 @@ def test_consistency_report_str():
 @pytest.mark.asyncio
 async def test_close_releases_every_backend(index):
     """
-    Index.close() must reach all seven storages, and stay safe when repeated.
+    Index.close() must reach all eight storages, and stay safe when repeated.
 
     Backends holding a connection (Neo4j, remote Qdrant) leak a pool otherwise;
     file-backed ones inherit a no-op from BaseStorage.
@@ -1108,6 +1108,7 @@ async def test_close_releases_every_backend(index):
         "edges_vector_db",
         "chunks_vector_db",
         "chunks_kv_storage",
+        "documents_kv_storage",
         "community_summary_kv_storage",
         "community_kv_storage",
     ):
@@ -1127,6 +1128,7 @@ async def test_close_releases_every_backend(index):
         "edges_vector_db",
         "chunks_vector_db",
         "chunks_kv_storage",
+        "documents_kv_storage",
         "community_summary_kv_storage",
         "community_kv_storage",
     ] * 2)

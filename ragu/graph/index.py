@@ -34,6 +34,7 @@ class StorageArguments:
     :param vdb_storage_type: Storage backend class for vector embeddings (entities, relations, chunks).
     :param chunks_kv_storage_kwargs: Additional kwargs passed to KV storage for text chunks.
     :param summary_kv_storage_kwargs: Additional kwargs passed to KV storage for community summaries.
+    :param documents_kv_storage_kwargs: Additional kwargs for processed document hashes.
     :param communities_kv_storage_kwargs: Additional kwargs passed to KV storage for community metadata.
     :param vdb_storage_kwargs: Additional kwargs passed to vector database instances.
     :param graph_storage_kwargs: Additional kwargs passed to graph backend storage.
@@ -47,6 +48,7 @@ class StorageArguments:
     communities_kv_storage_kwargs: Dict[str, Any] = field(default_factory=dict[str, Any])
     vdb_storage_kwargs: Dict[str, Any] = field(default_factory=dict[str, Any])
     graph_storage_kwargs: Dict[str, Any] = field(default_factory=dict[str, Any])
+    documents_kv_storage_kwargs: Dict[str, Any] = field(default_factory=dict[str, Any])
 
 
 @dataclass(frozen=True)
@@ -151,6 +153,11 @@ class Index:
             DEFAULT_FILENAMES["chunks_kv_storage_name"],
             arguments.chunks_kv_storage_kwargs,
         )
+        documents_kv_kwargs = self._build_storage_kwargs(
+            storage_folder,
+            DEFAULT_FILENAMES["documents_kv_storage_name"],
+            arguments.documents_kv_storage_kwargs,
+        )
         nodes_vdb_kwargs = self._build_storage_kwargs(
             storage_folder,
             DEFAULT_FILENAMES["entity_vdb_name"],
@@ -174,6 +181,9 @@ class Index:
 
         # Key-value storages
         self.chunks_kv_storage = arguments.kv_storage_type(**chunks_kv_kwargs)
+        self._documents_kv_storage: BaseKVStorage[Any] | None = None
+        self._documents_kv_storage_type = arguments.kv_storage_type
+        self._documents_kv_storage_kwargs = documents_kv_kwargs
         self.community_summary_kv_storage = arguments.kv_storage_type(**summary_kv_kwargs)
         self.community_kv_storage = arguments.kv_storage_type(**community_kv_kwargs)
 
@@ -213,6 +223,17 @@ class Index:
             edge_cls=edge_t,
             **graph_kwargs
         )
+
+    @property
+    def documents_kv_storage(self) -> BaseKVStorage[Any]:
+        """
+        Open the document hash registry on first use.
+
+        :return: Document hash storage, created only for ingestion or deletion.
+        """
+        if self._documents_kv_storage is None:
+            self._documents_kv_storage = self._documents_kv_storage_type(**self._documents_kv_storage_kwargs)
+        return self._documents_kv_storage
 
     def _require_embedder(self) -> Embedder:
         """
@@ -498,17 +519,17 @@ class Index:
         # Store in KV
         kv_data: dict[str, dict[str, Any]] = {}
         for chunk in chunks:
-            chunk_dict = asdict(chunk)
+            chunk_dict = chunk.to_dict()
             chunk_id = cast(str, chunk_dict.pop("id"))
             kv_data[chunk_id] = chunk_dict
 
         await self.chunks_kv_storage.upsert(kv_data)
 
         dense_embeddings = await embedder.batch_embed_text(
-            [c.content for c in chunks],
+            [c.to_embed() for c in chunks],
             desc="Chunks vectorization"
         )
-        sparse_embeddings = self.sparse_embedder.embed_document([c.content for c in chunks]) \
+        sparse_embeddings = self.sparse_embedder.embed_document([c.to_embed() for c in chunks]) \
             if self.sparse_embedder else [None for _ in chunks]
 
         vdb_data = [Point(
@@ -624,6 +645,19 @@ class Index:
         if not chunk_ids:
             return self
 
+        document_hashes = await self.documents_kv_storage.all_keys()
+        document_records = await self.documents_kv_storage.get_by_ids(document_hashes)
+        deleted_chunk_ids = set(chunk_ids)
+        invalidated_documents = [
+            key for key, record in zip(document_hashes, document_records)
+            if record is not None and deleted_chunk_ids.intersection(record.get("chunk_ids", []))
+        ]
+
+        if invalidated_documents:
+            await self.documents_kv_storage.index_start_callback()
+            await self.documents_kv_storage.delete(invalidated_documents)
+            await self.documents_kv_storage.index_done_callback()
+
         affected_nodes = await self._find_nodes_by_chunk_ids(chunk_ids)
         node_ids = [node.id for node in affected_nodes]
         edge_ids = await self._find_edge_ids_by_chunk_ids(chunk_ids)
@@ -714,11 +748,11 @@ class Index:
         """
         chunk_dicts = await self.chunks_kv_storage.get_by_ids(chunk_ids)
         result: list[Chunk | None] = []
-        for chunk_dict in chunk_dicts:
+        for chunk_id, chunk_dict in zip(chunk_ids, chunk_dicts):
             if chunk_dict is None:
                 result.append(None)
             else:
-                result.append(Chunk(**chunk_dict))
+                result.append(Chunk.from_dict(chunk_dict, chunk_id))
         return result
 
     async def get_communities(self, community_ids: List[str]) -> List[Optional[Community]]:
@@ -979,6 +1013,8 @@ class Index:
             self.community_kv_storage,
         ):
             await storage.close()
+        if self._documents_kv_storage is not None:
+            await self._documents_kv_storage.close()
 
     async def check_consistency(self) -> ConsistencyReport:
         """

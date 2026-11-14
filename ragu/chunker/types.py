@@ -1,5 +1,5 @@
 import json
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -68,6 +68,35 @@ class Chunk:
 
     def __post_init__(self) -> None:
         self.id = compute_mdhash_id(self.content, prefix="chunk-")
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Serialize a typed chunk without losing its identifier.
+
+        :return: Payload containing the chunk type and all dataclass fields.
+        """
+        return {**asdict(self), "chunk_type": type(self).__name__}
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any], chunk_id: str | None = None) -> "Chunk":
+        """
+        Restore a chunk, including legacy payloads without a type discriminator.
+
+        :param data: Stored chunk payload.
+        :param chunk_id: Storage key, authoritative for legacy identifiers.
+        :return: Reconstructed chunk with its persisted ID.
+        :raises ValueError: If the stored chunk type is unknown.
+        """
+        payload = dict(data)
+        kind = payload.pop("chunk_type", "Chunk")
+        stored_id = payload.pop("id", None)
+        classes = {c.__name__: c for c in (Chunk, TextChunk, ObjectChunk, TableChunk, FormulaChunk, CodeChunk, ImageChunk)}
+        if kind not in classes:
+            raise ValueError(f"Unknown chunk type: {kind}")
+        chunk = classes[kind](**payload)
+        if chunk_id is not None or stored_id is not None:
+            chunk.id = chunk_id if chunk_id is not None else stored_id
+        return chunk
 
     def to_embed(self) -> str:
         """

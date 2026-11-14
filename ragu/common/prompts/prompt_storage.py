@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from ragu.common.prompts.default_models import (
     ArtifactsModel,
+    RelationsExtractionModel,
     CommunityReportModel,
     GlobalSearchContextModel,
     EntityDescriptionModel,
@@ -37,6 +38,10 @@ from ragu.common.prompts.default_templates import (
     DEFAULT_QUERY_REWRITE_PROMPT,
     DEFAULT_RAGU_LM_SYSTEM_PROMPT,
     DEFAULT_OBJECT_DESCRIPTION_PROMPT,
+    DEFAULT_TABLE_RELATIONS_PROMPT,
+    DEFAULT_TABLE_RELATIONS_USER_PROMPT,
+    DEFAULT_FORMULA_RELATIONS_PROMPT,
+    DEFAULT_FORMULA_RELATIONS_USER_PROMPT,
 )
 from ragu.common.prompts.few_shot import (
     FewShotFormatter,
@@ -296,4 +301,21 @@ DEFAULT_PROMPT_TEMPLATES: dict[str, RAGUInstruction] = {
         pydantic_model=str,
         description="Prompt for describing tables, formulas, code blocks and images extracted by the Markdown chunker.",
     ),
+    "table_relations": RAGUInstruction(
+        messages=ChatMessages.from_messages([
+            SystemMessage(content=DEFAULT_TABLE_RELATIONS_PROMPT),
+            UserMessage(content=DEFAULT_TABLE_RELATIONS_USER_PROMPT),
+        ]),
+        pydantic_model=RelationsExtractionModel,
+        description="Links one table to known entities using text before and after it.",
+    ),
+    "formula_relations": RAGUInstruction(
+        messages=ChatMessages.from_messages([
+            SystemMessage(content=DEFAULT_FORMULA_RELATIONS_PROMPT),
+            UserMessage(content=DEFAULT_FORMULA_RELATIONS_USER_PROMPT),
+        ]),
+        pydantic_model=RelationsExtractionModel,
+        description="Links one formula to known entities using text before and after it.",
+    ),
+
 }

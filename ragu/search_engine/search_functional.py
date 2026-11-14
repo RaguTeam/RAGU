@@ -122,6 +122,11 @@ async def _find_most_related_text_unit_from_entities(
 
     all_text_units_lookup: Dict[str, Dict[str, Any]] = {}
     for index, (seed_id, this_text_units, this_edges) in enumerate(zip(seed_ids, chunks_id, grouped_relations)):
+        this_text_units = list(this_text_units)
+        for edge in this_edges:
+            neighbor_id = edge.object_id if edge.subject_id == seed_id else edge.subject_id
+            if neighbor_id.startswith("meta-"):
+                this_text_units.extend(neighbor_chunks.get(neighbor_id, []))
         for c_id in this_text_units:
             if c_id in all_text_units_lookup:
                 continue
@@ -157,7 +162,7 @@ async def _find_most_related_text_unit_from_entities(
         all_text_units, key=lambda x: (x["order"], -x["relation_counts"])
     )
     return [
-        Chunk(**chunk_data)
+        Chunk.from_dict(chunk_data, chunk["id"])
         for chunk in chunks
         if (chunk_data := chunk["data"]) is not None
     ]

@@ -10,7 +10,8 @@ class RemoveIsolatedNodes(GraphBuilderModule):
     Graph-builder module that removes isolated entities.
 
     Keeps only relations whose endpoints exist in the entity set, then removes
-    entities not connected by any remaining relation.
+    entities not connected by any remaining relation. Document metanodes
+    (``TABLE`` / ``FORMULA`` with ``meta-`` IDs) are retained without links.
     """
 
     def __init__(self) -> None:
@@ -37,7 +38,10 @@ class RemoveIsolatedNodes(GraphBuilderModule):
         ]
 
         connected_ids = {r.subject_id for r in relations} | {r.object_id for r in relations}
-        updated_entities = [e for e in entities if e.id in connected_ids]
+        updated_entities = [
+            e for e in entities
+            if e.id in connected_ids or (e.id.startswith("meta-") and e.entity_type in {"TABLE", "FORMULA"})
+        ]
 
         if len(entities) != len(updated_entities):
             logger.info(f"Take only {len(updated_entities)}/{len(entities)} entities after removing isolated nodes")

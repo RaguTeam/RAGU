@@ -190,6 +190,8 @@ Note: Global search is a **computationally expensive** operation.
 
 ### Chunkers
 
+Markdown chunkers split text at object boundaries to preserve source order. Local image attachments must resolve inside the document folder; paths outside it raise `ValueError`. See the [chunker documentation](../../ragu/chunker/README.md#markdownchunker-recursivemarkdownchunker-semanticmarkdownchunker).
+
 The first step in graph construction is splitting raw text corpora into chunks.
 RAGU implements several chunking strategies and supports user-defined ones.
 
@@ -475,3 +477,28 @@ change to a single instance. Full field reference, custom-message examples, and
 few-shot formatting are in
 [`../../ragu/common/prompts/README.md`](../../ragu/common/prompts/README.md).
 ```
+
+Tables and formulas from Markdown chunkers become ordinary `Entity` nodes with
+`TABLE` / `FORMULA` types. A separate linking stage uses surrounding text and its
+already extracted subgraph; it does not extract entities inside the objects.
+Chunk `to_embed()` supplies dense/sparse vectors and reranking, while `to_llm()`
+supplies extraction and answer context. Local search includes chunks of connected
+object nodes. See [configuration and example](../../ragu/graph/README.md#table-and-formula-metanodes).
+
+Document hashes are checked before invoking the chunker, so repeated ingestion
+skips both chunking and description generation. Completion hashes are persisted
+after the build succeeds and invalidated when their source chunks are deleted.
+Chunk-ID deduplication remains a separate step. See the
+[document registry details](../../ragu/graph/README.md#table-and-formula-metanodes).
+
+The nearby linking stage reuses `RelationsExtractionModel`: endpoint names are
+resolved to known nodes, and relation strength is retained. Relation sources
+contain the object chunk and the supplied neighboring text window; they do not
+represent individual citations selected by the model.
+
+Table and formula linking now use separate `table_relations` and
+`formula_relations` instructions and separate request batches. Jinja2 user
+templates render chunks before and after the object as plain text blocks,
+without JSON serialization.
+Both retain `RelationsExtractionModel`. See the
+[prompt constants and template parameters](../../ragu/common/prompts/README.md#table-and-formula-relation-prompts).

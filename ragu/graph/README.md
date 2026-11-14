@@ -626,3 +626,92 @@ External:
 - `upsert_entities` and `upsert_relations` reject duplicate IDs in the same request, then merge with existing stored items.
 - Community detection builds an undirected temporary graph for Leiden clustering, then stores communities separately in KV storage.
 - `build_only_vector_context=True` requires an embedder but does not require an LLM or artifact extractor.
+
+## Table and formula metanodes
+
+`KnowledgeGraph.build_from_docs()` accepts strings or `Document` objects and awaits
+`BaseChunker.a_split()`. Existing synchronous chunkers inherit an async adapter;
+`RecursiveMarkdownChunker` and `SemanticMarkdownChunker` can also generate object
+descriptions. Before calling the chunker, the graph filters processed documents
+by a deterministic hash of their content, document ID, title and structured
+content. Equivalent strings and default `Document` inputs share a hash; the
+local image folder path is excluded. A separate `kv_documents.json` registry
+stores completion hashes and their chunk IDs after successful persistence.
+Repeated inputs within a batch are also filtered. Chunk-ID deduplication remains
+a second step after chunking. Deleting a referenced chunk invalidates the
+corresponding document hashes, allowing the document to be ingested again.
+The registry is opened lazily so read-only access to a legacy index does not
+create new files. Override its backend arguments through
+`StorageArguments.documents_kv_storage_kwargs`; it uses the configured
+`kv_storage_type`. Existing indexes without document hashes establish the
+registry when documents are next ingested.
+
+The graph builder extracts ordinary entities only from text chunks. Each
+`TableChunk` / `FormulaChunk` becomes an ordinary `Entity` with type `TABLE` /
+`FORMULA`, a chunk-derived `meta-` ID and a `source_chunk_id` pointing to
+its original typed chunk. These object entities bypass entity-name merging.
+Images and code remain retrievable chunks without automatic graph nodes.
+
+`NearbyRelationExtractor.a_extract_nearby(chunks, entities, relations)` links these
+objects to the merged text subgraph. `BuilderArguments.metanode_context_window`
+(default `1`, positive integer) selects that many text chunks on each side,
+within the same document and section. The model receives surrounding `to_llm()`
+text, candidate entity names, IDs and their existing relations. It returns
+`source_entity` / `target_entity` names which are resolved against the supplied
+nodes. Unknown or ambiguous names, self-links and links between text entities
+are rejected. Every accepted link connects the object to one candidate entity.
+Sources include the object chunk and all text chunks in the request window;
+these identify the supplied context, not model-selected supporting citations.
+The stage does not extract entities from table cells or formula contents.
+
+The component is available as `knowledge_graph.pipeline.nearby_relation_extractor`;
+customize `table_relations` and `formula_relations` independently using
+`update_prompt()`. Each type is processed in a separate batch with its own
+system instructions and Jinja2 user template from `default_templates.py`. The template receives
+`context.before_chunks` and `context.after_chunks` in source order and renders
+them as plain text blocks, without JSON serialization, alongside the
+object identity, candidate entities and existing relations. Its schema is
+the existing `RelationsExtractionModel`, containing `RelationModel` entries with
+`source_entity`, `target_entity`, `relation_type`, `description`, and
+`relationship_strength` (0–5). The strength is preserved on the graph relation.
+See the [prompt registry](../common/prompts/README.md#default_prompt_templates).
+`TABLE` / `FORMULA` and generated object predicates are document structure types,
+separate from the text extractor's NEREL vocabulary. No NEREL entries are changed.
+
+```python
+from ragu import (
+    ArtifactsExtractorLLM, BuilderArguments, Document, KnowledgeGraph,
+    RecursiveMarkdownChunker,
+)
+
+# llm and embedder are initialized model clients.
+graph = KnowledgeGraph(
+    llm=llm,
+    embedder=embedder,
+    chunker=RecursiveMarkdownChunker(llm=llm),
+    artifact_extractor=ArtifactsExtractorLLM(llm=llm, embedder=embedder),
+    builder_settings=BuilderArguments(metanode_context_window=1),
+)
+await graph.build_from_docs([Document.from_mineru("data/parsed/report")])
+```
+
+The linking stage runs before graph-builder modules and community detection.
+The built-in `RemoveIsolatedNodes` preserves object entities even without links.
+Without an LLM only the deterministic object nodes are created. Failed linking
+calls leave objects intact; oversized requests are skipped using the tokenizer
+and context limit from `Settings`, with a warning. Vector-only mode stores typed
+chunks and their vectors without graph nodes or nearby-link extraction.
+
+Dense and sparse chunk embeddings use `to_embed()`. Chunk reranking also uses
+`to_embed()`, while text extraction and Local/Naive answer contexts use
+`to_llm()`. Local search additionally loads source chunks of directly connected
+metanodes. Chunk IDs deduplicate results reached through several paths.
+Deleting an object's source chunk removes its metanode, incident edges and
+corresponding vectors using the existing reverse indexes.
+
+Legacy KV records without `chunk_type` remain readable as `Chunk`; their storage
+key is authoritative. New records preserve the concrete class and ID. Existing
+indexes need rebuilding to obtain typed metanodes; no in-place backfill is run.
+Object IDs depend on document ID, object type and content. Identical objects
+in one document share an ID and are subject to chunk-ID deduplication. For edited documents, remove old source chunks
+before rebuilding; repeated ingestion of unchanged documents is deduplicated.

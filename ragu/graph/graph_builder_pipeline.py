@@ -7,11 +7,12 @@ import networkx as nx
 from graspologic_native import hierarchical_leiden
 
 from ragu.chunker.base_chunker import BaseChunker
-from ragu.chunker.types import Chunk
+from ragu.chunker.types import Chunk, ObjectChunk
 from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
 from ragu.graph.artifacts_summarizer import EntitySummarizer, RelationSummarizer
 from ragu.graph.community_summarizer import CommunitySummarizer
+from ragu.graph.metanodes import NearbyRelationExtractor
 from ragu.graph.types import CommunitySummary, Community, Entity, Relation
 from ragu.models.embedder import Embedder
 from ragu.models.llm import LLM
@@ -26,6 +27,7 @@ class BuilderArguments:
     This dataclass controls various aspects of graph construction including
     summarization strategies, clustering behavior, and optimization modes.
 
+    :param metanode_context_window: Text chunks on each side of a table or formula, within its section.
     :param use_llm_summarization: Enable LLM-based summarization for merging and
         deduplicating similar entity and relation descriptions.
     :param use_clustering: Apply clustering to group similar entities before
@@ -61,6 +63,7 @@ class BuilderArguments:
     max_cluster_size: int = 128
     min_cluster_size: int = 1
     random_seed: int = 42
+    metanode_context_window: int = 1
 
 
 class GraphBuilderModule(ABC):
@@ -140,6 +143,7 @@ class InMemoryGraphBuilder:
         self.embedder = embedder
         self.language = language if language else Settings.language
         self.build_parameters = build_parameters
+        self.nearby_relation_extractor = NearbyRelationExtractor(llm, build_parameters.metanode_context_window)
 
         params = self.build_parameters
         self.entity_summarizer: EntitySummarizer | None = None
@@ -192,7 +196,8 @@ class InMemoryGraphBuilder:
         if self.build_parameters.build_only_vector_context:
             return [], [], [], [], chunks
 
-        if self.artifact_extractor is None:
+        text_chunks = [chunk for chunk in chunks if not isinstance(chunk, ObjectChunk)]
+        if text_chunks and self.artifact_extractor is None:
             raise ValueError(
                 "artifact_extractor is required to build a knowledge graph. "
                 "Provide one to InMemoryGraphBuilder/KnowledgeGraph, or set "
@@ -201,11 +206,20 @@ class InMemoryGraphBuilder:
             )
 
         # Step 1: extract entities and relations
-        entities, relations = await self.artifact_extractor(chunks)
+        entities, relations = (
+            await self.artifact_extractor(text_chunks)
+            if text_chunks and self.artifact_extractor is not None else ([], [])
+        )
 
         # Step 2: summarize similar artifacts' descriptions
         entities = await self.entity_summarizer.run(entities) # type: ignore[union-attr]
         relations = await self.relation_summarizer.run(relations) # type: ignore[union-attr]
+
+        metanodes, nearby_relations = await self.nearby_relation_extractor.a_extract_nearby(
+            chunks, entities, relations
+        )
+        entities.extend(metanodes)
+        relations.extend(nearby_relations)
 
         # Step 3: use additional modules
         for additional_module in self.additional_pipeline or []:

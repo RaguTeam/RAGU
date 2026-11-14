@@ -111,7 +111,7 @@ class LocalSearchRetrieve(SearchEngineRetrieve[LocalSearchResult]):
         {%- if result.chunks %}
         **Chunks**
         {%- for c in result.chunks %}
-        {{ c.content }}
+        {{ c.to_llm() }}
         {%- endfor %}
         {% endif %}
     """))
@@ -317,7 +317,7 @@ class LocalSearchEngine(BaseEngine[LocalParams, LocalSearchRetrieve]):
             _rerank_items(
                 query,
                 relevant_chunks,
-                lambda chunk: chunk.content,
+                lambda chunk: chunk.to_embed(),
                 self.reranker,
             ),
         )

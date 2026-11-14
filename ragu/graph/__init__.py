@@ -5,3 +5,5 @@ from ragu.graph.graph_retrieve_backend import (
     RelationHits,
     ChunkHits,
 )
+
+from ragu.graph.metanodes import NearbyRelationExtractor

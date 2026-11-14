@@ -71,7 +71,7 @@ class NaiveSearchRetrieve(SearchEngineRetrieve[NaiveSearchResult]):
             **Retrieved Chunks**
             {%- for chunk, score in zip(result.chunks, result.scores) %}
             [{{ loop.index }}] (score: {{ "%.3f"|format(score) }})
-            {{ chunk.content }}
+            {{ chunk.to_llm() }}
             {%- endfor %}
         """))
         return template.render(result=self.result, zip=zip)
@@ -189,7 +189,7 @@ class NaiveSearchEngine(BaseEngine[NaiveSearchParams, NaiveSearchRetrieve]):
 
         scores = [r.distance for r in hits]
         if self.reranker is not None and chunks:
-            chunk_contents = [c.content for c in chunks]
+            chunk_contents = [c.to_embed() for c in chunks]
             rerank_results = await self.reranker.score(query, chunk_contents)
             reranked_chunks: list[Chunk] = []
             reranked_scores: list[float] = []

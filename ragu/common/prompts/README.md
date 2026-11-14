@@ -128,6 +128,9 @@ through `RaguGenerativeModule`.
 | `ragu_lm_relation_description` | `str` | `RaguLmArtifactExtractor` |
 | `query_decomposition` | `QueryPlan` | `QueryPlanEngine` |
 | `query_rewrite` | `RewriteQuery` | `QueryPlanEngine` |
+| `object_description` | `str` | Markdown chunkers |
+| `table_relations` | `RelationsExtractionModel` | `NearbyRelationExtractor` (tables) |
+| `formula_relations` | `RelationsExtractionModel` | `NearbyRelationExtractor` (formulas) |
 
 ```python
 from ragu.common.prompts import DEFAULT_PROMPT_TEMPLATES
@@ -313,3 +316,25 @@ External:
   single module instance.
 - The `pydantic_model` bound to an instruction must match the schema expected
   by the consuming module; changing it can break structured-output decoding.
+
+### Table and formula relation prompts
+
+System instructions and Jinja2 user templates are defined in
+[default_templates.py](default_templates.py) as `DEFAULT_TABLE_RELATIONS_PROMPT`,
+`DEFAULT_TABLE_RELATIONS_USER_PROMPT`, `DEFAULT_FORMULA_RELATIONS_PROMPT`, and
+`DEFAULT_FORMULA_RELATIONS_USER_PROMPT`. No external prompt files are loaded.
+
+Both templates receive a single `context` dictionary: `object`, `before_chunks`,
+`after_chunks`, `entities`, and `relations`. Chunks on each side are ordered by
+source position and contain `id`, `order`, and `text` from `to_llm()`. Missing
+sides render an explicit message that no context is available. Jinja2 loops
+insert chunk text directly in separate before/after blocks, without JSON
+serialization or escaping quotes, line breaks and Unicode. Literal template
+syntax inside chunk text is not evaluated again. The object includes its name, ID,
+type, caption, description and position; formulas also supply their expression
+for identification, not as relationship evidence. Table contents are omitted.
+
+`render(instruction.messages, context=payload)` renders both messages together;
+no extra ad hoc user message is appended. Each object type is sent in its own
+batch. Customize `table_relations` and `formula_relations` independently through
+`update_prompt()`. Both use the existing `RelationsExtractionModel` output schema.

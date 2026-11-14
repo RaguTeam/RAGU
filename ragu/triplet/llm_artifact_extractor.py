@@ -223,7 +223,7 @@ class ArtifactsExtractorLLM(BaseArtifactExtractor):
         if not chunks:
             return [], []
 
-        context: List[str] = [chunk.content for chunk in chunks]
+        context: List[str] = [chunk.to_llm() for chunk in chunks]
 
         try:
             result_list = await self._extract_artifacts(context)
