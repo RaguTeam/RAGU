@@ -11,7 +11,7 @@ from chonkie import (
     MarkdownDocument,
     RecursiveChunker,
     SemanticChunker,
-    SentenceTransformerEmbedding
+    SentenceTransformerEmbeddings
 )
 
 from ragu.chunker.base_chunker import BaseChunker
