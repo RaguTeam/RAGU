@@ -35,7 +35,6 @@ from ragu.search_engine import (
 from ragu.triplet import (
     ArtifactsExtractorLLM,
     TwoStageArtifactsExtractorLLM,
-    RaguLmArtifactExtractor
 )
 
 
@@ -54,7 +53,6 @@ __all__ = [
     "SearchEngineStreamEvent",
     "ArtifactsExtractorLLM",
     "TwoStageArtifactsExtractorLLM",
-    "RaguLmArtifactExtractor",
     "Env",
     "Settings",
     "CachedAsyncOpenAI",

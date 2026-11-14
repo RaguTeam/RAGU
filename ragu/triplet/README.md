@@ -91,24 +91,6 @@ extractor = TwoStageArtifactsExtractorLLM(
 print(extractor.get_prompt("entity_extraction").pydantic_model)
 ```
 
-### RaguLmArtifactExtractor
-
-Extractor adapter for RAGU-LM style artifact extraction.
-
-- Purpose: uses chunk context and RAGU-LM prompts to produce graph artifacts.
-
-```python
-from ragu.models.llm import LLMOpenAI
-from ragu.models.openai import CachedAsyncOpenAI
-from ragu.triplet import RaguLmArtifactExtractor
-
-client = CachedAsyncOpenAI(base_url="https://api.openai.com/v1", api_key="dummy-api-token")
-llm = LLMOpenAI(client=client, model_name="ragu-lm")
-extractor = RaguLmArtifactExtractor(llm, temperature=0.0, top_p=0.95)
-
-print(extractor.temperature)
-```
-
 ### Ontology
 
 `Ontology` carries the vocabulary and, optionally, the rules: `domain`/`range` per predicate, a type hierarchy, symmetric and inverse predicates, `aliases` and `inverse_aliases` per type, and `retype_when` rules that rewrite a predicate for specific endpoint types. A flat type list is the degenerate case where no predicate declares constraints.
@@ -253,8 +235,6 @@ Both LLM extractors:
 
 - `do_entity_validation` / `do_relation_validation`: disabled unless truthy.
 - `prune_relation_types=False` — offer each chunk only the predicates admissible between the entity types found in it. Possible here because the entity stage runs first; typically cuts the predicate list several-fold. Note the trade-off on vLLM: this makes the system message unique per chunk and therefore defeats prefix caching, so the shared full list can end up cheaper for batches larger than a handful of chunks.
-
-`RaguLmArtifactExtractor` takes no ontology: it labels every artifact `UNKNOWN`.
 
 ## Dependencies
 

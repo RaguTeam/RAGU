@@ -202,7 +202,7 @@ https://github.com/bond005/smart_chunker/tree/main
 ---
 
 ### Пайплайн извлечения графа
-В RAGU реализуется три варианта извлечения графа знаний из сырых текстов: одношаговый LLM-пайплайн `ArtifactsExtractorLLM`, двухшаговый LLM-пайплайн `TwoStageArtifactsExtractorLLM` и подход на основании небольшой специализированной модели [RAGU-lm](https://huggingface.co/RaguTeam/RAGU-lm).
+В RAGU реализованы два варианта извлечения графа знаний из сырых текстов: одношаговый LLM-пайплайн `ArtifactsExtractorLLM` и двухшаговый LLM-пайплайн `TwoStageArtifactsExtractorLLM`.
 #### ArtifactsExtractorLLM
 
 `ArtifactsExtractorLLM` — реализация классического варианта извлечения сущностей и отношений из GraphRAG, использующая LLM.
@@ -240,12 +240,6 @@ two_stage_extractor = TwoStageArtifactsExtractorLLM(
 Чтобы включить кэширование ответов сразу для всех клиентов без повторения `cache=...`, задайте `Settings.cache_path` один раз (см. `ragu/models/README.md` и `ragu/common/README.md`). Путь должен быть стабильным каталогом, **не зависящим от `Settings.storage_folder`** (который пересоздаётся при каждом запуске); учитывайте риск устаревших попаданий при смене модели, температуры или поведения провайдера.
 
 За одношаговое выделение/валидацию элементов графа отвечают инструкции `artifact_extraction` и `artifact_validation`. Двухшаговый пайплайн использует `entity_extraction`, `entity_validation`, `relation_extraction` и `relation_validation`.
-
-#### RAGU-lm
-
-Подход на основе небольшой дообученной модели для извлечения из русскоязычных текстов — [RAGU-lm](https://huggingface.co/RaguTeam/RAGU-lm) (Qwen-3-0.6B). Модель распознаёт и нормализует именованные сущности, генерирует их описания и извлекает направленные отношения между парами сущностей.
-
-Полный набор промптов, разобранный пример, таблица сравнения и инструкции по использованию вынесены в [`ragu_lm.md`](ragu_lm.md).
 
 ---
 

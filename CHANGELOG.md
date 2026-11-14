@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+- Removed the deprecated compact-model extraction adapter and its four prompts.
+  Use `ArtifactsExtractorLLM` or `TwoStageArtifactsExtractorLLM` instead.
+
 ## [0.1.0] - 2026-09-08
 
 ### Added
@@ -81,12 +87,6 @@
 - Development: the package is type-checked under a `mypy.ini` with
   `disallow_untyped_defs` and `check_untyped_defs`.
 
-### Deprecated
-- `RaguLmArtifactExtractor`, in favour of `TwoStageArtifactsExtractorLLM` and
-  `ArtifactsExtractorLLM`. Constructing it emits a `DeprecationWarning`; it will
-  be removed in a future release. `@deprecated` now works on a class without
-  turning it into a function.
-
 ### Fixed
 - Two-stage extraction discarded the entities of a chunk whenever its relation
   stage produced nothing — and every entity of the batch when the relation call
@@ -150,7 +150,7 @@
 - Added built-in examples and selection strategies for ICL: semantic, BM25, hybrid, and random.
 - Improved OpenAI-compatible server and embedder error handling.
 - Added embedder input auto-truncation and `GlobalSettings` serialization.
-- Fixed query embedding typing in `GraphRetriever` and an awaited coroutine bug in `RaguLmArtifactExtractor`.
+- Fixed query embedding typing in `GraphRetriever`.
 
 ## [0.0.2] - 2026-04-27
 
@@ -166,4 +166,4 @@
 - Reworked the graph builder, index, storage, and model interfaces.
 - Added naive, local, global, and mix search engines with query planning.
 - Added CRUD operations for graph, KV, and vector storage.
-- Added RAGU-lm prompt support, the two-stage extractor, caching, tests, and a prebuilt knowledge graph fixture.
+- Added the two-stage extractor, caching, tests, and a prebuilt knowledge graph fixture.

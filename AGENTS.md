@@ -95,7 +95,6 @@ After modifying code, the agent **must**:
 | Change | Canonical home |
 |---|---|
 | NEREL entity/relation types | `docs/{en,ru}/ontology.md` (+ `ragu/triplet/types.py`) |
-| RAGU-lm prompts/examples | `docs/{en,ru}/ragu_lm.md` |
 | Conceptual workflow, search strategies | `docs/{en,ru}/ragu_components.md` |
 | New prompt (name + schema) | `DEFAULT_PROMPT_TEMPLATES` (rule 3) + table in `ragu/common/prompts/README.md` |
 | `Settings` field / token limit | `ragu/common/README.md` (+ serialization list if user-configurable) |

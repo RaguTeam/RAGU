@@ -49,7 +49,6 @@ Our huggingface community is [here](https://huggingface.co/RaguTeam/)
 
 - [RAGU components and methodology (EN)](docs/en/ragu_components.md) | [RU](docs/ru/ragu_components.md)
 - [NEREL ontology (EN)](docs/en/ontology.md) | [RU](docs/ru/ontology.md)
-- [RAGU-lm extraction model (EN)](docs/en/ragu_lm.md) | [RU](docs/ru/ragu_lm.md)
 - [HTTP service (EN)](docs/en/api.md) | [RU](docs/ru/api.md)
 
 ### Module documentation
@@ -415,10 +414,6 @@ A baseline pipeline that uses an LLM to extract entities, relations, and their d
 File: `ragu/triplet/two_stage_extractor.py`.
 Extracts entities first, then extracts relations constrained by the entity list. It can separately validate entity and relation outputs. Supports optional in-context learning with few-shot examples.
 
-#### 3. RAGU-lm (Russian language)
-
-A compact model (Qwen-3-0.6B) fine-tuned on the NEREL dataset. Recognizes and normalizes entities, generates descriptions, and extracts relations. Full prompts, a worked example, and an F1 comparison live in [`docs/en/ragu_lm.md`](docs/en/ragu_lm.md) (RU: [`docs/ru/ragu_lm.md`](docs/ru/ragu_lm.md)).
-
 ---
 
 ### Prompt Customization
@@ -450,7 +445,7 @@ formatters) are in [`ragu/common/prompts/README.md`](ragu/common/prompts/README.
 
 ### Contributors
 #### **Main Idea & Inspiration**
-- Ivan Bondarenko — idea, smart_chunker, NER model, ragu-lm
+- Ivan Bondarenko — idea, smart_chunker, NER model
 
 
 #### **Core Development**

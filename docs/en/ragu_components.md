@@ -210,11 +210,10 @@ See details at: [smart_chunker GitHub](https://github.com/bond005/smart_chunker/
 
 ### Graph Extraction Pipeline
 
-RAGU supports three extraction strategies:
+RAGU supports two extraction strategies:
 
 1. Single-step LLM extraction with `ArtifactsExtractorLLM`.
 2. Two-stage LLM extraction with `TwoStageArtifactsExtractorLLM`.
-3. **lightweight fine-tuned model approach** with [RAGU-lm](https://huggingface.co/RaguTeam/RAGU-lm) (only for Russian language)
 
 #### ArtifactsExtractorLLM
 
@@ -251,12 +250,6 @@ two_stage_extractor = TwoStageArtifactsExtractorLLM(
 To enable response caching for every client without repeating `cache=...`, set `Settings.cache_path` once (see `ragu/models/README.md` and `ragu/common/README.md`). The path must be a stable directory **independent of `Settings.storage_folder`** (which is per-run); mind stale hits when changing model, temperature, or provider.
 
 Single-step extraction and validation are driven by the `artifact_extraction` and `artifact_validation` prompts. Two-stage extraction uses `entity_extraction`, `entity_validation`, `relation_extraction`, and `relation_validation`.
-
-#### RAGU-lm
-
-A lightweight fine-tuned model approach for Russian-language extraction, based on [RAGU-lm](https://huggingface.co/RaguTeam/RAGU-lm) (Qwen-3-0.6B). It recognizes and normalizes named entities, generates entity descriptions, and extracts directed relations between entity pairs.
-
-The full prompt set, a worked example, a comparison table, and usage instructions live in [`ragu_lm.md`](ragu_lm.md).
 
 ---
 

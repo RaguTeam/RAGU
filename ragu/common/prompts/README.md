@@ -122,10 +122,6 @@ through `RaguGenerativeModule`.
 | `mix_search` | `str` | `MixSearchEngine` |
 | `mix_search_context` | `str` | `MixSearchEngine` |
 | `cluster_summarize` | `ClusterSummarizationModel` | clustering pipeline |
-| `ragu_lm_entity_extraction` | `str` | `RaguLmArtifactExtractor` |
-| `ragu_lm_entity_normalization` | `str` | `RaguLmArtifactExtractor` |
-| `ragu_lm_entity_description` | `str` | `RaguLmArtifactExtractor` |
-| `ragu_lm_relation_description` | `str` | `RaguLmArtifactExtractor` |
 | `query_decomposition` | `QueryPlan` | `QueryPlanEngine` |
 | `query_rewrite` | `RewriteQuery` | `QueryPlanEngine` |
 | `object_description` | `str` | Markdown chunkers |

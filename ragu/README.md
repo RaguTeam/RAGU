@@ -80,7 +80,6 @@ ragu/
 │   ├── base_artifact_extractor.py
 │   ├── llm_artifact_extractor.py
 │   ├── prompts.py
-│   ├── ragu_lm_artifact_extractor.py
 │   ├── two_stage_extractor.py
 │   ├── types.py
 │   └── README.md
