@@ -25,13 +25,11 @@ docker compose --profile qdrant up -d               # add a remote Qdrant
 The build context is whitelisted in `.dockerignore` — the repository root holds
 multi-gigabyte working directories that must stay out of it.
 
-- Dependencies come from `uv.lock` in one step (`uv sync --frozen --no-dev
-  --no-editable --extra api`), not from a fresh resolve: `openai>=2.32.0`
-  resolves to 3.x, where `openai._utils._logs.httpx_logger` no longer exists and
-  `ragu.common.logger` fails on import. The lock pins the version that works.
+- The build creates `/opt/venv` and installs the package with
+  `uv pip install --python /opt/venv/bin/python --extra api -r pyproject.toml .`.
+  Dependency versions are resolved from the ranges in `pyproject.toml`.
 - `--build-arg RAGU_SYNC_EXTRAS="--extra local"` adds sentence-transformers and
-  transformers for local rerankers and embedders; the default image stays around
-  1 GB of site-packages.
+  transformers for local rerankers and embedders.
 - The tiktoken vocabularies are baked at build time; otherwise the first request
   downloads them and an offline deployment fails outright.
 - The healthcheck polls `/health/ready`, which answers 503 until the graph is

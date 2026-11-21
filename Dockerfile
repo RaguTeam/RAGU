@@ -11,10 +11,9 @@ FROM python:3.12-slim AS builder
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_LINK_MODE=copy
 
-# Present for source-only dependencies; the locked set installs from wheels.
+# Build tools for dependencies distributed as source.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends build-essential \
  && rm -rf /var/lib/apt/lists/*
@@ -22,11 +21,12 @@ RUN apt-get update \
 RUN pip install --no-cache-dir uv
 
 WORKDIR /src
-COPY pyproject.toml uv.lock README.md LICENSE ./
+COPY pyproject.toml README.md LICENSE ./
 COPY ragu/ ./ragu/
 
 ARG RAGU_SYNC_EXTRAS=""
-RUN uv sync --frozen --no-dev --no-editable --extra api ${RAGU_SYNC_EXTRAS}
+RUN uv venv /opt/venv \
+ && uv pip install --python /opt/venv/bin/python --extra api ${RAGU_SYNC_EXTRAS} -r pyproject.toml .
 
 ENV TIKTOKEN_CACHE_DIR=/opt/tiktoken
 RUN mkdir -p /opt/tiktoken \
