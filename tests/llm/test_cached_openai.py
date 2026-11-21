@@ -5,6 +5,8 @@ import time
 import openai
 import pytest
 from collections.abc import Generator
+from pathlib import Path
+from diskcache_community import Cache, Disk
 from pydantic import BaseModel
 
 from ragu.common.logger import logger
@@ -338,3 +340,32 @@ async def test_batch_embed_text_end_to_end_with_cache(
     elapsed = time.monotonic() - t0
     assert result1 == result2
     assert elapsed < 0.2, f'Second call should hit cache, got {elapsed:.2f} s'
+
+
+def _write_marker(path: str) -> tuple[dict[str, str], str]:
+    with open(path, 'w') as marker:
+        marker.write('ran')
+    return {}, 'planted reply'
+
+
+class _Planted:
+    def __init__(self, path: str) -> None:
+        self.path = path
+
+    def __reduce__(self) -> tuple[object, tuple[str]]:
+        return _write_marker, (self.path,)
+
+
+async def test_disk_cache_refuses_pickled_entry(server: OpenAIMockServer, tmp_path: Path) -> None:
+    marker = tmp_path / 'marker'
+    cache_dir = tmp_path / 'cache'
+    client = CachedAsyncOpenAI(base_url=server.base_url, api_key='mock', cache=cache_dir)
+    reply = await client.chat_completion(model_name='mock', conversation=_MSG)  # pyright: ignore[reportArgumentType]
+
+    assert client.cache is not None
+    (key,) = [k for k in client.cache if '"chat_completion"' in k]
+    with Cache(str(cache_dir.resolve()), disk=Disk) as other_writer:
+        other_writer[key] = _Planted(str(marker))
+
+    assert await client.chat_completion(model_name='mock', conversation=_MSG) == reply  # pyright: ignore[reportArgumentType]
+    assert not marker.exists()

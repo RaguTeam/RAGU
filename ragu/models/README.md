@@ -279,20 +279,20 @@ client = CachedAsyncOpenAI(
 On error you can open the corresponding request:
 
 ```python
-from diskcache import Index
+from ragu.utils.ragu_utils import get_disk_cache
 
-index = Index("./llm_debug")
+index = get_disk_cache("./llm_debug")
 info = index["1772078734557794672"]
 print(list(info["kwargs"]))
-print(info["kwargs"]["output_schema"].model_json_schema())
+print(info["kwargs"]["output_schema"])
 print(info["kwargs"]["conversation"][0]["content"])
 ```
 
-And re-run it:
+And re-run it, passing the schema class again:
 
 ```python
 result = await client._uncached_raw_chat_completion(
-    **info["kwargs"],
+    **{**info["kwargs"], "output_schema": MySchema},
 )
 ```
 

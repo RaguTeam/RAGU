@@ -16,7 +16,7 @@ from typing import List
 import loguru
 import numpy as np
 import numpy.typing as npt
-from diskcache import Index  # pyright: ignore[reportMissingTypeStubs]
+from diskcache_community import Index, SafeDisk
 from pydantic import BaseModel
 
 from ragu.common.logger import logger
@@ -36,7 +36,7 @@ def get_disk_cache(dir: str | Path) -> MutableMapping[str, Any]:
     path = str(Path(dir).resolve())
     if (cache := _dish_caches.get(path, None)):
         return cache
-    _dish_caches[path] = cache = Index(path, sqlite_synchronous=2)
+    _dish_caches[path] = cache = Index(path, disk=SafeDisk.with_options(on_error='miss'), sqlite_synchronous=2)
     return cache
 
 
@@ -114,12 +114,15 @@ def save_args_on_exception(func: T_fn, storage: MutableMapping[str, Any]) -> T_f
         except Exception as e:
             current_time = str(time.time_ns())
             logger.debug(f'Saved args that caused {e.__class__.__name__} as {current_time}')
-            storage[current_time] = {
-                'function_name': func.__qualname__,
-                'args': args,
-                'kwargs': kwargs,
-                'exception': e,
-            }
+            try:
+                storage[current_time] = {
+                    'function_name': func.__qualname__,
+                    'args': args,
+                    'kwargs': {k: v.__qualname__ if isinstance(v, type) else v for k, v in kwargs.items()},
+                    'exception': repr(e),
+                }
+            except TypeError as store_error:
+                logger.warning(f'Could not save args that caused {e.__class__.__name__}: {store_error}')
             raise
             
     return cast(T_fn, wrapper)
