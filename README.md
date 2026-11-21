@@ -13,7 +13,7 @@
   <a href="https://github.com/AsphodelRem/RAGU/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="RAGU is under the MIT license." alt="RAGU"/>
   </a>
-  <img src="https://img.shields.io/badge/python->=3.10-blue">
+  <img src="https://img.shields.io/badge/python-3.11%E2%80%933.14-blue">
 </h4>
 
 <h4 align="center">
