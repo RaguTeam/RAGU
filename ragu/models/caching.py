@@ -99,7 +99,7 @@ class ResponseCachingMixin:
             **kwargs,
         )
 
-        cached = response if issubclass(output_schema, str) else response.model_dump()
+        cached = response if issubclass(output_schema, str) else response.model_dump(mode='json')
 
         self.cache[key] = args, cached
 
