@@ -47,7 +47,7 @@ The full public API is re-exported from `ragu/__init__.py`. Top-level subpackage
 `ragu/api/` is a FastAPI service that serves a **prebuilt** graph over HTTP (it never builds one). It ships inside the wheel behind the `api` extra and is documented in `docs/{en,ru}/api.md`; deployment and package internals live in `ragu/api/README.md`. `tests/api/` opens with `pytest.importorskip("fastapi")`, so the `api` extra has to be installed for it to run at all:
 
 ```bash
-uv sync --frozen --extra api --extra test
+uv sync --extra api --extra test
 pytest tests/api
 ```
 
