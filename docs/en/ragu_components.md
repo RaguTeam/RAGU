@@ -286,7 +286,7 @@ client = CachedAsyncOpenAI(
 #     api_key="dummy-api-token",
 #     rate_max_simultaneous=20,
 #     rate_max_per_minute=500,
-#     embed_timeout=60.0,
+#     timeout=60.0,
 # )
 
 llm = LLMOpenAI(
@@ -495,3 +495,8 @@ templates render chunks before and after the object as plain text blocks,
 without JSON serialization.
 Both retain `RelationsExtractionModel`. See the
 [prompt constants and template parameters](../../ragu/common/prompts/README.md#table-and-formula-relation-prompts).
+
+
+### Typed decisions
+
+Typed decisions about one state are available through the `DecisionClient` protocol, implemented by `CachedAsyncOpenAI` (OpenAI) and `TypeSafeClient` (TypeSafe/OpenRouter Jev). Questions can combine predicates, choices and ordered score rubrics. See the [model layer reference](../../ragu/models/README.md#decisions-typed-questions-about-one-state) for the canonical usage example, configuration and error semantics.

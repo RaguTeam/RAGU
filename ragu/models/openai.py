@@ -1,7 +1,10 @@
 import asyncio
+import json
 import logging
+import time
+from copy import deepcopy
 from collections.abc import AsyncIterator, MutableMapping, Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from contextlib import AbstractAsyncContextManager, AsyncExitStack
 from pathlib import Path
 from typing import Any, cast, overload
@@ -9,7 +12,7 @@ import httpx
 from pydantic import BaseModel
 from typing_extensions import override
 
-from openai import AsyncOpenAI, omit
+from openai import NOT_GIVEN, AsyncOpenAI, NotGiven, omit
 from openai.types.chat import (
     ChatCompletion,
     ChatCompletionFunctionToolParam,
@@ -20,6 +23,15 @@ from tenacity import retry, retry_if_exception, stop_after_attempt, wait_chain, 
 from aiolimiter import AsyncLimiter
 
 from ragu.models.caching import ModelT, OutputSchema, ResponseCachingMixin
+from ragu.models.decisions.types import (
+    ChoiceQuestion,
+    DecisionQuestion,
+    DecisionResult,
+    DecisionState,
+    ScoreQuestion,
+)
+from ragu.models.decisions._schemas import _Request
+from ragu.models.decisions.openai import _parse_openai
 from ragu.utils.ragu_utils import FLOATS, LoguruAdapter, attach_async_contexts, get_disk_cache, save_args_on_exception
 from ragu.common.global_parameters import Settings
 from ragu.common.logger import logger
@@ -98,6 +110,8 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         cache_prefix: str = 'openai',
         debug_errors_storage: MutableMapping[str, Any] | str | Path | None = None,
         embed_timeout: float | None = 60.0,
+        *,
+        timeout: float | None | NotGiven = NOT_GIVEN,
     ):
         """
         Initializes backend client.
@@ -126,12 +140,17 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         :param debug_errors_storage: Optional mapping/path to store failing call
             arguments for debugging. When ``None``, falls back to
             ``Settings.debug_errors_path`` (also ``None`` by default).
-        :param embed_timeout: Per-request timeout in seconds for embedding API
-            calls.  Defaults to ``60.0``.  Set to ``None`` to use the client
-            default (typically 600 s).
+        :param timeout: Shared per-request timeout in seconds for chat, streaming,
+            embeddings, Decisions and scoring. Defaults to ``60.0`` through the
+            legacy ``embed_timeout`` argument. ``None`` preserves the SDK timeout.
+            An explicit value takes precedence over ``embed_timeout``.
+        :param embed_timeout: Backward-compatible alias for ``timeout``. Its
+            positional argument remains supported. Defaults to ``60.0``.
         """
+        self._owns_client = client is None
+        self._closed = False
         self.max_completion_tokens = max_completion_tokens
-        self.embed_timeout = embed_timeout
+        self.timeout = embed_timeout if isinstance(timeout, NotGiven) else timeout
         self.client = client or AsyncOpenAI(
             base_url=base_url,
             api_key=api_key,
@@ -148,6 +167,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         self._uncached_raw_embed_text = self._uncached_embed_text
         self._uncached_raw_embed_texts = self._uncached_embed_texts
         self._uncached_raw_score = self._uncached_score
+        self._uncached_raw_decide = self._uncached_decide
 
         # saving errors to debug
         # Per-instance `debug_errors_storage` overrides `Settings.debug_errors_path`; both default to None.
@@ -163,6 +183,27 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             case _:
                 self.debug_errors_storage = effective_debug_errors_storage
         if self.debug_errors_storage is not None:
+            async def debug_decide(
+                model_name: str, *, request: dict[str, Any], questions: Sequence[DecisionQuestion],
+            ) -> DecisionResult:
+                try:
+                    return await self._uncached_raw_decide(model_name, request=request, questions=questions)
+                except Exception as exc:
+                    # SafeDisk accepts builtins, not arbitrary question dataclasses.
+                    assert self.debug_errors_storage is not None
+                    try:
+                        self.debug_errors_storage[str(time.time_ns())] = {
+                            'function_name': self._uncached_raw_decide.__qualname__,
+                            'args': (), 'kwargs': {
+                                'model_name': model_name, 'request': request,
+                                'questions': [asdict(q) for q in questions],
+                            },
+                            'exception': repr(exc),
+                        }
+                    except TypeError:
+                        logger.warning('OpenAI Decisions: не удалось сохранить аргументы ошибки')
+                    raise
+            self._uncached_decide = debug_decide
             self._uncached_chat_completion = save_args_on_exception(
                 self._uncached_chat_completion, self.debug_errors_storage)
             self._uncached_embed_text = save_args_on_exception(
@@ -187,6 +228,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             contexts.append(AsyncLimiter(1, time_period=rate_min_delay))
         self._rate_limit_contexts = contexts
         if contexts:
+            self._uncached_decide = attach_async_contexts(self._uncached_decide, *contexts)
             self._uncached_chat_completion = attach_async_contexts(
                 self._uncached_chat_completion, *contexts)
             self._uncached_embed_text = attach_async_contexts(
@@ -211,7 +253,104 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             self._uncached_embed_text = retrying_decorator(self._uncached_embed_text)
             self._uncached_embed_texts = retrying_decorator(self._uncached_embed_texts)
             self._uncached_score = retrying_decorator(self._uncached_score)
+            # Do not log SDK exception bodies, which may echo the supplied state.
+            self._uncached_decide = retry(
+                retry=retry_if_exception(_is_retryable_exception),
+                stop=stop_after_attempt(len(retry_times_sec) + 1),
+                wait=wait_chain(*[wait_fixed(t) for t in retry_times_sec]),
+                before_sleep=lambda state: logger.warning(
+                    'OpenAI Decisions: повтор после попытки {}', state.attempt_number,
+                ),
+                reraise=True,
+            )(self._uncached_decide)
     
+    @property
+    def embed_timeout(self) -> float | None:
+        """Backward-compatible alias for the shared request timeout."""
+        return self.timeout
+
+    @embed_timeout.setter
+    def embed_timeout(self, value: float | None) -> None:
+        self.timeout = value
+
+    async def __aenter__(self) -> 'CachedAsyncOpenAI':
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc: Any, traceback: Any) -> None:
+        await self.aclose()
+
+    async def aclose(self) -> None:
+        """Close the SDK client only when this wrapper created it."""
+        if not self._closed:
+            if self._owns_client:
+                await self.client.close()
+            self._closed = True
+
+    async def decide(
+        self, model_name: str, *, state: DecisionState, questions: Sequence[DecisionQuestion],
+    ) -> DecisionResult:
+        """Evaluate named questions using OpenAI Decisions.
+
+        :param model_name: Decisions model identifier.
+        :param state: Text or structured JSON context.
+        :param questions: Ordered questions with unique names.
+        :return: Validated answers and available usage metadata.
+        """
+        _Request.model_validate(
+            {'model_name': model_name, 'state': state, 'questions': questions},
+            context={'protocol': 'openai'},
+        )
+        decision_questions = []
+        for question in questions:
+            item: dict[str, Any] = {
+                'name': question.name, 'instructions': question.instructions, 'type': 'predicate',
+            }
+            if isinstance(question, ChoiceQuestion):
+                item.update(type='choice', choices=[asdict(option) for option in question.choices])
+            elif isinstance(question, ScoreQuestion):
+                item.update(type='score', levels=[asdict(level) for level in question.levels])
+            decision_questions.append(item)
+        decision_input = state if isinstance(state, str) else [
+            {'role': 'user', 'content': [{'type': 'input_json', 'data': state}]},
+        ]
+        request = deepcopy({'model': model_name, 'input': decision_input, 'questions': decision_questions})
+        questions = deepcopy(questions)
+        url = str(self.client.base_url).rstrip('/') + '/decisions'
+        return await self._cached_decide(
+            model_name, request=request, questions=questions, protocol='openai', url=url,
+        )
+
+    @override
+    async def _uncached_decide(
+        self, model_name: str, *, request: dict[str, Any], questions: Sequence[DecisionQuestion],
+    ) -> DecisionResult:
+        options: dict[str, Any] = {'max_retries': 0}
+        if self.timeout is not None:
+            options['timeout'] = self.timeout
+        client = self.client.with_options(**options)
+        start = time.monotonic()
+        status: int | str = 'error'
+        try:
+            try:
+                response = await client.decisions.create(
+                    model=model_name,
+                    input=request['input'],
+                    questions=request['questions'],
+                )
+            except json.JSONDecodeError:
+                raise ValueError('OpenAI response JSON: invalid JSON') from None
+            status = 200
+            raw = response.model_dump(mode='json') if hasattr(response, 'model_dump') else response
+            return _parse_openai(raw, model_name, questions)
+        except Exception as exc:
+            status = getattr(exc, 'status_code', status)
+            raise
+        finally:
+            logger.debug(
+                'OpenAI Decisions: модель={}, вопросов={}, статус={}, длительность={:.3f} с',
+                model_name, len(questions), status, time.monotonic() - start,
+            )
+
     @overload
     async def chat_completion(
         self,
@@ -293,6 +432,8 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             )
         if self.max_completion_tokens is not None:
             recognized_kwargs['max_completion_tokens'] = self.max_completion_tokens
+        if self.timeout is not None:
+            recognized_kwargs['timeout'] = self.timeout
 
         async with AsyncExitStack() as stack:
             for manager in self._rate_limit_contexts:
@@ -410,6 +551,8 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             )
         if self.max_completion_tokens is not None:
             recognized_kwargs['max_completion_tokens'] = self.max_completion_tokens
+        if self.timeout is not None:
+            recognized_kwargs['timeout'] = self.timeout
         if issubclass(output_schema, str):
             response = cast(ChatCompletion, await self.client.chat.completions.create(
                 model=model_name,
@@ -488,7 +631,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         if kwargs:
             raise TypeError(f'Unsupported embed_text arguments: {sorted(kwargs)}')
         timeout_kwarg: dict[str, Any] = (
-            {'timeout': self.embed_timeout} if self.embed_timeout is not None else {}
+            {'timeout': self.timeout} if self.timeout is not None else {}
         )
         response = await self.client.embeddings.create(
             model=model_name, input=text, **timeout_kwarg,
@@ -519,7 +662,7 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
         if kwargs:
             raise TypeError(f'Unsupported embed_texts arguments: {sorted(kwargs)}')
         timeout_kwarg: dict[str, Any] = (
-            {'timeout': self.embed_timeout} if self.embed_timeout is not None else {}
+            {'timeout': self.timeout} if self.timeout is not None else {}
         )
         response = await self.client.embeddings.create(
             model=model_name, input=texts, **timeout_kwarg,
@@ -558,7 +701,10 @@ class CachedAsyncOpenAI(ResponseCachingMixin):
             "text_2": text_2,
         }
 
-        async with httpx.AsyncClient(timeout=60) as http_client:   # TODO move to args
+        timeout = self.timeout if self.timeout is not None else self.client.timeout
+        if hasattr(timeout, 'as_dict'):
+            timeout = httpx.Timeout(**timeout.as_dict())
+        async with httpx.AsyncClient(timeout=timeout) as http_client:
             response = await http_client.post(
                 f"{self.client.base_url!s}score",
                 headers=headers,

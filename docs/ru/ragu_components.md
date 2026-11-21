@@ -277,7 +277,7 @@ client = CachedAsyncOpenAI(
 #     api_key="dummy-api-token",
 #     rate_max_simultaneous=20,
 #     rate_max_per_minute=500,
-#     embed_timeout=60.0,
+#     timeout=60.0,
 # )
 
 llm = LLMOpenAI(client=client, model_name="gpt-4o-mini")
@@ -493,3 +493,8 @@ Jinja2-шаблоны выводят чанки до и после объект�
 без сериализации в JSON.
 В обоих случаях сохраняется схема `RelationsExtractionModel`. См.
 [константы промптов и параметры шаблонов](../../ragu/common/prompts/README.md#table-and-formula-relation-prompts).
+
+
+### Типизированные решения
+
+Типизированные решения об одном состоянии доступны через протокол `DecisionClient`. Его реализуют `CachedAsyncOpenAI` (OpenAI) и `TypeSafeClient` (TypeSafe/OpenRouter Jev). В одном вызове можно сочетать бинарные вопросы, выбор категории и оценку по упорядоченной рубрике. Пример использования, параметры и трактовка ошибок находятся в [справочнике модельного слоя](../../ragu/models/README.md#decisions-typed-questions-about-one-state).

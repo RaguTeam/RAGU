@@ -20,6 +20,13 @@ from ragu.common.global_parameters import Settings
 
 # Model clients
 from ragu.models import CachedAsyncOpenAI, EmbedderOpenAI, LLMOpenAI
+from ragu.models.typesafe import TypeSafeClient
+from ragu.models.decisions import (
+    ChoiceAnswer, ChoiceOption, ChoiceQuestion, DecisionAnswer, DecisionClient,
+    DecisionQuestion, DecisionResult, DecisionState, PredicateAnswer,
+    PredicateQuestion, RefusalAnswer, ScoreAnswer, ScoreLevel, ScoreQuestion,
+)
+
 
 # Search engines
 from ragu.search_engine import (
@@ -38,7 +45,11 @@ from ragu.triplet import (
 )
 
 
+
 __all__ = [
+    'TypeSafeClient', 'ChoiceAnswer', 'ChoiceOption', 'ChoiceQuestion', 'DecisionAnswer',
+    'DecisionClient', 'DecisionQuestion', 'DecisionResult', 'DecisionState',
+    'PredicateAnswer', 'PredicateQuestion', 'RefusalAnswer', 'ScoreAnswer', 'ScoreLevel', 'ScoreQuestion',
     "__version__",
     "KnowledgeGraph",
     "InMemoryGraphBuilder",

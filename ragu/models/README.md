@@ -104,9 +104,17 @@ duplicating it.
 | `rate_max_per_minute` | Max requests per minute | `None` (unlimited) |
 | `rate_min_delay` | Min seconds between request starts | `None` |
 | `retry_times_sec` | Retry wait schedule on transient errors | `(2, 4, 8)` |
-| `embed_timeout` | Per-request timeout for embedding calls (seconds) | `60.0` |
+| `timeout` | Shared per-request timeout for chat (including structured output and streaming), embeddings, Decisions and scoring. `None` preserves the configured SDK timeout. | `60.0` effective |
+| `embed_timeout` | Backward-compatible alias for the same shared timeout; its positional argument is preserved. Explicit `timeout` takes precedence, including `timeout=None`. | `60.0` |
 | `cache` | Cache directory path. When `None`, falls back to `Settings.cache_path` (also `None` by default → caching disabled). An explicit value (incl. in-memory `{}`) always takes precedence. | `None` |
 | `debug_errors_storage` | Directory for dumping failed request payloads. When `None`, falls back to `Settings.debug_errors_path` (also `None` by default). | `None` |
+
+Use `CachedAsyncOpenAI(timeout=30.0, ...)` for a common limit. Existing calls
+such as `CachedAsyncOpenAI(embed_timeout=30.0, ...)` remain valid and now set
+the same common limit for all operations. If both names are supplied,
+`timeout` wins. Omitting both retains the effective 60-second default.
+`timeout=None` (or `embed_timeout=None` when `timeout` is omitted) inherits the
+configured SDK timeout. Per-operation timeout parameters are unnecessary.
 
 > **Tip:** instead of passing `cache=` to every client, set a process-wide
 > default once via `Settings.cache_path = "./my_cache"` (and similarly
@@ -154,7 +162,7 @@ embed_client = CachedAsyncOpenAI(
     api_key="sk-...",
     rate_max_simultaneous=20,
     rate_max_per_minute=500,
-    embed_timeout=60.0,
+    timeout=60.0,
     cache="./embed_cache",
 )
 
@@ -227,6 +235,173 @@ Used by:
 - `GraphRetriever` uses the embedder to build query vectors.
 - Sparse embedders must be paired with a vector backend configured for sparse
   vectors.
+
+## Decisions: typed questions about one state
+
+`DecisionClient` is a structural `Protocol` with one async operation:
+`decide(model_name, *, state, questions) -> DecisionResult`. Both
+`CachedAsyncOpenAI` and `TypeSafeClient` implement it. Select and configure the
+transport in application assembly; one instance accepts multiple model names.
+This API evaluates one state. It does not implement the RAGU `Scorer` interface.
+
+```python
+import asyncio
+import os
+
+from ragu import (
+    DecisionClient, PredicateAnswer, PredicateQuestion, RefusalAnswer,
+    TypeSafeClient,
+)
+
+
+async def check_claims(client: DecisionClient, model_name: str) -> None:
+    result = await client.decide(
+        model_name=model_name,
+        state={
+            "claim_a": "The company had exactly one branch on January 1, 2025.",
+            "claim_b": "The same company had three branches on January 1, 2025.",
+        },
+        questions=[PredicateQuestion(
+            name="contradiction",
+            instructions="Do the claims contradict each other under these conditions? "
+                         "A contradiction means they cannot both be true at once.",
+        )],
+    )
+    answer = result.answers["contradiction"]
+    if isinstance(answer, PredicateAnswer):
+        print(f"Contradiction probability: {answer.probability:.3f}")
+    elif isinstance(answer, RefusalAnswer):
+        print("The model declined to answer.")
+
+
+async def main() -> None:
+    async with TypeSafeClient(
+        api_key=os.environ["OPENROUTER_API_KEY"],
+        url="https://openrouter.ai/api/alpha/decisions",
+    ) as client:
+        await check_claims(client, "typesafe/jev-1.14")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+For direct TypeSafe, construct `TypeSafeClient(os.environ["TYPESAFE_API_KEY"])`
+and pass an available Jev model to `check_claims`. For OpenAI, pass an existing
+`CachedAsyncOpenAI` to the same function and use a supported Decisions model.
+The operation uses `AsyncOpenAI.decisions.create` from `openai>=3.57.0,<4`,
+through the configured SDK instance. Custom base URL prefixes, project,
+organization, headers and connection pool are preserved. SDK retries are
+turned off for this operation using `with_options(max_retries=0)`, without
+changing the injected instance. Chat/embedding parameters are not forwarded.
+
+### Questions and answers
+
+`state` accepts a string, JSON object or JSON array. Nested values accept JSON
+scalars including `None`; object keys must be strings and numbers must be
+finite. Tuples, arbitrary objects and cyclic structures are rejected.
+`questions` is a nonempty ordered sequence with unique, nonempty names and text
+instructions. All question types can be mixed in one request.
+
+| Public question types | Fields beyond `name` and `instructions` | Public answer types |
+|---|---|---|
+| `PredicateQuestion` | — | `PredicateAnswer(probability)` in [0, 1] |
+| `ChoiceQuestion` | `choices`: ordered `ChoiceOption(value, description)` objects with unique string values | `ChoiceAnswer(choice, probabilities, confidence)`; probabilities keyed by original values |
+| `ScoreQuestion` | `levels`: 2–10 ordered `ScoreLevel(label, description)` objects, lowest first | `ScoreAnswer(score, probabilities, confidence)`; probabilities keyed by integer indices |
+| Any question | Explicit service refusal | `RefusalAnswer(details=None)`; other answers remain available |
+
+Names, instructions, choice values/descriptions and level labels/descriptions
+must contain non-whitespace text. OpenAI accepts 1–400 questions and 2–255
+choices per choice question. No additional undocumented Jev limits are imposed.
+A score for K levels stays on its original 0…K−1 scale and may be fractional.
+Confidence is the provider's independent [0, 1] value; it is not recomputed.
+Distributions must cover exactly the supplied choices/levels. RAGU allows an
+absolute probability-sum error of **0.01** for rounding; every probability
+must still be finite and within [0, 1]. Zero is preserved.
+
+`DecisionQuestion`, `DecisionAnswer` and `DecisionState` are public type aliases.
+`DecisionResult.answers` maps original names to typed answers in input order.
+The result also exposes `requested_model`, `resolved_model`, `provider` (only
+when supplied by the service), `id`, `usage`, and `cache_hit`. Missing metadata
+is `None`. `usage` preserves the provider's token counts, cost and additional
+usage fields as a dictionary. Cached usage describes the original call.
+
+### TypeSafeClient configuration and lifecycle
+
+| Parameter | Default | Meaning |
+|---|---|---|
+| `api_key` | Required | Caller-supplied Bearer token, regardless of host |
+| `url` | `https://api.typesafe.ai/v1/systemone` | Full absolute HTTP(S) POST URL, including path and optional query; no suffix is appended |
+| `http_client` | `None` | Optional caller-owned `httpx.AsyncClient`; otherwise one pool is created |
+| `timeout` | `60.0` | HTTPX timeout in seconds for every attempt |
+| `cache` | `None` | Mapping or disk path; otherwise `Settings.cache_path` |
+| `cache_prefix` | `"typesafe"` | Cache namespace |
+| `rate_min_delay` | `None` | Minimum interval between request starts, seconds |
+| `rate_max_per_minute` | `None` | Maximum request starts per minute |
+| `rate_max_simultaneous` | `None` | Concurrent network attempt limit |
+| `retry_times_sec` | `(2, 4, 8)` | Retry delays; `None` or empty means one attempt |
+
+TypeSafe and OpenRouter use the same Jev codec. OpenRouter uses
+`https://openrouter.ai/api/alpha/decisions` in this integration; its
+`/api/v1/systemone` compatibility route is also documented upstream. A proxy
+can use any full operation URL and receives the same request body. Host names
+do not select credentials or protocols.
+
+Both concrete clients support `async with` and idempotent `aclose()`. They close
+only SDK/HTTP clients they created. An injected client remains owned by the
+application and usable after exiting the wrapper context.
+
+### Caching, retries and errors
+
+Decision caching uses `ResponseCachingMixin`. Explicit mappings (including
+`{}`) or disk paths take precedence over `Settings.cache_path`. Only complete,
+validated results are stored, serialized as JSON. Cache keys hash the format
+version, namespace, protocol, full operation URL, model and full request,
+including meaningful question, choice and level order. Authorization keys are
+excluded. Cache hits bypass all network and rate-limit work and return
+`cache_hit=True`. Use a new `cache_prefix` or a pinned model version when a
+model alias changes during an experiment.
+
+OpenAI decisions share the existing client's quota with chat and embeddings
+and use RAGU's tenacity retry classification and schedule. Jev retries timeouts,
+transient network failures and HTTP 429/500/502/503/504. A valid `Retry-After`
+number or HTTP date is a minimum retry delay. Each attempt reacquires the
+instance's limiters; the semaphore is released before retry sleep. Task
+cancellation propagates to the caller and frees its slot.
+
+Input and response validation raise `ValueError` naming the offending field;
+protocol errors also identify the provider and question when available.
+Missing, duplicate, unexpected or mismatched answers fail the whole call and
+are not cached. An explicit refusal is a valid individual answer. Authentication
+errors, bad requests, invalid JSON and malformed answers are not retried. HTTP
+exceptions retain their status (`openai.APIStatusError` or
+`httpx.HTTPStatusError`). Standard decision logs omit state and credentials.
+`CachedAsyncOpenAI.debug_errors_storage` retains its existing **opt-in**
+contract: when enabled, failing decision arguments include the supplied state.
+
+Offline tests and separate provider fixtures live in `tests/decisions/`.
+Live smoke tests require `RAGU_DECISIONS_SMOKE=1`, the route's API key and its
+explicit model environment variable (`TYPESAFE_DECISION_MODEL`,
+`OPENROUTER_DECISION_MODEL`, or `OPENAI_DECISION_MODEL`). Run them with
+`pytest tests/decisions/test_smoke.py -m integration`; default CI needs no keys.
+
+For the OpenRouter mixed-request and cache check, put `OPENROUTER_API_KEY` in
+`.env` at the repository root and run:
+
+```bash
+RAGU_DECISIONS_SMOKE=1 pytest tests/decisions/test_openrouter_live.py -m integration --no-cov -q -s
+```
+
+This opt-in test uses `typesafe/jev-1.14` unless `OPENROUTER_DECISION_MODEL` is
+set in `.env` or the environment. It sends Russian claims with nested JSON,
+asks all three question types, validates the typed answers and their ranges,
+and repeats the request to verify a local cache hit with one HTTP POST in total.
+Successful output includes answers, resolved model, provider and usage, without
+the API key. HTTP attempts use a 15-second timeout and retries are disabled.
+
+Protocol references: [TypeSafe System One](https://docs.typesafe.ai/api/system-one),
+[OpenRouter decisions](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request),
+[OpenAI Decisions SDK](https://github.com/openai/openai-python/blob/v3.57.0/src/openai/resources/decisions.py).
 
 ## Configuration
 
@@ -304,7 +479,10 @@ result = await client._uncached_raw_chat_completion(
   handles retries itself via `tenacity` and `retry_times_sec`.
 - `EmbedderOpenAI` truncates input before embedding; a too-small
   `embedder_token_limit` silently changes vector quality.
-- `embed_timeout` only applies to embedding requests, not chat requests.
+- `timeout` applies to every request made by `CachedAsyncOpenAI`. The legacy
+  `embed_timeout` name reads and writes the same setting. When `timeout=None`,
+  SDK operations inherit the injected SDK client's timeout; the HTTP scoring
+  request uses that same timeout. The injected SDK instance is not modified.
 - For local GPU serving (e.g. vLLM) lower `batch_size` and
   `max_concurrent_batches` to avoid OOM — the defaults (500 / 5) target cloud
   APIs.

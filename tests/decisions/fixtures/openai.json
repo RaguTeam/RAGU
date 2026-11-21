@@ -1,0 +1,13 @@
+{
+  "model": "decision-model-resolved",
+  "answers": [
+    {"name": "score", "type": "score", "score": 1.99, "confidence": 0.99,
+     "probabilities": [{"value": 0, "label": "low", "probability": 0}, {"value": 1, "label": "medium", "probability": 0.01}, {"value": 2, "label": "high", "probability": 0.99}]},
+    {"name": "choice", "type": "choice", "choice": "b", "confidence": 0.75,
+     "probabilities": [{"value": "a", "probability": 0.16}, {"value": "b", "probability": 0.84}]},
+    {"name": "predicate", "type": "predicate", "probability": 0.0}
+  ],
+  "usage": {"input_tokens": 120, "output_tokens": 12, "total_tokens": 132,
+    "input_tokens_details": {"cache_write_tokens": 0, "cached_tokens": 0},
+    "output_tokens_details": {"reasoning_tokens": 0}}
+}

@@ -1,5 +1,7 @@
+import hashlib
 import json
-from collections.abc import MutableMapping
+from collections.abc import MutableMapping, Sequence
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, TypeVar, Union
 
@@ -7,6 +9,15 @@ from pydantic import BaseModel
 from openai.types.chat import ChatCompletionMessageParam
 
 from ragu.common.logger import logger
+from ragu.models.decisions.types import (
+    ChoiceAnswer,
+    ChoiceQuestion,
+    DecisionQuestion,
+    DecisionResult,
+    PredicateAnswer,
+    RefusalAnswer,
+    ScoreAnswer,
+)
 from ragu.utils.ragu_utils import FLOATS, get_disk_cache
 
 
@@ -55,6 +66,83 @@ class ResponseCachingMixin:
                 self.cache = get_disk_cache(cache)
             case _:
                 self.cache = cache
+
+    async def _cached_decide(
+        self, model_name: str, *, request: dict[str, Any],
+        questions: Sequence[DecisionQuestion], protocol: str, url: str,
+    ) -> DecisionResult:
+        """Cache a complete validated decision independently of other operations."""
+        if self.cache is None:
+            return await self._uncached_decide(
+                model_name,
+                request=request,
+                questions=questions
+            )
+        # Jev represents ordered questions and choices as objects. Preserve their
+        # order explicitly while canonicalizing ordinary JSON object keys.
+        identity = {
+            'version': 1,
+            'cache_prefix': self.cache_prefix,
+            'protocol': protocol,
+            'url': url,
+            'model': model_name,
+            'request': request,
+            'order': [
+                [q.name, [o.value for o in q.choices] if isinstance(q, ChoiceQuestion) else None]
+                for q in questions
+            ],
+        }
+        key = 'decision:' + hashlib.sha256(
+            json.dumps(
+                identity,
+                ensure_ascii=False,
+                sort_keys=True,
+                allow_nan=False,
+                separators=(',', ':'),
+            )
+            .encode()
+        ).hexdigest()
+
+        if key in self.cache:
+            data = json.loads(self.cache[key])
+            answer_types = {cls.__name__: cls for cls in (
+                PredicateAnswer,
+                ChoiceAnswer,
+                ScoreAnswer,
+                RefusalAnswer,
+            )}
+            answers = {}
+            for name, item in data.pop('answers').items():
+                cls = answer_types[item['type']]
+                fields = item['fields']
+                if cls is ScoreAnswer:
+                    fields['probabilities'] = {int(k): v for k, v in fields['probabilities'].items()}
+                answers[name] = cls(**fields)
+            data['cache_hit'] = True
+            return DecisionResult(answers=answers, **data)
+
+        result = await self._uncached_decide(
+            model_name,
+            request=request,
+            questions=questions
+        )
+        data = asdict(result)
+        data['answers'] = {
+            name: {'type': type(answer).__name__, 'fields': asdict(answer)}
+            for name, answer in result.answers.items()
+        }
+        self.cache[key] = json.dumps(
+            data,
+            ensure_ascii=False,
+            allow_nan=False
+        )
+        return result
+
+    async def _uncached_decide(
+        self, model_name: str, *, request: dict[str, Any], questions: Sequence[DecisionQuestion],
+    ) -> DecisionResult:
+        """Execute a decision request; implemented by each concrete transport."""
+        raise NotImplementedError
 
     async def _cached_chat_completion(
         self,

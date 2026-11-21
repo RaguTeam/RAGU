@@ -1,0 +1,9 @@
+{
+  "model": "jev-latest",
+  "answers": {
+    "predicate": {"type": "noul", "noul": 0.0},
+    "choice": {"type": "choice", "choice": "b", "probabilities": {"a": 0.16, "b": 0.84}, "confidence": 0.75},
+    "score": {"type": "score", "score": 1.99, "probabilities": {"0": 0, "1": 0.01, "2": 0.99}, "confidence": 0.99}
+  },
+  "usage": {"input_tokens": 120, "output_tokens": 12}
+}

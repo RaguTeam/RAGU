@@ -1,0 +1,11 @@
+{
+  "id": "gen-dec-test",
+  "provider": "TypeSafe",
+  "model": "typesafe/jev-1.13-20260917",
+  "answers": {
+    "predicate": {"type": "noul", "noul": 0.96},
+    "choice": {"type": "choice", "choice": "b", "probabilities": {"a": 0.16, "b": 0.84}, "confidence": 0.75},
+    "score": {"type": "score", "score": 1.99, "probabilities": {"0": 0, "1": 0.01, "2": 0.99}, "confidence": 0.99}
+  },
+  "usage": {"cost": 0.000019992, "input_tokens": 476, "output_tokens": 70}
+}
