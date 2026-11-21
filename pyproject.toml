@@ -46,6 +46,7 @@ dependencies = [
     "scikit-learn>=1.7.2",
     "requests>=2.33.1",
     "neo4j>=5.26.0,<7",
+    "ladybug>=0.22.3,<0.23; python_version < '3.15'",
 ]
 
 [project.urls]
